@@ -56,33 +56,33 @@ module.exports = grammar({
 	name: "kotlin",
 	
 	conflicts: $ => [
-		// Ambiguous when used in an explicit delegation expression,
-		// since the '{' could either be interpreted as the class body
-		// or as the anonymous function body. Consider the following sequence:
-		//
-		// 'class'  simple_identifier  ':'  user_type  'by'  'fun'  '('  ')'  •  '{'  …
-		//
-		// Possible interpretations:
-		//
-		// 'class'  simple_identifier  ':'  user_type  'by'  (anonymous_function  'fun'  '('  ')'  •  function_body)
-		// 'class'  simple_identifier  ':'  user_type  'by'  (anonymous_function  'fun'  '('  ')')  •  '{'  …
-		[$.anonymous_function],
+        // Ambiguous when used in an explicit delegation expression,
+        // since the '{' could either be interpreted as the class body
+        // or as the anonymous function body. Consider the following sequence:
+        //
+        // 'class'  simple_identifier  ':'  user_type  'by'  'fun'  '('  ')'  •  '{'  …
+        //
+        // Possible interpretations:
+        //
+        // 'class'  simple_identifier  ':'  user_type  'by'  (anonymous_function  'fun'  '('  ')'  •  function_body)
+        // 'class'  simple_identifier  ':'  user_type  'by'  (anonymous_function  'fun'  '('  ')')  •  '{'  …
+        [$.anonymous_function],
 
-		// Member access operator '::' conflicts with callable reference
-		[$._primary_expression, $.callable_reference],
+        // Member access operator '::' conflicts with callable reference
+        [$._primary_expression, $.callable_reference],
 
         // Possible interpretations:
         // 1:  (jump_expression  'return'  •  _expression)
         // 2:  (jump_expression  'return')  •  '['  …
-		[$.jump_expression],
+        [$.jump_expression],
 
         // Possible interpretations:
-
         //  1:  '@'  (_unescaped_annotation  user_type)  •  '('  …
         //  2:  '@'  (constructor_invocation  user_type  •  value_arguments)
-		[$.constructor_invocation, $._unescaped_annotation],
+        [$.constructor_invocation, $._unescaped_annotation],
 
-		[$.catch_block]
+        [$.super_expression],
+        [$.catch_block]
 	],
 
 	extras: $ => [
@@ -142,7 +142,8 @@ module.exports = grammar({
 
 		type_alias: $ => seq(
 			"typealias",
-			alias($.simple_identifier, $.type_identifier),
+			field("identifier", alias($.simple_identifier, $.type_identifier)),
+			optional($.type_arguments),
 			"=",
 			$._type
 		),
@@ -280,12 +281,24 @@ module.exports = grammar({
 			optional($.modifiers),
 			optional($.type_parameters),
 			"fun",
+			optional($.type_parameters),
+			optional($._receiver_types),
 			field("identifier", $.simple_identifier),
 			$._function_value_parameters,
 			optional(seq(":", $._type)),
 			optional($.type_constraints),
 			field("function_body", optional($.function_body))
 		)),
+
+        // TODO
+		_receiver_types: $ => repeat1(
+		    seq(optional($.type_modifiers),
+		        choice(
+		            $.simple_identifier
+                ),
+                optional($.type_arguments),
+                ".")
+		),
 
 		function_body: $ => choice(
 		    $._block,
@@ -310,7 +323,10 @@ module.exports = grammar({
 			choice("val", "var"),
 			optional($.type_parameters),
 			// TODO: Receiver type
-			field("variable_declaration", $.variable_declaration), // TODO: Multi-variable-declaration
+			choice(
+			    field("variable_declaration", $.variable_declaration),
+			    field("multi_variable_declaration", $.multi_variable_declaration)
+			),
 			optional($.type_constraints),
 			optional(choice(
 				seq("=", $._expression),
@@ -542,12 +558,13 @@ module.exports = grammar({
 		_semis: $ => /[\r\n]+/,
 		
 		assignment: $ => choice(
+		    // TODO use more specific rule than `$._expression`
 		    prec.left(PREC.ASSIGNMENT, seq(
 		                    field("directly_assignable_expression", $.directly_assignable_expression),
 		                    "=",
 		                    field("expression", $._expression))),
 			prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
-			// TODO
+
 		),
 		
 		// ==========
@@ -764,6 +781,7 @@ module.exports = grammar({
 
 		super_expression: $ => seq(
 			"super",
+			optional(seq("<", $.simple_identifier, ">"))
 			// TODO optional(seq("<", $._type, ">")),
 			// TODO optional(seq("@", $.simple_identifier))
 		),
@@ -898,7 +916,9 @@ module.exports = grammar({
 		                           //       navigation operator 'split up' in Kotlin.
 
 		directly_assignable_expression: $ => choice(
-			field("simple_identifier", $.simple_identifier)
+			field("simple_identifier", $.simple_identifier),
+			$.indexing_expression,
+			$.navigation_expression,
 			// TODO
 		),
 
@@ -906,7 +926,12 @@ module.exports = grammar({
 		// Modifiers
 		// ==========
 		
-		modifiers: $ => choice($.annotation, repeat1($._modifier), seq($.annotation, repeat1($._modifier))),
+		modifiers: $ => choice(
+		    $.annotation,
+		    repeat1($._modifier),
+		    seq($.annotation, repeat1($._modifier)),
+		    seq(repeat1($._modifier), $.annotation)
+		),
 
 		parameter_modifiers: $ => choice($.annotation, repeat1($.parameter_modifier)),
 

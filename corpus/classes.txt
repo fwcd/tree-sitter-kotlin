@@ -8,8 +8,11 @@ class Empty2 {}
 ---
 
 (source_file
-	(class_declaration (type_identifier))
-	(class_declaration (type_identifier) (class_body)))
+	(class_declaration
+	    identifier: (type_identifier))
+	(class_declaration
+	    identifier: (type_identifier)
+	    class_body: (class_body)))
  
 ==================
 Class with methods
@@ -24,10 +27,10 @@ class HelloWorld {
 ---
 
 (source_file
-	(class_declaration (type_identifier)
-		(class_body
-			(function_declaration (simple_identifier) (function_body))
-			(function_declaration (simple_identifier) (function_body)))))
+	(class_declaration identifier: (type_identifier)
+		class_body: (class_body
+			(function_declaration identifier: (simple_identifier) function_body: (function_body))
+			(function_declaration identifier: (simple_identifier) function_body: (function_body)))))
 
 ==================
 Generic class
@@ -38,9 +41,9 @@ class Container<T> {}
 ---
 
 (source_file
-	(class_declaration (type_identifier)
+	(class_declaration identifier: (type_identifier)
 		(type_parameters (type_parameter (type_identifier)))
-		(class_body)))
+		class_body: (class_body)))
 
 ==================
 Class with methods and expressions
@@ -55,16 +58,18 @@ class Strings {
 ---
 
 (source_file
-	(class_declaration (type_identifier)
-		(class_body
-			(function_declaration (simple_identifier) (function_body
-				(line_string_literal)))
-			(function_declaration (simple_identifier) (function_body
-				(additive_expression
-					(additive_expression
-						(line_string_literal)
-						(line_string_literal))
-					(line_string_literal)))))))
+	(class_declaration identifier: (type_identifier)
+		class_body: (class_body
+                        (function_declaration identifier: (simple_identifier)
+                            function_body: (function_body
+                                expression: (line_string_literal)))
+                        (function_declaration identifier: (simple_identifier)
+                            function_body: (function_body
+                                expression: (additive_expression
+                                    left: (additive_expression
+                                        left: (line_string_literal)
+                                        right: (line_string_literal))
+                                    right: (line_string_literal)))))))
 
 ==================
 Class with modifiers
@@ -79,11 +84,11 @@ internal open class Test {
 (source_file
 	(class_declaration
 		(modifiers (visibility_modifier) (inheritance_modifier))
-		(type_identifier)
-		(class_body
-			(function_declaration
-				(modifiers (visibility_modifier) (inheritance_modifier) (function_modifier))
-				(simple_identifier)))))
+		identifier: (type_identifier)
+        class_body: (class_body
+                (function_declaration
+                    (modifiers (visibility_modifier) (inheritance_modifier) (function_modifier))
+                    identifier: (simple_identifier)))))
 
 ==================
 Objects
@@ -114,14 +119,14 @@ data class Vector2D(
 (source_file
 	(class_declaration
 		(modifiers (class_modifier))
-		(type_identifier)
+		identifier: (type_identifier)
 		(primary_constructor
 			(class_parameter
 				(simple_identifier)
-				(user_type (type_identifier)))
+				(user_type identifier: (type_identifier)))
 			(class_parameter
 				(simple_identifier)
-				(user_type (type_identifier))))))
+				(user_type identifier: (type_identifier))))))
 
 ==================
 Inheritance
@@ -137,21 +142,21 @@ class D : SomeInterface
 
 (source_file
 	(class_declaration
-		(type_identifier)
-		(delegation_specifier (constructor_invocation (user_type (type_identifier))
+		identifier: (type_identifier)
+		delegation_specifiers: (delegation_specifier constructor_invocation: (constructor_invocation (user_type identifier: (type_identifier))
 			(value_arguments)))
-		(class_body))
+		class_body: (class_body))
 	(class_declaration
-		(type_identifier)
+		identifier: (type_identifier)
 		(primary_constructor
 			(class_parameter
 				(simple_identifier)
-				(user_type (type_identifier))))
-		(delegation_specifier (constructor_invocation (user_type (type_identifier))
-			(value_arguments (value_argument (simple_identifier))))))
+				(user_type identifier: (type_identifier))))
+		delegation_specifiers: (delegation_specifier constructor_invocation: (constructor_invocation (user_type identifier: (type_identifier))
+			(value_arguments (value_argument expression: (simple_identifier))))))
 	(class_declaration
-		(type_identifier)
-		(delegation_specifier (user_type (type_identifier)))))
+		identifier: (type_identifier)
+		delegation_specifiers: (delegation_specifier user_type: (user_type identifier: (type_identifier)))))
 
 ==================
 Properties
@@ -167,22 +172,21 @@ class Something {
 
 (source_file
 	(class_declaration
-		(type_identifier)
-		(class_body
-			(property_declaration
-				(variable_declaration
-					(simple_identifier)
-					(user_type (type_identifier)))
-				(integer_literal))
-			(property_declaration
-				(variable_declaration
-					(simple_identifier)
-					(nullable_type (user_type (type_identifier)))))
-			(property_declaration
-				(variable_declaration
-					(simple_identifier)
-					(user_type (type_identifier)))
-				(getter (function_body (simple_identifier)))))))
+		identifier: (type_identifier)
+        class_body: (class_body
+                (property_declaration variable_declaration: (variable_declaration
+                                                identifier: (simple_identifier)
+                                                (user_type identifier: (type_identifier)))
+                    (integer_literal))
+                (property_declaration
+                    variable_declaration: (variable_declaration
+                                identifier: (simple_identifier)
+                                (nullable_type type: (user_type identifier: (type_identifier)))))
+                (property_declaration
+                    variable_declaration: (variable_declaration
+                                identifier: (simple_identifier)
+                                (user_type identifier: (type_identifier)))
+                            (getter (function_body expression: (simple_identifier)))))))
 
 ==================
 Constructor delegation calls
@@ -196,20 +200,20 @@ class Test(x: Int, y: Int) {
 
 (source_file
 	(class_declaration
-		(type_identifier)
+		identifier: (type_identifier)
 		(primary_constructor
 			(class_parameter
 				(simple_identifier)
-				(user_type (type_identifier)))
+				(user_type identifier: (type_identifier)))
 			(class_parameter
 				(simple_identifier)
-				(user_type (type_identifier))))
-		(class_body
-			(secondary_constructor
-				(constructor_delegation_call
-					(value_arguments
-						(value_argument (integer_literal))
-						(value_argument (integer_literal))))))))
+				(user_type identifier: (type_identifier))))
+		class_body: (class_body
+                        (secondary_constructor
+                            (constructor_delegation_call
+                                (value_arguments
+                                    (value_argument expression: (integer_literal))
+                                    (value_argument expression: (integer_literal))))))))
 
 ==================
 Enum classes
@@ -231,8 +235,8 @@ enum class Color(val rgb: Int) {
 
 (source_file
 	(class_declaration
-		(type_identifier)
-		(enum_class_body
+		identifier: (type_identifier)
+		enum_class_body: (enum_class_body
 			(enum_entry
 				(simple_identifier))
 			(enum_entry
@@ -242,33 +246,33 @@ enum class Color(val rgb: Int) {
 			(enum_entry
 				(simple_identifier))))
 	(class_declaration
-		(type_identifier)
+		identifier: (type_identifier)
 		(primary_constructor
 			(class_parameter
 				(simple_identifier)
-				(user_type (type_identifier))))
-		(enum_class_body
+				(user_type identifier: (type_identifier))))
+		enum_class_body: (enum_class_body
 			(enum_entry
 				(simple_identifier)
 				(value_arguments
-					(value_argument (hex_literal))))
+					(value_argument expression: (hex_literal))))
 			(enum_entry
 				(simple_identifier)
 				(value_arguments
-					(value_argument (hex_literal))))
+					(value_argument expression: (hex_literal))))
 			(enum_entry
 				(simple_identifier)
 				(value_arguments
-					(value_argument (hex_literal))))
+					(value_argument expression: (hex_literal))))
 			(function_declaration
 				(modifiers (member_modifier))
-				(simple_identifier)
-				(function_body
-					(call_expression
+				identifier: (simple_identifier)
+				function_body: (function_body
+					expression: (call_expression
 						(navigation_expression
-							(simple_identifier)
-							(navigation_suffix
-								(simple_identifier)))
+							expression: (simple_identifier)
+							navigation_suffix: (navigation_suffix
+								    identifier: (simple_identifier)))
 						(call_suffix
-							(value_arguments
-								(value_argument (integer_literal))))))))))
+							value_arguments: (value_arguments
+								(value_argument expression: (integer_literal))))))))))

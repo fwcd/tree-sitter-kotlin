@@ -3173,7 +3173,7 @@
     "fields": {
       "simple_identifier": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "simple_identifier",
@@ -3181,6 +3181,20 @@
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "indexing_expression",
+          "named": true
+        },
+        {
+          "type": "navigation_expression",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -5314,6 +5328,10 @@
         },
         {
           "type": "try_catch_expression",
+          "named": true
+        },
+        {
+          "type": "type_arguments",
           "named": true
         },
         {
@@ -8563,9 +8581,19 @@
     "type": "property_declaration",
     "named": true,
     "fields": {
+      "multi_variable_declaration": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "multi_variable_declaration",
+            "named": true
+          }
+        ]
+      },
       "variable_declaration": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "variable_declaration",
@@ -10383,7 +10411,17 @@
   {
     "type": "super_expression",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "simple_identifier",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "this_expression",
@@ -10429,10 +10467,21 @@
   {
     "type": "type_alias",
     "named": true,
-    "fields": {},
+    "fields": {
+      "identifier": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "type_identifier",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "function_type",
@@ -10447,7 +10496,7 @@
           "named": true
         },
         {
-          "type": "type_identifier",
+          "type": "type_arguments",
           "named": true
         },
         {

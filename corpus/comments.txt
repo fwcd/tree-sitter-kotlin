@@ -10,6 +10,6 @@ Comments
 ---
 
 (source_file
-	(additive_expression (integer_literal) (integer_literal))
+	(additive_expression left: (integer_literal) right: (integer_literal))
 	(comment)
 	(comment))

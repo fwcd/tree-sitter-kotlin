@@ -8,8 +8,8 @@ fun main() {}
 
 (source_file
 	(function_declaration
-		(simple_identifier)
-		(function_body)))
+		identifier: (simple_identifier)
+		function_body: (function_body)))
 
 ==================
 Generic functions
@@ -22,8 +22,8 @@ Generic functions
 (source_file
 	(function_declaration
 		(type_parameters (type_parameter (type_identifier)))
-		(simple_identifier)
-		(function_body)))
+		identifier: (simple_identifier)
+		function_body: (function_body)))
 
 ==================
 Functions with parameters
@@ -37,25 +37,25 @@ fun sum(a: Int, b: Int) = a + b
 
 (source_file
 	(function_declaration
-		(simple_identifier)
-		(parameter 
-			(simple_identifier)
+		identifier: (simple_identifier)
+		parameter: (parameter
+			identifier: (simple_identifier)
 			(user_type
-				(type_identifier)
-				(type_arguments (type_projection (user_type (type_identifier))))))
-		(function_body))
+				identifier: (type_identifier)
+				(type_arguments (type_projection (user_type identifier: (type_identifier))))))
+		function_body: (function_body))
 	(function_declaration
-		(simple_identifier)
-		(parameter
-			(simple_identifier)
-			(user_type (type_identifier)))
-		(parameter
-			(simple_identifier)
-			(user_type (type_identifier)))
-		(function_body
-			(additive_expression
-				(simple_identifier)
-				(simple_identifier)))))
+		identifier: (simple_identifier)
+		parameter: (parameter
+			identifier: (simple_identifier)
+			(user_type identifier: (type_identifier)))
+		parameter: (parameter
+			identifier: (simple_identifier)
+			(user_type identifier: (type_identifier)))
+		function_body: (function_body
+			expression: (additive_expression
+                    left: (simple_identifier)
+                    right: (simple_identifier)))))
 
 ==================
 Functions with return types
@@ -67,7 +67,7 @@ fun answerToTheUltimateQuestionOfLifeTheUniverseAndEverything(): Int = 42
 
 (source_file
 	(function_declaration
-		(simple_identifier)
-		(user_type (type_identifier))
-		(function_body (integer_literal))))
+		identifier: (simple_identifier)
+		(user_type identifier: (type_identifier))
+		function_body: (function_body expression: (integer_literal))))
 

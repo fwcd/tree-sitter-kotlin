@@ -19,9 +19,9 @@ sum(1, 2)
 
 (source_file
 	(call_expression (simple_identifier)
-		(call_suffix (value_arguments
-			(value_argument (line_string_literal)))))
+		(call_suffix value_arguments: (value_arguments
+			(value_argument expression: (line_string_literal)))))
 	(call_expression (simple_identifier)
-		(call_suffix (value_arguments
-			(value_argument (integer_literal))
-			(value_argument (integer_literal))))))
+		(call_suffix value_arguments: (value_arguments
+			(value_argument expression: (integer_literal))
+			(value_argument expression: (integer_literal))))))

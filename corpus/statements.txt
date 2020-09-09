@@ -8,7 +8,7 @@ for (value in values) {}
 
 (source_file
 	(for_statement
-		(variable_declaration (simple_identifier))
-		(simple_identifier)
-		(control_structure_body)))
+		variable_declaration: (variable_declaration identifier: (simple_identifier))
+		collection: (simple_identifier)
+		control_structure_body: (control_structure_body)))
 
