@@ -10,5 +10,5 @@ for (value in values) {}
 	(for_statement
 		variable_declaration: (variable_declaration identifier: (simple_identifier))
 		collection: (simple_identifier)
-		control_structure_body: (control_structure_body)))
+		body: (control_structure_body)))
 

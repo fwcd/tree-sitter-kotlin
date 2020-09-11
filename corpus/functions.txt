@@ -9,7 +9,8 @@ fun main() {}
 (source_file
 	(function_declaration
 		identifier: (simple_identifier)
-		function_body: (function_body)))
+		parameters: (function_value_parameters)
+		body: (function_body)))
 
 ==================
 Generic functions
@@ -23,7 +24,8 @@ Generic functions
 	(function_declaration
 		(type_parameters (type_parameter (type_identifier)))
 		identifier: (simple_identifier)
-		function_body: (function_body)))
+		parameters: (function_value_parameters)
+		body: (function_body)))
 
 ==================
 Functions with parameters
@@ -38,24 +40,23 @@ fun sum(a: Int, b: Int) = a + b
 (source_file
 	(function_declaration
 		identifier: (simple_identifier)
-		parameter: (parameter
-			identifier: (simple_identifier)
+		parameters: (function_value_parameters
+		   (parameter identifier: (simple_identifier)
 			(user_type
 				identifier: (type_identifier)
-				(type_arguments (type_projection (user_type identifier: (type_identifier))))))
-		function_body: (function_body))
+				(type_arguments (type_projection (user_type identifier: (type_identifier))))))) body: (function_body))
 	(function_declaration
 		identifier: (simple_identifier)
-		parameter: (parameter
-			identifier: (simple_identifier)
-			(user_type identifier: (type_identifier)))
-		parameter: (parameter
-			identifier: (simple_identifier)
-			(user_type identifier: (type_identifier)))
-		function_body: (function_body
-			expression: (additive_expression
-                    left: (simple_identifier)
-                    right: (simple_identifier)))))
+		parameters: (function_value_parameters
+            (parameter
+                identifier: (simple_identifier)
+                (user_type identifier: (type_identifier)))
+                (parameter
+                    identifier: (simple_identifier)
+                    (user_type identifier: (type_identifier)))) body: (function_body
+                    expression: (additive_expression
+                            left: (simple_identifier)
+                            right: (simple_identifier)))))
 
 ==================
 Functions with return types
@@ -68,6 +69,7 @@ fun answerToTheUltimateQuestionOfLifeTheUniverseAndEverything(): Int = 42
 (source_file
 	(function_declaration
 		identifier: (simple_identifier)
+		parameters: (function_value_parameters)
 		(user_type identifier: (type_identifier))
-		function_body: (function_body expression: (integer_literal))))
+		body: (function_body expression: (integer_literal))))
 

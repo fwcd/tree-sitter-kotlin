@@ -12,7 +12,7 @@ class Empty2 {}
 	    identifier: (type_identifier))
 	(class_declaration
 	    identifier: (type_identifier)
-	    class_body: (class_body)))
+	    body: (class_body)))
  
 ==================
 Class with methods
@@ -28,9 +28,15 @@ class HelloWorld {
 
 (source_file
 	(class_declaration identifier: (type_identifier)
-		class_body: (class_body
-			(function_declaration identifier: (simple_identifier) function_body: (function_body))
-			(function_declaration identifier: (simple_identifier) function_body: (function_body)))))
+		body: (class_body
+			(function_declaration
+			    identifier: (simple_identifier)
+			    parameters: (function_value_parameters)
+			    body: (function_body))
+			(function_declaration
+			    identifier: (simple_identifier)
+			    parameters: (function_value_parameters)
+			    body: (function_body)))))
 
 ==================
 Generic class
@@ -43,7 +49,7 @@ class Container<T> {}
 (source_file
 	(class_declaration identifier: (type_identifier)
 		(type_parameters (type_parameter (type_identifier)))
-		class_body: (class_body)))
+		body: (class_body)))
 
 ==================
 Class with methods and expressions
@@ -59,12 +65,16 @@ class Strings {
 
 (source_file
 	(class_declaration identifier: (type_identifier)
-		class_body: (class_body
-                        (function_declaration identifier: (simple_identifier)
-                            function_body: (function_body
+		body: (class_body
+                        (function_declaration
+                            identifier: (simple_identifier)
+                            parameters: (function_value_parameters)
+                            body: (function_body
                                 expression: (line_string_literal)))
-                        (function_declaration identifier: (simple_identifier)
-                            function_body: (function_body
+                        (function_declaration
+                            identifier: (simple_identifier)
+                            parameters: (function_value_parameters)
+                            body: (function_body
                                 expression: (additive_expression
                                     left: (additive_expression
                                         left: (line_string_literal)
@@ -85,10 +95,11 @@ internal open class Test {
 	(class_declaration
 		(modifiers (visibility_modifier) (inheritance_modifier))
 		identifier: (type_identifier)
-        class_body: (class_body
+        body: (class_body
                 (function_declaration
                     (modifiers (visibility_modifier) (inheritance_modifier) (function_modifier))
-                    identifier: (simple_identifier)))))
+                    identifier: (simple_identifier)
+                    parameters: (function_value_parameters)))))
 
 ==================
 Objects
@@ -103,7 +114,7 @@ object Singleton {
 (source_file
 	(object_declaration (type_identifier)
 		(class_body
-			(function_declaration (simple_identifier)))))
+			(function_declaration (simple_identifier) (function_value_parameters)))))
 
 ==================
 Primary constructors
@@ -145,7 +156,7 @@ class D : SomeInterface
 		identifier: (type_identifier)
 		delegation_specifiers: (delegation_specifier constructor_invocation: (constructor_invocation (user_type identifier: (type_identifier))
 			(value_arguments)))
-		class_body: (class_body))
+		body: (class_body))
 	(class_declaration
 		identifier: (type_identifier)
 		(primary_constructor
@@ -173,19 +184,19 @@ class Something {
 (source_file
 	(class_declaration
 		identifier: (type_identifier)
-        class_body: (class_body
+        body: (class_body
                 (property_declaration variable_declaration: (variable_declaration
                                                 identifier: (simple_identifier)
-                                                (user_type identifier: (type_identifier)))
+                                                type: (user_type identifier: (type_identifier)))
                     (integer_literal))
                 (property_declaration
                     variable_declaration: (variable_declaration
                                 identifier: (simple_identifier)
-                                (nullable_type type: (user_type identifier: (type_identifier)))))
+                                type: (nullable_type type: (user_type identifier: (type_identifier)))))
                 (property_declaration
                     variable_declaration: (variable_declaration
                                 identifier: (simple_identifier)
-                                (user_type identifier: (type_identifier)))
+                                type: (user_type identifier: (type_identifier)))
                             (getter (function_body expression: (simple_identifier)))))))
 
 ==================
@@ -208,8 +219,10 @@ class Test(x: Int, y: Int) {
 			(class_parameter
 				(simple_identifier)
 				(user_type identifier: (type_identifier))))
-		class_body: (class_body
+		body: (class_body
                         (secondary_constructor
+                        parameters: (function_value_parameters)
+                        delegation_call:
                             (constructor_delegation_call
                                 (value_arguments
                                     (value_argument expression: (integer_literal))
@@ -234,9 +247,9 @@ enum class Color(val rgb: Int) {
 ---
 
 (source_file
-	(class_declaration
+	(enum_class_declaration
 		identifier: (type_identifier)
-		enum_class_body: (enum_class_body
+		body: (enum_class_body
 			(enum_entry
 				(simple_identifier))
 			(enum_entry
@@ -245,13 +258,13 @@ enum class Color(val rgb: Int) {
 				(simple_identifier))
 			(enum_entry
 				(simple_identifier))))
-	(class_declaration
+	(enum_class_declaration
 		identifier: (type_identifier)
 		(primary_constructor
 			(class_parameter
 				(simple_identifier)
 				(user_type identifier: (type_identifier))))
-		enum_class_body: (enum_class_body
+		body: (enum_class_body
 			(enum_entry
 				(simple_identifier)
 				(value_arguments
@@ -267,7 +280,8 @@ enum class Color(val rgb: Int) {
 			(function_declaration
 				(modifiers (member_modifier))
 				identifier: (simple_identifier)
-				function_body: (function_body
+				parameters: (function_value_parameters)
+				body: (function_body
 					expression: (call_expression
 						(navigation_expression
 							expression: (simple_identifier)

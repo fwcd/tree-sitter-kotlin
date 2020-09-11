@@ -97,15 +97,15 @@ consumer as (Int) -> Unit
 	(as_expression
 		expression: (simple_identifier)
 		type: (function_type
-			function_type_parameters: (function_type_parameters)
+			parameters: (function_type_parameters)
 			(user_type identifier: (type_identifier))))
 	(as_expression
 		expression: (simple_identifier)
 		type: (function_type
-			function_type_parameters:
- (function_type_parameters
- parameters: (user_type identifier: (type_identifier)))
-			(user_type identifier: (type_identifier)))))
+                parameters:
+                 (function_type_parameters
+                 parameters: (user_type identifier: (type_identifier)))
+                            (user_type identifier: (type_identifier)))))
 
 ==================
 Function types with multiple parameters
@@ -120,7 +120,7 @@ b as (Nested.Type, (Int)) -> Unit
 	(as_expression
 		expression: (simple_identifier)
 		type: (function_type
-			function_type_parameters: (function_type_parameters
+			parameters: (function_type_parameters
 				parameters: (user_type identifier: (type_identifier))
 				parameters: (user_type identifier: (type_identifier)
 					(type_arguments
@@ -130,7 +130,7 @@ b as (Nested.Type, (Int)) -> Unit
 	(as_expression
 		expression: (simple_identifier)
 		type: (function_type
-			function_type_parameters: (function_type_parameters
+			parameters: (function_type_parameters
 				parameters: (user_type identifier: (type_identifier) identifier: (type_identifier))
 				parameters: (parenthesized_type type: (user_type identifier: (type_identifier))))
 			    (user_type identifier: (type_identifier)))))
@@ -147,7 +147,7 @@ a as (first: A, second: B) -> Unit
 	(as_expression
 		expression: (simple_identifier)
 		type: (function_type
-			function_type_parameters: (function_type_parameters
+			parameters: (function_type_parameters
 				parameters: (parameter
                         identifier: (simple_identifier)
                         (user_type identifier: (type_identifier)))
@@ -169,6 +169,6 @@ a as T.() -> Unit
 		expression: (simple_identifier)
 		type: (function_type
 			    identifier: (type_identifier)
-			    function_type_parameters: (function_type_parameters)
+			    parameters: (function_type_parameters)
 			    (user_type identifier: (type_identifier)))))
 
