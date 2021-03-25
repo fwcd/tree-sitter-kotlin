@@ -6547,6 +6547,7 @@
       "catch_block"
     ]
   ],
+  "precedences": [],
   "externals": [],
   "inline": [],
   "supertypes": []
