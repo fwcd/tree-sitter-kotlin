@@ -68,6 +68,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -315,6 +319,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "function_type",
           "named": true
         },
@@ -510,6 +518,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -687,6 +699,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -944,6 +960,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -1209,6 +1229,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "function_type",
           "named": true
         },
@@ -1401,6 +1425,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -1602,6 +1630,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -1770,6 +1802,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -1991,6 +2027,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -2239,6 +2279,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -2414,6 +2458,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -2582,6 +2630,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -2830,6 +2882,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -2933,6 +2989,21 @@
     }
   },
   {
+    "type": "expect_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "call_suffix",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "explicit_delegation",
     "named": true,
     "fields": {},
@@ -2998,6 +3069,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -3222,6 +3297,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -3397,6 +3476,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -3569,6 +3652,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -3924,6 +4011,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -4129,6 +4220,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -4304,6 +4399,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -4472,6 +4571,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -4651,6 +4754,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -4824,6 +4931,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -5145,6 +5256,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -5313,6 +5428,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -5688,6 +5807,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -5914,6 +6037,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -6086,6 +6213,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -6280,6 +6411,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -6482,6 +6617,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -6653,6 +6792,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -6821,6 +6964,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -6996,6 +7143,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -7251,6 +7402,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "file_annotation",
           "named": true
         },
@@ -7466,6 +7621,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -7650,6 +7809,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -8136,6 +8299,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -8355,6 +8522,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
@@ -8589,6 +8760,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -8810,6 +8985,10 @@
           "named": true
         },
         {
+          "type": "expect_expression",
+          "named": true
+        },
+        {
           "type": "hex_literal",
           "named": true
         },
@@ -8986,6 +9165,10 @@
         },
         {
           "type": "equality_expression",
+          "named": true
+        },
+        {
+          "type": "expect_expression",
           "named": true
         },
         {
