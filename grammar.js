@@ -507,7 +507,7 @@ module.exports = grammar({
 		
 		assignment: $ => choice(
 			prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
-			// TODO
+			prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression))
 		),
 		
 		// ==========
@@ -823,7 +823,7 @@ module.exports = grammar({
 			choice($.simple_identifier, "class")
 		),
 
-		_assignment_and_operator: $ => choice("+=", "-=", "*=", "/=", "%=", "="),
+		_assignment_and_operator: $ => choice("+=", "-=", "*=", "/=", "%="),
 		
 		_equality_operator: $ => choice("!=", "!==", "==", "==="),
 		

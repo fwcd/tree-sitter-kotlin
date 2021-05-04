@@ -2594,6 +2594,27 @@
               }
             ]
           }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "directly_assignable_expression"
+              },
+              {
+                "type": "STRING",
+                "value": "="
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_expression"
+              }
+            ]
+          }
         }
       ]
     },
@@ -4367,10 +4388,6 @@
         {
           "type": "STRING",
           "value": "%="
-        },
-        {
-          "type": "STRING",
-          "value": "="
         }
       ]
     },
