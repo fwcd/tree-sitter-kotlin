@@ -41,6 +41,7 @@ const PREC = {
 	CONJUNCTION: 4,
 	DISJUNCTION: 3,
 	SPREAD: 2,
+	EXPECT: 2,
 	ASSIGNMENT: 1,
 	BLOCK: 1,
 	LAMBDA_LITERAL: 0,
@@ -506,7 +507,7 @@ module.exports = grammar({
 		
 		assignment: $ => choice(
 			prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
-			// TODO
+			prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression))
 		),
 		
 		// ==========
@@ -528,7 +529,8 @@ module.exports = grammar({
 			$.navigation_expression,
 			$.prefix_expression,
 			$.as_expression,
-			$.spread_expression
+			$.spread_expression,
+			$.expect_expression,
 		),
 
 		postfix_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $._postfix_unary_operator)),
@@ -549,6 +551,8 @@ module.exports = grammar({
 		as_expression: $ => prec.left(PREC.AS, seq($._expression, $._as_operator, $._type)),
 
 		spread_expression: $ => prec.left(PREC.SPREAD, seq("*", $._expression)),
+
+		expect_expression: $ => prec.left(PREC.EXPECT, seq("expect", $.call_suffix)),
 
 		// Binary expressions
 
