@@ -1,0 +1,22 @@
+==================
+Return Statement
+==================
+
+fun foo(p0:Int) {
+    return p0
+}
+
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (parameter
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (function_body
+      (statements
+        (jump_expression
+          (simple_identifier))))))
