@@ -577,9 +577,11 @@ module.exports = grammar({
 
 		range_expression: $ => prec.left(PREC.RANGE, seq($._expression, "..", $._expression)),
 
-		infix_expression: $ => prec.left(PREC.INFIX, seq($._expression, $.simple_identifier, $._expression)),
+		infix_expression: $ => prec.left(PREC.INFIX, seq($.range_expression, $.simple_identifier, $.range_expression)),
 
-		elvis_expression: $ => prec.left(PREC.ELVIS, seq($._expression, "?:", $._expression)),
+		//infix_expression: $ => prec.left(PREC.INFIX, seq($._expression, $.simple_identifier, $._expression)),
+
+		elvis_expression: $ => prec.left(PREC.ELVIS, seq($.infix_expression, "?:", $.infix_expression)),
 
 		check_expression: $ => prec.left(PREC.CHECK, seq($._expression, choice($._in_operator, $._is_operator), $._expression)),
 		
