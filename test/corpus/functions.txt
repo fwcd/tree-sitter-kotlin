@@ -1,0 +1,73 @@
+==================
+Top-level functions
+==================
+
+fun main() {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_body)))
+
+==================
+Generic functions
+==================
+
+<T> fun test() {}
+
+---
+
+(source_file
+  (function_declaration
+    (type_parameters (type_parameter (type_identifier)))
+    (simple_identifier)
+    (function_body)))
+
+==================
+Functions with parameters
+==================
+
+fun main(args: Array<String>) {}
+
+fun sum(a: Int, b: Int) = a + b
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (parameter 
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments (type_projection (user_type (type_identifier))))))
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (parameter
+      (simple_identifier)
+      (user_type (type_identifier)))
+    (parameter
+      (simple_identifier)
+      (user_type (type_identifier)))
+    (function_body
+      (additive_expression
+        (simple_identifier)
+        (simple_identifier)))))
+
+==================
+Functions with return types
+==================
+
+fun answerToTheUltimateQuestionOfLifeTheUniverseAndEverything(): Int = 42
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (user_type (type_identifier))
+    (function_body (integer_literal))))
+

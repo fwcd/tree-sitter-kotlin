@@ -4114,7 +4114,7 @@
       ]
     },
     "when_condition": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
           "type": "SYMBOL",
@@ -5732,6 +5732,7 @@
       "_unescaped_annotation"
     ]
   ],
+  "precedences": [],
   "externals": [],
   "inline": [],
   "supertypes": []
