@@ -2949,7 +2949,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "range_expression"
           },
           {
             "type": "SYMBOL",
@@ -2957,7 +2957,7 @@
           },
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "range_expression"
           }
         ]
       }
@@ -2970,7 +2970,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "infix_expression"
           },
           {
             "type": "STRING",
@@ -2978,7 +2978,7 @@
           },
           {
             "type": "SYMBOL",
-            "name": "_expression"
+            "name": "infix_expression"
           }
         ]
       }
@@ -4114,7 +4114,7 @@
       ]
     },
     "when_condition": {
-      "type": "CHOICE",
+      "type": "SEQ",
       "members": [
         {
           "type": "SYMBOL",
@@ -4565,9 +4565,84 @@
       "type": "STRING",
       "value": "?."
     },
+    "_postfix_unary_suffix": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_postfix_unary_operator"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "type_arguments"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "call_suffix"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "indexing_suffix"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "navigation_suffix"
+        }
+      ]
+    },
+    "_postfix_unary_expression": {
+      "type": "PREC_RIGHT",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "_primary_expression"
+          },
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_postfix_unary_suffix"
+            }
+          }
+        ]
+      }
+    },
+    "_assignable_suffix": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "type_arguments"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "indexing_suffix"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "navigation_suffix"
+        }
+      ]
+    },
     "directly_assignable_expression": {
       "type": "CHOICE",
       "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_postfix_unary_expression"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_assignable_suffix"
+            }
+          ]
+        },
         {
           "type": "SYMBOL",
           "name": "simple_identifier"
