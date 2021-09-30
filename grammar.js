@@ -510,7 +510,6 @@ module.exports = grammar({
 
     assignment: $ => choice(
       prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
-      prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression)),
       // TODO
     ),
 
@@ -852,23 +851,9 @@ module.exports = grammar({
                                //       does it seem to be very uncommon to write the safe
                                //       navigation operator 'split up' in Kotlin.
 
-    _postfix_unary_suffix: $ => choice(
-      $._postfix_unary_operator,
-      $.navigation_suffix
-    ),
-
-    _postfix_unary_expression: $ => prec(
-      PREC.ASSIGNMENT,
-      seq($._primary_expression, repeat($._postfix_unary_suffix))
-    ),
-
-    directly_assignable_expression: $ => prec(
-      PREC.ASSIGNMENT,
-      choice(
-        $._postfix_unary_expression,
-        $.simple_identifier
-        // TODO
-      )
+    directly_assignable_expression: $ => choice(
+      $.simple_identifier
+      // TODO
     ),
 
     // ==========
