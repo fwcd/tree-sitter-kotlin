@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#playground-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  box-sizing: border-box;
+  display: flex;
+  padding: 20px;
+  height: 60px;
+  border-bottom: 1px solid #aaa;
+}
+
+main {
+  flex: 1;
+  position: relative;
+}
+
+#input-pane {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+#code-container, #query-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+}
+
+#output-container-scroll {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  bottom: 0;
+  right: 0;
+}
+
+.header-item {
+  margin-right: 30px;
+}
+
+#playground-container .CodeMirror {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+}
+
+#output-container-scroll {
+  flex: 1;
+  padding: 0;
+  overflow: auto;
+}
+
+#output-container {
+  padding: 0 10px;
+  margin: 0;
+}
+
+#logging-checkbox {
+  vertical-align: middle;
+}
+
+.CodeMirror div.CodeMirror-cursor {
+  border-left: 3px solid red;
+}
+
+a {
+  text-decoration: none;
+  color: #040404;
+  padding: 2px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a.highlighted {
+  background-color: #d9d9d9;
+  color: red;
+  border-radius: 3px;
+  text-decoration: underline;
+}
+
+.query-error {
+  text-decoration: underline red dashed;
+}

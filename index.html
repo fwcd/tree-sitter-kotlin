@@ -1,0 +1,69 @@
+<!-- Based on https://github.com/tree-sitter/tree-sitter/blob/master/cli/src/playground.html -->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>tree-sitter-kotlin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.45.0/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/clusterize.js/0.18.0/clusterize.min.css">
+    <link rel="icon" type="image/png" href="http://tree-sitter.github.io/tree-sitter/assets/images/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="http://tree-sitter.github.io/tree-sitter/assets/images/favicon-16x16.png" sizes="16x16" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  
+  <body>
+    <div id="playground-container" style="visibility: hidden;">
+      <header>
+        <div class=header-item>
+          <b>Kotlin</b>
+        </div>
+  
+        <div class=header-item>
+          <label for="logging-checkbox">log</label>
+          <input id="logging-checkbox" type="checkbox"></input>
+        </div>
+  
+        <div class=header-item>
+          <label for="query-checkbox">query</label>
+          <input id="query-checkbox" type="checkbox"></input>
+        </div>
+  
+        <div class=header-item>
+          <label for="update-time">parse time: </label>
+          <span id="update-time"></span>
+        </div>
+  
+        <select id="language-select" style="display: none;">
+          <option value="parser">Parser</option>
+        </select>
+      </header>
+  
+      <main>
+        <div id="input-pane">
+          <div id="code-container">
+            <textarea id="code-input"></textarea>
+          </div>
+  
+          <div id="query-container" style="visibility: hidden; position: absolute;">
+            <textarea id="query-input"></textarea>
+          </div>
+        </div>
+  
+        <div id="output-container-scroll">
+          <pre id="output-container" class="highlight"></pre>
+        </div>
+      </main>
+    </div>
+  
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      crossorigin="anonymous">
+    </script>
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.45.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clusterize.js/0.18.0/clusterize.min.js"></script>
+  
+    <script>LANGUAGE_BASE_URL = "";</script>
+    <script src="tree-sitter.js"></script>
+    <script src="playground.js"></script>
+  </body>
+</html>
