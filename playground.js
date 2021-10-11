@@ -39,7 +39,8 @@ let tree;
   const parser = new TreeSitter();
   const codeEditor = CodeMirror.fromTextArea(codeInput, {
     lineNumbers: true,
-    showCursorWhenSelecting: true
+    showCursorWhenSelecting: true,
+    mode: 'text/x-kotlin'
   });
 
   const queryEditor = CodeMirror.fromTextArea(queryInput, {
