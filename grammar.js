@@ -292,7 +292,6 @@ module.exports = grammar({
 		_function_value_parameter: $ => seq(
 			optional($.parameter_modifiers),
 			$.parameter,
-			optional(seq("=", $._expression))
 		),
 
 		function_declaration: $ => prec.right(seq( // TODO
@@ -390,7 +389,11 @@ module.exports = grammar({
 			optional(seq(":", $._type))
 		),
 
-		parameter: $ => seq(field("identifier", $.simple_identifier), ":", $._type),
+		parameter: $ => seq(
+            field("identifier", $.simple_identifier),
+            seq(":", field("type", $._type)),
+            optional(seq("=", field("default_value", $._expression)))
+		),
 
 		object_declaration: $ => prec.right(seq(
 			optional($.modifiers),
