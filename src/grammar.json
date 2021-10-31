@@ -1692,24 +1692,28 @@
             "type": "CHOICE",
             "members": [
               {
-                "type": "CHOICE",
+                "type": "SEQ",
                 "members": [
                   {
-                    "type": "SEQ",
+                    "type": "CHOICE",
                     "members": [
                       {
                         "type": "STRING",
                         "value": "="
                       },
                       {
-                        "type": "SYMBOL",
-                        "name": "_expression"
+                        "type": "STRING",
+                        "value": "by"
                       }
                     ]
                   },
                   {
-                    "type": "SYMBOL",
-                    "name": "property_delegate"
+                    "type": "FIELD",
+                    "name": "initial_value",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_expression"
+                    }
                   }
                 ]
               },

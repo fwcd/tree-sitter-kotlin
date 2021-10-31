@@ -345,9 +345,9 @@ module.exports = grammar({
 			    field("multi_variable_declaration", $.multi_variable_declaration)
 			),
 			optional($.type_constraints),
-			optional(choice(
-				seq("=", $._expression),
-				$.property_delegate
+			optional(seq(
+				choice("=", "by"),
+				field("initial_value", $._expression)
 			)),
 			choice(
 				//optional(seq($.getter, optional(seq(optional($._semi), $.setter)))),
