@@ -5385,6 +5385,32 @@
     }
   },
   {
+    "type": "function_value_parameter",
+    "named": true,
+    "fields": {
+      "parameter_modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "parameter_modifiers",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "parameter",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "function_value_parameters",
     "named": true,
     "fields": {},
@@ -5393,11 +5419,7 @@
       "required": false,
       "types": [
         {
-          "type": "parameter",
-          "named": true
-        },
-        {
-          "type": "parameter_modifiers",
+          "type": "function_value_parameter",
           "named": true
         }
       ]
