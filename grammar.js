@@ -287,10 +287,10 @@ module.exports = grammar({
 			optional($.class_body)
 		),
 
-		function_value_parameters: $ => seq("(", optional(sep1($._function_value_parameter, ",")), ")"),
+		function_value_parameters: $ => seq("(", optional(sep1($.function_value_parameter, ",")), ")"),
 
-		_function_value_parameter: $ => seq(
-			optional($.parameter_modifiers),
+		function_value_parameter: $ => seq(
+			optional(field("parameter_modifiers", $.parameter_modifiers)),
 			$.parameter,
 		),
 
@@ -345,9 +345,9 @@ module.exports = grammar({
 			    field("multi_variable_declaration", $.multi_variable_declaration)
 			),
 			optional($.type_constraints),
-			optional(choice(
-				seq("=", $._expression),
-				$.property_delegate
+			optional(seq(
+				choice("=", "by"),
+				field("initial_value", $._expression)
 			)),
 			choice(
 				//optional(seq($.getter, optional(seq(optional($._semi), $.setter)))),
