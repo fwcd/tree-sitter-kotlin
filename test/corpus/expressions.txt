@@ -95,11 +95,19 @@ val y = when(x){
   (property_declaration
     (variable_declaration (simple_identifier))
     (when_expression
-      (when_subject (simple_identifier))
-      (when_entry (when_condition (integer_literal))
-        (control_structure_body (boolean_literal)))
-      (when_entry (when_condition (integer_literal))
-        (control_structure_body (boolean_literal))))))
+      (when_subject
+	    (simple_identifier))
+	  (when_structure_body
+        (when_entry
+		  (when_condition
+		    (integer_literal))
+          (control_structure_body
+		    (boolean_literal)))
+        (when_entry
+		  (when_condition
+		    (integer_literal))
+          (control_structure_body
+		    (boolean_literal)))))))
 
 =================
 When expression with type arguments
@@ -115,15 +123,16 @@ when (this) {
   (when_expression
     (when_subject
       (this_expression))
-    (when_entry
-      (when_condition
-        (type_test
-          (user_type
-            (type_identifier)
-            (type_arguments
-              (type_projection)))))
-      (control_structure_body
-        (jump_expression)))))
+	(when_structure_body
+      (when_entry
+        (when_condition
+          (type_test
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection)))))
+        (control_structure_body
+          (jump_expression))))))
 
 ==================
 Value declaration with receiver type
@@ -301,30 +310,31 @@ when (dir) {
   (when_expression
     (when_subject
       (simple_identifier))
-    (when_entry
-      (when_condition
-        (integer_literal))
-      (control_structure_body
-        (statements
-          (property_declaration
-            (variable_declaration
-              (simple_identifier))
-            (navigation_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier))))
-          (assignment
-            (directly_assignable_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier)))
-            (navigation_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier))))
-          (assignment
-            (directly_assignable_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier)))
-            (simple_identifier)))))))
+	(when_structure_body
+      (when_entry
+        (when_condition
+          (integer_literal))
+        (control_structure_body
+          (statements
+            (property_declaration
+              (variable_declaration
+                (simple_identifier))
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier))))
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier))))
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (simple_identifier))))))))
