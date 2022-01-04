@@ -847,6 +847,10 @@ module.exports = grammar({
     when_expression: $ => seq(
       "when",
       optional($.when_subject),
+      $.when_structure_body,
+    ),
+
+    when_structure_body: $ => seq(
       "{",
       repeat($.when_entry),
       "}"
