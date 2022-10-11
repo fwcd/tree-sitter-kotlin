@@ -144,7 +144,7 @@ module.exports = grammar({
       optional($.shebang_line),
       repeat($.file_annotation),
       optional($.package_header),
-      repeat($.import_list),
+      repeat($._import_list),
       repeat(seq($._statement, $._semi))
     ),
 
@@ -161,7 +161,7 @@ module.exports = grammar({
 
     package_header: $ => seq("package", $.identifier, $._semi),
 
-    import_list: $ => seq(
+    _import_list: $ => seq(
       repeat1($.import_header),
       $._import_list_delimiter
     ),
@@ -995,7 +995,7 @@ module.exports = grammar({
     _postfix_unary_suffix: $ => choice(
       $._postfix_unary_operator,
       $.navigation_suffix,
-      $.indexing_suffix
+      field('indexing_suffix', $.indexing_suffix)
     ),
 
     _postfix_unary_expression: $ => seq($._primary_expression, repeat($._postfix_unary_suffix)),

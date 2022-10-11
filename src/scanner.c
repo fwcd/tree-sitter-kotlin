@@ -162,6 +162,14 @@ bool scan_automatic_semicolon(TSLexer *lexer) {
       skip(lexer);
       return lexer->lookahead != '=';
 
+    // Don't insert a semicolon before an catch
+    case 'c':
+      return !scan_for_word(lexer, "atch", 4);
+
+    // Don't insert a semicolon before an finally
+    case 'f':
+      return !scan_for_word(lexer, "inally", 6);
+
     // Don't insert a semicolon before an else
     case 'e':
       return !scan_for_word(lexer, "lse", 3);
@@ -179,10 +187,10 @@ bool scan_automatic_semicolon(TSLexer *lexer) {
 
       return !scan_for_word(lexer, "stanceof", 8);
 
-      case ';':
-        advance(lexer);
-        lexer->mark_end(lexer);
-        return true;
+    case ';':
+      advance(lexer);
+      lexer->mark_end(lexer);
+      return true;
 
     default:
       return true;
