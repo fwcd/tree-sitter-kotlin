@@ -3268,6 +3268,16 @@
     "type": "directly_assignable_expression",
     "named": true,
     "fields": {
+      "indexing_suffix": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "indexing_suffix",
+            "named": true
+          }
+        ]
+      },
       "simple_identifier": {
         "multiple": false,
         "required": false,
@@ -3317,10 +3327,6 @@
         },
         {
           "type": "indexing_expression",
-          "named": true
-        },
-        {
-          "type": "indexing_suffix",
           "named": true
         },
         {
@@ -5917,21 +5923,6 @@
           }
         ]
       }
-    }
-  },
-  {
-    "type": "import_list",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "import_header",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -9952,7 +9943,7 @@
           "named": true
         },
         {
-          "type": "import_list",
+          "type": "import_header",
           "named": true
         },
         {
