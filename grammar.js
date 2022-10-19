@@ -848,11 +848,11 @@ module.exports = grammar({
       $.anonymous_function
     ),
 
-    object_literal: $ => seq(
+    object_literal: $ => prec.right(seq(
       "object",
       optional(seq(":", $._delegation_specifiers)),
-      $.class_body
-    ),
+      optional($.class_body)
+    )),
 
     this_expression: $ => "this",
 
