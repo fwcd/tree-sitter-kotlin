@@ -217,6 +217,7 @@ module.exports = grammar({
     class_declaration: $ => prec.right(
 			seq(
 				optional($.modifiers),
+        optional("impl"),
 				"class",
 				field("identifier", alias($.simple_identifier, $.type_identifier)),
 				optional($.type_parameters),
@@ -337,6 +338,7 @@ module.exports = grammar({
 
     companion_object: $ => seq(
       optional($.modifiers),
+      optional("impl"),
       "companion",
       "object",
       optional(alias($.simple_identifier, $.type_identifier)),
@@ -367,6 +369,7 @@ module.exports = grammar({
 
     function_declaration: $ => prec.right(seq( // TODO
       optional($.modifiers),
+      optional("impl"),
       "fun",
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),
