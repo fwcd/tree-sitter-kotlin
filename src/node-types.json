@@ -8031,7 +8031,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "class_body",
@@ -12158,6 +12158,10 @@
   },
   {
     "type": "if",
+    "named": false
+  },
+  {
+    "type": "impl",
     "named": false
   },
   {
