@@ -63,6 +63,58 @@ bool scan_for_word(TSLexer *lexer, char* word, unsigned len) {
     return true;
 }
 
+// primary constructor can be annotated, ref: https://stackoverflow.com/questions/28398572/is-it-possible-to-annotate-class-constructor-in-kotlin
+bool scan_constructor(TSLexer *lexer) {
+  for (;;) {
+
+    if (!scan_whitespace_and_comments(lexer)) {
+      return false;
+    }
+    switch(lexer->lookahead) {
+      case 'c':
+        goto out_of_loop;
+      case 'i':
+        /* internal */
+        if (!scan_for_word(lexer, "nternal", 7)) return false;
+        break;
+      case 'p':
+        skip(lexer);
+        if (lexer->lookahead == 'u') {
+          /* public */
+          if (!scan_for_word(lexer, "blic", 4)) return false;
+        } else if (lexer->lookahead == 'r') {
+          skip(lexer);
+          switch (lexer->lookahead) {
+            case 'i':
+              /* private */
+              if (!scan_for_word(lexer, "vate", 4)) return false;
+              break;
+            case 'o':
+              /* protected */
+              if (!scan_for_word(lexer, "tected", 6)) return false;
+              break;
+            default:
+              return false;
+          }
+        } else {
+          return false;
+        }
+        break;
+      case '@':
+        skip(lexer);
+        if (!iswalpha(lexer->lookahead)) return false;
+        skip(lexer);
+        while (iswalpha(lexer->lookahead)) skip(lexer);
+        break;
+      default:
+        return false;
+    }
+  }
+  out_of_loop:;
+  /* stop scanning at constructor */
+  return lexer->lookahead == 'c' && scan_for_word(lexer, "onstructor", 10);
+}
+
 bool scan_automatic_semicolon(TSLexer *lexer) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
   lexer->mark_end(lexer);
@@ -164,7 +216,14 @@ bool scan_automatic_semicolon(TSLexer *lexer) {
 
     // Don't insert a semicolon before an catch
     case 'c':
-      return !scan_for_word(lexer, "atch", 4);
+      skip(lexer);
+      if (lexer->lookahead == 'a') {
+        return !scan_for_word(lexer, "tch", 3);
+      } else if (lexer->lookahead == 'o') {
+        return !scan_for_word(lexer, "nstructor", 9);
+      } else {
+        return true;
+      }
 
     // Don't insert a semicolon before an finally
     case 'f':
@@ -185,7 +244,15 @@ bool scan_automatic_semicolon(TSLexer *lexer) {
       if (!iswalpha(lexer->lookahead))
         return false;
 
-      return !scan_for_word(lexer, "stanceof", 8);
+      // Scan for primary constructor when "internal" matched
+      if (lexer->lookahead == 't' && scan_for_word(lexer, "ernal", 5)) {
+        return !scan_constructor(lexer);
+      } else {
+        return true;
+      }
+    case 'p':
+    case '@':
+        return !scan_constructor(lexer);
 
     case ';':
       advance(lexer);

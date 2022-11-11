@@ -1252,7 +1252,7 @@ module.exports = grammar({
     // Strings
     // ==========
 
-    _line_str_text: $ => /[^\\"$]+/,
+    _line_str_text: $ => token.immediate(prec(1, /[^\\"$]+/)),
 
     _multi_line_str_text: $ => /[^"$]+/
   }

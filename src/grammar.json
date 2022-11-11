@@ -6775,8 +6775,15 @@
       "value": "\\\\[tbrn'\"\\\\$]"
     },
     "_line_str_text": {
-      "type": "PATTERN",
-      "value": "[^\\\\\"$]+"
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[^\\\\\"$]+"
+        }
+      }
     },
     "_multi_line_str_text": {
       "type": "PATTERN",
