@@ -180,8 +180,6 @@ module.exports = grammar({
 
     import_alias: $ => seq("as", field("alias", alias($.simple_identifier, $.type_identifier))),
 
-    top_level_object: $ => seq($._declaration, optional($._semi)),
-
     type_alias: $ => seq(
       optional($.modifiers),
       "typealias",
@@ -217,11 +215,10 @@ module.exports = grammar({
     class_declaration: $ => prec.right(
 			seq(
 				optional($.modifiers),
-        optional("impl"),
 				"class",
 				field("identifier", alias($.simple_identifier, $.type_identifier)),
-				optional($.type_parameters),
-				optional($.primary_constructor),
+        optional($.type_parameters),
+        optional($.primary_constructor),
 				field("delegation_specifiers", optional(seq(":", $._delegation_specifiers))),
 				optional($.type_constraints),
 				field("body", optional($.class_body))
@@ -338,7 +335,6 @@ module.exports = grammar({
 
     companion_object: $ => seq(
       optional($.modifiers),
-      optional("impl"),
       "companion",
       "object",
       optional(alias($.simple_identifier, $.type_identifier)),
@@ -369,7 +365,6 @@ module.exports = grammar({
 
     function_declaration: $ => prec.right(seq( // TODO
       optional($.modifiers),
-      optional("impl"),
       "fun",
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),
@@ -1083,7 +1078,8 @@ module.exports = grammar({
     inheritance_modifier: $ => choice(
       "abstract",
       "final",
-      "open"
+      "open",
+      "impl"
     ),
 
     parameter_modifier: $ => choice(
