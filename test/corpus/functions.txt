@@ -1,37 +1,42 @@
-==================
+================================================================================
 Top-level functions
-==================
+================================================================================
 
 fun main() {}
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (simple_identifier)
+    (function_value_parameters)
     (function_body)))
 
-==================
+================================================================================
 Generic functions
-==================
+================================================================================
 
 fun <T> test() {}
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
-    (type_parameters (type_parameter (type_identifier)))
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
     (simple_identifier)
+    (function_value_parameters)
     (function_body)))
 
-==================
+================================================================================
 Generic functions with parameters
-=================
+================================================================================
 
 fun <T: Int> bar(foo: Int): T {}
 
----
+--------------------------------------------------------------------------------
+
 (source_file
   (function_declaration
     (type_parameters
@@ -40,77 +45,94 @@ fun <T: Int> bar(foo: Int): T {}
         (user_type
           (type_identifier))))
     (simple_identifier)
-    (parameter
-      (simple_identifier)
-      (user_type
-        (type_identifier)))
+    (function_value_parameters
+      (function_value_parameter
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
     (user_type
       (type_identifier))
     (function_body)))
 
-==================
+================================================================================
 Functions with parameters
-==================
+================================================================================
 
 fun main(args: Array<String>) {}
 
 fun sum(a: Int, b: Int) = a + b
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (simple_identifier)
-    (parameter
-      (simple_identifier)
-      (user_type
-        (type_identifier)
-        (type_arguments (type_projection (user_type (type_identifier))))))
+    (function_value_parameters
+      (function_value_parameter
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))))))
     (function_body))
   (function_declaration
     (simple_identifier)
-    (parameter
-      (simple_identifier)
-      (user_type (type_identifier)))
-    (parameter
-      (simple_identifier)
-      (user_type (type_identifier)))
+    (function_value_parameters
+      (function_value_parameter
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (function_value_parameter
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
     (function_body
       (additive_expression
         (simple_identifier)
         (simple_identifier)))))
 
-==================
+================================================================================
 Functions with return types
-==================
+================================================================================
 
 fun answerToTheUltimateQuestionOfLifeTheUniverseAndEverything(): Int = 42
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (simple_identifier)
-    (user_type (type_identifier))
-    (function_body (integer_literal))))
+    (function_value_parameters)
+    (user_type
+      (type_identifier))
+    (function_body
+      (integer_literal))))
 
-==================
+================================================================================
 Functions with return calls
-==================
+================================================================================
 
 fun foo(p0: Int): Long {
   return p0.toLong()
 }
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (simple_identifier)
-    (parameter
-      (simple_identifier)
-      (user_type
-        (type_identifier)))
+    (function_value_parameters
+      (function_value_parameter
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
     (user_type
       (type_identifier))
     (function_body
@@ -124,39 +146,41 @@ fun foo(p0: Int): Long {
             (call_suffix
               (value_arguments))))))))
 
-=====================
+================================================================================
 Override functions
-======================
+================================================================================
 
 override fun boo() = foo()
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (modifiers
       (member_modifier))
     (simple_identifier)
+    (function_value_parameters)
     (function_body
       (call_expression
         (simple_identifier)
         (call_suffix
           (value_arguments))))))
 
-=====================
+================================================================================
 Set function call
-======================
+================================================================================
 
 fun test() {
     isAccessible = true
     set(it, COROUTINE_SUSPENDED)
 }
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (simple_identifier)
+    (function_value_parameters)
     (function_body
       (statements
         (assignment
@@ -172,82 +196,92 @@ fun test() {
               (value_argument
                 (simple_identifier)))))))))
 
-==================
+================================================================================
 Anonymous function
-==================
+================================================================================
 
 fun()
 val anon = fun()
 
----
-
-(source_file
-  (anonymous_function)
-  (property_declaration
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function)))
-
-==================
-Anonymous function with parameters
-==================
-
-fun(x: Int)
-val anon = fun(x: Int)
-
----
+--------------------------------------------------------------------------------
 
 (source_file
   (anonymous_function
-    (parameter
-      (simple_identifier)
-      (user_type
-        (type_identifier))))
+    (function_value_parameters))
   (property_declaration
     (variable_declaration
       (simple_identifier))
     (anonymous_function
-      (parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier))))))
+      (function_value_parameters))))
 
-==================
+================================================================================
+Anonymous function with parameters
+================================================================================
+
+fun(x: Int)
+val anon = fun(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (anonymous_function
+    (function_value_parameters
+      (function_value_parameter
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier))))))
+  (property_declaration
+    (variable_declaration
+      (simple_identifier))
+    (anonymous_function
+      (function_value_parameters
+        (function_value_parameter
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))))))
+
+================================================================================
 Anonymous function with return type
-==================
+================================================================================
 
 fun(): Int
 val anon = fun(): Int
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (anonymous_function
+    (function_value_parameters)
     (user_type
       (type_identifier)))
   (property_declaration
     (variable_declaration
       (simple_identifier))
     (anonymous_function
+      (function_value_parameters)
       (user_type
         (type_identifier)))))
 
-==================
+================================================================================
 Anonymous function with body
-==================
+================================================================================
 
 fun() = true
 fun() { assert(true) }
 val anon = fun() = true
 val anon = fun() { assert(true) }
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (anonymous_function
+    (function_value_parameters)
     (function_body
       (boolean_literal)))
   (anonymous_function
+    (function_value_parameters)
     (function_body
       (statements
         (call_expression
@@ -260,12 +294,14 @@ val anon = fun() { assert(true) }
     (variable_declaration
       (simple_identifier))
     (anonymous_function
+      (function_value_parameters)
       (function_body
         (boolean_literal))))
   (property_declaration
     (variable_declaration
       (simple_identifier))
     (anonymous_function
+      (function_value_parameters)
       (function_body
         (statements
           (call_expression

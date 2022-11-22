@@ -7,13 +7,39 @@ enum TokenType {
   AUTOMATIC_SEMICOLON,
   IMPORT_LIST_DELIMITER,
   SAFE_NAV,
+  CLASS,
 };
 
-void *tree_sitter_kotlin_external_scanner_create() { return NULL; }
-void tree_sitter_kotlin_external_scanner_destroy(void *p) {}
-void tree_sitter_kotlin_external_scanner_reset(void *p) {}
-unsigned tree_sitter_kotlin_external_scanner_serialize(void *p, char *buffer) { return 0; }
-void tree_sitter_kotlin_external_scanner_deserialize(void *p, const char *b, unsigned n) {}
+struct ScannerState {
+  bool is_class_decl;
+  bool class_sig_ended;
+};
+
+void *tree_sitter_kotlin_external_scanner_create() {
+  return malloc(sizeof(struct ScannerState));
+}
+
+void tree_sitter_kotlin_external_scanner_destroy(void *p) {
+  free(p);
+}
+
+unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buffer) {
+  struct ScannerState *state = payload;
+  buffer[0] = state->is_class_decl;
+  buffer[1] = state->class_sig_ended;
+  return 2;
+}
+
+void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *buffer, unsigned n) {
+  struct ScannerState *state = payload;
+  if (n == 2) {
+    state->is_class_decl = buffer[0];
+    state->class_sig_ended = buffer[1];
+  } else {
+    state->is_class_decl = false;
+    state->class_sig_ended = false;
+  }
+}
 
 static void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 static void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
@@ -115,9 +141,14 @@ bool scan_constructor(TSLexer *lexer) {
   return lexer->lookahead == 'c' && scan_for_word(lexer, "onstructor", 10);
 }
 
-bool scan_automatic_semicolon(TSLexer *lexer) {
+bool scan_automatic_semicolon(void *payload, TSLexer *lexer) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
   lexer->mark_end(lexer);
+
+  struct ScannerState *state = payload;
+  bool should_scan_constructor = state->is_class_decl && !state->class_sig_ended;
+  state->is_class_decl = false;
+  state->class_sig_ended = false;
 
   bool sameline = true;
   for (;;) {
@@ -220,7 +251,10 @@ bool scan_automatic_semicolon(TSLexer *lexer) {
       if (lexer->lookahead == 'a') {
         return !scan_for_word(lexer, "tch", 3);
       } else if (lexer->lookahead == 'o') {
-        return !scan_for_word(lexer, "nstructor", 9);
+        return !(
+          should_scan_constructor
+          && scan_for_word(lexer, "nstructor", 9)
+        );
       } else {
         return true;
       }
@@ -246,13 +280,19 @@ bool scan_automatic_semicolon(TSLexer *lexer) {
 
       // Scan for primary constructor when "internal" matched
       if (lexer->lookahead == 't' && scan_for_word(lexer, "ernal", 5)) {
-        return !scan_constructor(lexer);
+        return !(
+          should_scan_constructor
+          && scan_constructor(lexer)
+        );
       } else {
         return true;
       }
     case 'p':
     case '@':
-        return !scan_constructor(lexer);
+        return !(
+          should_scan_constructor
+          && scan_constructor(lexer)
+        );
 
     case ';':
       advance(lexer);
@@ -362,22 +402,57 @@ bool scan_import_list_delimiter(TSLexer *lexer) {
   }
 }
 
-bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer,
-                                                  const bool *valid_symbols) {
+bool scan_class(void *payload, TSLexer *lexer) {
+  lexer->result_symbol = CLASS;
+  lexer->mark_end(lexer);
+  struct ScannerState *state = payload;
+
+  // skip white space
+  if (!scan_whitespace_and_comments(lexer))
+    return false;
+
+  if (
+      lexer->lookahead != 'c'
+      || !scan_for_word(lexer, "lass", 4)
+  ) return false;
+
+  lexer->mark_end(lexer);
+
+  bool class_sig_ended = false;
+  for (;;) {
+    if (lexer->eof(lexer) || lexer->lookahead == ';' || lexer->lookahead == '{') {
+      class_sig_ended = true;
+      break;
+    }
+    if (lexer->lookahead == '\n' || lexer->lookahead == '\r') break;
+    skip(lexer);
+  }
+
+  state->is_class_decl = true;
+  state->class_sig_ended = class_sig_ended;
+
+  return true;
+}
+
+bool tree_sitter_kotlin_external_scanner_scan(
+    void *payload,
+    TSLexer *lexer,
+    const bool *valid_symbols
+) {
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
-    bool ret = scan_automatic_semicolon(lexer);
+    bool ret = scan_automatic_semicolon(payload, lexer);
     if (!ret && valid_symbols[SAFE_NAV] && lexer->lookahead == '?')
       return scan_safe_nav(lexer);
 
     return ret;
   }
 
-  if (valid_symbols[SAFE_NAV]) {
-    return scan_safe_nav(lexer);
-  }
+  if (valid_symbols[SAFE_NAV]) return scan_safe_nav(lexer);
 
   if (valid_symbols[IMPORT_LIST_DELIMITER])
     return scan_import_list_delimiter(lexer);
+
+  if (valid_symbols[CLASS]) return scan_class(payload, lexer);
 
   return false;
 }

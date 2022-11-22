@@ -121,6 +121,7 @@ module.exports = grammar({
     $._automatic_semicolon,
     $._import_list_delimiter,
     $.safe_nav,
+    $._class,
   ],
 
   extras: $ => [
@@ -215,7 +216,7 @@ module.exports = grammar({
     class_declaration: $ => prec.right(
 			seq(
 				optional($.modifiers),
-				"class",
+				prec(1, $._class),
 				field("identifier", alias($.simple_identifier, $.type_identifier)),
         optional($.type_parameters),
         optional($.primary_constructor),
@@ -242,7 +243,7 @@ module.exports = grammar({
 			seq(
 				optional($.modifiers),
 				"enum",
-				"class",
+				$._class,
 				field("identifier", alias($.simple_identifier, $.type_identifier)),
 				optional($.type_parameters),
 				optional($.primary_constructor),
@@ -1032,12 +1033,13 @@ module.exports = grammar({
 
     _type_modifier: $ => choice($.annotation, "suspend"),
 
-    class_modifier: $ => choice(
+    class_modifier: $ => token(prec(1, choice(
       "sealed",
       "annotation",
       "data",
-      "inner"
-    ),
+      "inner",
+      "value"
+    ))),
 
     member_modifier: $ => choice(
       "override",
@@ -1090,10 +1092,10 @@ module.exports = grammar({
 
     reification_modifier: $ => "reified",
 
-    platform_modifier: $ => choice(
+    platform_modifier: $ => token(prec(1, choice(
       "expect",
       "actual"
-    ),
+    ))),
 
     // ==========
     // Annotations

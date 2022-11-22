@@ -347,8 +347,12 @@
             ]
           },
           {
-            "type": "STRING",
-            "value": "class"
+            "type": "PREC",
+            "value": 1,
+            "content": {
+              "type": "SYMBOL",
+              "name": "_class"
+            }
           },
           {
             "type": "FIELD",
@@ -598,8 +602,8 @@
             "value": "enum"
           },
           {
-            "type": "STRING",
-            "value": "class"
+            "type": "SYMBOL",
+            "name": "_class"
           },
           {
             "type": "FIELD",
@@ -5669,25 +5673,36 @@
       ]
     },
     "class_modifier": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "sealed"
-        },
-        {
-          "type": "STRING",
-          "value": "annotation"
-        },
-        {
-          "type": "STRING",
-          "value": "data"
-        },
-        {
-          "type": "STRING",
-          "value": "inner"
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "sealed"
+            },
+            {
+              "type": "STRING",
+              "value": "annotation"
+            },
+            {
+              "type": "STRING",
+              "value": "data"
+            },
+            {
+              "type": "STRING",
+              "value": "inner"
+            },
+            {
+              "type": "STRING",
+              "value": "value"
+            }
+          ]
         }
-      ]
+      }
     },
     "member_modifier": {
       "type": "CHOICE",
@@ -5836,17 +5851,24 @@
       "value": "reified"
     },
     "platform_modifier": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "expect"
-        },
-        {
-          "type": "STRING",
-          "value": "actual"
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "expect"
+            },
+            {
+              "type": "STRING",
+              "value": "actual"
+            }
+          ]
         }
-      ]
+      }
     },
     "annotation": {
       "type": "CHOICE",
@@ -6871,6 +6893,10 @@
     {
       "type": "SYMBOL",
       "name": "safe_nav"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_class"
     }
   ],
   "inline": [],
