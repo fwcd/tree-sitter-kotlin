@@ -1,6 +1,6 @@
-==================
+================================================================================
 This Assignment
-==================
+================================================================================
 
 class Foo(){
   var foo = null
@@ -9,7 +9,8 @@ class Foo(){
   }
 }
 
----
+--------------------------------------------------------------------------------
+
 (source_file
   (class_declaration
     (type_identifier)
@@ -17,12 +18,15 @@ class Foo(){
     (class_body
       (property_declaration
         (variable_declaration
-          (simple_identifier)))
+          (simple_identifier))
+        (null_literal))
       (secondary_constructor
-        (parameter
-          (simple_identifier)
-          (user_type
-            (type_identifier)))
+        (function_value_parameters
+          (function_value_parameter
+            (parameter
+              (simple_identifier)
+              (user_type
+                (type_identifier)))))
         (statements
           (assignment
             (directly_assignable_expression
@@ -31,20 +35,21 @@ class Foo(){
                 (simple_identifier)))
             (simple_identifier)))))))
 
-==================
+================================================================================
 Index Assignment
-==================
+================================================================================
 
 fun main(){
   var listOfPets:Array<String>
   listOfPets[0] = "foo"
 }
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (simple_identifier)
+    (function_value_parameters)
     (function_body
       (statements
         (property_declaration

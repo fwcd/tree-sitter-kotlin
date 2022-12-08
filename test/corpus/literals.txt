@@ -1,29 +1,30 @@
-==================
+================================================================================
 Simple identifiers
-==================
+================================================================================
 
 helloWorld
 
----
+--------------------------------------------------------------------------------
 
-(source_file (simple_identifier))
+(source_file
+  (simple_identifier))
 
-==================
+================================================================================
 Boolean literals
-==================
+================================================================================
 
 true
 false
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (boolean_literal)
   (boolean_literal))
 
-==================
+================================================================================
 String literals
-==================
+================================================================================
 
 "Hello World!"
 """
@@ -31,15 +32,15 @@ This is a "multiline"
 string.
 """
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (line_string_literal)
   (multi_line_string_literal))
 
-==================
+================================================================================
 String interpolation
-==================
+================================================================================
 
 "Sample $string.interpolation literal"
 "Sample ${"string.interpolation"} literal"
@@ -48,25 +49,29 @@ Multiline
 ${"""string interpolation"""} $literal
 """
 
----
+--------------------------------------------------------------------------------
 
 (source_file
-  (line_string_literal (interpolated_identifier))
-  (line_string_literal (interpolated_expression (line_string_literal)))
+  (line_string_literal
+    (interpolated_identifier))
+  (line_string_literal
+    (interpolated_expression
+      (line_string_literal)))
   (multi_line_string_literal
-    (interpolated_expression (multi_line_string_literal))
+    (interpolated_expression
+      (multi_line_string_literal))
     (interpolated_identifier)))
 
-==================
+================================================================================
 Integer literals
-==================
+================================================================================
 
 0
 8
 23
 9847
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (integer_literal)
@@ -74,9 +79,9 @@ Integer literals
   (integer_literal)
   (integer_literal))
 
-==================
+================================================================================
 Real literals
-==================
+================================================================================
 
 0.0
 -23.434
@@ -84,22 +89,24 @@ Real literals
 4.3f
 +53.9e-3F
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (real_literal)
-  (prefix_expression (real_literal))
+  (prefix_expression
+    (real_literal))
   (real_literal)
   (real_literal)
-  (prefix_expression (real_literal)))
+  (prefix_expression
+    (real_literal)))
 
-===================
+================================================================================
 Unicode literals
-===================
+================================================================================
 
 assertEquals("\u214E\uA7B5\u2CEF", "\u2132\uA7B4\u2CEF".lowercase())
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (call_expression
@@ -122,3 +129,15 @@ assertEquals("\u214E\uA7B5\u2CEF", "\u2132\uA7B4\u2CEF".lowercase())
                 (simple_identifier)))
             (call_suffix
               (value_arguments))))))))
+
+================================================================================
+Special raw string
+================================================================================
+
+""""foo""""
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (multi_line_string_literal)
+  (ERROR))

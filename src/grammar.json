@@ -233,27 +233,6 @@
         }
       ]
     },
-    "top_level_object": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "_declaration"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "_semi"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        }
-      ]
-    },
     "type_alias": {
       "type": "SEQ",
       "members": [
@@ -368,20 +347,12 @@
             ]
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "impl"
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
-          },
-          {
-            "type": "STRING",
-            "value": "class"
+            "type": "PREC",
+            "value": 1,
+            "content": {
+              "type": "SYMBOL",
+              "name": "_class"
+            }
           },
           {
             "type": "FIELD",
@@ -631,8 +602,8 @@
             "value": "enum"
           },
           {
-            "type": "STRING",
-            "value": "class"
+            "type": "SYMBOL",
+            "name": "_class"
           },
           {
             "type": "FIELD",
@@ -1254,18 +1225,6 @@
           ]
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "impl"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
           "type": "STRING",
           "value": "companion"
         },
@@ -1454,18 +1413,6 @@
               {
                 "type": "SYMBOL",
                 "name": "modifiers"
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
-          },
-          {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "impl"
               },
               {
                 "type": "BLANK"
@@ -5726,25 +5673,36 @@
       ]
     },
     "class_modifier": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "sealed"
-        },
-        {
-          "type": "STRING",
-          "value": "annotation"
-        },
-        {
-          "type": "STRING",
-          "value": "data"
-        },
-        {
-          "type": "STRING",
-          "value": "inner"
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "sealed"
+            },
+            {
+              "type": "STRING",
+              "value": "annotation"
+            },
+            {
+              "type": "STRING",
+              "value": "data"
+            },
+            {
+              "type": "STRING",
+              "value": "inner"
+            },
+            {
+              "type": "STRING",
+              "value": "value"
+            }
+          ]
         }
-      ]
+      }
     },
     "member_modifier": {
       "type": "CHOICE",
@@ -5864,6 +5822,10 @@
         {
           "type": "STRING",
           "value": "open"
+        },
+        {
+          "type": "STRING",
+          "value": "impl"
         }
       ]
     },
@@ -5889,17 +5851,24 @@
       "value": "reified"
     },
     "platform_modifier": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "expect"
-        },
-        {
-          "type": "STRING",
-          "value": "actual"
+      "type": "TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "expect"
+            },
+            {
+              "type": "STRING",
+              "value": "actual"
+            }
+          ]
         }
-      ]
+      }
     },
     "annotation": {
       "type": "CHOICE",
@@ -6775,8 +6744,15 @@
       "value": "\\\\[tbrn'\"\\\\$]"
     },
     "_line_str_text": {
-      "type": "PATTERN",
-      "value": "[^\\\\\"$]+"
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "PREC",
+        "value": 1,
+        "content": {
+          "type": "PATTERN",
+          "value": "[^\\\\\"$]+"
+        }
+      }
     },
     "_multi_line_str_text": {
       "type": "PATTERN",
@@ -6917,6 +6893,10 @@
     {
       "type": "SYMBOL",
       "name": "safe_nav"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_class"
     }
   ],
   "inline": [],

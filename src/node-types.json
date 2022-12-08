@@ -1847,11 +1847,6 @@
     }
   },
   {
-    "type": "class_modifier",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "class_parameter",
     "named": true,
     "fields": {},
@@ -8570,11 +8565,6 @@
     }
   },
   {
-    "type": "platform_modifier",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "postfix_expression",
     "named": true,
     "fields": {
@@ -12029,10 +12019,6 @@
     "named": false
   },
   {
-    "type": "annotation",
-    "named": false
-  },
-  {
     "type": "as",
     "named": false
   },
@@ -12063,6 +12049,10 @@
   {
     "type": "class",
     "named": false
+  },
+  {
+    "type": "class_modifier",
+    "named": true
   },
   {
     "type": "comment",
@@ -12249,6 +12239,10 @@
     "named": false
   },
   {
+    "type": "platform_modifier",
+    "named": true
+  },
+  {
     "type": "point_star",
     "named": true
   },
@@ -12290,10 +12284,6 @@
   },
   {
     "type": "return@",
-    "named": false
-  },
-  {
-    "type": "sealed",
     "named": false
   },
   {

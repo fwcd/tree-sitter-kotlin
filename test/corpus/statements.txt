@@ -1,33 +1,37 @@
-==================
+================================================================================
 For statements
-==================
+================================================================================
 
 for (value in values) {}
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (for_statement
-    (variable_declaration (simple_identifier))
+    (variable_declaration
+      (simple_identifier))
     (simple_identifier)
     (control_structure_body)))
 
-==================
+================================================================================
 Statements separated by semicolon
-==================
+================================================================================
 
 override fun isDisposed(): Boolean { expectUnreached();  return false }
 
----
+--------------------------------------------------------------------------------
 
 (source_file
   (function_declaration
     (modifiers
       (member_modifier))
     (simple_identifier)
+    (function_value_parameters)
     (user_type
       (type_identifier))
     (function_body
+      (ERROR
+        (platform_modifier))
       (statements
         (call_expression
           (simple_identifier)
@@ -35,4 +39,3 @@ override fun isDisposed(): Boolean { expectUnreached();  return false }
             (value_arguments)))
         (jump_expression
           (boolean_literal))))))
-
