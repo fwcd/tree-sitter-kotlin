@@ -414,6 +414,7 @@ bool scan_class(void *payload, TSLexer *lexer) {
   if (
       lexer->lookahead != 'c'
       || !scan_for_word(lexer, "lass", 4)
+      || !iswspace(lexer->lookahead)
   ) return false;
 
   lexer->mark_end(lexer);
