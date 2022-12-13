@@ -215,7 +215,7 @@ module.exports = grammar({
 
     class_declaration: $ => prec.right(
 			seq(
-				optional($.modifiers),
+				field("modifiers", optional($.modifiers)),
 				prec(1, $._class),
 				field("identifier", alias($.simple_identifier, $.type_identifier)),
         optional($.type_parameters),
@@ -228,7 +228,7 @@ module.exports = grammar({
 
 		interface_declaration: $ => prec.right(
 			seq(
-				optional($.modifiers),
+				field("modifiers", optional($.modifiers)),
 				seq(optional("fun"), "interface"),
 				field("identifier", alias($.simple_identifier, $.type_identifier)),
 				optional($.type_parameters),
@@ -241,7 +241,7 @@ module.exports = grammar({
 
 		enum_class_declaration: $ => prec.right(
 			seq(
-				optional($.modifiers),
+				field("modifiers", optional($.modifiers)),
 				"enum",
 				$._class,
 				field("identifier", alias($.simple_identifier, $.type_identifier)),
@@ -254,7 +254,10 @@ module.exports = grammar({
 		),
 
     primary_constructor: $ => seq(
-      optional(seq(optional($.modifiers), "constructor")),
+      optional(seq(
+				field("modifiers", optional($.modifiers)),
+        "constructor"
+      )),
       $._class_parameters
     ),
 
@@ -268,7 +271,7 @@ module.exports = grammar({
     ),
 
     class_parameter: $ => seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       optional(choice("val", "var")),
       $.simple_identifier,
       ":",
@@ -335,7 +338,7 @@ module.exports = grammar({
     anonymous_initializer: $ => seq("init", $._block),
 
     companion_object: $ => seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       "companion",
       "object",
       optional(alias($.simple_identifier, $.type_identifier)),
@@ -365,7 +368,7 @@ module.exports = grammar({
     ),
 
     function_declaration: $ => prec.right(seq( // TODO
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       "fun",
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),
@@ -393,7 +396,7 @@ module.exports = grammar({
     )),
 
     property_declaration: $ => prec.right(seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       choice("val", "var"),
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),
@@ -417,7 +420,7 @@ module.exports = grammar({
     property_delegate: $ => seq("by", $._expression),
 
     getter: $ => prec.right(seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       "get",
       optional(seq(
         "(", ")",
@@ -427,7 +430,7 @@ module.exports = grammar({
     )),
 
     setter: $ => prec.right(seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       "set",
       optional(seq(
         "(",
@@ -453,7 +456,7 @@ module.exports = grammar({
 		),
 
     object_declaration: $ => prec.right(seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       "object",
       alias($.simple_identifier, $.type_identifier),
       optional(seq(":", $._delegation_specifiers)),
@@ -461,7 +464,7 @@ module.exports = grammar({
     )),
 
     secondary_constructor: $ => seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       "constructor",
       field("parameters", $.function_value_parameters),
       field("delegation_call", optional(seq(":", $.constructor_delegation_call))),
@@ -484,7 +487,7 @@ module.exports = grammar({
     _enum_entries: $ => seq(sep1($.enum_entry, ","), optional(",")),
 
     enum_entry: $ => seq(
-      optional($.modifiers),
+			field("modifiers", optional($.modifiers)),
       $.simple_identifier,
       optional($.value_arguments),
       optional($.class_body)
