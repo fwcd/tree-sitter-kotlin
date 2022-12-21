@@ -306,7 +306,7 @@ module.exports = grammar({
       $.secondary_constructor
     ),
 
-    anonymous_initializer: $ => seq("init", $._block),
+    anonymous_initializer: $ => seq("init", $.block),
 
     companion_object: $ => seq(
       optional($.modifiers),
@@ -351,7 +351,7 @@ module.exports = grammar({
       optional($.function_body)
     )),
 
-    function_body: $ => choice($._block, seq("=", $._expression)),
+    function_body: $ => choice($.block, seq("=", $._expression)),
 
     variable_declaration: $ => prec.left(PREC.VAR_DECL, seq(
       // repeat($.annotation), TODO
@@ -425,7 +425,7 @@ module.exports = grammar({
       "constructor",
       $._function_value_parameters,
       optional(seq(":", $.constructor_delegation_call)),
-      optional($._block)
+      optional($.block)
     ),
 
     constructor_delegation_call: $ => seq(choice("this", "super"), $.value_arguments),
@@ -545,9 +545,9 @@ module.exports = grammar({
       "@"
     )),
 
-    control_structure_body: $ => choice($._block, $._statement),
+    control_structure_body: $ => choice($.block, $._statement),
 
-    _block: $ => prec(PREC.BLOCK, seq("{", optional($.statements), "}")),
+    block: $ => prec(PREC.BLOCK, seq("{", optional($.statements), "}")),
 
     _loop_statement: $ => choice(
       $.for_statement,
@@ -883,7 +883,7 @@ module.exports = grammar({
 
     try_expression: $ => seq(
       "try",
-      $._block,
+      $.block,
       choice(
         seq(repeat1($.catch_block), optional($.finally_block)),
         $.finally_block
@@ -898,10 +898,10 @@ module.exports = grammar({
       ":",
       $._type,
       ")",
-      $._block,
+      $.block,
     ),
 
-    finally_block: $ => seq("finally", $._block),
+    finally_block: $ => seq("finally", $.block),
 
     jump_expression: $ => choice(
       prec.right(PREC.RETURN_OR_THROW, seq("throw", $._expression)),

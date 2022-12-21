@@ -43,10 +43,11 @@ fun foo()  {
 (source_file
   (function_declaration (simple_identifier)
      (function_body
-        (statements
-           (property_declaration
-              (variable_declaration (simple_identifier))
-              (conjunction_expression (simple_identifier) (simple_identifier)))))))
+        (block
+          (statements
+             (property_declaration
+                (variable_declaration (simple_identifier))
+                (conjunction_expression (simple_identifier) (simple_identifier))))))))
 
 
 ==================
@@ -60,7 +61,9 @@ fun foo():String
 (source_file
    (function_declaration (simple_identifier)
       (user_type (type_identifier))
-      (function_body (statements (jump_expression (line_string_literal))))))
+      (function_body
+        (block
+          (statements (jump_expression (line_string_literal)))))))
 
 ==================
 Colon after newline
@@ -93,21 +96,22 @@ fun foo() {
 (source_file
   (function_declaration (simple_identifier)
     (function_body
-      (statements
-        (property_declaration
-          (variable_declaration (simple_identifier))
-            (elvis_expression
+      (block
+        (statements
+          (property_declaration
+            (variable_declaration (simple_identifier))
               (elvis_expression
-                (call_expression
-                   (navigation_expression (simple_identifier)
-                     (navigation_suffix (simple_identifier)))
-                   (call_suffix
-                     (value_arguments (value_argument (boolean_literal)))))
-                (call_expression
-                   (navigation_expression (simple_identifier)
-                      (navigation_suffix (simple_identifier)))
-                    (call_suffix (value_arguments))))
-               (jump_expression)))))))
+                (elvis_expression
+                  (call_expression
+                     (navigation_expression (simple_identifier)
+                       (navigation_suffix (simple_identifier)))
+                     (call_suffix
+                       (value_arguments (value_argument (boolean_literal)))))
+                  (call_expression
+                     (navigation_expression (simple_identifier)
+                        (navigation_suffix (simple_identifier)))
+                      (call_suffix (value_arguments))))
+                 (jump_expression))))))))
 
 ==================
 get after newline

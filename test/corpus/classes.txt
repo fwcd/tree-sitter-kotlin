@@ -26,8 +26,8 @@ class HelloWorld {
 (source_file
   (class_declaration (type_identifier)
     (class_body
-      (function_declaration (simple_identifier) (function_body))
-      (function_declaration (simple_identifier) (function_body)))))
+      (function_declaration (simple_identifier) (function_body (block)))
+      (function_declaration (simple_identifier) (function_body (block))))))
 
 ==================
 Generic class

@@ -10,7 +10,8 @@ for (value in values) {}
   (for_statement
     (variable_declaration (simple_identifier))
     (simple_identifier)
-    (control_structure_body)))
+    (control_structure_body
+      (block))))
 
 ==================
 Statements separated by semicolon
@@ -28,11 +29,12 @@ override fun isDisposed(): Boolean { expectUnreached();  return false }
     (user_type
       (type_identifier))
     (function_body
-      (statements
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments)))
-        (jump_expression
-          (boolean_literal))))))
+      (block
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments)))
+          (jump_expression
+            (boolean_literal)))))))
 

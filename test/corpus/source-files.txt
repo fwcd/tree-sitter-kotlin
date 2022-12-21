@@ -87,7 +87,7 @@ fun main() {
         (simple_identifier))))
   (function_declaration
     (simple_identifier)
-    (function_body)))
+    (function_body (block))))
 
 ===================
 Multiple Imports On A Single Line

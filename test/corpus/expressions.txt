@@ -275,36 +275,7 @@ when (dir) {
   (function_declaration
     (simple_identifier)
     (function_body
-      (statements
-        (property_declaration
-          (variable_declaration
-            (simple_identifier))
-          (navigation_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier))))
-        (assignment
-          (directly_assignable_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier)))
-          (navigation_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier))))
-        (assignment
-          (directly_assignable_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier)))
-          (simple_identifier)))))
-  (when_expression
-    (when_subject
-      (simple_identifier))
-    (when_entry
-      (when_condition
-        (integer_literal))
-      (control_structure_body
+      (block
         (statements
           (property_declaration
             (variable_declaration
@@ -327,4 +298,35 @@ when (dir) {
               (simple_identifier)
               (navigation_suffix
                 (simple_identifier)))
-            (simple_identifier)))))))
+            (simple_identifier))))))
+  (when_expression
+    (when_subject
+      (simple_identifier))
+    (when_entry
+      (when_condition
+        (integer_literal))
+      (control_structure_body
+        (block
+          (statements
+            (property_declaration
+              (variable_declaration
+                (simple_identifier))
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier))))
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier))))
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (simple_identifier))))))))
