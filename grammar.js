@@ -84,13 +84,13 @@ module.exports = grammar({
     [$._postfix_unary_expression, $._expression],
 
     // ambiguity between generics and comparison operations (foo < b > c)
-    [$.call_expression, $.prefix_expression, $.comparison_expression],
-    [$.call_expression, $.range_expression, $.comparison_expression],
-    [$.call_expression, $.elvis_expression, $.comparison_expression],
-    [$.call_expression, $.check_expression, $.comparison_expression],
-    [$.call_expression, $.additive_expression, $.comparison_expression],
-    [$.call_expression, $.infix_expression, $.comparison_expression],
-    [$.call_expression, $.multiplicative_expression, $.comparison_expression],
+    [$.call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
+    [$.call_expression, $.navigation_expression, $.range_expression, $.comparison_expression],
+    [$.call_expression, $.navigation_expression, $.elvis_expression, $.comparison_expression],
+    [$.call_expression, $.navigation_expression, $.check_expression, $.comparison_expression],
+    [$.call_expression, $.navigation_expression, $.additive_expression, $.comparison_expression],
+    [$.call_expression, $.navigation_expression, $.infix_expression, $.comparison_expression],
+    [$.call_expression, $.navigation_expression, $.multiplicative_expression, $.comparison_expression],
     [$.type_arguments, $._comparison_operator],
 
     // ambiguity between prefix expressions and annotations before functions
@@ -113,6 +113,7 @@ module.exports = grammar({
 
     // ambiguity between parameter modifiers in anonymous functions
     [$.parameter_modifiers, $._type_modifier],
+
   ],
 
   externals: $ => [
@@ -673,6 +674,8 @@ module.exports = grammar({
     indexing_suffix: $ => seq("[", sep1($._expression, ","), "]"),
 
     navigation_suffix: $ => seq(
+      // this introduces ambiguities with 'less than' for comparisons
+      optional($.type_arguments),
       $._member_access_operator,
       choice(
         $.simple_identifier,

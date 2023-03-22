@@ -3317,6 +3317,18 @@
       "type": "SEQ",
       "members": [
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "type_arguments"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "SYMBOL",
           "name": "_member_access_operator"
         },
@@ -6133,36 +6145,43 @@
     ],
     [
       "call_expression",
+      "navigation_expression",
       "prefix_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "navigation_expression",
       "range_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "navigation_expression",
       "elvis_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "navigation_expression",
       "check_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "navigation_expression",
       "additive_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "navigation_expression",
       "infix_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "navigation_expression",
       "multiplicative_expression",
       "comparison_expression"
     ],
