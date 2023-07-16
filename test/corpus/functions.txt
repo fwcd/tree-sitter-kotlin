@@ -192,6 +192,7 @@ val anon = fun()
   (anonymous_function
   (function_value_parameters))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (anonymous_function (function_value_parameters))))
@@ -213,6 +214,7 @@ val anon = fun(x: Int)
       (user_type
         (type_identifier)))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (anonymous_function
@@ -237,6 +239,7 @@ val anon = fun(): Int
     (user_type
       (type_identifier)))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (anonymous_function
@@ -271,6 +274,7 @@ val anon = fun() { assert(true) }
               (value_argument
                 (boolean_literal))))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (anonymous_function
@@ -278,6 +282,7 @@ val anon = fun() { assert(true) }
       (function_body
         (boolean_literal))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (anonymous_function

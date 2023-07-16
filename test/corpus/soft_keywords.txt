@@ -10,14 +10,23 @@ fun foo() {
 
 ---
 (source_file
-  (function_declaration (simple_identifier) (function_value_parameters)
-    (function_body
-      (statements
-         (property_declaration
-	   (variable_declaration (simple_identifier))
-	   (call_expression (simple_identifier)
-	     (call_suffix
-	       (value_arguments (value_argument (simple_identifier))))))
-	 (postfix_expression
-	    (indexing_expression (simple_identifier)
-  	      (indexing_suffix (integer_literal))))))))
+  (function_declaration
+  (simple_identifier)
+  (function_value_parameters)
+  (function_body
+    (statements
+    (property_declaration
+      (binding_pattern_kind)
+      (variable_declaration
+      (simple_identifier))
+      (call_expression
+      (simple_identifier)
+      (call_suffix
+        (value_arguments
+        (value_argument
+          (simple_identifier))))))
+    (postfix_expression
+      (indexing_expression
+      (simple_identifier)
+      (indexing_suffix
+        (integer_literal))))))))
