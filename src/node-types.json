@@ -641,6 +641,11 @@
     }
   },
   {
+    "type": "binding_pattern_kind",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "boolean_literal",
     "named": true,
     "fields": {}
@@ -1237,6 +1242,10 @@
         },
         {
           "type": "bin_literal",
+          "named": true
+        },
+        {
+          "type": "binding_pattern_kind",
           "named": true
         },
         {
@@ -6401,6 +6410,10 @@
         },
         {
           "type": "bin_literal",
+          "named": true
+        },
+        {
+          "type": "binding_pattern_kind",
           "named": true
         },
         {

@@ -663,6 +663,19 @@
         }
       ]
     },
+    "binding_pattern_kind": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "val"
+        },
+        {
+          "type": "STRING",
+          "value": "var"
+        }
+      ]
+    },
     "class_parameter": {
       "type": "SEQ",
       "members": [
@@ -682,17 +695,8 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "STRING",
-                  "value": "val"
-                },
-                {
-                  "type": "STRING",
-                  "value": "var"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "binding_pattern_kind"
             },
             {
               "type": "BLANK"
@@ -1448,17 +1452,8 @@
             ]
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "STRING",
-                "value": "val"
-              },
-              {
-                "type": "STRING",
-                "value": "var"
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "binding_pattern_kind"
           },
           {
             "type": "CHOICE",
