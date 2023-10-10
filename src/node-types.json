@@ -1257,7 +1257,7 @@
         ]
       },
       "kind": {
-        "multiple": false,
+        "multiple": true,
         "required": true,
         "types": [
           {
@@ -1266,6 +1266,10 @@
           },
           {
             "type": "enum",
+            "named": false
+          },
+          {
+            "type": "fun",
             "named": false
           },
           {
