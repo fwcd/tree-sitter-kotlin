@@ -4169,17 +4169,55 @@
       ]
     },
     "this_expression": {
-      "type": "STRING",
-      "value": "this"
-    },
-    "super_expression": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
           "type": "STRING",
-          "value": "super"
+          "value": "this"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_this_at"
         }
       ]
+    },
+    "super_expression": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "super"
+          },
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "super"
+              },
+              {
+                "type": "STRING",
+                "value": "<"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_type"
+              },
+              {
+                "type": "STRING",
+                "value": ">"
+              }
+            ]
+          },
+          {
+            "type": "SYMBOL",
+            "name": "_super_at"
+          }
+        ]
+      }
     },
     "if_expression": {
       "type": "PREC_RIGHT",
@@ -5449,8 +5487,13 @@
           "value": "return@"
         },
         {
-          "type": "SYMBOL",
-          "name": "_lexical_identifier"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_lexical_identifier"
+          },
+          "named": true,
+          "value": "label"
         }
       ]
     },
@@ -5462,8 +5505,13 @@
           "value": "continue@"
         },
         {
-          "type": "SYMBOL",
-          "name": "_lexical_identifier"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_lexical_identifier"
+          },
+          "named": true,
+          "value": "label"
         }
       ]
     },
@@ -5475,8 +5523,13 @@
           "value": "break@"
         },
         {
-          "type": "SYMBOL",
-          "name": "_lexical_identifier"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_lexical_identifier"
+          },
+          "named": true,
+          "value": "label"
         }
       ]
     },
@@ -5488,21 +5541,73 @@
           "value": "this@"
         },
         {
-          "type": "SYMBOL",
-          "name": "_lexical_identifier"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_lexical_identifier"
+          },
+          "named": true,
+          "value": "type_identifier"
         }
       ]
     },
     "_super_at": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
-          "type": "STRING",
-          "value": "super@"
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "super@"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_lexical_identifier"
+              },
+              "named": true,
+              "value": "type_identifier"
+            }
+          ]
         },
         {
-          "type": "SYMBOL",
-          "name": "_lexical_identifier"
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "super"
+            },
+            {
+              "type": "STRING",
+              "value": "<"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_type"
+            },
+            {
+              "type": "STRING",
+              "value": ">"
+            },
+            {
+              "type": "IMMEDIATE_TOKEN",
+              "content": {
+                "type": "STRING",
+                "value": "@"
+              }
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_lexical_identifier"
+              },
+              "named": true,
+              "value": "type_identifier"
+            }
+          ]
         }
       ]
     },
