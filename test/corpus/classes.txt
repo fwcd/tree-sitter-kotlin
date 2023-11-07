@@ -146,11 +146,11 @@ data class Vector2D(
       (class_modifier))
     name: (type_identifier)
     primary_constructor: (primary_constructor
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier)))
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))))
@@ -179,7 +179,7 @@ class D : SomeInterface
   (class_declaration
     name: (type_identifier)
     primary_constructor: (primary_constructor
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))
@@ -247,18 +247,18 @@ class Test(x: Int, y: Int) {
   (class_declaration
     name: (type_identifier)
     primary_constructor: (primary_constructor
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier)))
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))
     body: (class_body
       (secondary_constructor
-        (function_value_parameters)
-        (constructor_delegation_call
+        parameters: (function_value_parameters)
+        delegation: (constructor_delegation_call
           (value_arguments
             (value_argument
               (integer_literal))
@@ -298,7 +298,7 @@ enum class Color(val rgb: Int) {
   (class_declaration
     name: (type_identifier)
     primary_constructor: (primary_constructor
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))
@@ -351,11 +351,11 @@ data class JwtConfiguration(
       (class_modifier))
     name: (type_identifier)
     primary_constructor: (primary_constructor
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier)))
-      (class_parameter
+      parameters: (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))))
@@ -378,7 +378,7 @@ value class Password(private val s: String)
       (class_modifier))
     name: (type_identifier)
     primary_constructor: (primary_constructor
-      (class_parameter
+      parameters: (class_parameter
         (modifiers
           (visibility_modifier))
         (simple_identifier)

@@ -230,8 +230,8 @@ module.exports = grammar({
     )),
 
     primary_constructor: $ => seq(
-      optional(seq(optional($.modifiers), "constructor")),
-      $._class_parameters
+      optional(seq(optional(field('modifiers', $.modifiers)), "constructor")),
+      field('parameters', $._class_parameters)
     ),
 
     class_body: $ => seq("{", optional($._class_member_declarations), "}"),
@@ -423,11 +423,11 @@ module.exports = grammar({
     )),
 
     secondary_constructor: $ => seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "constructor",
-      $.function_value_parameters,
-      optional(seq(":", $.constructor_delegation_call)),
-      optional($._block)
+      field('parameters', $.function_value_parameters),
+      optional(seq(":", field('delegation', $.constructor_delegation_call))),
+      optional(field('body', $._block))
     ),
 
     constructor_delegation_call: $ => seq(choice("this", "super"), $.value_arguments),

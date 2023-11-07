@@ -27,7 +27,7 @@ class Empty(@field:Test val x: Boolean)
   (class_declaration
     name: (type_identifier)
     primary_constructor: (primary_constructor
-      (class_parameter
+      parameters: (class_parameter
         (modifiers
           (annotation
             (use_site_target)

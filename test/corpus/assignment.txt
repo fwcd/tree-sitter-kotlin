@@ -20,12 +20,12 @@ class Foo(){
         variable: (variable_declaration
           (simple_identifier)))
       (secondary_constructor
-      (function_value_parameters
-        (parameter
-          (simple_identifier)
-          (user_type
-            (type_identifier))))
-        (statements
+        parameters: (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        body: (statements
           (assignment
             (directly_assignable_expression
               (this_expression)

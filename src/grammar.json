@@ -635,8 +635,12 @@
                   "type": "CHOICE",
                   "members": [
                     {
-                      "type": "SYMBOL",
-                      "name": "modifiers"
+                      "type": "FIELD",
+                      "name": "modifiers",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "modifiers"
+                      }
                     },
                     {
                       "type": "BLANK"
@@ -655,8 +659,12 @@
           ]
         },
         {
-          "type": "SYMBOL",
-          "name": "_class_parameters"
+          "type": "FIELD",
+          "name": "parameters",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_class_parameters"
+          }
         }
       ]
     },
@@ -2102,8 +2110,12 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "modifiers"
+              "type": "FIELD",
+              "name": "modifiers",
+              "content": {
+                "type": "SYMBOL",
+                "name": "modifiers"
+              }
             },
             {
               "type": "BLANK"
@@ -2115,8 +2127,12 @@
           "value": "constructor"
         },
         {
-          "type": "SYMBOL",
-          "name": "function_value_parameters"
+          "type": "FIELD",
+          "name": "parameters",
+          "content": {
+            "type": "SYMBOL",
+            "name": "function_value_parameters"
+          }
         },
         {
           "type": "CHOICE",
@@ -2129,8 +2145,12 @@
                   "value": ":"
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "constructor_delegation_call"
+                  "type": "FIELD",
+                  "name": "delegation",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "constructor_delegation_call"
+                  }
                 }
               ]
             },
@@ -2143,8 +2163,12 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "_block"
+              "type": "FIELD",
+              "name": "body",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_block"
+              }
             },
             {
               "type": "BLANK"
