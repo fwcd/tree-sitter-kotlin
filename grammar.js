@@ -308,7 +308,7 @@ module.exports = grammar({
       $.secondary_constructor
     ),
 
-    anonymous_initializer: $ => seq("init", $._block),
+    anonymous_initializer: $ => seq("init", field('body', $._block)),
 
     companion_object: $ => seq(
       optional($.modifiers),

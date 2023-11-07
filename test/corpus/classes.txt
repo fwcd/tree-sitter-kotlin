@@ -384,3 +384,33 @@ value class Password(private val s: String)
         (simple_identifier)
         (user_type
           (type_identifier))))))
+
+================================================================================
+Anonymous initializer
+================================================================================
+
+class MyClass(name: String) {
+  init {
+    println(name)
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    name: (type_identifier)
+    primary_constructor: (primary_constructor
+      parameters: (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    body: (class_body
+      (anonymous_initializer
+        body: (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier))))))))))
