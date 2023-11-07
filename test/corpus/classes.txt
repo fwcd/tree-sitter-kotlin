@@ -123,8 +123,8 @@ object Singleton {
 
 (source_file
   (object_declaration
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (function_declaration
         name: (simple_identifier)
         parameters: (function_value_parameters)))))
