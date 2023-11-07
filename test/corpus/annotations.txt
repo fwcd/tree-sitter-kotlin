@@ -85,16 +85,17 @@ class X {
     (type_identifier)
     (class_body
       (function_declaration
-        (modifiers
-          (annotation (user_type (type_identifier)))
-          (annotation (user_type (type_identifier))))
-        (simple_identifier)
-        (function_value_parameters)
-        (user_type (type_identifier))
-      )
-    )
-  )
-)
+        modifiers: (modifiers
+          (annotation
+            (user_type
+              (type_identifier)))
+          (annotation
+            (user_type
+              (type_identifier))))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        return_type: (user_type
+          (type_identifier))))))
 
 =====================
 Annotated functions
@@ -107,13 +108,13 @@ fun foo() = bar {}
 
 (source_file
   (function_declaration
-    (modifiers
+    modifiers: (modifiers
       (annotation
         (user_type
           (type_identifier))))
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (call_expression
         (simple_identifier)
         (call_suffix

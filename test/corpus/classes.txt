@@ -31,13 +31,13 @@ class HelloWorld {
     (type_identifier)
     (class_body
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-       (function_body))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body))
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-       (function_body)))))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body)))))
 
 ================================================================================
 Generic class
@@ -72,16 +72,16 @@ class Strings {
     (type_identifier)
     (class_body
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-       (function_body
-        (string_literal)))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body
+          (string_literal)))
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-       (function_body
-        (additive_expression
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body
           (additive_expression
+            (additive_expression
               (string_literal)
               (string_literal))
             (string_literal)))))))
@@ -104,12 +104,12 @@ internal open class Test {
     (type_identifier)
     (class_body
       (function_declaration
-        (modifiers
-         (visibility_modifier)
-         (inheritance_modifier)
-         (function_modifier))
-        (simple_identifier)
-        (function_value_parameters)))))
+        modifiers: (modifiers
+          (visibility_modifier)
+          (inheritance_modifier)
+          (function_modifier))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)))))
 
 ================================================================================
 Objects
@@ -126,8 +126,8 @@ object Singleton {
     (type_identifier)
     (class_body
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)))))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)))))
 
 ================================================================================
 Primary constructors
@@ -318,11 +318,11 @@ enum class Color(val rgb: Int) {
           (value_argument
             (hex_literal))))
       (function_declaration
-        (modifiers
+        modifiers: (modifiers
           (member_modifier))
-        (simple_identifier)
-        (function_value_parameters)
-        (function_body
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body
           (call_expression
             (navigation_expression
               (simple_identifier)

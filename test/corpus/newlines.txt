@@ -29,13 +29,14 @@ Eq after newline
 fun foo()
     = 1
 
----
+--------------------------------------------------------------------------------
+
 (source_file
-   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body 
-    (integer_literal))))
+  (function_declaration
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
+      (integer_literal))))
 
 ================================================================================
 Binary operator after newline
@@ -50,15 +51,17 @@ fun foo()  {
 --------------------------------------------------------------------------------
 
 (source_file
-  (function_declaration (simple_identifier) (function_value_parameters)
-     (function_body
-        (statements
-           (property_declaration
-              (variable_declaration
-               (simple_identifier))
-              (conjunction_expression
-               (simple_identifier)
-               (simple_identifier)))))))
+  (function_declaration
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
+      (statements
+        (property_declaration
+          (variable_declaration
+            (simple_identifier))
+          (conjunction_expression
+            (simple_identifier)
+            (simple_identifier)))))))
 
 ================================================================================
 Open brace after newline
@@ -71,11 +74,11 @@ fun foo():String
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    return_type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (statements
         (jump_expression
           (string_literal))))))
@@ -113,9 +116,9 @@ fun foo() {
 
 (source_file
   (function_declaration
-   (simple_identifier)
-  (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (statements
         (property_declaration
           (variable_declaration

@@ -23,13 +23,13 @@ override fun isDisposed(): Boolean { expectUnreached();  return false }
 
 (source_file
   (function_declaration
-    (modifiers
+    modifiers: (modifiers
       (member_modifier))
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    return_type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (statements
         (call_expression
           (simple_identifier)

@@ -89,9 +89,9 @@ fun main() {
         (simple_identifier)
         (simple_identifier))))
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body)))
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body)))
 
 ================================================================================
 Multiple Imports On A Single Line

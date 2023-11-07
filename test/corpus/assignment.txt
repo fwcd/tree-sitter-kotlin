@@ -46,9 +46,9 @@ fun main(){
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (statements
         (property_declaration
           (variable_declaration

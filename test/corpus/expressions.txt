@@ -209,11 +209,11 @@ expect fun randomUUID(): String
 
 (source_file
   (function_declaration
-    (modifiers
+    modifiers: (modifiers
       (platform_modifier))
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    return_type: (user_type
       (type_identifier))))
 
 ================================================================================
@@ -346,9 +346,9 @@ when (dir) {
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (statements
         (property_declaration
           (variable_declaration
@@ -495,11 +495,11 @@ class Square() : Rectangle(), Polygon {
         (type_identifier)))
     (class_body
       (function_declaration
-        (modifiers
+        modifiers: (modifiers
           (member_modifier))
-        (simple_identifier)
-        (function_value_parameters)
-        (function_body
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body
           (statements
             (call_expression
               (navigation_expression
