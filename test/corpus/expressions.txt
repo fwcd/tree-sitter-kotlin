@@ -483,17 +483,17 @@ class Square() : Rectangle(), Polygon {
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (primary_constructor)
-    (delegation_specifier
+    name: (type_identifier)
+    primary_constructor: (primary_constructor)
+    delegation_specifiers: (delegation_specifier
       (constructor_invocation
         (user_type
           (type_identifier))
         (value_arguments)))
-    (delegation_specifier
+    delegation_specifiers: (delegation_specifier
       (user_type
         (type_identifier)))
-    (class_body
+    body: (class_body
       (function_declaration
         modifiers: (modifiers
           (member_modifier))

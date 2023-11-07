@@ -13,9 +13,9 @@ class Foo(){
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (primary_constructor)
-    (class_body
+    name: (type_identifier)
+    primary_constructor: (primary_constructor)
+    body: (class_body
       (property_declaration
         (variable_declaration
           (simple_identifier)))

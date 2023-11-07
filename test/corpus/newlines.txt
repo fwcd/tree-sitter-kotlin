@@ -95,11 +95,11 @@ class Foo
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (delegation_specifier
+    name: (type_identifier)
+    delegation_specifiers: (delegation_specifier
       (user_type
         (type_identifier)))
-    (class_body)))
+    body: (class_body)))
 
 ================================================================================
 Question mark after newline
@@ -155,8 +155,8 @@ class Foo {
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (property_declaration
         (variable_declaration
           (simple_identifier)

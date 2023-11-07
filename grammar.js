@@ -208,24 +208,24 @@ module.exports = grammar({
 
     class_declaration: $ => prec.right(choice(
       seq(
-        optional($.modifiers),
-        choice("class", "interface"),
-        alias($.simple_identifier, $.type_identifier),
-        optional($.type_parameters),
-        optional($.primary_constructor),
-        optional(seq(":", $._delegation_specifiers)),
-        optional($.type_constraints),
-        optional($.class_body)
+        optional(field('modifiers', $.modifiers)),
+        field('kind', choice("class", "interface")),
+        field('name', alias($.simple_identifier, $.type_identifier)),
+        optional(field('type_parameters', $.type_parameters)),
+        optional(field('primary_constructor', $.primary_constructor)),
+        optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
+        optional(field('constraints', $.type_constraints)),
+        optional(field('body', $.class_body))
       ),
       seq(
-        optional($.modifiers),
-        "enum", "class",
-        alias($.simple_identifier, $.type_identifier),
-        optional($.type_parameters),
-        optional($.primary_constructor),
-        optional(seq(":", $._delegation_specifiers)),
-        optional($.type_constraints),
-        optional($.enum_class_body)
+        optional(field('modifiers', $.modifiers)),
+        field('kind', "enum"), "class",
+        field('name', alias($.simple_identifier, $.type_identifier)),
+        optional(field('type_parameters', $.type_parameters)),
+        optional(field('primary_constructor', $.primary_constructor)),
+        optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
+        optional(field('constraints', $.type_constraints)),
+        optional(field('body', $.enum_class_body))
       )
     )),
 
