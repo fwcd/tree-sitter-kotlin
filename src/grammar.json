@@ -4388,8 +4388,12 @@
                   "value": ":"
                 },
                 {
-                  "type": "SYMBOL",
-                  "name": "_delegation_specifiers"
+                  "type": "FIELD",
+                  "name": "delegation_specifiers",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_delegation_specifiers"
+                  }
                 }
               ]
             },
@@ -4399,8 +4403,12 @@
           ]
         },
         {
-          "type": "SYMBOL",
-          "name": "class_body"
+          "type": "FIELD",
+          "name": "body",
+          "content": {
+            "type": "SYMBOL",
+            "name": "class_body"
+          }
         }
       ]
     },

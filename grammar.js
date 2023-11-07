@@ -808,8 +808,8 @@ module.exports = grammar({
 
     object_literal: $ => seq(
       "object",
-      optional(seq(":", $._delegation_specifiers)),
-      $.class_body
+      optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
+      field('body', $.class_body)
     ),
 
     this_expression: $ => choice(
