@@ -414,3 +414,29 @@ class MyClass(name: String) {
               (value_arguments
                 (value_argument
                   (simple_identifier))))))))))
+
+================================================================================
+Companion object
+================================================================================
+
+class C() {
+  private companion object Factory : D() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    name: (type_identifier)
+    primary_constructor: (primary_constructor)
+    body: (class_body
+      (companion_object
+        modifiers: (modifiers
+          (visibility_modifier))
+        name: (type_identifier)
+        delegation_specifiers: (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments)))
+        body: (class_body)))))

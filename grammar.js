@@ -311,12 +311,12 @@ module.exports = grammar({
     anonymous_initializer: $ => seq("init", field('body', $._block)),
 
     companion_object: $ => seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "companion",
       "object",
-      optional(alias($.simple_identifier, $.type_identifier)),
-      optional(seq(":", $._delegation_specifiers)),
-      optional($.class_body)
+      optional(field('name', alias($.simple_identifier, $.type_identifier))),
+      optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
+      optional(field('body', $.class_body))
     ),
 
     function_value_parameters: $ => seq(
