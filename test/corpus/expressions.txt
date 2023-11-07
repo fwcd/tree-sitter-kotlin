@@ -324,13 +324,13 @@ foo.forEach { (index, value) -> 2 }
     (call_suffix
       (annotated_lambda
         (lambda_literal
-          (lambda_parameters
+          parameters: (lambda_parameters
             (multi_variable_declaration
               (variable_declaration
                 (simple_identifier))
               (variable_declaration
                 (simple_identifier))))
-          (statements
+          body: (statements
             (integer_literal)))))))
 
 ================================================================================
