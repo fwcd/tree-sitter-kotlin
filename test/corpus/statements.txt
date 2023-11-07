@@ -8,10 +8,35 @@ for (value in values) {}
 
 (source_file
   (for_statement
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (simple_identifier)
-    (control_structure_body)))
+    value: (simple_identifier)
+    body: (control_structure_body)))
+
+================================================================================
+For with multiple variables
+================================================================================
+
+for ((variable0, variable1) in container) {
+  then()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    variables: (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    value: (simple_identifier)
+    body: (control_structure_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
 
 ================================================================================
 Statements separated by semicolon
@@ -91,3 +116,43 @@ val (x, y, z) = listOf(1, 2, 3)
             (integer_literal))
           (value_argument
             (integer_literal)))))))
+
+================================================================================
+While
+================================================================================
+
+while (condition) {
+  then()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (while_statement
+    condition: (simple_identifier)
+    body: (control_structure_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Do while
+================================================================================
+
+do {
+  then()
+} while (condition)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (do_while_statement
+    body: (control_structure_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))
+    condition: (simple_identifier)))

@@ -570,27 +570,30 @@ module.exports = grammar({
       "for",
       "(",
       repeat($.annotation),
-      choice($.variable_declaration, $.multi_variable_declaration),
+      choice(
+        field('variable', $.variable_declaration),
+        field('variables', $.multi_variable_declaration)
+      ),
       "in",
-      $._expression,
+      field('value', $._expression),
       ")",
-      optional($.control_structure_body)
+      optional(field('body', $.control_structure_body))
     )),
 
     while_statement: $ => seq(
       "while",
       "(",
-      $._expression,
+      field('condition', $._expression),
       ")",
-      choice(";", $.control_structure_body)
+      choice(";", field('body', $.control_structure_body))
     ),
 
     do_while_statement: $ => prec.right(seq(
       "do",
-      optional($.control_structure_body),
+      optional(field('body', $.control_structure_body)),
       "while",
       "(",
-      $._expression,
+      field('condition', $._expression),
       ")",
     )),
 
@@ -825,15 +828,15 @@ module.exports = grammar({
 
     if_expression: $ => prec.right(seq(
       "if",
-      "(", $._expression, ")",
+      "(", field('condition', $._expression), ")",
       choice(
-        $.control_structure_body,
+        field('consequence', $.control_structure_body),
         ";",
         seq(
-          optional($.control_structure_body),
+          optional(field('consequence', $.control_structure_body)),
           optional(";"),
           "else",
-          choice($.control_structure_body, ";")
+          choice(field('alternative', $.control_structure_body), ";")
         )
       )
     )),
@@ -852,19 +855,19 @@ module.exports = grammar({
 
     when_expression: $ => seq(
       "when",
-      optional($.when_subject),
+      optional(field('subject', $.when_subject)),
       "{",
-      repeat($.when_entry),
+      repeat(field('entry', $.when_entry)),
       "}"
     ),
 
     when_entry: $ => seq(
       choice(
-        seq($.when_condition, repeat(seq(",", $.when_condition))),
+        seq(field('condition', $.when_condition), repeat(seq(",", field('condition', $.when_condition)))),
         "else"
       ),
       "->",
-      $.control_structure_body,
+      field('body', $.control_structure_body),
       optional($._semi)
     ),
 
@@ -880,9 +883,9 @@ module.exports = grammar({
 
     try_expression: $ => seq(
       "try",
-      $._block,
+      field('body', $._block),
       choice(
-        seq(repeat1($.catch_block), optional($.finally_block)),
+        seq(repeat1(field('catch', $.catch_block)), optional(field('finally', $.finally_block))),
         $.finally_block
       )
     ),
@@ -895,10 +898,10 @@ module.exports = grammar({
       ":",
       $._type,
       ")",
-      $._block,
+      field('body', $._block),
     ),
 
-    finally_block: $ => seq("finally", $._block),
+    finally_block: $ => seq("finally", field('body', $._block)),
 
     jump_expression: $ => choice(
       prec.right(PREC.RETURN_OR_THROW, seq("throw", $._expression)),

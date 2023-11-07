@@ -107,17 +107,17 @@ val y = when(x){
     variable: (variable_declaration
       (simple_identifier))
     expression: (when_expression
-      (when_subject
+      subject: (when_subject
         (simple_identifier))
-      (when_entry
-        (when_condition
+      entry: (when_entry
+        condition: (when_condition
           (integer_literal))
-        (control_structure_body
+        body: (control_structure_body
           (boolean_literal)))
-      (when_entry
-        (when_condition
+      entry: (when_entry
+        condition: (when_condition
           (integer_literal))
-        (control_structure_body
+        body: (control_structure_body
           (boolean_literal))))))
 
 ================================================================================
@@ -132,16 +132,16 @@ when (this) {
 
 (source_file
   (when_expression
-    (when_subject
+    subject: (when_subject
       (this_expression))
-    (when_entry
-      (when_condition
+    entry: (when_entry
+      condition: (when_condition
         (type_test
           (user_type
             (type_identifier)
             (type_arguments
               (type_projection)))))
-      (control_structure_body
+      body: (control_structure_body
         (jump_expression)))))
 
 ================================================================================
@@ -373,12 +373,12 @@ when (dir) {
               (simple_identifier)))
           (simple_identifier)))))
   (when_expression
-    (when_subject
+    subject: (when_subject
       (simple_identifier))
-    (when_entry
-      (when_condition
+    entry: (when_entry
+      condition: (when_condition
         (integer_literal))
-      (control_structure_body
+      body: (control_structure_body
         (statements
           (property_declaration
             variable: (variable_declaration
@@ -536,4 +536,55 @@ class Square() : Rectangle(), Polygon {
                   (simple_identifier)))
               (call_suffix
                 (value_arguments)))))))))
+
+================================================================================
+Try expression
+================================================================================
+
+val x = try {
+    something()
+  } catch (e: SomeException) {
+    handle()
+  } catch (e: SomeOtherException) {
+    handle()
+  } finally {
+    something()
+  }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    variable: (variable_declaration
+      (simple_identifier))
+    expression: (try_expression
+      body: (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      catch: (catch_block
+        (simple_identifier)
+        (user_type
+          (type_identifier))
+        body: (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments)))))
+      catch: (catch_block
+        (simple_identifier)
+        (user_type
+          (type_identifier))
+        body: (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments)))))
+      finally: (finally_block
+        body: (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))
 
