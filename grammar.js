@@ -796,9 +796,9 @@ module.exports = grammar({
     anonymous_function: $ => prec.right(seq(
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
-      $.function_value_parameters,
-      optional(seq(":", $._type)),
-      optional($.function_body)
+      field('parameters', $.function_value_parameters),
+      optional(seq(":", field('return_type', $._type))),
+      optional(field('body', $.function_body))
     )),
 
     _function_literal: $ => choice(

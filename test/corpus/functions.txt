@@ -226,12 +226,12 @@ val anon = fun()
 
 (source_file
   (anonymous_function
-  (function_value_parameters))
+    parameters: (function_value_parameters))
   (property_declaration
     variable: (variable_declaration
       (simple_identifier))
     expression: (anonymous_function
-      (function_value_parameters))))
+      parameters: (function_value_parameters))))
 
 ==================
 Anonymous function with parameters
@@ -244,16 +244,16 @@ val anon = fun(x: Int)
 
 (source_file
   (anonymous_function
-  (function_value_parameters
-    (parameter
-      (simple_identifier)
-      (user_type
-        (type_identifier)))))
+    parameters: (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))))
   (property_declaration
     variable: (variable_declaration
       (simple_identifier))
     expression: (anonymous_function
-      (function_value_parameters
+      parameters: (function_value_parameters
         (parameter
           (simple_identifier)
           (user_type
@@ -270,15 +270,15 @@ val anon = fun(): Int
 
 (source_file
   (anonymous_function
-    (function_value_parameters)
-    (user_type
+    parameters: (function_value_parameters)
+    return_type: (user_type
       (type_identifier)))
   (property_declaration
     variable: (variable_declaration
       (simple_identifier))
     expression: (anonymous_function
-      (function_value_parameters)
-      (user_type
+      parameters: (function_value_parameters)
+      return_type: (user_type
         (type_identifier)))))
 
 ==================
@@ -294,12 +294,12 @@ val anon = fun() { assert(true) }
 
 (source_file
   (anonymous_function
-    (function_value_parameters)
-    (function_body
+    parameters: (function_value_parameters)
+    body: (function_body
       (boolean_literal)))
   (anonymous_function
-    (function_value_parameters)
-    (function_body
+    parameters: (function_value_parameters)
+    body: (function_body
       (statements
         (call_expression
           (simple_identifier)
@@ -311,15 +311,15 @@ val anon = fun() { assert(true) }
     variable: (variable_declaration
       (simple_identifier))
     expression: (anonymous_function
-      (function_value_parameters)
-      (function_body
+      parameters: (function_value_parameters)
+      body: (function_body
         (boolean_literal))))
   (property_declaration
     variable: (variable_declaration
       (simple_identifier))
     expression: (anonymous_function
-      (function_value_parameters)
-      (function_body
+      parameters: (function_value_parameters)
+      body: (function_body
         (statements
           (call_expression
             (simple_identifier)
