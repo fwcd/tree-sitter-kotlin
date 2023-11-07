@@ -177,12 +177,12 @@ module.exports = grammar({
     top_level_object: $ => seq($._declaration, optional($._semi)),
 
     type_alias: $ => seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "typealias",
-      alias($.simple_identifier, $.type_identifier),
-      optional($.type_parameters),
+      field('name', alias($.simple_identifier, $.type_identifier)),
+      optional(field('type_parameters', $.type_parameters)),
       "=",
-      $._type
+      field('type', $._type)
     ),
 
     _declaration: $ => choice(
