@@ -213,23 +213,23 @@ class Something {
     name: (type_identifier)
     body: (class_body
       (property_declaration
-        (variable_declaration
+        variable: (variable_declaration
           (simple_identifier)
           (user_type
             (type_identifier)))
-        (integer_literal))
+        expression: (integer_literal))
       (property_declaration
-        (variable_declaration
+        variable: (variable_declaration
           (simple_identifier)
           (nullable_type
             (user_type
               (type_identifier)))))
       (property_declaration
-        (variable_declaration
+        variable: (variable_declaration
           (simple_identifier)
           (user_type
             (type_identifier)))
-        (getter
+        getter: (getter
           (function_body
             (simple_identifier)))))))
 

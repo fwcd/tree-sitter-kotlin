@@ -57,9 +57,9 @@ fun foo()  {
     body: (function_body
       (statements
         (property_declaration
-          (variable_declaration
+          variable: (variable_declaration
             (simple_identifier))
-          (conjunction_expression
+          expression: (conjunction_expression
             (simple_identifier)
             (simple_identifier)))))))
 
@@ -121,9 +121,9 @@ fun foo() {
     body: (function_body
       (statements
         (property_declaration
-          (variable_declaration
+          variable: (variable_declaration
             (simple_identifier))
-          (elvis_expression
+          expression: (elvis_expression
             (elvis_expression
               (call_expression
                 (navigation_expression
@@ -158,7 +158,7 @@ class Foo {
     name: (type_identifier)
     body: (class_body
       (property_declaration
-        (variable_declaration
+        variable: (variable_declaration
           (simple_identifier)
           (user_type
             (type_identifier))))

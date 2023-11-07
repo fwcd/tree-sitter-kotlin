@@ -50,16 +50,44 @@ val ty x get () = 3
 
 (source_file
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (getter
+    getter: (getter
       (function_body
         (integer_literal))))
   (property_declaration
-    (user_type
+    receiver: (user_type
       (type_identifier))
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (getter
+    getter: (getter
       (function_body
         (integer_literal)))))
+
+================================================================================
+Multiple variables
+================================================================================
+
+val (x, y, z) = listOf(1, 2, 3)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    variables: (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    expression: (call_expression
+      (simple_identifier)
+      (call_suffix
+        (value_arguments
+          (value_argument
+            (integer_literal))
+          (value_argument
+            (integer_literal))
+          (value_argument
+            (integer_literal)))))))

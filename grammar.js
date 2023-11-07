@@ -362,21 +362,21 @@ module.exports = grammar({
     )),
 
     property_declaration: $ => prec.right(seq(
-      optional($.modifiers),
-      choice("val", "var"),
-      optional($.type_parameters),
-      optional(seq($._receiver_type, optional('.'))),
-      choice($.variable_declaration, $.multi_variable_declaration),
-      optional($.type_constraints),
+      optional(field('modifiers', $.modifiers)),
+      field('kind', choice("val", "var")),
+      optional(field('type_parameters', $.type_parameters)),
+      optional(seq(field('receiver', $._receiver_type), optional('.'))),
+      choice(field('variable', $.variable_declaration), field('variables', $.multi_variable_declaration)),
+      optional(field('constraints', $.type_constraints)),
       optional(choice(
-        seq("=", $._expression),
-        $.property_delegate
+        seq("=", field('expression', $._expression)),
+        field('delegate', $.property_delegate)
       )),
       optional(';'),
       choice(
         // TODO: Getter-setter combinations
-        optional($.getter),
-        optional($.setter)
+        optional(field('getter', $.getter)),
+        optional(field('setter', $.setter))
       )
     )),
 

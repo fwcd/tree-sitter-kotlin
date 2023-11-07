@@ -15,7 +15,7 @@ fun foo() {
     body: (function_body
       (statements
         (property_declaration
-          (variable_declaration
+          variable: (variable_declaration
             (simple_identifier))
           (call_expression
             (simple_identifier)

@@ -100,13 +100,13 @@ val y = when(x){
 
 (source_file
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (integer_literal))
+    expression: (integer_literal))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (when_expression
+    expression: (when_expression
       (when_subject
         (simple_identifier))
       (when_entry
@@ -154,13 +154,13 @@ val MyDate.s: String get() = "hello"
 
 (source_file
   (property_declaration
-    (user_type
+    receiver: (user_type
       (type_identifier))
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier)
       (user_type
         (type_identifier)))
-    (getter
+    getter: (getter
       (function_body
         (string_literal)))))
 
@@ -174,9 +174,9 @@ val x = expect(1)
 
 (source_file
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (call_expression
+    expression: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
@@ -264,30 +264,30 @@ val a = a<2>(3)
 
 (source_file
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (comparison_expression
+    expression: (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (comparison_expression
+    expression: (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (comparison_expression
+    expression: (comparison_expression
       (comparison_expression
         (simple_identifier)
         (simple_identifier))
       (simple_identifier)))
   (line_comment)
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (call_expression
+    expression: (call_expression
       (simple_identifier)
       (call_suffix
         (type_arguments
@@ -298,9 +298,9 @@ val a = a<2>(3)
           (value_argument
             (simple_identifier))))))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (comparison_expression
+    expression: (comparison_expression
       (comparison_expression
         (simple_identifier)
         (integer_literal))
@@ -351,9 +351,9 @@ when (dir) {
     body: (function_body
       (statements
         (property_declaration
-          (variable_declaration
+          variable: (variable_declaration
             (simple_identifier))
-          (navigation_expression
+          expression: (navigation_expression
             (simple_identifier)
             (navigation_suffix
               (simple_identifier))))
@@ -381,9 +381,9 @@ when (dir) {
       (control_structure_body
         (statements
           (property_declaration
-            (variable_declaration
+            variable: (variable_declaration
               (simple_identifier))
-            (navigation_expression
+            expression: (navigation_expression
               (simple_identifier)
               (navigation_suffix
                 (simple_identifier))))
@@ -422,49 +422,49 @@ val comments = """ // and here """
 
 (source_file
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (call_expression
+    expression: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (call_expression
+    expression: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (call_expression
+    expression: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (call_expression
+    expression: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (string_literal))
+    expression: (string_literal))
   (property_declaration
-    (variable_declaration
+    variable: (variable_declaration
       (simple_identifier))
-    (string_literal)))
+    expression: (string_literal)))
 
 ================================================================================
 Qualified this/super expressions
@@ -536,3 +536,4 @@ class Square() : Rectangle(), Polygon {
                   (simple_identifier)))
               (call_suffix
                 (value_arguments)))))))))
+

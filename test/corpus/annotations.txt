@@ -47,9 +47,18 @@ var x: Int
 ---
 
 (source_file
-    (property_declaration
-        (modifiers (annotation (use_site_target) (user_type (type_identifier)) (user_type (type_identifier))))
-        (variable_declaration (simple_identifier) (user_type (type_identifier)))))
+  (property_declaration
+    modifiers: (modifiers
+      (annotation
+        (use_site_target)
+        (user_type
+          (type_identifier))
+        (user_type
+          (type_identifier))))
+    variable: (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)))))
 
 ==================
 Multiple annotations on a variable
@@ -67,16 +76,18 @@ class X {
     name: (type_identifier)
     body: (class_body
       (property_declaration
-        (modifiers
-          (annotation (user_type (type_identifier)))
-          (annotation (user_type (type_identifier)))
+        modifiers: (modifiers
+          (annotation
+            (user_type
+              (type_identifier)))
+          (annotation
+            (user_type
+              (type_identifier)))
           (member_modifier))
-        (variable_declaration (simple_identifier) (user_type (type_identifier)))
-      )
-    )
-  )
-)
-
+        variable: (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))))
 
 ==================
 Multiple annotations on a function
