@@ -51,7 +51,7 @@ const PREC = {
 const DEC_DIGITS = token(sep1(/[0-9]+/, /_+/));
 const HEX_DIGITS = token(sep1(/[0-9a-fA-F]+/, /_+/));
 const BIN_DIGITS = token(sep1(/[01]/, /_+/));
-const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), DEC_DIGITS))
+const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), DEC_DIGITS));
 
 module.exports = grammar({
   name: "kotlin",
@@ -812,13 +812,16 @@ module.exports = grammar({
       $.class_body
     ),
 
-    this_expression: $ => "this",
-
-    super_expression: $ => seq(
-      "super",
-      // TODO optional(seq("<", $._type, ">")),
-      // TODO optional(seq("@", $.simple_identifier))
+    this_expression: $ => choice(
+      "this",
+      $._this_at
     ),
+
+    super_expression: $ => prec.right(choice(
+      "super",
+      seq("super", "<", $._type, ">"),
+      $._super_at
+    )),
 
     if_expression: $ => prec.right(seq(
       "if",
@@ -1116,15 +1119,38 @@ module.exports = grammar({
     // Keywords
     // ==========
 
-    _return_at: $ => seq("return@", $._lexical_identifier),
+    _return_at: $ => seq(
+      "return@",
+      alias($._lexical_identifier, $.label)
+    ),
 
-    _continue_at: $ => seq("continue@", $._lexical_identifier),
+    _continue_at: $ => seq(
+      "continue@",
+      alias($._lexical_identifier, $.label)
+    ),
 
-    _break_at: $ => seq("break@", $._lexical_identifier),
+    _break_at: $ => seq(
+      "break@",
+      alias($._lexical_identifier, $.label)
+    ),
 
-    _this_at: $ => seq("this@", $._lexical_identifier),
+    _this_at: $ => seq(
+      "this@",
+      alias($._lexical_identifier, $.type_identifier)
+    ),
 
-    _super_at: $ => seq("super@", $._lexical_identifier),
+    _super_at: $ => choice(
+      seq(
+        "super@",
+        alias($._lexical_identifier, $.type_identifier)
+      ),
+      seq(
+        "super",
+        "<", $._type, ">",
+        token.immediate("@"),
+        alias($._lexical_identifier, $.type_identifier)
+      )
+    ),
 
     // ==========
     // Literals

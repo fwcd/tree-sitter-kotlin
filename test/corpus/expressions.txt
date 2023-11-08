@@ -213,7 +213,8 @@ expect fun randomUUID(): String
       (platform_modifier))
     (simple_identifier)
     (function_value_parameters)
-    (user_type (type_identifier))))
+    (user_type
+      (type_identifier))))
 
 ================================================================================
 Less than for generics
@@ -464,3 +465,74 @@ val comments = """ // and here """
     (variable_declaration
       (simple_identifier))
     (string_literal)))
+
+================================================================================
+Qualified this/super expressions
+================================================================================
+
+class Square() : Rectangle(), Polygon {
+    override fun draw() {
+        this@Square.draw()
+        super@Square.draw()
+        super<Polygon>.draw()
+        super<Rectangle>@Square.draw()
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (statements
+            (call_expression
+              (navigation_expression
+                (this_expression
+                  (type_identifier))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (navigation_expression
+                (super_expression
+                  (type_identifier))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (navigation_expression
+                (super_expression
+                  (user_type
+                    (type_identifier)))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (navigation_expression
+                (super_expression
+                  (user_type
+                    (type_identifier))
+                  (type_identifier))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))))))))
