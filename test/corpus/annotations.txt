@@ -9,8 +9,11 @@ class Empty
 
 (source_file
   (class_declaration
-        (modifiers (annotation (user_type (type_identifier))))
-        (type_identifier)))
+    modifiers: (modifiers
+      (annotation
+        (user_type
+          (type_identifier))))
+    name: (type_identifier)))
 
 ==================
 Annotations with use-site-target
@@ -22,11 +25,17 @@ class Empty(@field:Test val x: Boolean)
 
 (source_file
   (class_declaration
-        (type_identifier)
-        (primary_constructor (class_parameter
-            (modifiers (annotation (use_site_target) (user_type (type_identifier))))
-            (simple_identifier)
-            (user_type (type_identifier))))))
+    name: (type_identifier)
+    primary_constructor: (primary_constructor
+      parameters: (class_parameter
+        (modifiers
+          (annotation
+            (use_site_target)
+            (user_type
+              (type_identifier))))
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
 
 ==================
 Multi-annotations
@@ -38,9 +47,18 @@ var x: Int
 ---
 
 (source_file
-    (property_declaration
-        (modifiers (annotation (use_site_target) (user_type (type_identifier)) (user_type (type_identifier))))
-        (variable_declaration (simple_identifier) (user_type (type_identifier)))))
+  (property_declaration
+    modifiers: (modifiers
+      (annotation
+        (use_site_target)
+        (user_type
+          (type_identifier))
+        (user_type
+          (type_identifier))))
+    variable: (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)))))
 
 ==================
 Multiple annotations on a variable
@@ -55,19 +73,21 @@ class X {
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (property_declaration
-        (modifiers
-          (annotation (user_type (type_identifier)))
-          (annotation (user_type (type_identifier)))
+        modifiers: (modifiers
+          (annotation
+            (user_type
+              (type_identifier)))
+          (annotation
+            (user_type
+              (type_identifier)))
           (member_modifier))
-        (variable_declaration (simple_identifier) (user_type (type_identifier)))
-      )
-    )
-  )
-)
-
+        variable: (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))))
 
 ==================
 Multiple annotations on a function
@@ -82,19 +102,20 @@ class X {
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (function_declaration
-        (modifiers
-          (annotation (user_type (type_identifier)))
-          (annotation (user_type (type_identifier))))
-        (simple_identifier)
-        (function_value_parameters)
-        (user_type (type_identifier))
-      )
-    )
-  )
-)
+        modifiers: (modifiers
+          (annotation
+            (user_type
+              (type_identifier)))
+          (annotation
+            (user_type
+              (type_identifier))))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        return_type: (user_type
+          (type_identifier))))))
 
 =====================
 Annotated functions
@@ -107,13 +128,13 @@ fun foo() = bar {}
 
 (source_file
   (function_declaration
-    (modifiers
+    modifiers: (modifiers
       (annotation
         (user_type
           (type_identifier))))
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (call_expression
         (simple_identifier)
         (call_suffix

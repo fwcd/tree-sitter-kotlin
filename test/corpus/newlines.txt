@@ -29,13 +29,14 @@ Eq after newline
 fun foo()
     = 1
 
----
+--------------------------------------------------------------------------------
+
 (source_file
-   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body 
-    (integer_literal))))
+  (function_declaration
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
+      (integer_literal))))
 
 ================================================================================
 Binary operator after newline
@@ -50,15 +51,17 @@ fun foo()  {
 --------------------------------------------------------------------------------
 
 (source_file
-  (function_declaration (simple_identifier) (function_value_parameters)
-     (function_body
-        (statements
-           (property_declaration
-              (variable_declaration
-               (simple_identifier))
-              (conjunction_expression
-               (simple_identifier)
-               (simple_identifier)))))))
+  (function_declaration
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
+      (statements
+        (property_declaration
+          variable: (variable_declaration
+            (simple_identifier))
+          expression: (conjunction_expression
+            (simple_identifier)
+            (simple_identifier)))))))
 
 ================================================================================
 Open brace after newline
@@ -71,11 +74,11 @@ fun foo():String
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    return_type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (statements
         (jump_expression
           (string_literal))))))
@@ -92,11 +95,11 @@ class Foo
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (delegation_specifier
+    name: (type_identifier)
+    delegation_specifiers: (delegation_specifier
       (user_type
         (type_identifier)))
-    (class_body)))
+    body: (class_body)))
 
 ================================================================================
 Question mark after newline
@@ -113,14 +116,14 @@ fun foo() {
 
 (source_file
   (function_declaration
-   (simple_identifier)
-  (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (statements
         (property_declaration
-          (variable_declaration
+          variable: (variable_declaration
             (simple_identifier))
-          (elvis_expression
+          expression: (elvis_expression
             (elvis_expression
               (call_expression
                 (navigation_expression
@@ -152,10 +155,10 @@ class Foo {
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (property_declaration
-        (variable_declaration
+        variable: (variable_declaration
           (simple_identifier)
           (user_type
             (type_identifier))))
@@ -203,11 +206,11 @@ else boo()
 
 (source_file
   (if_expression
-    (prefix_expression
+    condition: (prefix_expression
       (simple_identifier))
-    (control_structure_body
+    consequence: (control_structure_body
       (integer_literal))
-    (control_structure_body
+    alternative: (control_structure_body
       (call_expression
         (simple_identifier)
         (call_suffix
@@ -223,11 +226,11 @@ if (!foo) 3 else boo()
 
 (source_file
   (if_expression
-    (prefix_expression
+    condition: (prefix_expression
       (simple_identifier))
-    (control_structure_body
+    consequence: (control_structure_body
       (integer_literal))
-    (control_structure_body
+    alternative: (control_structure_body
       (call_expression
         (simple_identifier)
         (call_suffix

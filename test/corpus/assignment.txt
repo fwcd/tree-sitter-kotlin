@@ -13,19 +13,19 @@ class Foo(){
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (primary_constructor)
-    (class_body
+    name: (type_identifier)
+    primary_constructor: (primary_constructor)
+    body: (class_body
       (property_declaration
-        (variable_declaration
+        variable: (variable_declaration
           (simple_identifier)))
       (secondary_constructor
-      (function_value_parameters
-        (parameter
-          (simple_identifier)
-          (user_type
-            (type_identifier))))
-        (statements
+        parameters: (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        body: (statements
           (assignment
             (directly_assignable_expression
               (this_expression)
@@ -46,12 +46,12 @@ fun main(){
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (statements
         (property_declaration
-          (variable_declaration
+          variable: (variable_declaration
             (simple_identifier)
             (user_type
               (type_identifier)
