@@ -2223,6 +2223,10 @@
           "named": true
         },
         {
+          "type": "call_expression",
+          "named": true
+        },
+        {
           "type": "callable_reference",
           "named": true
         },
