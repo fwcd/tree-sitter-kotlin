@@ -607,7 +607,6 @@ module.exports = grammar({
 
     _unary_expression: $ => choice(
       $.postfix_expression,
-      $.call_expression,
       $.indexing_expression,
       $.navigation_expression,
       $.prefix_expression,
@@ -723,6 +722,7 @@ module.exports = grammar({
       $._string_literal,
       $.callable_reference,
       $._function_literal,
+      $.call_expression,
       $.object_literal,
       $.collection_literal,
       $.this_expression,
