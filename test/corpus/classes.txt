@@ -9,10 +9,10 @@ class Empty2 {}
 
 (source_file
   (class_declaration
-    name: (type_identifier))
+    (type_identifier))
   (class_declaration
-    name: (type_identifier)
-    body: (class_body)))
+    (type_identifier)
+    (class_body)))
 
 ================================================================================
 Class with methods
@@ -28,16 +28,16 @@ class HelloWorld {
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    body: (class_body
+    (type_identifier)
+    (class_body
       (function_declaration
-        name: (simple_identifier)
-        parameters: (function_value_parameters)
-        body: (function_body))
+       (simple_identifier)
+       (function_value_parameters)
+       (function_body))
       (function_declaration
-        name: (simple_identifier)
-        parameters: (function_value_parameters)
-        body: (function_body)))))
+       (simple_identifier)
+       (function_value_parameters)
+       (function_body)))))
 
 ================================================================================
 Generic class
@@ -49,11 +49,11 @@ class Container<T> {}
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    type_parameters: (type_parameters
+    (type_identifier)
+    (type_parameters
       (type_parameter
         (type_identifier)))
-    body: (class_body)))
+    (class_body)))
 
 ================================================================================
 Class with methods and expressions
@@ -69,19 +69,19 @@ class Strings {
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    body: (class_body
+    (type_identifier)
+    (class_body
       (function_declaration
-        name: (simple_identifier)
-        parameters: (function_value_parameters)
-        body: (function_body
-          (string_literal)))
+       (simple_identifier)
+       (function_value_parameters)
+       (function_body
+        (string_literal)))
       (function_declaration
-        name: (simple_identifier)
-        parameters: (function_value_parameters)
-        body: (function_body
+       (simple_identifier)
+       (function_value_parameters)
+       (function_body
+        (additive_expression
           (additive_expression
-            (additive_expression
               (string_literal)
               (string_literal))
             (string_literal)))))))
@@ -98,18 +98,18 @@ internal open class Test {
 
 (source_file
   (class_declaration
-    modifiers: (modifiers
+    (modifiers
       (visibility_modifier)
       (inheritance_modifier))
-    name: (type_identifier)
-    body: (class_body
+    (type_identifier)
+    (class_body
       (function_declaration
-        modifiers: (modifiers
-          (visibility_modifier)
-          (inheritance_modifier)
-          (function_modifier))
-        name: (simple_identifier)
-        parameters: (function_value_parameters)))))
+        (modifiers
+         (visibility_modifier)
+         (inheritance_modifier)
+         (function_modifier))
+        (simple_identifier)
+        (function_value_parameters)))))
 
 ================================================================================
 Objects
@@ -123,11 +123,11 @@ object Singleton {
 
 (source_file
   (object_declaration
-    name: (type_identifier)
-    body: (class_body
+    (type_identifier)
+    (class_body
       (function_declaration
-        name: (simple_identifier)
-        parameters: (function_value_parameters)))))
+       (simple_identifier)
+       (function_value_parameters)))))
 
 ================================================================================
 Primary constructors
@@ -142,15 +142,15 @@ data class Vector2D(
 
 (source_file
   (class_declaration
-    modifiers: (modifiers
+    (modifiers
       (class_modifier))
-    name: (type_identifier)
-    primary_constructor: (primary_constructor
-      parameters: (class_parameter
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier)))
-      parameters: (class_parameter
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))))
@@ -169,21 +169,21 @@ class D : SomeInterface
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    delegation_specifiers: (delegation_specifier
+    (type_identifier)
+    (delegation_specifier
       (constructor_invocation
         (user_type
           (type_identifier))
         (value_arguments)))
-    body: (class_body))
+    (class_body))
   (class_declaration
-    name: (type_identifier)
-    primary_constructor: (primary_constructor
-      parameters: (class_parameter
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))
-    delegation_specifiers: (delegation_specifier
+    (delegation_specifier
       (constructor_invocation
         (user_type
           (type_identifier))
@@ -191,8 +191,8 @@ class D : SomeInterface
           (value_argument
             (simple_identifier))))))
   (class_declaration
-    name: (type_identifier)
-    delegation_specifiers: (delegation_specifier
+    (type_identifier)
+    (delegation_specifier
       (user_type
         (type_identifier)))))
 
@@ -210,26 +210,26 @@ class Something {
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    body: (class_body
+    (type_identifier)
+    (class_body
       (property_declaration
-        variable: (variable_declaration
+        (variable_declaration
           (simple_identifier)
           (user_type
             (type_identifier)))
-        expression: (integer_literal))
+        (integer_literal))
       (property_declaration
-        variable: (variable_declaration
+        (variable_declaration
           (simple_identifier)
           (nullable_type
             (user_type
               (type_identifier)))))
       (property_declaration
-        variable: (variable_declaration
+        (variable_declaration
           (simple_identifier)
           (user_type
             (type_identifier)))
-        getter: (getter
+        (getter
           (function_body
             (simple_identifier)))))))
 
@@ -245,20 +245,19 @@ class Test(x: Int, y: Int) {
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    primary_constructor: (primary_constructor
-      parameters: (class_parameter
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier)))
-      parameters: (class_parameter
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))
-    body: (class_body
-      (secondary_constructor
-        parameters: (function_value_parameters)
-        delegation: (constructor_delegation_call
+    (class_body
+      (secondary_constructor (function_value_parameters)
+        (constructor_delegation_call
           (value_arguments
             (value_argument
               (integer_literal))
@@ -285,8 +284,8 @@ enum class Color(val rgb: Int) {
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    body: (enum_class_body
+    (type_identifier)
+    (enum_class_body
       (enum_entry
         (simple_identifier))
       (enum_entry
@@ -296,13 +295,13 @@ enum class Color(val rgb: Int) {
       (enum_entry
         (simple_identifier))))
   (class_declaration
-    name: (type_identifier)
-    primary_constructor: (primary_constructor
-      parameters: (class_parameter
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))
-    body: (enum_class_body
+    (enum_class_body
       (enum_entry
         (simple_identifier)
         (value_arguments
@@ -319,11 +318,11 @@ enum class Color(val rgb: Int) {
           (value_argument
             (hex_literal))))
       (function_declaration
-        modifiers: (modifiers
+        (modifiers
           (member_modifier))
-        name: (simple_identifier)
-        parameters: (function_value_parameters)
-        body: (function_body
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
           (call_expression
             (navigation_expression
               (simple_identifier)
@@ -347,15 +346,15 @@ data class JwtConfiguration(
 
 (source_file
   (class_declaration
-    modifiers: (modifiers
+    (modifiers
       (class_modifier))
-    name: (type_identifier)
-    primary_constructor: (primary_constructor
-      parameters: (class_parameter
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier)))
-      parameters: (class_parameter
+      (class_parameter
         (simple_identifier)
         (user_type
           (type_identifier))))))
@@ -371,72 +370,16 @@ value class Password(private val s: String)
 
 (source_file
   (class_declaration
-    modifiers: (modifiers
+    (modifiers
       (annotation
         (user_type
           (type_identifier)))
       (class_modifier))
-    name: (type_identifier)
-    primary_constructor: (primary_constructor
-      parameters: (class_parameter
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
         (modifiers
           (visibility_modifier))
         (simple_identifier)
         (user_type
           (type_identifier))))))
-
-================================================================================
-Anonymous initializer
-================================================================================
-
-class MyClass(name: String) {
-  init {
-    println(name)
-  }
-}
-
---------------------------------------------------------------------------------
-
-(source_file
-  (class_declaration
-    name: (type_identifier)
-    primary_constructor: (primary_constructor
-      parameters: (class_parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier))))
-    body: (class_body
-      (anonymous_initializer
-        body: (statements
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments
-                (value_argument
-                  (simple_identifier))))))))))
-
-================================================================================
-Companion object
-================================================================================
-
-class C() {
-  private companion object Factory : D() {}
-}
-
---------------------------------------------------------------------------------
-
-(source_file
-  (class_declaration
-    name: (type_identifier)
-    primary_constructor: (primary_constructor)
-    body: (class_body
-      (companion_object
-        modifiers: (modifiers
-          (visibility_modifier))
-        name: (type_identifier)
-        delegation_specifiers: (delegation_specifier
-          (constructor_invocation
-            (user_type
-              (type_identifier))
-            (value_arguments)))
-        body: (class_body)))))

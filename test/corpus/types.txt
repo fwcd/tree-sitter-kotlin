@@ -266,13 +266,13 @@ private typealias T<E> = Foo<E>
 
 (source_file
   (type_alias
-    modifiers: (modifiers
+    (modifiers
       (visibility_modifier))
-    name: (type_identifier)
-    type_parameters: (type_parameters
+    (type_identifier)
+    (type_parameters
       (type_parameter
         (type_identifier)))
-    type: (user_type
+    (user_type
       (type_identifier)
       (type_arguments
         (type_projection

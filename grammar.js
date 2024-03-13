@@ -177,12 +177,12 @@ module.exports = grammar({
     top_level_object: $ => seq($._declaration, optional($._semi)),
 
     type_alias: $ => seq(
-      optional(field('modifiers', $.modifiers)),
+      optional($.modifiers),
       "typealias",
-      field('name', alias($.simple_identifier, $.type_identifier)),
-      optional(field('type_parameters', $.type_parameters)),
+      alias($.simple_identifier, $.type_identifier),
+      optional($.type_parameters),
       "=",
-      field('type', $._type)
+      $._type
     ),
 
     _declaration: $ => choice(
@@ -208,30 +208,30 @@ module.exports = grammar({
 
     class_declaration: $ => prec.right(choice(
       seq(
-        optional(field('modifiers', $.modifiers)),
-        field('kind', choice("class", "interface")),
-        field('name', alias($.simple_identifier, $.type_identifier)),
-        optional(field('type_parameters', $.type_parameters)),
-        optional(field('primary_constructor', $.primary_constructor)),
-        optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
-        optional(field('constraints', $.type_constraints)),
-        optional(field('body', $.class_body))
+        optional($.modifiers),
+        choice("class", "interface"),
+        alias($.simple_identifier, $.type_identifier),
+        optional($.type_parameters),
+        optional($.primary_constructor),
+        optional(seq(":", $._delegation_specifiers)),
+        optional($.type_constraints),
+        optional($.class_body)
       ),
       seq(
-        optional(field('modifiers', $.modifiers)),
-        field('kind', "enum"), "class",
-        field('name', alias($.simple_identifier, $.type_identifier)),
-        optional(field('type_parameters', $.type_parameters)),
-        optional(field('primary_constructor', $.primary_constructor)),
-        optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
-        optional(field('constraints', $.type_constraints)),
-        optional(field('body', $.enum_class_body))
+        optional($.modifiers),
+        "enum", "class",
+        alias($.simple_identifier, $.type_identifier),
+        optional($.type_parameters),
+        optional($.primary_constructor),
+        optional(seq(":", $._delegation_specifiers)),
+        optional($.type_constraints),
+        optional($.enum_class_body)
       )
     )),
 
     primary_constructor: $ => seq(
-      optional(seq(optional(field('modifiers', $.modifiers)), "constructor")),
-      field('parameters', $._class_parameters)
+      optional(seq(optional($.modifiers), "constructor")),
+      $._class_parameters
     ),
 
     class_body: $ => seq("{", optional($._class_member_declarations), "}"),
@@ -308,15 +308,15 @@ module.exports = grammar({
       $.secondary_constructor
     ),
 
-    anonymous_initializer: $ => seq("init", field('body', $._block)),
+    anonymous_initializer: $ => seq("init", $._block),
 
     companion_object: $ => seq(
-      optional(field('modifiers', $.modifiers)),
+      optional($.modifiers),
       "companion",
       "object",
-      optional(field('name', alias($.simple_identifier, $.type_identifier))),
-      optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
-      optional(field('body', $.class_body))
+      optional(alias($.simple_identifier, $.type_identifier)),
+      optional(seq(":", $._delegation_specifiers)),
+      optional($.class_body)
     ),
 
     function_value_parameters: $ => seq(
@@ -342,15 +342,15 @@ module.exports = grammar({
     ),
 
     function_declaration: $ => prec.right(seq( // TODO
-      optional(field('modifiers', $.modifiers)),
+      optional($.modifiers),
       "fun",
-      optional(field('type_parameters', $.type_parameters)),
-      optional(seq(field('receiver', $._receiver_type), optional('.'))),
-      field('name', $.simple_identifier),
-      field('parameters', $.function_value_parameters),
-      optional(seq(":", field('return_type', $._type))),
-      optional(field('constraints', $.type_constraints)),
-      optional(field('body', $.function_body))
+      optional($.type_parameters),
+      optional(seq($._receiver_type, optional('.'))),
+      $.simple_identifier,
+      $.function_value_parameters,
+      optional(seq(":", $._type)),
+      optional($.type_constraints),
+      optional($.function_body)
     )),
 
     function_body: $ => choice($._block, seq("=", $._expression)),
@@ -362,21 +362,21 @@ module.exports = grammar({
     )),
 
     property_declaration: $ => prec.right(seq(
-      optional(field('modifiers', $.modifiers)),
-      field('kind', choice("val", "var")),
-      optional(field('type_parameters', $.type_parameters)),
-      optional(seq(field('receiver', $._receiver_type), optional('.'))),
-      choice(field('variable', $.variable_declaration), field('variables', $.multi_variable_declaration)),
-      optional(field('constraints', $.type_constraints)),
+      optional($.modifiers),
+      choice("val", "var"),
+      optional($.type_parameters),
+      optional(seq($._receiver_type, optional('.'))),
+      choice($.variable_declaration, $.multi_variable_declaration),
+      optional($.type_constraints),
       optional(choice(
-        seq("=", field('expression', $._expression)),
-        field('delegate', $.property_delegate)
+        seq("=", $._expression),
+        $.property_delegate
       )),
       optional(';'),
       choice(
         // TODO: Getter-setter combinations
-        optional(field('getter', $.getter)),
-        optional(field('setter', $.setter))
+        optional($.getter),
+        optional($.setter)
       )
     )),
 
@@ -415,19 +415,19 @@ module.exports = grammar({
     parameter: $ => seq($.simple_identifier, ":", $._type),
 
     object_declaration: $ => prec.right(seq(
-      optional(field('modifiers', $.modifiers)),
+      optional($.modifiers),
       "object",
-      field('name', alias($.simple_identifier, $.type_identifier)),
-      optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
-      optional(field('body', $.class_body))
+      alias($.simple_identifier, $.type_identifier),
+      optional(seq(":", $._delegation_specifiers)),
+      optional($.class_body)
     )),
 
     secondary_constructor: $ => seq(
-      optional(field('modifiers', $.modifiers)),
+      optional($.modifiers),
       "constructor",
-      field('parameters', $.function_value_parameters),
-      optional(seq(":", field('delegation', $.constructor_delegation_call))),
-      optional(field('body', $._block))
+      $.function_value_parameters,
+      optional(seq(":", $.constructor_delegation_call)),
+      optional($._block)
     ),
 
     constructor_delegation_call: $ => seq(choice("this", "super"), $.value_arguments),
@@ -570,30 +570,27 @@ module.exports = grammar({
       "for",
       "(",
       repeat($.annotation),
-      choice(
-        field('variable', $.variable_declaration),
-        field('variables', $.multi_variable_declaration)
-      ),
+      choice($.variable_declaration, $.multi_variable_declaration),
       "in",
-      field('value', $._expression),
+      $._expression,
       ")",
-      optional(field('body', $.control_structure_body))
+      optional($.control_structure_body)
     )),
 
     while_statement: $ => seq(
       "while",
       "(",
-      field('condition', $._expression),
+      $._expression,
       ")",
-      choice(";", field('body', $.control_structure_body))
+      choice(";", $.control_structure_body)
     ),
 
     do_while_statement: $ => prec.right(seq(
       "do",
-      optional(field('body', $.control_structure_body)),
+      optional($.control_structure_body),
       "while",
       "(",
-      field('condition', $._expression),
+      $._expression,
       ")",
     )),
 
@@ -778,8 +775,8 @@ module.exports = grammar({
 
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
       "{",
-      optional(seq(optional(field('parameters', $.lambda_parameters)), "->")),
-      optional(field('body', $.statements)),
+      optional(seq(optional($.lambda_parameters), "->")),
+      optional($.statements),
       "}"
     )),
 
@@ -799,9 +796,9 @@ module.exports = grammar({
     anonymous_function: $ => prec.right(seq(
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
-      field('parameters', $.function_value_parameters),
-      optional(seq(":", field('return_type', $._type))),
-      optional(field('body', $.function_body))
+      $.function_value_parameters,
+      optional(seq(":", $._type)),
+      optional($.function_body)
     )),
 
     _function_literal: $ => choice(
@@ -811,8 +808,8 @@ module.exports = grammar({
 
     object_literal: $ => seq(
       "object",
-      optional(seq(":", field('delegation_specifiers', $._delegation_specifiers))),
-      field('body', $.class_body)
+      optional(seq(":", $._delegation_specifiers)),
+      $.class_body
     ),
 
     this_expression: $ => choice(
@@ -828,15 +825,15 @@ module.exports = grammar({
 
     if_expression: $ => prec.right(seq(
       "if",
-      "(", field('condition', $._expression), ")",
+      "(", $._expression, ")",
       choice(
-        field('consequence', $.control_structure_body),
+        $.control_structure_body,
         ";",
         seq(
-          optional(field('consequence', $.control_structure_body)),
+          optional($.control_structure_body),
           optional(";"),
           "else",
-          choice(field('alternative', $.control_structure_body), ";")
+          choice($.control_structure_body, ";")
         )
       )
     )),
@@ -855,19 +852,19 @@ module.exports = grammar({
 
     when_expression: $ => seq(
       "when",
-      optional(field('subject', $.when_subject)),
+      optional($.when_subject),
       "{",
-      repeat(field('entry', $.when_entry)),
+      repeat($.when_entry),
       "}"
     ),
 
     when_entry: $ => seq(
       choice(
-        seq(field('condition', $.when_condition), repeat(seq(",", field('condition', $.when_condition)))),
+        seq($.when_condition, repeat(seq(",", $.when_condition))),
         "else"
       ),
       "->",
-      field('body', $.control_structure_body),
+      $.control_structure_body,
       optional($._semi)
     ),
 
@@ -883,9 +880,9 @@ module.exports = grammar({
 
     try_expression: $ => seq(
       "try",
-      field('body', $._block),
+      $._block,
       choice(
-        seq(repeat1(field('catch', $.catch_block)), optional(field('finally', $.finally_block))),
+        seq(repeat1($.catch_block), optional($.finally_block)),
         $.finally_block
       )
     ),
@@ -898,10 +895,10 @@ module.exports = grammar({
       ":",
       $._type,
       ")",
-      field('body', $._block),
+      $._block,
     ),
 
-    finally_block: $ => seq("finally", field('body', $._block)),
+    finally_block: $ => seq("finally", $._block),
 
     jump_expression: $ => choice(
       prec.right(PREC.RETURN_OR_THROW, seq("throw", $._expression)),

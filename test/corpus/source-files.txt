@@ -17,9 +17,9 @@ val x = 4
         (value_argument
           (string_literal)))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (integer_literal)))
+    (integer_literal)))
 
 ================================================================================
 Multiple file annotations
@@ -89,9 +89,9 @@ fun main() {
         (simple_identifier)
         (simple_identifier))))
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
 
 ================================================================================
 Multiple Imports On A Single Line

@@ -8,9 +8,8 @@ fun main() {}
 
 (source_file
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body)))
+    (simple_identifier) (function_value_parameters)
+    (function_body)))
 
 ==================
 Generic functions
@@ -22,12 +21,9 @@ fun <T> test() {}
 
 (source_file
   (function_declaration
-    type_parameters: (type_parameters
-      (type_parameter
-        (type_identifier)))
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body)))
+    (type_parameters (type_parameter (type_identifier)))
+    (simple_identifier) (function_value_parameters)
+    (function_body)))
 
 ==================
 Generic functions with parameters
@@ -38,20 +34,20 @@ fun <T: Int> bar(foo: Int): T {}
 ---
 (source_file
   (function_declaration
-    type_parameters: (type_parameters
+    (type_parameters
       (type_parameter
         (type_identifier)
         (user_type
           (type_identifier))))
-    name: (simple_identifier)
-    parameters: (function_value_parameters
+    (simple_identifier)
+    (function_value_parameters
       (parameter
         (simple_identifier)
         (user_type
           (type_identifier))))
-    return_type: (user_type
+    (user_type
       (type_identifier))
-    body: (function_body)))
+    (function_body)))
 
 ==================
 Functions with parameters
@@ -65,56 +61,26 @@ fun sum(a: Int, b: Int) = a + b
 
 (source_file
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters
+    (simple_identifier)
+    (function_value_parameters
       (parameter
         (simple_identifier)
         (user_type
           (type_identifier)
-          (type_arguments
-            (type_projection
-              (user_type
-                (type_identifier)))))))
-    body: (function_body))
+          (type_arguments (type_projection (user_type (type_identifier)))))))
+    (function_body))
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters
+    (simple_identifier)
+    (function_value_parameters
       (parameter
         (simple_identifier)
-        (user_type
-          (type_identifier)))
+        (user_type (type_identifier)))
       (parameter
         (simple_identifier)
-        (user_type
-          (type_identifier))))
-    body: (function_body
+        (user_type (type_identifier))))
+    (function_body
       (additive_expression
         (simple_identifier)
-        (simple_identifier)))))
-
-==================
-Functions with receivers
-==================
-
-fun Int.add(other: Int): Int = this + other
-
---------------------------------------------------------------------------------
-
-(source_file
-  (function_declaration
-    receiver: (user_type
-      (type_identifier))
-    name: (simple_identifier)
-    parameters: (function_value_parameters
-      (parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier))))
-    return_type: (user_type
-      (type_identifier))
-    body: (function_body
-      (additive_expression
-        (this_expression)
         (simple_identifier)))))
 
 ==================
@@ -127,12 +93,10 @@ fun answerToTheUltimateQuestionOfLifeTheUniverseAndEverything(): Int = 42
 
 (source_file
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    return_type: (user_type
-      (type_identifier))
-    body: (function_body
-      (integer_literal))))
+    (simple_identifier)
+    (function_value_parameters)
+    (user_type (type_identifier))
+    (function_body (integer_literal))))
 
 ==================
 Functions with return calls
@@ -146,15 +110,15 @@ fun foo(p0: Int): Long {
 
 (source_file
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters
-      (parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier))))
-    return_type: (user_type
+    (simple_identifier)
+    (function_value_parameters
+    (parameter
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+    (user_type
       (type_identifier))
-    body: (function_body
+    (function_body
       (statements
         (jump_expression
           (call_expression
@@ -175,11 +139,11 @@ override fun boo() = foo()
 
 (source_file
   (function_declaration
-    modifiers: (modifiers
+    (modifiers
       (member_modifier))
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
       (call_expression
         (simple_identifier)
         (call_suffix
@@ -198,9 +162,9 @@ fun test() {
 
 (source_file
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
       (statements
         (assignment
           (directly_assignable_expression
@@ -226,12 +190,11 @@ val anon = fun()
 
 (source_file
   (anonymous_function
-    parameters: (function_value_parameters))
+  (function_value_parameters))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (anonymous_function
-      parameters: (function_value_parameters))))
+    (anonymous_function (function_value_parameters))))
 
 ==================
 Anonymous function with parameters
@@ -244,20 +207,20 @@ val anon = fun(x: Int)
 
 (source_file
   (anonymous_function
-    parameters: (function_value_parameters
+  (function_value_parameters
+    (parameter
+      (simple_identifier)
+      (user_type
+        (type_identifier)))))
+  (property_declaration
+    (variable_declaration
+      (simple_identifier))
+    (anonymous_function
+    (function_value_parameters
       (parameter
         (simple_identifier)
         (user_type
-          (type_identifier)))))
-  (property_declaration
-    variable: (variable_declaration
-      (simple_identifier))
-    expression: (anonymous_function
-      parameters: (function_value_parameters
-        (parameter
-          (simple_identifier)
-          (user_type
-            (type_identifier)))))))
+          (type_identifier)))))))
 
 ==================
 Anonymous function with return type
@@ -270,15 +233,15 @@ val anon = fun(): Int
 
 (source_file
   (anonymous_function
-    parameters: (function_value_parameters)
-    return_type: (user_type
+    (function_value_parameters)
+    (user_type
       (type_identifier)))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (anonymous_function
-      parameters: (function_value_parameters)
-      return_type: (user_type
+    (anonymous_function
+      (function_value_parameters)
+      (user_type
         (type_identifier)))))
 
 ==================
@@ -294,12 +257,12 @@ val anon = fun() { assert(true) }
 
 (source_file
   (anonymous_function
-    parameters: (function_value_parameters)
-    body: (function_body
+    (function_value_parameters)
+    (function_body
       (boolean_literal)))
   (anonymous_function
-    parameters: (function_value_parameters)
-    body: (function_body
+    (function_value_parameters)
+    (function_body
       (statements
         (call_expression
           (simple_identifier)
@@ -308,18 +271,18 @@ val anon = fun() { assert(true) }
               (value_argument
                 (boolean_literal))))))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (anonymous_function
-      parameters: (function_value_parameters)
-      body: (function_body
+    (anonymous_function
+      (function_value_parameters)
+      (function_body
         (boolean_literal))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (anonymous_function
-      parameters: (function_value_parameters)
-      body: (function_body
+    (anonymous_function
+      (function_value_parameters)
+      (function_body
         (statements
           (call_expression
             (simple_identifier)
@@ -338,7 +301,6 @@ fun `this is a test function`() = true
 
 (source_file
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body
-      (boolean_literal))))
+   (simple_identifier)
+   (function_value_parameters)
+   (function_body (boolean_literal))))

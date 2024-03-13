@@ -100,24 +100,24 @@ val y = when(x){
 
 (source_file
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (integer_literal))
+    (integer_literal))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (when_expression
-      subject: (when_subject
+    (when_expression
+      (when_subject
         (simple_identifier))
-      entry: (when_entry
-        condition: (when_condition
+      (when_entry
+        (when_condition
           (integer_literal))
-        body: (control_structure_body
+        (control_structure_body
           (boolean_literal)))
-      entry: (when_entry
-        condition: (when_condition
+      (when_entry
+        (when_condition
           (integer_literal))
-        body: (control_structure_body
+        (control_structure_body
           (boolean_literal))))))
 
 ================================================================================
@@ -132,16 +132,16 @@ when (this) {
 
 (source_file
   (when_expression
-    subject: (when_subject
+    (when_subject
       (this_expression))
-    entry: (when_entry
-      condition: (when_condition
+    (when_entry
+      (when_condition
         (type_test
           (user_type
             (type_identifier)
             (type_arguments
               (type_projection)))))
-      body: (control_structure_body
+      (control_structure_body
         (jump_expression)))))
 
 ================================================================================
@@ -154,13 +154,13 @@ val MyDate.s: String get() = "hello"
 
 (source_file
   (property_declaration
-    receiver: (user_type
+    (user_type
       (type_identifier))
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier)
       (user_type
         (type_identifier)))
-    getter: (getter
+    (getter
       (function_body
         (string_literal)))))
 
@@ -174,9 +174,9 @@ val x = expect(1)
 
 (source_file
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (call_expression
+    (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
@@ -209,11 +209,11 @@ expect fun randomUUID(): String
 
 (source_file
   (function_declaration
-    modifiers: (modifiers
+    (modifiers
       (platform_modifier))
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    return_type: (user_type
+    (simple_identifier)
+    (function_value_parameters)
+    (user_type
       (type_identifier))))
 
 ================================================================================
@@ -264,30 +264,30 @@ val a = a<2>(3)
 
 (source_file
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (comparison_expression
+    (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (comparison_expression
+    (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (comparison_expression
+    (comparison_expression
       (comparison_expression
         (simple_identifier)
         (simple_identifier))
       (simple_identifier)))
   (line_comment)
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (call_expression
+    (call_expression
       (simple_identifier)
       (call_suffix
         (type_arguments
@@ -298,9 +298,9 @@ val a = a<2>(3)
           (value_argument
             (simple_identifier))))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (comparison_expression
+    (comparison_expression
       (comparison_expression
         (simple_identifier)
         (integer_literal))
@@ -324,13 +324,13 @@ foo.forEach { (index, value) -> 2 }
     (call_suffix
       (annotated_lambda
         (lambda_literal
-          parameters: (lambda_parameters
+          (lambda_parameters
             (multi_variable_declaration
               (variable_declaration
                 (simple_identifier))
               (variable_declaration
                 (simple_identifier))))
-          body: (statements
+          (statements
             (integer_literal)))))))
 
 ================================================================================
@@ -346,14 +346,14 @@ when (dir) {
 
 (source_file
   (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
       (statements
         (property_declaration
-          variable: (variable_declaration
+          (variable_declaration
             (simple_identifier))
-          expression: (navigation_expression
+          (navigation_expression
             (simple_identifier)
             (navigation_suffix
               (simple_identifier))))
@@ -373,17 +373,17 @@ when (dir) {
               (simple_identifier)))
           (simple_identifier)))))
   (when_expression
-    subject: (when_subject
+    (when_subject
       (simple_identifier))
-    entry: (when_entry
-      condition: (when_condition
+    (when_entry
+      (when_condition
         (integer_literal))
-      body: (control_structure_body
+      (control_structure_body
         (statements
           (property_declaration
-            variable: (variable_declaration
+            (variable_declaration
               (simple_identifier))
-            expression: (navigation_expression
+            (navigation_expression
               (simple_identifier)
               (navigation_suffix
                 (simple_identifier))))
@@ -422,49 +422,49 @@ val comments = """ // and here """
 
 (source_file
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (call_expression
+    (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (call_expression
+    (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (call_expression
+    (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (call_expression
+    (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
           (value_argument
             (string_literal))))))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (string_literal))
+    (string_literal))
   (property_declaration
-    variable: (variable_declaration
+    (variable_declaration
       (simple_identifier))
-    expression: (string_literal)))
+    (string_literal)))
 
 ================================================================================
 Qualified this/super expressions
@@ -483,23 +483,23 @@ class Square() : Rectangle(), Polygon {
 
 (source_file
   (class_declaration
-    name: (type_identifier)
-    primary_constructor: (primary_constructor)
-    delegation_specifiers: (delegation_specifier
+    (type_identifier)
+    (primary_constructor)
+    (delegation_specifier
       (constructor_invocation
         (user_type
           (type_identifier))
         (value_arguments)))
-    delegation_specifiers: (delegation_specifier
+    (delegation_specifier
       (user_type
         (type_identifier)))
-    body: (class_body
+    (class_body
       (function_declaration
-        modifiers: (modifiers
+        (modifiers
           (member_modifier))
-        name: (simple_identifier)
-        parameters: (function_value_parameters)
-        body: (function_body
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
           (statements
             (call_expression
               (navigation_expression
@@ -536,55 +536,3 @@ class Square() : Rectangle(), Polygon {
                   (simple_identifier)))
               (call_suffix
                 (value_arguments)))))))))
-
-================================================================================
-Try expression
-================================================================================
-
-val x = try {
-    something()
-  } catch (e: SomeException) {
-    handle()
-  } catch (e: SomeOtherException) {
-    handle()
-  } finally {
-    something()
-  }
-
---------------------------------------------------------------------------------
-
-(source_file
-  (property_declaration
-    variable: (variable_declaration
-      (simple_identifier))
-    expression: (try_expression
-      body: (statements
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments))))
-      catch: (catch_block
-        (simple_identifier)
-        (user_type
-          (type_identifier))
-        body: (statements
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments)))))
-      catch: (catch_block
-        (simple_identifier)
-        (user_type
-          (type_identifier))
-        body: (statements
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments)))))
-      finally: (finally_block
-        body: (statements
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments))))))))
-

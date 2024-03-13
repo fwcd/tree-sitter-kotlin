@@ -163,21 +163,3 @@ assertEquals("\u214E\uA7B5\u2CEF", "\u2132\uA7B4\u2CEF".lowercase())
                 (simple_identifier)))
             (call_suffix
               (value_arguments))))))))
-
-================================================================================
-Object literals
-================================================================================
-
-val x = object : D {}
-
---------------------------------------------------------------------------------
-
-(source_file
-  (property_declaration
-    variable: (variable_declaration
-      (simple_identifier))
-    expression: (object_literal
-      delegation_specifiers: (delegation_specifier
-        (user_type
-          (type_identifier)))
-      body: (class_body))))
