@@ -3,7 +3,6 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch:
 
 jobs:
   deploy:
@@ -11,7 +10,21 @@ jobs:
     env:
       EMSCRIPTEN_VERSION: '3.1.55'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - name: Clone gh-pages branch into nested directory
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+      - name: Configure Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Get tag name
+        id: tag
+        run: |
+          tag=$(basename "${{ github.ref }}")
+          echo "tag=$tag" >> $GITHUB_OUTPUT
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
@@ -27,38 +40,30 @@ jobs:
       - name: Build WASM binary
         run: npm run build-wasm
       - name: Deploy to GitHub Releases
-        if: github.event_name != 'workflow_dispatch'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: tree-sitter-kotlin.wasm
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ steps.tag.outputs.tag }}"
+          gh release create "$tag" --title "$tag"
+          gh release upload "$tag" tree-sitter-kotlin.wasm
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+      - name: Deploy to GitHub Pages
+        run: |
+          sha="$(git rev-parse --short HEAD)"
+          tag="${{ steps.tag.outputs.tag }}"
 
-      # TODO: Update this to the new playground layout. This would
-      #       involve deploying the Wasm binary to
-      # 
-      #         assets/tree-sitter-kotlin-<version>/tree-sitter-kotlin.wasm
-      #
-      #       and would also require rewriting the versions in the
-      #       index.html (both the reference to the parser binary and the
-      #       displayed version). Ideally this should be performed by a
-      #       script that generates the index.html automatically. Perhaps
-      #       we could even generate this to automatically download
-      #       web-tree-sitter and maybe even generate playground.js from
-      #       the upstream playground.
-      #
-      #       Also, we would likely want to replace peaceiris/actions-gh-pages
-      #       with the `gh` command-line tool, which should already be
-      #       preinstalled in the runner.
+          echo "==> Replacing Wasm binary..."
+          rm -rf gh-pages/assets/tree-sitter-kotlin*
+          mkdir -p "gh-pages/assets/tree-sitter-kotlin-$tag"
+          cp tree-sitter-kotlin.wasm "gh-pages/assets/tree-sitter-kotlin-$tag"
+          tree gh-pages/assets
 
-      # - name: Set up folder for GitHub Pages deployment
-      #   run: |
-      #     mkdir public
-      #     cp tree-sitter-kotlin.wasm public/tree-sitter-parser.wasm
-      # - name: Deploy to GitHub Pages
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./public
-      #     keep_files: true
-      #     user_name: 'github-actions[bot]'
-      #     user_email: 'github-actions[bot]@users.noreply.github.com'
+          echo "==> Updating version on website..."
+          sed -i "s|\(LANGUAGE_BASE_URL = \"\)[^\"]*\(\"\)|\1$tag\2|g" gh-pages/index.html
+          sed -i "s|\(<span class=\"version\">\)[^<]*\(</span>\)|\1$tag\2|g" gh-pages/index.html
+
+          echo "==> Committing and pushing gh-pages branch..."
+          cd gh-pages
+          git add .
+          git commit -m "Deploy tree-sitter-kotlin $tag ($sha)"
+          git push
