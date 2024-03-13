@@ -25,6 +25,8 @@ jobs:
           diff=`git diff HEAD -- src`
           echo "$diff"
           test -z "$diff"
+      - name: Output parser size
+        run: du -sh src/* | sort -h
       - name: Run tests
         run: npm test
       - name: Set up Rust
