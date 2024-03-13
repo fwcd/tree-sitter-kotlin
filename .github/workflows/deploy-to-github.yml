@@ -27,6 +27,7 @@ jobs:
       - name: Build WASM binary
         run: npm run build-wasm
       - name: Deploy to GitHub Releases
+        if: github.event_name != 'workflow_dispatch'
         uses: ncipollo/release-action@v1
         with:
           artifacts: tree-sitter-kotlin.wasm
