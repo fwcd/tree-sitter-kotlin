@@ -32,15 +32,33 @@ jobs:
         with:
           artifacts: tree-sitter-kotlin.wasm
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set up folder for GitHub Pages deployment
-        run: |
-          mkdir public
-          cp tree-sitter-kotlin.wasm public/tree-sitter-parser.wasm
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          keep_files: true
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+
+      # TODO: Update this to the new playground layout. This would
+      #       involve deploying the Wasm binary to
+      # 
+      #         assets/tree-sitter-kotlin-<version>/tree-sitter-kotlin.wasm
+      #
+      #       and would also require rewriting the versions in the
+      #       index.html (both the reference to the parser binary and the
+      #       displayed version). Ideally this should be performed by a
+      #       script that generates the index.html automatically. Perhaps
+      #       we could even generate this to automatically download
+      #       web-tree-sitter and maybe even generate playground.js from
+      #       the upstream playground.
+      #
+      #       Also, we would likely want to replace peaceiris/actions-gh-pages
+      #       with the `gh` command-line tool, which should already be
+      #       preinstalled in the runner.
+
+      # - name: Set up folder for GitHub Pages deployment
+      #   run: |
+      #     mkdir public
+      #     cp tree-sitter-kotlin.wasm public/tree-sitter-parser.wasm
+      # - name: Deploy to GitHub Pages
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./public
+      #     keep_files: true
+      #     user_name: 'github-actions[bot]'
+      #     user_email: 'github-actions[bot]@users.noreply.github.com'
