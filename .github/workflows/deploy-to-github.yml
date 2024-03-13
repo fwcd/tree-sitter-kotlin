@@ -59,7 +59,7 @@ jobs:
           tree gh-pages/assets
 
           echo "==> Updating version on website..."
-          sed -i "s|\(LANGUAGE_BASE_URL = \"\)[^\"]*\(\"\)|\1$tag\2|g" gh-pages/index.html
+          sed -i "s|\(LANGUAGE_BASE_URL = \"\)[^\"]*\(\"\)|\1assets/tree-sitter-kotlin-$tag\2|g" gh-pages/index.html
           sed -i "s|\(<span class=\"version\">\)[^<]*\(</span>\)|\1$tag\2|g" gh-pages/index.html
 
           echo "==> Committing and pushing gh-pages branch..."
