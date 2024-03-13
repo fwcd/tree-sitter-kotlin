@@ -175,13 +175,7 @@ let tree;
           const start = cursor.startPosition;
           const end = cursor.endPosition;
           const id = cursor.nodeId;
-          let fieldName = cursor.currentFieldName();
-          if (fieldName) {
-            fieldName += ': ';
-          } else {
-            fieldName = '';
-          }
-          row = `<div>${'  '.repeat(indentLevel)}${fieldName}<a class='plain' href="#" data-id=${id} data-range="${start.row},${start.column},${end.row},${end.column}">${displayName}</a> [${start.row}, ${start.column}] - [${end.row}, ${end.column}])`;
+          row = `<div>${'  '.repeat(indentLevel)}<a class='plain' href="#" data-id=${id} data-range="${start.row},${start.column},${end.row},${end.column}">${displayName}</a> [${start.row}, ${start.column}] - [${end.row}, ${end.column}])`;
           finishedRow = true;
         }
 
