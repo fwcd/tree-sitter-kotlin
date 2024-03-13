@@ -37,7 +37,7 @@ jobs:
         run: npm install
       - name: Compile grammar
         run: npm run generate
-      - name: Build WASM binary
+      - name: Build Wasm binary
         run: npm run build-wasm
       - name: Deploy to GitHub Releases
         run: |
