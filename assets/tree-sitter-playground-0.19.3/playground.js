@@ -39,8 +39,7 @@ let tree;
   const parser = new TreeSitter();
   const codeEditor = CodeMirror.fromTextArea(codeInput, {
     lineNumbers: true,
-    showCursorWhenSelecting: true,
-    mode: 'text/x-kotlin'
+    showCursorWhenSelecting: true
   });
 
   const queryEditor = CodeMirror.fromTextArea(queryInput, {
@@ -104,7 +103,7 @@ let tree;
   }
 
   async function handleCodeChange(editor, changes) {
-    const newText = codeEditor.getValue() + '\n';
+    const newText = codeEditor.getValue();
     const edits = tree && changes && changes.map(treeEditForEditorChange);
 
     const start = performance.now();
@@ -182,7 +181,7 @@ let tree;
           } else {
             fieldName = '';
           }
-          row = `<div>${'  '.repeat(indentLevel)}${fieldName}<a class='plain' href="#" data-id=${id} data-range="${start.row},${start.column},${end.row},${end.column}">${displayName}</a> [${start.row}, ${start.column}] - [${end.row}, ${end.column}]`;
+          row = `<div>${'  '.repeat(indentLevel)}${fieldName}<a class='plain' href="#" data-id=${id} data-range="${start.row},${start.column},${end.row},${end.column}">${displayName}</a> [${start.row}, ${start.column}] - [${end.row}, ${end.column}])`;
           finishedRow = true;
         }
 
@@ -421,11 +420,19 @@ let tree;
     return COLORS_BY_INDEX[id % COLORS_BY_INDEX.length];
   }
 
+  function getLocalStorageItem(key) {
+    return localStorage.getItem(`${document.title}:${key}`);
+  }
+
+  function setLocalStorageItem(key, value) {
+    localStorage.setItem(`${document.title}:${key}`, value);
+  }
+
   function loadState() {
-    const language = localStorage.getItem("language");
-    const sourceCode = localStorage.getItem("sourceCode");
-    const query = localStorage.getItem("query");
-    const queryEnabled = localStorage.getItem("queryEnabled");
+    const language = getLocalStorageItem("language");
+    const sourceCode = getLocalStorageItem("sourceCode");
+    const query = getLocalStorageItem("query");
+    const queryEnabled = getLocalStorageItem("queryEnabled");
     if (language != null && sourceCode != null && query != null) {
       queryInput.value = query;
       codeInput.value = sourceCode;
@@ -435,14 +442,14 @@ let tree;
   }
 
   function saveState() {
-    localStorage.setItem("language", languageSelect.value);
-    localStorage.setItem("sourceCode", codeEditor.getValue());
+    setLocalStorageItem("language", languageSelect.value);
+    setLocalStorageItem("sourceCode", codeEditor.getValue());
     saveQueryState();
   }
 
   function saveQueryState() {
-    localStorage.setItem("queryEnabled", queryCheckbox.checked);
-    localStorage.setItem("query", queryEditor.getValue());
+    setLocalStorageItem("queryEnabled", queryCheckbox.checked);
+    setLocalStorageItem("query", queryEditor.getValue());
   }
 
   function debounce(func, wait, immediate) {
