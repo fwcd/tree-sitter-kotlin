@@ -209,10 +209,7 @@ module.exports = grammar({
     class_declaration: $ => prec.right(choice(
       seq(
         optional($.modifiers),
-        choice(
-          "class",
-          seq(optional("fun"), "interface"),
-        ),
+        choice("class", "interface"),
         alias($.simple_identifier, $.type_identifier),
         optional($.type_parameters),
         optional($.primary_constructor),
