@@ -351,8 +351,25 @@
                     "value": "class"
                   },
                   {
-                    "type": "STRING",
-                    "value": "interface"
+                    "type": "SEQ",
+                    "members": [
+                      {
+                        "type": "CHOICE",
+                        "members": [
+                          {
+                            "type": "STRING",
+                            "value": "fun"
+                          },
+                          {
+                            "type": "BLANK"
+                          }
+                        ]
+                      },
+                      {
+                        "type": "STRING",
+                        "value": "interface"
+                      }
+                    ]
                   }
                 ]
               },
@@ -6341,3 +6358,4 @@
   "inline": [],
   "supertypes": []
 }
+

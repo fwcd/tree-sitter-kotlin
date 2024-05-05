@@ -111,6 +111,43 @@ internal open class Test {
         (simple_identifier)
         (function_value_parameters)))))
 
+
+================================================================================
+Interfaces
+================================================================================
+
+interface KRunnable {
+   fun invoke()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
+
+================================================================================
+Functional Interfaces
+================================================================================
+
+fun interface KRunnable {
+   fun invoke()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
+
 ================================================================================
 Objects
 ================================================================================
