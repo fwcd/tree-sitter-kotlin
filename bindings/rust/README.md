@@ -17,6 +17,6 @@ let code = r#"
   )
 "#;
 let mut parser = Parser::new();
-parser.set_language(tree_sitter_kotlin::language()).expect("Error loading Kotlin grammar");
+parser.set_language(&tree_sitter_kotlin::language()).expect("Error loading Kotlin grammar");
 let parsed = parser.parse(code, None);
 ```
