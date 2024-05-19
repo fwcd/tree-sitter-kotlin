@@ -6054,7 +6054,7 @@
         },
         {
           "type": "PATTERN",
-          "value": "[uU][L]?"
+          "value": "[uU]L?"
         }
       ]
     },
