@@ -3818,7 +3818,7 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_string_content"
+                "name": "string_content"
               },
               {
                 "type": "SYMBOL",
@@ -6335,9 +6335,10 @@
     },
     {
       "type": "SYMBOL",
-      "name": "_string_content"
+      "name": "string_content"
     }
   ],
   "inline": [],
   "supertypes": []
 }
+

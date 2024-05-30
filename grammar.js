@@ -118,7 +118,7 @@ module.exports = grammar({
     $.multiline_comment,
     $._string_start,
     $._string_end,
-    $._string_content,
+    $.string_content,
   ],
 
   extras: $ => [
@@ -762,7 +762,7 @@ module.exports = grammar({
 
     string_literal: $ => seq(
       $._string_start,
-      repeat(choice($._string_content, $._interpolation)),
+      repeat(choice($.string_content, $._interpolation)),
       $._string_end,
     ),
 
