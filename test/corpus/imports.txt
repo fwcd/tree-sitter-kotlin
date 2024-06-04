@@ -1,0 +1,64 @@
+==================
+simple import
+==================
+
+import pkg
+
+---
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)))))
+
+==================
+qualified import
+==================
+
+import a.b.c
+
+---
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier)))))
+
+==================
+import alias
+==================
+
+import a.b.c as x
+
+---
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier))
+      (import_alias
+        (simple_identifier)))))
+
+==================
+star import
+==================
+
+import a.b.c.*
+
+---
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier))
+      (star_import))))

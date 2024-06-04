@@ -168,11 +168,13 @@ module.exports = grammar({
     import_header: $ => seq(
       "import",
       $.identifier,
-      optional(choice(seq(".*"), $.import_alias)),
+      optional(choice($.star_import, $.import_alias)),
       $._semi
     ),
 
-    import_alias: $ => seq("as", alias($.simple_identifier, $.type_identifier)),
+    star_import: $ => seq(".*"),
+
+    import_alias: $ => seq("as", $.simple_identifier),
 
     top_level_object: $ => seq($._declaration, optional($._semi)),
 

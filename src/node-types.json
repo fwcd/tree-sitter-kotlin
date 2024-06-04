@@ -4209,7 +4209,7 @@
       "required": true,
       "types": [
         {
-          "type": "type_identifier",
+          "type": "simple_identifier",
           "named": true
         }
       ]
@@ -4229,6 +4229,10 @@
         },
         {
           "type": "import_alias",
+          "named": true
+        },
+        {
+          "type": "star_import",
           "named": true
         }
       ]
@@ -7589,6 +7593,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "star_import",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "statements",

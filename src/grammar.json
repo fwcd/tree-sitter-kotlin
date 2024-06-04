@@ -175,13 +175,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ".*"
-                    }
-                  ]
+                  "type": "SYMBOL",
+                  "name": "star_import"
                 },
                 {
                   "type": "SYMBOL",
@@ -200,6 +195,15 @@
         }
       ]
     },
+    "star_import": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": ".*"
+        }
+      ]
+    },
     "import_alias": {
       "type": "SEQ",
       "members": [
@@ -208,13 +212,8 @@
           "value": "as"
         },
         {
-          "type": "ALIAS",
-          "content": {
-            "type": "SYMBOL",
-            "name": "simple_identifier"
-          },
-          "named": true,
-          "value": "type_identifier"
+          "type": "SYMBOL",
+          "name": "simple_identifier"
         }
       ]
     },
