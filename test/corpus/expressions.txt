@@ -142,7 +142,8 @@ when (this) {
             (type_arguments
               (type_projection)))))
       (control_structure_body
-        (jump_expression)))))
+        (jump_expression
+          (null_literal))))))
 
 ================================================================================
 Value declaration with receiver type

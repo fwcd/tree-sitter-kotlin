@@ -304,3 +304,17 @@ fun `this is a test function`() = true
    (simple_identifier)
    (function_value_parameters)
    (function_body (boolean_literal))))
+
+==================
+Function with null literal as expression body
+==================
+
+fun f() = null
+
+---
+
+(source_file
+  (function_declaration
+   (simple_identifier)
+   (function_value_parameters)
+   (function_body (null_literal))))

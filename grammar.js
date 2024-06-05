@@ -755,7 +755,7 @@ module.exports = grammar({
       $.bin_literal,
       $.character_literal,
       $.real_literal,
-      "null",
+      $.null_literal,
       $.long_literal,
       $.unsigned_literal
     ),
@@ -1195,6 +1195,10 @@ module.exports = grammar({
     character_escape_seq: $ => choice(
       $._uni_character_literal,
       $._escaped_identifier
+    ),
+
+    null_literal: $ => seq(
+      "null"
     ),
 
     // ==========

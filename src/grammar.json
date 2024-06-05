@@ -3791,8 +3791,8 @@
           "name": "real_literal"
         },
         {
-          "type": "STRING",
-          "value": "null"
+          "type": "SYMBOL",
+          "name": "null_literal"
         },
         {
           "type": "SYMBOL",
@@ -6145,6 +6145,15 @@
         {
           "type": "SYMBOL",
           "name": "_escaped_identifier"
+        }
+      ]
+    },
+    "null_literal": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "null"
         }
       ]
     },

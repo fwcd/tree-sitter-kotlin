@@ -18,7 +18,8 @@ class Foo(){
     (class_body
       (property_declaration
         (variable_declaration
-          (simple_identifier)))
+          (simple_identifier))
+        (null_literal))
       (secondary_constructor
       (function_value_parameters
         (parameter
