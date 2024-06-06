@@ -75,16 +75,16 @@ class Strings {
        (simple_identifier)
        (function_value_parameters)
        (function_body
-        (string_literal)))
+        (string_literal (string_content))))
       (function_declaration
        (simple_identifier)
        (function_value_parameters)
        (function_body
         (additive_expression
           (additive_expression
-              (string_literal)
-              (string_literal))
-            (string_literal)))))))
+              (string_literal (string_content))
+              (string_literal (string_content)))
+            (string_literal (string_content))))))))
 
 ================================================================================
 Class with modifiers

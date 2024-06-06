@@ -76,7 +76,7 @@ sum(1, 2)
     (call_suffix
       (value_arguments
         (value_argument
-          (string_literal)))))
+          (string_literal (string_content))))))
   (call_expression
     (simple_identifier)
     (call_suffix
@@ -162,7 +162,7 @@ val MyDate.s: String get() = "hello"
         (type_identifier)))
     (getter
       (function_body
-        (string_literal)))))
+        (string_literal (string_content))))))
 
 ================================================================================
 Expect as an expression
@@ -429,7 +429,7 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
     (variable_declaration
       (simple_identifier))
@@ -438,7 +438,7 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
     (variable_declaration
       (simple_identifier))
@@ -447,7 +447,7 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
     (variable_declaration
       (simple_identifier))
@@ -456,15 +456,15 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
     (variable_declaration
       (simple_identifier))
-    (string_literal))
+    (string_literal (string_content)))
   (property_declaration
     (variable_declaration
       (simple_identifier))
-    (string_literal)))
+    (string_literal (string_content))))
 
 ================================================================================
 Qualified this/super expressions
