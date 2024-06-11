@@ -206,18 +206,19 @@ else boo()
 
 (source_file
   (if_expression
-    (prefix_expression
+    condition: (prefix_expression
       (simple_identifier))
-    (control_structure_body
+    consequence: (control_structure_body
       (integer_literal))
-    (control_structure_body
-      (call_expression
-        (simple_identifier)
-        (call_suffix
-          (value_arguments))))))
+    alternative:
+      (control_structure_body
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))))
 
 ================================================================================
-Else after newline
+Else on the same line
 ================================================================================
 
 if (!foo) 3 else boo()
@@ -226,12 +227,13 @@ if (!foo) 3 else boo()
 
 (source_file
   (if_expression
-    (prefix_expression
+    condition: (prefix_expression
       (simple_identifier))
-    (control_structure_body
+    consequence: (control_structure_body
       (integer_literal))
-    (control_structure_body
-      (call_expression
-        (simple_identifier)
-        (call_suffix
-          (value_arguments))))))
+    alternative:
+      (control_structure_body
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))))
