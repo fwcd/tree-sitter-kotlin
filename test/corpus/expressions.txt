@@ -554,3 +554,53 @@ class Square() : Rectangle(), Polygon {
                   (simple_identifier)))
               (call_suffix
                 (value_arguments)))))))))
+
+================================================================================
+If else-if else expression
+================================================================================
+
+if (cond1) {
+	println("cond1")
+} else if (cond2) {
+	println("cond2")
+} else {
+	println("cond3")
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_expression
+    (simple_identifier)
+    (control_structure_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content))))))))
+    (else
+      (control_structure_body
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments
+                    (value_argument
+                      (string_literal
+                        (string_content))))))))
+          (else
+            (control_structure_body
+              (statements
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments
+                      (value_argument
+                        (string_literal
+                          (string_content))))))))))))))

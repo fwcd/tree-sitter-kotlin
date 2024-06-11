@@ -4260,10 +4260,6 @@
                 "name": "control_structure_body"
               },
               {
-                "type": "STRING",
-                "value": ";"
-              },
-              {
                 "type": "SEQ",
                 "members": [
                   {
@@ -4291,28 +4287,41 @@
                     ]
                   },
                   {
-                    "type": "STRING",
-                    "value": "else"
-                  },
-                  {
-                    "type": "CHOICE",
-                    "members": [
-                      {
-                        "type": "SYMBOL",
-                        "name": "control_structure_body"
-                      },
-                      {
-                        "type": "STRING",
-                        "value": ";"
-                      }
-                    ]
+                    "type": "SYMBOL",
+                    "name": "else"
                   }
                 ]
+              },
+              {
+                "type": "STRING",
+                "value": ";"
               }
             ]
           }
         ]
       }
+    },
+    "else": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "else"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "control_structure_body"
+            },
+            {
+              "type": "STRING",
+              "value": ";"
+            }
+          ]
+        }
+      ]
     },
     "when_subject": {
       "type": "SEQ",

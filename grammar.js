@@ -832,15 +832,19 @@ module.exports = grammar({
       "(", $._expression, ")",
       choice(
         $.control_structure_body,
-        ";",
         seq(
           optional($.control_structure_body),
           optional(";"),
-          "else",
-          choice($.control_structure_body, ";")
-        )
+          $.else
+        ),
+        ";"
       )
     )),
+
+    else: $ => seq(
+      "else",
+      choice($.control_structure_body, ";")
+    ),
 
     when_subject: $ => seq(
       "(",
