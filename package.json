@@ -5,6 +5,7 @@
   "main": "bindings/node",
   "types": "bindings/node",
   "scripts": {
+    "build": "tree-sitter generate --no-bindings",
     "test": "tree-sitter test",
     "install": "node-gyp-build",
     "generate": "tree-sitter generate",
