@@ -2,34 +2,70 @@ name: Build
 
 on:
   push:
-    branches:
-    - main
+    branches: [main]
+    paths:
+      - grammar.js
+      - src/**
+      - test/**
+      - bindings/**
+      - binding.gyp
   pull_request:
-  workflow_dispatch:
+    paths:
+      - grammar.js
+      - src/**
+      - test/**
+      - bindings/**
+      - binding.gyp
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  test:
+    name: Test parser
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-14]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Set up PATH
+        uses: actions/github-script@v7
+        with:
+          script: core.addPath(process.cwd() + '/node_modules/.bin')
+      - name: Run parser and binding tests
+        uses: tree-sitter/parser-test-action@v2
+        with:
+          test-rust: true
+          generate: ${{ runner.os == 'Linux' }}
+      - name: Output generated file size
+        if: runner.os == 'Linux'
+        run: du -sh src/*.json src/parser.c | sort -rh
+      - name: Parse sample files
+        uses: tree-sitter/parse-action@v4
+        with:
+          files: examples/Logger.kt
+  fuzz:
+    name: Fuzz scanner
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Node
-        uses: actions/setup-node@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          node-version: '18'
-      - name: Install dependencies
-        run: npm install
-      - name: Generate parser
-        run: npm run generate
-      - name: Verify that generated parser matches the repository
-        run: |
-          diff=`git diff HEAD -- src`
-          echo "$diff"
-          test -z "$diff"
-      - name: Output parser size
-        run: du -sh src/* | sort -h
-      - name: Run tests
-        run: npm test
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Build and test crate
-        run: cargo test
+          fetch-depth: 2
+      - name: Check for scanner changes
+        id: scanner-check
+        run: |-
+          if git diff --quiet HEAD^ -- src/scanner.c; then
+            printf 'changed=false\n' >> "$GITHUB_OUTPUT"
+          else
+            printf 'changed=true\n' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run the fuzzer
+        uses: tree-sitter/fuzz-action@v4
+        if: steps.scanner-check.outputs.changed == 'true'
