@@ -27,6 +27,13 @@ dist/
 *.egg-info
 *.whl
 
+# Gradle artifacts
+.gradle/
+.cmake/
+gradle/
+gradlew
+gradlew.bat
+
 # C artifacts
 *.a
 *.so
