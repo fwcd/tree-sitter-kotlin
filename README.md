@@ -34,9 +34,9 @@ Note that the grammar is written completely in JavaScript (`grammar.js`), the ot
 
 ### Testing
 
-To run the unit tests, run:
+To run the parser tests, run:
 
->`npm run test`
+>`npm x -- tree-sitter test`
 
 ## WebAssembly
 
@@ -52,7 +52,8 @@ After compiling the grammar to WebAssembly, you can invoke
 
 >`npm run playground`
 
-to launch an interactive editing environment that displays the parsed syntax tree on-the-fly in the browser. You can also view a deployed version of this playground [on the web](https://fwcd.github.io/tree-sitter-kotlin).
+to launch an interactive editing environment that displays the parsed syntax tree on-the-fly in the browser.
+You can also view a deployed version of this playground [on the web](https://fwcd.github.io/tree-sitter-kotlin).
 
 ![Screenshot](playground-screenshot.png)
 
