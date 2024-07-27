@@ -55,6 +55,7 @@ Multiple file annotations
 Imports
 ================================================================================
 
+import java.util.*
 import java.util.Scanner
 import java.util.StringBuilder
 
@@ -67,6 +68,11 @@ fun main() {
 
 (source_file
   (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))
+      (wildcard_import))
     (import_header
       (identifier
         (simple_identifier)

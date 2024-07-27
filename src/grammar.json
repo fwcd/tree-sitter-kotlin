@@ -165,8 +165,13 @@
           "value": "import"
         },
         {
-          "type": "SYMBOL",
-          "name": "identifier"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_import_identifier"
+          },
+          "named": true,
+          "value": "identifier"
         },
         {
           "type": "CHOICE",
@@ -179,7 +184,11 @@
                   "members": [
                     {
                       "type": "STRING",
-                      "value": ".*"
+                      "value": "."
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "wildcard_import"
                     }
                   ]
                 },
@@ -199,6 +208,13 @@
           "name": "_semi"
         }
       ]
+    },
+    "wildcard_import": {
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "STRING",
+        "value": "*"
+      }
     },
     "import_alias": {
       "type": "SEQ",
@@ -5460,6 +5476,32 @@
               }
             ]
           }
+        }
+      ]
+    },
+    "_import_identifier": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "simple_identifier"
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_import_identifier"
+            },
+            {
+              "type": "STRING",
+              "value": "."
+            },
+            {
+              "type": "SYMBOL",
+              "name": "simple_identifier"
+            }
+          ]
         }
       ]
     },

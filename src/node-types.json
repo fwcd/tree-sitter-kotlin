@@ -4230,6 +4230,10 @@
         {
           "type": "import_alias",
           "named": true
+        },
+        {
+          "type": "wildcard_import",
+          "named": true
         }
       ]
     }
@@ -9165,10 +9169,6 @@
     "named": false
   },
   {
-    "type": ".*",
-    "named": false
-  },
-  {
     "type": "..",
     "named": false
   },
@@ -9591,6 +9591,10 @@
   {
     "type": "while",
     "named": false
+  },
+  {
+    "type": "wildcard_import",
+    "named": true
   },
   {
     "type": "{",
