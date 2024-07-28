@@ -9,3 +9,6 @@ bindings:
 
 examples:
 - examples/**/*
+
+scanner:
+- src/scanner.c
