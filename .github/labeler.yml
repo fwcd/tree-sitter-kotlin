@@ -1,14 +1,24 @@
 ci-cd:
-- .github/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+        - .github/**/*
 
 grammar:
-- grammar.js
+  - changed-files:
+    - any-glob-to-any-file:
+        - grammar.js
 
 bindings:
-- bindings/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+        - bindings/**/*
 
 examples:
-- examples/**/*
+  - changed-files:
+    - any-glob-to-any-file:
+        - examples/**/*
 
 scanner:
-- src/scanner.c
+  - changed-files:
+    - any-glob-to-any-file:
+        - src/scanner.c
