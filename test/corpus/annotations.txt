@@ -25,6 +25,7 @@ class Empty(@field:Test val x: Boolean)
         (type_identifier)
         (primary_constructor (class_parameter
             (modifiers (annotation (use_site_target) (user_type (type_identifier))))
+            (binding_pattern_kind)
             (simple_identifier)
             (user_type (type_identifier))))))
 
@@ -40,6 +41,7 @@ var x: Int
 (source_file
     (property_declaration
         (modifiers (annotation (use_site_target) (user_type (type_identifier)) (user_type (type_identifier))))
+        (binding_pattern_kind)
         (variable_declaration (simple_identifier) (user_type (type_identifier)))))
 
 ==================
@@ -62,6 +64,7 @@ class X {
           (annotation (user_type (type_identifier)))
           (annotation (user_type (type_identifier)))
           (member_modifier))
+        (binding_pattern_kind)
         (variable_declaration (simple_identifier) (user_type (type_identifier)))
       )
     )

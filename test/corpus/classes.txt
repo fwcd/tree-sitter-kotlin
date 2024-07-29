@@ -147,10 +147,12 @@ data class Vector2D(
     (type_identifier)
     (primary_constructor
       (class_parameter
+        (binding_pattern_kind)
         (simple_identifier)
         (user_type
           (type_identifier)))
       (class_parameter
+        (binding_pattern_kind)
         (simple_identifier)
         (user_type
           (type_identifier))))))
@@ -213,18 +215,21 @@ class Something {
     (type_identifier)
     (class_body
       (property_declaration
+        (binding_pattern_kind)
         (variable_declaration
           (simple_identifier)
           (user_type
             (type_identifier)))
         (integer_literal))
       (property_declaration
+        (binding_pattern_kind)
         (variable_declaration
           (simple_identifier)
           (nullable_type
             (user_type
               (type_identifier)))))
       (property_declaration
+        (binding_pattern_kind)
         (variable_declaration
           (simple_identifier)
           (user_type
@@ -298,6 +303,7 @@ enum class Color(val rgb: Int) {
     (type_identifier)
     (primary_constructor
       (class_parameter
+        (binding_pattern_kind)
         (simple_identifier)
         (user_type
           (type_identifier))))
@@ -351,10 +357,12 @@ data class JwtConfiguration(
     (type_identifier)
     (primary_constructor
       (class_parameter
+        (binding_pattern_kind)
         (simple_identifier)
         (user_type
           (type_identifier)))
       (class_parameter
+        (binding_pattern_kind)
         (simple_identifier)
         (user_type
           (type_identifier))))))
@@ -380,6 +388,7 @@ value class Password(private val s: String)
       (class_parameter
         (modifiers
           (visibility_modifier))
+        (binding_pattern_kind)
         (simple_identifier)
         (user_type
           (type_identifier))))))

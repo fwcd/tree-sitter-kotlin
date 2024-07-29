@@ -50,12 +50,14 @@ val ty x get () = 3
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (getter
       (function_body
         (integer_literal))))
   (property_declaration
+    (binding_pattern_kind)
     (user_type
       (type_identifier))
     (variable_declaration

@@ -100,10 +100,12 @@ val y = when(x){
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (integer_literal))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (when_expression
@@ -154,6 +156,7 @@ val MyDate.s: String get() = "hello"
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (user_type
       (type_identifier))
     (variable_declaration
@@ -174,6 +177,7 @@ val x = expect(1)
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -264,18 +268,21 @@ val a = a<2>(3)
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
@@ -285,6 +292,7 @@ val a = a<2>(3)
       (simple_identifier)))
   (line_comment)
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -298,6 +306,7 @@ val a = a<2>(3)
           (value_argument
             (simple_identifier))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
@@ -351,6 +360,7 @@ when (dir) {
     (function_body
       (statements
         (property_declaration
+          (binding_pattern_kind)
           (variable_declaration
             (simple_identifier))
           (navigation_expression
@@ -381,6 +391,7 @@ when (dir) {
       (control_structure_body
         (statements
           (property_declaration
+            (binding_pattern_kind)
             (variable_declaration
               (simple_identifier))
             (navigation_expression
@@ -422,6 +433,7 @@ val comments = """ // and here """
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -431,6 +443,7 @@ val comments = """ // and here """
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -440,6 +453,7 @@ val comments = """ // and here """
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -449,6 +463,7 @@ val comments = """ // and here """
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -458,10 +473,12 @@ val comments = """ // and here """
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (string_literal (string_content)))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (string_literal (string_content))))

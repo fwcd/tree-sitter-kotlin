@@ -245,9 +245,11 @@ module.exports = grammar({
       ")"
     ),
 
+    binding_pattern_kind: $ => choice("val", "var"),
+
     class_parameter: $ => seq(
       optional($.modifiers),
-      optional(choice("val", "var")),
+      optional($.binding_pattern_kind),
       $.simple_identifier,
       ":",
       $._type,
@@ -365,7 +367,7 @@ module.exports = grammar({
 
     property_declaration: $ => prec.right(seq(
       optional($.modifiers),
-      choice("val", "var"),
+      $.binding_pattern_kind,
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
