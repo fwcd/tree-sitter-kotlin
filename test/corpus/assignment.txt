@@ -64,4 +64,4 @@ fun main(){
             (simple_identifier)
             (indexing_suffix
               (integer_literal)))
-          (string_literal))))))
+          (string_literal (string_content)))))))

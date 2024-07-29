@@ -228,10 +228,10 @@ a as Foo(x = "hi", y = "bar")
       (value_arguments
         (value_argument
           (simple_identifier)
-          (string_literal))
+          (string_literal (string_content)))
         (value_argument
           (simple_identifier)
-          (string_literal))))))
+          (string_literal (string_content)))))))
 
 ================================================================================
 Type constructor with trailing comma
@@ -251,10 +251,10 @@ a as Foo(x = "hi", y = "bar",)
       (value_arguments
         (value_argument
           (simple_identifier)
-          (string_literal))
+          (string_literal (string_content)))
         (value_argument
           (simple_identifier)
-          (string_literal))))))
+          (string_literal (string_content)))))))
 
 ================================================================================
 Type alias with type parameters

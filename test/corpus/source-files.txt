@@ -15,7 +15,7 @@ val x = 4
         (type_identifier))
       (value_arguments
         (value_argument
-          (string_literal)))))
+          (string_literal (string_content))))))
   (property_declaration
     (variable_declaration
       (simple_identifier))
@@ -41,7 +41,7 @@ Multiple file annotations
         (type_identifier))
       (value_arguments
         (value_argument
-          (string_literal)))))
+          (string_literal (string_content))))))
   (file_annotation
     (constructor_invocation
       (user_type
