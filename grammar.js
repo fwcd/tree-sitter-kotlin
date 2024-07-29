@@ -1184,8 +1184,7 @@ module.exports = grammar({
 
     unsigned_literal: $ => seq(
       choice($.integer_literal, $.hex_literal, $.bin_literal),
-      /[uU]/,
-      optional("L")
+      /[uU]L?/
     ),
 
     long_literal: $ => seq(

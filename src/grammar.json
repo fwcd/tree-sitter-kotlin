@@ -6096,19 +6096,7 @@
         },
         {
           "type": "PATTERN",
-          "value": "[uU]"
-        },
-        {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "L"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
+          "value": "[uU]L?"
         }
       ]
     },
