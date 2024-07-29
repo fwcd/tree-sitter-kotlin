@@ -9,8 +9,10 @@
     "install": "node-gyp-build",
     "generate": "tree-sitter generate",
     "parse": "tree-sitter parse",
-    "build-wasm": "tree-sitter build-wasm",
+    "build-wasm": "tree-sitter build --wasm",
     "playground": "tree-sitter playground",
+    "prestart": "npm run build-wasm",
+    "start": "npm run playground",
     "prebuildify": "prebuildify --napi --strip"
   },
   "repository": {
