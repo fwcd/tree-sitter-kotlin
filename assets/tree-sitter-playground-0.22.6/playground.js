@@ -1,7 +1,7 @@
 let tree;
 
 (async () => {
-  const CAPTURE_REGEX = /@\s*([\w\._-]+)/g;
+  const CAPTURE_REGEX = /@\s*([\w._-]+)/g;
   const COLORS_BY_INDEX = [
     'blue',
     'chocolate',
@@ -17,8 +17,6 @@ let tree;
     'red',
     'sienna',
   ];
-
-  const scriptURL = document.currentScript.getAttribute('src');
 
   const codeInput = document.getElementById('code-input');
   const languageSelect = document.getElementById('language-select');
@@ -102,8 +100,8 @@ let tree;
     handleQueryChange();
   }
 
-  async function handleCodeChange(editor, changes) {
-    const newText = codeEditor.getValue();
+  async function handleCodeChange(_editor, changes) {
+    const newText = `${codeEditor.getValue()}\n`;
     const edits = tree && changes && changes.map(treeEditForEditorChange);
 
     const start = performance.now();
@@ -128,9 +126,9 @@ let tree;
     isRendering++;
     const cursor = tree.walk();
 
-    let currentRenderCount = parseCount;
+    const currentRenderCount = parseCount;
     let row = '';
-    let rows = [];
+    const rows = [];
     let finishedRow = false;
     let visitedChildren = false;
     let indentLevel = 0;
@@ -175,7 +173,13 @@ let tree;
           const start = cursor.startPosition;
           const end = cursor.endPosition;
           const id = cursor.nodeId;
-          row = `<div>${'  '.repeat(indentLevel)}<a class='plain' href="#" data-id=${id} data-range="${start.row},${start.column},${end.row},${end.column}">${displayName}</a> [${start.row}, ${start.column}] - [${end.row}, ${end.column}])`;
+          let fieldName = cursor.currentFieldName;
+          if (fieldName) {
+            fieldName += ': ';
+          } else {
+            fieldName = '';
+          }
+          row = `<div>${'  '.repeat(indentLevel)}${fieldName}<a class='plain' href="#" data-id=${id} data-range="${start.row},${start.column},${end.row},${end.column}">${displayName}</a> [${start.row}, ${start.column}] - [${end.row}, ${end.column}]`;
           finishedRow = true;
         }
 
@@ -313,7 +317,7 @@ let tree;
         start.column > end.column
       )
     ) {
-      let swap = end;
+      const swap = end;
       end = start;
       start = swap;
     }
@@ -414,19 +418,11 @@ let tree;
     return COLORS_BY_INDEX[id % COLORS_BY_INDEX.length];
   }
 
-  function getLocalStorageItem(key) {
-    return localStorage.getItem(`${document.title}:${key}`);
-  }
-
-  function setLocalStorageItem(key, value) {
-    localStorage.setItem(`${document.title}:${key}`, value);
-  }
-
   function loadState() {
-    const language = getLocalStorageItem("language");
-    const sourceCode = getLocalStorageItem("sourceCode");
-    const query = getLocalStorageItem("query");
-    const queryEnabled = getLocalStorageItem("queryEnabled");
+    const language = localStorage.getItem("language");
+    const sourceCode = localStorage.getItem("sourceCode");
+    const query = localStorage.getItem("query");
+    const queryEnabled = localStorage.getItem("queryEnabled");
     if (language != null && sourceCode != null && query != null) {
       queryInput.value = query;
       codeInput.value = sourceCode;
@@ -436,25 +432,25 @@ let tree;
   }
 
   function saveState() {
-    setLocalStorageItem("language", languageSelect.value);
-    setLocalStorageItem("sourceCode", codeEditor.getValue());
+    localStorage.setItem("language", languageSelect.value);
+    localStorage.setItem("sourceCode", codeEditor.getValue());
     saveQueryState();
   }
 
   function saveQueryState() {
-    setLocalStorageItem("queryEnabled", queryCheckbox.checked);
-    setLocalStorageItem("query", queryEditor.getValue());
+    localStorage.setItem("queryEnabled", queryCheckbox.checked);
+    localStorage.setItem("query", queryEditor.getValue());
   }
 
   function debounce(func, wait, immediate) {
-    var timeout;
+    let timeout;
     return function() {
-      var context = this, args = arguments;
-      var later = function() {
+      const context = this, args = arguments;
+      const later = function() {
         timeout = null;
         if (!immediate) func.apply(context, args);
       };
-      var callNow = immediate && !timeout;
+      const callNow = immediate && !timeout;
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
       if (callNow) func.apply(context, args);
