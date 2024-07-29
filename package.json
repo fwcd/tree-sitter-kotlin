@@ -3,13 +3,15 @@
   "version": "0.3.7",
   "description": "Tree-sitter grammar for Kotlin",
   "main": "bindings/node",
+  "types": "bindings/node",
   "scripts": {
     "test": "tree-sitter test",
-    "install": "node-gyp rebuild",
+    "install": "node-gyp-build",
     "generate": "tree-sitter generate",
     "parse": "tree-sitter parse",
     "build-wasm": "tree-sitter build-wasm",
-    "playground": "tree-sitter playground"
+    "playground": "tree-sitter playground",
+    "prebuildify": "prebuildify --napi --strip"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,14 @@
     "kotlin",
     "grammar"
   ],
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
   "author": "fwcd",
   "license": "MIT",
   "gypfile": true,
@@ -28,15 +38,28 @@
   },
   "homepage": "https://github.com/fwcd/tree-sitter-kotlin#readme",
   "dependencies": {
-    "nan": "^2.19.0"
+    "node-addon-api": "^7.1.0",
+    "node-gyp-build": "^4.8.0"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.0"
+  },
+  "peerDependenciesMeta": {
+    "tree_sitter": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "tree-sitter-cli": "^0.22.1"
+    "tree-sitter-cli": "^0.22.6",
+    "prebuildify": "^6.0.0"
   },
   "tree-sitter": [
     {
       "scope": "source.kotlin",
-      "file-types": ["kt", "kts"]
+      "file-types": [
+        "kt",
+        "kts"
+      ]
     }
   ]
 }
