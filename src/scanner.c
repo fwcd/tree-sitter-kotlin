@@ -149,6 +149,16 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack) {
       // which leaves the possibility that it is an interpolation 
       if (lexer->lookahead == '$') {
         advance(lexer);
+        // however this leaves an edgecase where an escaped dollar sign could
+        // appear at the end of a string (e.g "aa\$") which isn't handled
+        // correctly; if we were at the end of the string, terminate properly
+        if (lexer->lookahead == end_char) {
+          pop(stack);
+          advance(lexer);
+          mark_end(lexer);
+          lexer->result_symbol = STRING_END;
+          return true;
+        }
       }
     } else if (lexer->lookahead == end_char) {
       if (is_triple) {
