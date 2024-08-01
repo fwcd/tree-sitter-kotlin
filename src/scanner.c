@@ -122,9 +122,9 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack) {
         // appear at the end of a string (e.g "aa\$") which isn't handled
         // correctly; if we were at the end of the string, terminate properly
         if (lexer->lookahead == end_char) {
-          pop(stack);
+          stack_pop(stack);
           advance(lexer);
-          mark_end(lexer);
+          lexer->mark_end(lexer);
           lexer->result_symbol = STRING_END;
           return true;
         }
