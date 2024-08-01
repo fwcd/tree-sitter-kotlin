@@ -54,6 +54,7 @@ fun foo()  {
      (function_body
         (statements
            (property_declaration
+              (binding_pattern_kind)
               (variable_declaration
                (simple_identifier))
               (conjunction_expression
@@ -78,7 +79,7 @@ fun foo():String
     (function_body
       (statements
         (jump_expression
-          (string_literal))))))
+          (string_literal (string_content)))))))
 
 ================================================================================
 Colon after newline
@@ -118,6 +119,7 @@ fun foo() {
     (function_body
       (statements
         (property_declaration
+          (binding_pattern_kind)
           (variable_declaration
             (simple_identifier))
           (elvis_expression
@@ -155,6 +157,7 @@ class Foo {
     (type_identifier)
     (class_body
       (property_declaration
+        (binding_pattern_kind)
         (variable_declaration
           (simple_identifier)
           (user_type

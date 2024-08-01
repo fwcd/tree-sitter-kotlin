@@ -14,10 +14,21 @@ node_modules
 *.lib
 *.obj
 
-# WASM
+# Wasm
 *.asm.js
 *.wasm
 *.wasm.mem
 
 # Rust build artifacts
 target
+
+# C
+/*.a
+/*.dylib
+/*.so*
+*.o
+/bindings/c/*.h
+/bindings/c/tree-sitter-*.pc
+
+# Swift
+.build

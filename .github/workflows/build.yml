@@ -5,17 +5,17 @@ on:
     branches:
     - main
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '12'
-          cache: 'npm'
+          node-version: '18'
       - name: Install dependencies
         run: npm install
       - name: Generate parser
@@ -25,13 +25,11 @@ jobs:
           diff=`git diff HEAD -- src`
           echo "$diff"
           test -z "$diff"
+      - name: Output parser size
+        run: du -sh src/* | sort -h
       - name: Run tests
         run: npm test
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
       - name: Build and test crate
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
+        run: cargo test

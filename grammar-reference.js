@@ -531,7 +531,7 @@ module.exports = grammar({
 		
 		// Note how the following rules directly encode
 		// predence and associativity rather than using
-		// Tree-Sitters prec function. This might be
+		// Tree-sitters prec function. This might be
 		// changed in the future (though it reflects how
 		// the Kotlin compiler generates its syntax tree).
 		

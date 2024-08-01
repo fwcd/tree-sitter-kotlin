@@ -17,14 +17,15 @@ class Foo(){
     (primary_constructor)
     (class_body
       (property_declaration
+        (binding_pattern_kind)
         (variable_declaration
           (simple_identifier)))
       (secondary_constructor
-      (function_value_parameters
-        (parameter
-          (simple_identifier)
-          (user_type
-            (type_identifier))))
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
         (statements
           (assignment
             (directly_assignable_expression
@@ -51,6 +52,7 @@ fun main(){
     (function_body
       (statements
         (property_declaration
+          (binding_pattern_kind)
           (variable_declaration
             (simple_identifier)
             (user_type
@@ -64,4 +66,4 @@ fun main(){
             (simple_identifier)
             (indexing_suffix
               (integer_literal)))
-          (string_literal))))))
+          (string_literal (string_content)))))))

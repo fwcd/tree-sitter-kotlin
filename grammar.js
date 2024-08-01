@@ -51,7 +51,7 @@ const PREC = {
 const DEC_DIGITS = token(sep1(/[0-9]+/, /_+/));
 const HEX_DIGITS = token(sep1(/[0-9a-fA-F]+/, /_+/));
 const BIN_DIGITS = token(sep1(/[01]/, /_+/));
-const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), DEC_DIGITS))
+const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), DEC_DIGITS));
 
 module.exports = grammar({
   name: "kotlin",
@@ -60,14 +60,6 @@ module.exports = grammar({
     // Ambiguous when used in an explicit delegation expression,
     // since the '{' could either be interpreted as the class body
     // or as the anonymous function body. Consider the following sequence:
-    //
-    // 'class'  simple_identifier  ':'  user_type  'by'  'fun'  '('  ')'  •  '{'  …
-    //
-    // Possible interpretations:
-    //
-    // 'class'  simple_identifier  ':'  user_type  'by'  (anonymous_function  'fun'  '('  ')'  •  function_body)
-    // 'class'  simple_identifier  ':'  user_type  'by'  (anonymous_function  'fun'  '('  ')')  •  '{'  …
-    [$.anonymous_function],
 
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
@@ -84,7 +76,6 @@ module.exports = grammar({
     [$._postfix_unary_expression, $._expression],
 
     // ambiguity between generics and comparison operations (foo < b > c)
-    [$.call_expression, $.prefix_expression, $.comparison_expression],
     [$.call_expression, $.range_expression, $.comparison_expression],
     [$.call_expression, $.elvis_expression, $.comparison_expression],
     [$.call_expression, $.check_expression, $.comparison_expression],
@@ -113,6 +104,11 @@ module.exports = grammar({
 
     // ambiguity between parameter modifiers in anonymous functions
     [$.parameter_modifiers, $._type_modifier],
+
+    // ambiguity between type modifiers before an @
+    [$.type_modifiers],
+    // ambiguity between associating type modifiers
+    [$.not_nullable_type],
   ],
 
   externals: $ => [
@@ -122,7 +118,7 @@ module.exports = grammar({
     $.multiline_comment,
     $._string_start,
     $._string_end,
-    $._string_content,
+    $.string_content,
   ],
 
   extras: $ => [
@@ -171,10 +167,12 @@ module.exports = grammar({
 
     import_header: $ => seq(
       "import",
-      $.identifier,
-      optional(choice(seq(".*"), $.import_alias)),
+      alias($._import_identifier, $.identifier),
+      optional(choice(seq(".", $.wildcard_import), $.import_alias)),
       $._semi
     ),
+
+    wildcard_import: _ => token.immediate("*"),
 
     import_alias: $ => seq("as", alias($.simple_identifier, $.type_identifier)),
 
@@ -247,9 +245,11 @@ module.exports = grammar({
       ")"
     ),
 
+    binding_pattern_kind: $ => choice("val", "var"),
+
     class_parameter: $ => seq(
       optional($.modifiers),
-      optional(choice("val", "var")),
+      optional($.binding_pattern_kind),
       $.simple_identifier,
       ":",
       $._type,
@@ -367,7 +367,7 @@ module.exports = grammar({
 
     property_declaration: $ => prec.right(seq(
       optional($.modifiers),
-      choice("val", "var"),
+      $.binding_pattern_kind,
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
@@ -466,13 +466,22 @@ module.exports = grammar({
         $.parenthesized_type,
         $.nullable_type,
         $._type_reference,
-        $.function_type
+        $.function_type,
+        $.not_nullable_type
       )
     ),
 
-    _type_reference: $ => choice(
+    _type_reference: $ => prec.left(1, choice(
       $.user_type,
       "dynamic"
+    )),
+
+    not_nullable_type: $ => seq(
+      optional($.type_modifiers),
+      choice($.user_type, $.parenthesized_user_type),
+      '&',
+      optional($.type_modifiers),
+      choice($.user_type, $.parenthesized_user_type),
     ),
 
     nullable_type: $ => seq(
@@ -705,7 +714,7 @@ module.exports = grammar({
     type_arguments: $ => seq("<", sep1($.type_projection, ","), ">"),
 
     value_arguments: $ => seq(
-      "(", 
+      "(",
       optional(
         seq(
           sep1($.value_argument, ","),
@@ -757,7 +766,7 @@ module.exports = grammar({
 
     string_literal: $ => seq(
       $._string_start,
-      repeat(choice($._string_content, $._interpolation)),
+      repeat(choice($.string_content, $._interpolation)),
       $._string_end,
     ),
 
@@ -807,13 +816,16 @@ module.exports = grammar({
       $.class_body
     ),
 
-    this_expression: $ => "this",
-
-    super_expression: $ => seq(
-      "super",
-      // TODO optional(seq("<", $._type, ">")),
-      // TODO optional(seq("@", $.simple_identifier))
+    this_expression: $ => choice(
+      "this",
+      $._this_at
     ),
+
+    super_expression: $ => prec.right(choice(
+      "super",
+      seq("super", "<", $._type, ">"),
+      $._super_at
+    )),
 
     if_expression: $ => prec.right(seq(
       "if",
@@ -981,7 +993,8 @@ module.exports = grammar({
       "sealed",
       "annotation",
       "data",
-      "inner"
+      "inner",
+      "value",
     ),
 
     member_modifier: $ => choice(
@@ -1081,6 +1094,7 @@ module.exports = grammar({
       "expect",
       "data",
       "inner",
+      "value",
       "actual",
       "set",
       "get"
@@ -1088,6 +1102,13 @@ module.exports = grammar({
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),
+
+    // Adapted from tree-sitter-java, helps to avoid a conflic with
+    // wildcard_import node while being compatible with identifier
+    _import_identifier: $ => choice(
+      $.simple_identifier,
+      seq($._import_identifier, ".", $.simple_identifier),
+    ),
 
     // ====================
     // Lexical grammar
@@ -1109,15 +1130,38 @@ module.exports = grammar({
     // Keywords
     // ==========
 
-    _return_at: $ => seq("return@", $._lexical_identifier),
+    _return_at: $ => seq(
+      "return@",
+      alias($._lexical_identifier, $.label)
+    ),
 
-    _continue_at: $ => seq("continue@", $._lexical_identifier),
+    _continue_at: $ => seq(
+      "continue@",
+      alias($._lexical_identifier, $.label)
+    ),
 
-    _break_at: $ => seq("break@", $._lexical_identifier),
+    _break_at: $ => seq(
+      "break@",
+      alias($._lexical_identifier, $.label)
+    ),
 
-    _this_at: $ => seq("this@", $._lexical_identifier),
+    _this_at: $ => seq(
+      "this@",
+      alias($._lexical_identifier, $.type_identifier)
+    ),
 
-    _super_at: $ => seq("super@", $._lexical_identifier),
+    _super_at: $ => choice(
+      seq(
+        "super@",
+        alias($._lexical_identifier, $.type_identifier)
+      ),
+      seq(
+        "super",
+        "<", $._type, ">",
+        token.immediate("@"),
+        alias($._lexical_identifier, $.type_identifier)
+      )
+    ),
 
     // ==========
     // Literals
@@ -1142,8 +1186,7 @@ module.exports = grammar({
 
     unsigned_literal: $ => seq(
       choice($.integer_literal, $.hex_literal, $.bin_literal),
-      /[uU]/,
-      optional("L")
+      /[uU]L?/
     ),
 
     long_literal: $ => seq(
@@ -1173,7 +1216,7 @@ module.exports = grammar({
       $._backtick_identifier,
     ),
 
-    _alpha_identifier: $ => /[a-zA-Z_][a-zA-Z_0-9]*/,
+    _alpha_identifier: $ => /[\p{L}_][\p{L}_\p{Nd}]*/,
 
     _backtick_identifier: $ => /`[^\r\n`]+`/,
 

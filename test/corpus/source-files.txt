@@ -15,8 +15,9 @@ val x = 4
         (type_identifier))
       (value_arguments
         (value_argument
-          (string_literal)))))
+          (string_literal (string_content))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (integer_literal)))
@@ -41,7 +42,7 @@ Multiple file annotations
         (type_identifier))
       (value_arguments
         (value_argument
-          (string_literal)))))
+          (string_literal (string_content))))))
   (file_annotation
     (constructor_invocation
       (user_type
@@ -55,6 +56,7 @@ Multiple file annotations
 Imports
 ================================================================================
 
+import java.util.*
 import java.util.Scanner
 import java.util.StringBuilder
 
@@ -67,6 +69,11 @@ fun main() {
 
 (source_file
   (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))
+      (wildcard_import))
     (import_header
       (identifier
         (simple_identifier)

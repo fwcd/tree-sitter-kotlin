@@ -76,7 +76,7 @@ sum(1, 2)
     (call_suffix
       (value_arguments
         (value_argument
-          (string_literal)))))
+          (string_literal (string_content))))))
   (call_expression
     (simple_identifier)
     (call_suffix
@@ -100,10 +100,12 @@ val y = when(x){
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (integer_literal))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (when_expression
@@ -154,6 +156,7 @@ val MyDate.s: String get() = "hello"
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (user_type
       (type_identifier))
     (variable_declaration
@@ -162,7 +165,7 @@ val MyDate.s: String get() = "hello"
         (type_identifier)))
     (getter
       (function_body
-        (string_literal)))))
+        (string_literal (string_content))))))
 
 ================================================================================
 Expect as an expression
@@ -174,6 +177,7 @@ val x = expect(1)
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -213,7 +217,8 @@ expect fun randomUUID(): String
       (platform_modifier))
     (simple_identifier)
     (function_value_parameters)
-    (user_type (type_identifier))))
+    (user_type
+      (type_identifier))))
 
 ================================================================================
 Less than for generics
@@ -263,18 +268,21 @@ val a = a<2>(3)
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
@@ -284,6 +292,7 @@ val a = a<2>(3)
       (simple_identifier)))
   (line_comment)
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -297,6 +306,7 @@ val a = a<2>(3)
           (value_argument
             (simple_identifier))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (comparison_expression
@@ -350,6 +360,7 @@ when (dir) {
     (function_body
       (statements
         (property_declaration
+          (binding_pattern_kind)
           (variable_declaration
             (simple_identifier))
           (navigation_expression
@@ -380,6 +391,7 @@ when (dir) {
       (control_structure_body
         (statements
           (property_declaration
+            (binding_pattern_kind)
             (variable_declaration
               (simple_identifier))
             (navigation_expression
@@ -421,6 +433,7 @@ val comments = """ // and here """
 
 (source_file
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -428,8 +441,9 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -437,8 +451,9 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -446,8 +461,9 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
     (call_expression
@@ -455,12 +471,85 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal))))))
+            (string_literal (string_content)))))))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
-    (string_literal))
+    (string_literal (string_content)))
   (property_declaration
+    (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
-    (string_literal)))
+    (string_literal (string_content))))
+
+================================================================================
+Qualified this/super expressions
+================================================================================
+
+class Square() : Rectangle(), Polygon {
+    override fun draw() {
+        this@Square.draw()
+        super@Square.draw()
+        super<Polygon>.draw()
+        super<Rectangle>@Square.draw()
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (statements
+            (call_expression
+              (navigation_expression
+                (this_expression
+                  (type_identifier))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (navigation_expression
+                (super_expression
+                  (type_identifier))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (navigation_expression
+                (super_expression
+                  (user_type
+                    (type_identifier)))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (navigation_expression
+                (super_expression
+                  (user_type
+                    (type_identifier))
+                  (type_identifier))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))))))))
