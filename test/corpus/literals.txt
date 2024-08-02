@@ -114,6 +114,7 @@ More string interpolation
 "$1"
 "$ $ $"
 "\$foo"
+"\$"
 
 --------------------------------------------------------------------------------
 
@@ -130,7 +131,8 @@ More string interpolation
     (string_content)
     (string_content))
   (string_literal
-    (string_content)))
+    (string_content))
+  (string_literal))
 
 ================================================================================
 Integer literals
