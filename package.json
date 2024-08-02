@@ -1,28 +1,17 @@
 {
   "name": "tree-sitter-kotlin",
   "version": "0.3.8",
-  "description": "Tree-sitter grammar for Kotlin",
+  "description": "Kotlin grammar for tree-sitter",
+  "repository": "github:fwcd/tree-sitter-kotlin",
+  "author": "fwcd",
+  "license": "MIT",
   "main": "bindings/node",
   "types": "bindings/node",
-  "scripts": {
-    "test": "tree-sitter test",
-    "install": "node-gyp-build",
-    "generate": "tree-sitter generate",
-    "parse": "tree-sitter parse",
-    "build-wasm": "tree-sitter build --wasm",
-    "playground": "tree-sitter playground",
-    "prestart": "npm run build-wasm",
-    "start": "npm run playground",
-    "prebuildify": "prebuildify --napi --strip"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fwcd/tree-sitter-kotlin.git"
-  },
   "keywords": [
+    "incremental",
+    "parsing",
     "tree-sitter",
-    "kotlin",
-    "grammar"
+    "kotlin"
   ],
   "files": [
     "grammar.js",
@@ -30,34 +19,39 @@
     "prebuilds/**",
     "bindings/node/*",
     "queries/*",
-    "src/**"
+    "src/**",
+    "*.wasm"
   ],
-  "author": "fwcd",
-  "license": "MIT",
-  "gypfile": true,
-  "bugs": {
-    "url": "https://github.com/fwcd/tree-sitter-kotlin/issues"
-  },
-  "homepage": "https://github.com/fwcd/tree-sitter-kotlin#readme",
   "dependencies": {
-    "node-addon-api": "^7.1.0",
-    "node-gyp-build": "^4.8.0"
+    "node-addon-api": "^8.0.0",
+    "node-gyp-build": "^4.8.1"
+  },
+  "devDependencies": {
+    "prebuildify": "^6.0.1",
+    "tree-sitter-cli": "^0.22.6"
   },
   "peerDependencies": {
-    "tree-sitter": "^0.21.0"
+    "tree-sitter": "^0.21.1"
   },
   "peerDependenciesMeta": {
-    "tree_sitter": {
+    "tree-sitter": {
       "optional": true
     }
   },
-  "devDependencies": {
-    "tree-sitter-cli": "^0.22.6",
-    "prebuildify": "^6.0.0"
+  "scripts": {
+    "build-wasm": "tree-sitter build --wasm",
+    "generate": "tree-sitter generate --no-bindings",
+    "install": "node-gyp-build",
+    "parse": "tree-sitter parse",
+    "playground": "tree-sitter playground",
+    "prestart": "npm run build-wasm",
+    "start": "npm run playground",
+    "test": "node --test bindings/node/*_test.js"
   },
   "tree-sitter": [
     {
       "scope": "source.kotlin",
+      "injection-regex": "^(kotlin|kt)$",
       "file-types": [
         "kt",
         "kts"

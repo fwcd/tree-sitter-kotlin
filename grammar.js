@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+/// <reference types="tree-sitter-cli/dsl" />
+
 // Using an adapted version of https://kotlinlang.org/docs/reference/grammar.html
 
 const PREC = {

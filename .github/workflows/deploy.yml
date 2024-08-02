@@ -1,16 +1,25 @@
-name: Deploy to GitHub
+name: Deploy Releases
+
 on:
   push:
-    tags:
-      - '*'
+    tags: ["*"]
 
 jobs:
-  deploy:
+  npm:
+    uses: tree-sitter/workflows/.github/workflows/package-npm.yml@main
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  crates:
+    uses: tree-sitter/workflows/.github/workflows/package-crates.yml@main
+    secrets:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+  github:
     runs-on: ubuntu-latest
     env:
-      EMSCRIPTEN_VERSION: '3.1.55'
+      EMSCRIPTEN_VERSION: "3.1.55"
     steps:
-      - uses: actions/checkout@v4
+      - name: Clone main branch
+        uses: actions/checkout@v4
       - name: Clone gh-pages branch into nested directory
         uses: actions/checkout@v4
         with:
@@ -20,49 +29,37 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Get tag name
-        id: tag
-        run: |
-          tag=$(basename "${{ github.ref }}")
-          echo "tag=$tag" >> $GITHUB_OUTPUT
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
       - name: Install Emscripten
         uses: mymindstorm/setup-emsdk@v14
         with:
           version: ${{ env.EMSCRIPTEN_VERSION }}
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Compile grammar
         run: npm run generate
       - name: Build Wasm binary
         run: npm run build-wasm
       - name: Deploy to GitHub Releases
-        run: |
-          tag="${{ steps.tag.outputs.tag }}"
-          gh release create "$tag" --title "$tag"
-          gh release upload "$tag" tree-sitter-kotlin.wasm
+        run: gh release create "$GITHUB_REF_NAME" tree-sitter-kotlin.wasm
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
       - name: Deploy to GitHub Pages
         run: |
           sha="$(git rev-parse --short HEAD)"
-          tag="${{ steps.tag.outputs.tag }}"
+          tag="$GITHUB_REF_NAME"
 
-          echo "==> Replacing Wasm binary..."
+          echo '==> Replacing Wasm binary...'
           rm -rf gh-pages/assets/tree-sitter-kotlin*
           mkdir -p "gh-pages/assets/tree-sitter-kotlin-$tag"
           cp tree-sitter-kotlin.wasm "gh-pages/assets/tree-sitter-kotlin-$tag"
           tree gh-pages/assets
 
-          echo "==> Updating version on website..."
+          echo '==> Updating version on website...'
           sed -i "s|\(LANGUAGE_BASE_URL = \"\)[^\"]*\(\"\)|\1assets/tree-sitter-kotlin-$tag\2|g" gh-pages/index.html
           sed -i "s|\(<span class=\"version\">\)[^<]*\(</span>\)|\1$tag\2|g" gh-pages/index.html
 
-          echo "==> Committing and pushing gh-pages branch..."
+          echo '==> Committing and pushing gh-pages branch...'
           cd gh-pages
           git add .
           git commit -m "Deploy tree-sitter-kotlin $tag ($sha)"

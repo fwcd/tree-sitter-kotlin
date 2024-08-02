@@ -1,34 +1,51 @@
-.DS_Store
-.vscode
-.idea
-bin
-build
-local
-public
-node_modules
-*.swp
-*.wasm
+# Rust artifacts
+target/
 
-# Windows compiler
-*.exp
-*.lib
+# Node artifacts
+build/
+prebuilds/
+node_modules/
+*.tgz
+
+# Swift artifacts
+.build/
+Package.resolved
+
+# Go artifacts
+go.sum
+_obj/
+
+# Python artifacts
+.venv/
+dist/
+*.egg-info
+*.whl
+
+# Python artifacts
+.venv/
+dist/
+*.egg-info
+*.whl
+
+# Gradle artifacts
+.gradle/
+.cmake/
+gradle/
+gradlew
+gradlew.bat
+
+# C artifacts
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.pc
+
+# Example dirs
+/examples/*/
+
+# Grammar volatiles
+*.wasm
 *.obj
-
-# Wasm
-*.asm.js
-*.wasm
-*.wasm.mem
-
-# Rust build artifacts
-target
-
-# C
-/*.a
-/*.dylib
-/*.so*
 *.o
-/bindings/c/*.h
-/bindings/c/tree-sitter-*.pc
-
-# Swift
-.build
