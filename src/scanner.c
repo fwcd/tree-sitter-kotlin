@@ -521,6 +521,7 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
 void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) {
   Stack *stack = (Stack *)payload;
   if (length > 0) {
+    array_reserve(stack, length);
     memcpy(stack->contents, buffer, length);
     stack->size = length;
   } else {
