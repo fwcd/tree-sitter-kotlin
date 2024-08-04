@@ -19,7 +19,8 @@ class Foo(){
       (property_declaration
         (binding_pattern_kind)
         (variable_declaration
-          (simple_identifier)))
+          (simple_identifier))
+          (null_literal))
       (secondary_constructor
         (function_value_parameters
           (parameter
