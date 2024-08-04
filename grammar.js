@@ -25,6 +25,7 @@
 // Using an adapted version of https://kotlinlang.org/docs/reference/grammar.html
 
 const PREC = {
+  ARGUMENTS: 17,
   POSTFIX: 16,
   PREFIX: 15,
   TYPE_RHS: 14,
@@ -700,7 +701,7 @@ module.exports = grammar({
       // this introduces ambiguities with 'less than' for comparisons
       optional($.type_arguments),
       choice(
-        seq(optional($.value_arguments), $.annotated_lambda),
+        prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
         $.value_arguments
       )
     )),
