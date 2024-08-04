@@ -25,7 +25,6 @@
 // Using an adapted version of https://kotlinlang.org/docs/reference/grammar.html
 
 const PREC = {
-  ARGUMENTS: 17,
   POSTFIX: 16,
   PREFIX: 15,
   TYPE_RHS: 14,
@@ -45,6 +44,7 @@ const PREC = {
   SIMPLE_USER_TYPE: 2,
   ASSIGNMENT: 1,
   BLOCK: 1,
+  ARGUMENTS: 1,
   LAMBDA_LITERAL: 0,
   RETURN_OR_THROW: 0,
   COMMENT: 0
