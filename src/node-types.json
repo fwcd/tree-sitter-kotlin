@@ -5737,11 +5737,6 @@
     }
   },
   {
-    "type": "null_literal",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "nullable_type",
     "named": true,
     "fields": {},
@@ -9627,8 +9622,8 @@
     "named": false
   },
   {
-    "type": "null",
-    "named": false
+    "type": "null_literal",
+    "named": true
   },
   {
     "type": "object",
