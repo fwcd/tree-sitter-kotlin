@@ -3802,8 +3802,8 @@
           "name": "real_literal"
         },
         {
-          "type": "STRING",
-          "value": "null"
+          "type": "SYMBOL",
+          "name": "null_literal"
         },
         {
           "type": "SYMBOL",
@@ -6172,6 +6172,10 @@
           "name": "_escaped_identifier"
         }
       ]
+    },
+    "null_literal": {
+      "type": "STRING",
+      "value": "null"
     },
     "_lexical_identifier": {
       "type": "CHOICE",
