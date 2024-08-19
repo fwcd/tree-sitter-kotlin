@@ -206,6 +206,7 @@ class Something {
   val x: Int = 4
   var y: Int?
   val z: Int get() = x
+  val s = "s"
 }
 
 --------------------------------------------------------------------------------
@@ -216,27 +217,36 @@ class Something {
     (class_body
       (property_declaration
         (binding_pattern_kind)
+        var_decl:
         (variable_declaration
-          (simple_identifier)
-          (user_type
+          id: (simple_identifier)
+          type: (user_type
             (type_identifier)))
-        (integer_literal))
+        initializer: (integer_literal))
       (property_declaration
         (binding_pattern_kind)
+        var_decl:
         (variable_declaration
-          (simple_identifier)
-          (nullable_type
+          id: (simple_identifier)
+          type: (nullable_type
             (user_type
               (type_identifier)))))
       (property_declaration
         (binding_pattern_kind)
+        var_decl:
         (variable_declaration
-          (simple_identifier)
-          (user_type
+          id: (simple_identifier)
+          type: (user_type
             (type_identifier)))
         (getter
           (function_body
-            (simple_identifier)))))))
+            (simple_identifier))))
+      (property_declaration
+            (binding_pattern_kind)
+            var_decl: (variable_declaration
+              id: (simple_identifier))
+            initializer: (string_literal
+              (string_content))))))    
 
 ================================================================================
 Constructor delegation calls

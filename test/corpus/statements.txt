@@ -65,3 +65,30 @@ val ty x get () = 3
     (getter
       (function_body
         (integer_literal)))))
+
+================================================================================
+Multi variable declarations
+================================================================================
+
+fun foo() {
+  val (x, y) = f()
+}
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          var_decl: (multi_variable_declaration
+            (variable_declaration
+              id: (simple_identifier))
+            (variable_declaration
+              id: (simple_identifier)))
+          initializer: (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))

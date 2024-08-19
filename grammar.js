@@ -361,19 +361,19 @@ module.exports = grammar({
 
     variable_declaration: $ => prec.left(PREC.VAR_DECL, seq(
       // repeat($.annotation), TODO
-      $.simple_identifier,
-      optional(seq(":", $._type))
+      field('id', $.simple_identifier),
+      optional(field('type', seq(":", $._type)))
     )),
 
     property_declaration: $ => prec.right(seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       $.binding_pattern_kind,
-      optional($.type_parameters),
+      optional(field('type_parameters', $.type_parameters)),
       optional(seq($._receiver_type, optional('.'))),
-      choice($.variable_declaration, $.multi_variable_declaration),
-      optional($.type_constraints),
+      choice(field('var_decl', $.variable_declaration), field('var_decl', $.multi_variable_declaration)),
+      optional(field('type_constraints', $.type_constraints)),
       optional(choice(
-        seq("=", $._expression),
+        seq("=", field('initializer', $._expression)),
         $.property_delegate
       )),
       optional(';'),
