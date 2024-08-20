@@ -33,11 +33,13 @@ class HelloWorld {
       (function_declaration
        (simple_identifier)
        (function_value_parameters)
-       (function_body))
+       (function_body
+        (block)))
       (function_declaration
        (simple_identifier)
        (function_value_parameters)
-       (function_body)))))
+        (function_body
+          (block))))))
 
 ================================================================================
 Generic class

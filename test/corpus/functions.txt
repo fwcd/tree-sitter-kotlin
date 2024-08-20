@@ -9,7 +9,8 @@ fun main() {}
 (source_file
   (function_declaration
     (simple_identifier) (function_value_parameters)
-    (function_body)))
+    (function_body
+      (block))))
 
 ==================
 Generic functions
@@ -23,7 +24,8 @@ fun <T> test() {}
   (function_declaration
     (type_parameters (type_parameter (type_identifier)))
     (simple_identifier) (function_value_parameters)
-    (function_body)))
+    (function_body
+      (block))))
 
 ==================
 Generic functions with parameters
@@ -47,7 +49,8 @@ fun <T: Int> bar(foo: Int): T {}
           (type_identifier))))
     (user_type
       (type_identifier))
-    (function_body)))
+    (function_body
+      (block))))
 
 ==================
 Functions with parameters
@@ -68,7 +71,8 @@ fun sum(a: Int, b: Int) = a + b
         (user_type
           (type_identifier)
           (type_arguments (type_projection (user_type (type_identifier)))))))
-    (function_body))
+    (function_body
+      (block)))
   (function_declaration
     (simple_identifier)
     (function_value_parameters
@@ -119,15 +123,16 @@ fun foo(p0: Int): Long {
     (user_type
       (type_identifier))
     (function_body
-      (statements
-        (jump_expression
-          (call_expression
-            (navigation_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier)))
-            (call_suffix
-              (value_arguments))))))))
+      (block
+        (statements
+          (jump_expression
+            (call_expression
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))))))))
 
 =====================
 Override functions
@@ -165,19 +170,20 @@ fun test() {
     (simple_identifier)
     (function_value_parameters)
     (function_body
-      (statements
-        (assignment
-          (directly_assignable_expression
-            (simple_identifier))
-          (boolean_literal))
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments
-              (value_argument
-                (simple_identifier))
-              (value_argument
-                (simple_identifier)))))))))
+      (block
+        (statements
+          (assignment
+            (directly_assignable_expression
+              (simple_identifier))
+            (boolean_literal))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier))
+                (value_argument
+                  (simple_identifier))))))))))
 
 ==================
 Anonymous function
@@ -266,13 +272,14 @@ val anon = fun() { assert(true) }
   (anonymous_function
     (function_value_parameters)
     (function_body
-      (statements
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments
-              (value_argument
-                (boolean_literal))))))))
+      (block
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (boolean_literal)))))))))
   (property_declaration
     (binding_pattern_kind)
     (variable_declaration
@@ -288,13 +295,14 @@ val anon = fun() { assert(true) }
     (anonymous_function
       (function_value_parameters)
       (function_body
-        (statements
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments
-                (value_argument
-                  (boolean_literal))))))))))
+        (block
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (boolean_literal)))))))))))
 
 ==================
 Function with backticked name

@@ -27,14 +27,14 @@ class Foo(){
             (simple_identifier)
             (user_type
               (type_identifier))))
-        (statements
-          (assignment
-            (directly_assignable_expression
-              (this_expression)
-              (navigation_suffix
-                (simple_identifier)))
-            (simple_identifier)))))))
-
+        (block
+          (statements
+            (assignment
+              (directly_assignable_expression
+                (this_expression)
+                (navigation_suffix
+                  (simple_identifier)))
+              (simple_identifier))))))))
 ================================================================================
 Index Assignment
 ================================================================================
@@ -51,20 +51,22 @@ fun main(){
     (simple_identifier)
     (function_value_parameters)
     (function_body
-      (statements
-        (property_declaration
-          (binding_pattern_kind)
-          (variable_declaration
-            (simple_identifier)
-            (user_type
-              (type_identifier)
-              (type_arguments
-                (type_projection
-                  (user_type
-                    (type_identifier)))))))
-        (assignment
-          (directly_assignable_expression
-            (simple_identifier)
-            (indexing_suffix
-              (integer_literal)))
-          (string_literal (string_content)))))))
+      (block
+        (statements
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)
+              (user_type
+                (type_identifier)
+                (type_arguments
+                  (type_projection
+                    (user_type
+                      (type_identifier)))))))
+          (assignment
+            (directly_assignable_expression
+              (simple_identifier)
+              (indexing_suffix
+                (integer_literal)))
+            (string_literal
+              (string_content))))))))

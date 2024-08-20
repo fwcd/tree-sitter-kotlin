@@ -11,7 +11,8 @@ for (value in values) {}
     (variable_declaration
       (simple_identifier))
     (simple_identifier)
-    (control_structure_body)))
+    (control_structure_body
+      (block))))
 
 ================================================================================
 Statements separated by semicolon
@@ -30,13 +31,14 @@ override fun isDisposed(): Boolean { expectUnreached();  return false }
     (user_type
       (type_identifier))
     (function_body
-      (statements
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments)))
-        (jump_expression
-          (boolean_literal))))))
+      (block
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments)))
+          (jump_expression
+            (boolean_literal)))))))
 
 ================================================================================
 Getters
@@ -80,15 +82,16 @@ fun foo() {
     (simple_identifier)
     (function_value_parameters)
     (function_body
-      (statements
-        (property_declaration
-          (binding_pattern_kind)
-          var_decl: (multi_variable_declaration
-            (variable_declaration
-              id: (simple_identifier))
-            (variable_declaration
-              id: (simple_identifier)))
-          initializer: (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments))))))))
+      (block
+        (statements
+          (property_declaration
+            (binding_pattern_kind)
+            var_decl: (multi_variable_declaration
+              (variable_declaration
+                id: (simple_identifier))
+              (variable_declaration
+                id: (simple_identifier)))
+            initializer: (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))

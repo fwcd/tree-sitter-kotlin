@@ -353,43 +353,12 @@ when (dir) {
   1 -> { val temp = b.y; b.y = b.z; b.z = temp }
 }
 --------------------------------------------------------------------------------
-
 (source_file
   (function_declaration
     (simple_identifier)
     (function_value_parameters)
     (function_body
-      (statements
-        (property_declaration
-          (binding_pattern_kind)
-          (variable_declaration
-            (simple_identifier))
-          (navigation_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier))))
-        (assignment
-          (directly_assignable_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier)))
-          (navigation_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier))))
-        (assignment
-          (directly_assignable_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier)))
-          (simple_identifier)))))
-  (when_expression
-    (when_subject
-      (simple_identifier))
-    (when_entry
-      (when_condition
-        (integer_literal))
-      (control_structure_body
+      (block
         (statements
           (property_declaration
             (binding_pattern_kind)
@@ -413,7 +382,39 @@ when (dir) {
               (simple_identifier)
               (navigation_suffix
                 (simple_identifier)))
-            (simple_identifier)))))))
+            (simple_identifier))))))
+  (when_expression
+    (when_subject
+      (simple_identifier))
+    (when_entry
+      (when_condition
+        (integer_literal))
+      (control_structure_body
+        (block
+          (statements
+            (property_declaration
+              (binding_pattern_kind)
+              (variable_declaration
+                (simple_identifier))
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier))))
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier))))
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (simple_identifier))))))))
 
 ================================================================================
 Comments in Strings
@@ -500,60 +501,61 @@ class Square() : Rectangle(), Polygon {
 --------------------------------------------------------------------------------
 
 (source_file
-  (class_declaration
-    (type_identifier)
-    (primary_constructor)
-    (delegation_specifier
-      (constructor_invocation
-        (user_type
-          (type_identifier))
-        (value_arguments)))
-    (delegation_specifier
-      (user_type
-        (type_identifier)))
-    (class_body
-      (function_declaration
-        (modifiers
-          (member_modifier))
-        (simple_identifier)
-        (function_value_parameters)
-        (function_body
-          (statements
-            (call_expression
-              (navigation_expression
-                (this_expression
-                  (type_identifier))
-                (navigation_suffix
-                  (simple_identifier)))
-              (call_suffix
-                (value_arguments)))
-            (call_expression
-              (navigation_expression
-                (super_expression
-                  (type_identifier))
-                (navigation_suffix
-                  (simple_identifier)))
-              (call_suffix
-                (value_arguments)))
-            (call_expression
-              (navigation_expression
-                (super_expression
-                  (user_type
-                    (type_identifier)))
-                (navigation_suffix
-                  (simple_identifier)))
-              (call_suffix
-                (value_arguments)))
-            (call_expression
-              (navigation_expression
-                (super_expression
-                  (user_type
-                    (type_identifier))
-                  (type_identifier))
-                (navigation_suffix
-                  (simple_identifier)))
-              (call_suffix
-                (value_arguments)))))))))
+      (class_declaration
+        (type_identifier)
+        (primary_constructor)
+        (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments)))
+        (delegation_specifier
+          (user_type
+            (type_identifier)))
+        (class_body
+          (function_declaration
+            (modifiers
+              (member_modifier))
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body
+              (block
+                (statements
+                  (call_expression
+                    (navigation_expression
+                      (this_expression
+                        (type_identifier))
+                      (navigation_suffix
+                        (simple_identifier)))
+                    (call_suffix
+                      (value_arguments)))
+                  (call_expression
+                    (navigation_expression
+                      (super_expression
+                        (type_identifier))
+                      (navigation_suffix
+                        (simple_identifier)))
+                    (call_suffix
+                      (value_arguments)))
+                  (call_expression
+                    (navigation_expression
+                      (super_expression
+                        (user_type
+                          (type_identifier)))
+                      (navigation_suffix
+                        (simple_identifier)))
+                    (call_suffix
+                      (value_arguments)))
+                  (call_expression
+                    (navigation_expression
+                      (super_expression
+                        (user_type
+                          (type_identifier))
+                        (type_identifier))
+                      (navigation_suffix
+                        (simple_identifier)))
+                    (call_suffix
+                      (value_arguments))))))))))
 
 ================================================================================
 If else-if else expression
@@ -570,22 +572,10 @@ if (cond1) {
 --------------------------------------------------------------------------------
 
 (source_file
-  (if_expression
-    (simple_identifier)
-    (control_structure_body
-      (statements
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments
-              (value_argument
-                (string_literal
-                  (string_content))))))))
-    (else
-      (control_structure_body
-        (if_expression
-          (simple_identifier)
-          (control_structure_body
+      (if_expression
+        (simple_identifier)
+        (control_structure_body
+          (block
             (statements
               (call_expression
                 (simple_identifier)
@@ -593,14 +583,30 @@ if (cond1) {
                   (value_arguments
                     (value_argument
                       (string_literal
-                        (string_content))))))))
-          (else
-            (control_structure_body
-              (statements
-                (call_expression
-                  (simple_identifier)
-                  (call_suffix
-                    (value_arguments
-                      (value_argument
-                        (string_literal
-                          (string_content))))))))))))))
+                        (string_content)))))))))
+        (else
+          (control_structure_body
+            (if_expression
+              (simple_identifier)
+              (control_structure_body
+                (block
+                  (statements
+                    (call_expression
+                      (simple_identifier)
+                      (call_suffix
+                        (value_arguments
+                          (value_argument
+                            (string_literal
+                              (string_content)))))))))
+              (else
+                (control_structure_body
+                  (block
+                    (statements
+                      (call_expression
+                        (simple_identifier)
+                        (call_suffix
+                          (value_arguments
+                            (value_argument
+                              (string_literal
+                                (string_content)))))))))))))))
+

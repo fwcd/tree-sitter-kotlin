@@ -51,15 +51,16 @@ fun foo()  {
 
 (source_file
   (function_declaration (simple_identifier) (function_value_parameters)
-     (function_body
+    (function_body
+      (block
         (statements
-           (property_declaration
-              (binding_pattern_kind)
-              (variable_declaration
-               (simple_identifier))
-              (conjunction_expression
-               (simple_identifier)
-               (simple_identifier)))))))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (conjunction_expression
+              (simple_identifier)
+              (simple_identifier))))))))
 
 ================================================================================
 Open brace after newline
@@ -77,9 +78,11 @@ fun foo():String
     (user_type
       (type_identifier))
     (function_body
-      (statements
-        (jump_expression
-          (string_literal (string_content)))))))
+      (block
+        (statements
+          (jump_expression
+            (string_literal
+              (string_content))))))))
 
 ================================================================================
 Colon after newline
@@ -114,33 +117,34 @@ fun foo() {
 
 (source_file
   (function_declaration
-   (simple_identifier)
-  (function_value_parameters)
+    (simple_identifier)
+    (function_value_parameters)
     (function_body
-      (statements
-        (property_declaration
-          (binding_pattern_kind)
-          (variable_declaration
-            (simple_identifier))
-          (elvis_expression
+      (block
+        (statements
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
             (elvis_expression
-              (call_expression
-                (navigation_expression
-                  (simple_identifier)
-                  (navigation_suffix
-                    (simple_identifier)))
-                (call_suffix
-                  (value_arguments
-                    (value_argument
-                      (boolean_literal)))))
-              (call_expression
-                (navigation_expression
-                  (simple_identifier)
-                  (navigation_suffix
-                    (simple_identifier)))
-                (call_suffix
-                  (value_arguments))))
-            (jump_expression)))))))
+              (elvis_expression
+                (call_expression
+                  (navigation_expression
+                    (simple_identifier)
+                    (navigation_suffix
+                      (simple_identifier)))
+                  (call_suffix
+                    (value_arguments
+                      (value_argument
+                        (boolean_literal)))))
+                (call_expression
+                  (navigation_expression
+                    (simple_identifier)
+                    (navigation_suffix
+                      (simple_identifier)))
+                  (call_suffix
+                    (value_arguments))))
+              (jump_expression))))))))
 
 ================================================================================
 get after newline
