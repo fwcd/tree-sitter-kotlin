@@ -325,16 +325,16 @@ module.exports = grammar({
 
     function_value_parameters: $ => seq(
       "(",
-      optional(sep1($._function_value_parameter, ",")),
+      optional(sep1($.function_value_parameter, ",")),
       optional(","),
       ")"
     ),
 
-    _function_value_parameter: $ => seq(
-      optional($.parameter_modifiers),
-      $.parameter,
-      optional(seq("=", $._expression))
-    ),
+		function_value_parameter: $ => seq(
+			optional(field('modifiers', $.parameter_modifiers)),
+			field('parameter', $.parameter),
+			optional(seq("=", field('initializer', $._expression)))
+		),
 
     _receiver_type: $ => seq(
       optional($.type_modifiers),

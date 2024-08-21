@@ -23,10 +23,11 @@ class Foo(){
         initializer: (null_literal))
       (secondary_constructor
         (function_value_parameters
-          (parameter
-            name: (simple_identifier)
-            type: (user_type
-              (type_identifier))))
+          (function_value_parameter
+            parameter: (parameter
+                        name: (simple_identifier)
+                        type: (user_type
+                          (type_identifier)))))
         (block
           (statements
             (assignment
