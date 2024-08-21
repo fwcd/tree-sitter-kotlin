@@ -1342,12 +1342,20 @@
             ]
           },
           {
-            "type": "SYMBOL",
-            "name": "simple_identifier"
+            "type": "FIELD",
+            "name": "name",
+            "content": {
+              "type": "SYMBOL",
+              "name": "simple_identifier"
+            }
           },
           {
-            "type": "SYMBOL",
-            "name": "function_value_parameters"
+            "type": "FIELD",
+            "name": "parameters",
+            "content": {
+              "type": "SYMBOL",
+              "name": "function_value_parameters"
+            }
           },
           {
             "type": "CHOICE",
@@ -1360,8 +1368,12 @@
                     "value": ":"
                   },
                   {
-                    "type": "SYMBOL",
-                    "name": "_type"
+                    "type": "FIELD",
+                    "name": "type",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_type"
+                    }
                   }
                 ]
               },
@@ -1386,8 +1398,12 @@
             "type": "CHOICE",
             "members": [
               {
-                "type": "SYMBOL",
-                "name": "function_body"
+                "type": "FIELD",
+                "name": "body",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "function_body"
+                }
               },
               {
                 "type": "BLANK"
@@ -1890,16 +1906,24 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "simple_identifier"
+          "type": "FIELD",
+          "name": "name",
+          "content": {
+            "type": "SYMBOL",
+            "name": "simple_identifier"
+          }
         },
         {
           "type": "STRING",
           "value": ":"
         },
         {
-          "type": "SYMBOL",
-          "name": "_type"
+          "type": "FIELD",
+          "name": "type",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_type"
+          }
         }
       ]
     },
@@ -6420,4 +6444,3 @@
   "inline": [],
   "supertypes": []
 }
-

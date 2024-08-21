@@ -3761,6 +3761,16 @@
     "type": "function_declaration",
     "named": true,
     "fields": {
+      "body": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "function_body",
+            "named": true
+          }
+        ]
+      },
       "modifiers": {
         "multiple": false,
         "required": false,
@@ -3770,38 +3780,72 @@
             "named": true
           }
         ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "simple_identifier",
+            "named": true
+          }
+        ]
+      },
+      "parameters": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "function_value_parameters",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "dynamic",
+            "named": false
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "not_nullable_type",
+            "named": true
+          },
+          {
+            "type": "nullable_type",
+            "named": true
+          },
+          {
+            "type": "parenthesized_type",
+            "named": true
+          },
+          {
+            "type": "type_modifiers",
+            "named": true
+          },
+          {
+            "type": "user_type",
+            "named": true
+          }
+        ]
       }
     },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
-        {
-          "type": "function_body",
-          "named": true
-        },
-        {
-          "type": "function_type",
-          "named": true
-        },
-        {
-          "type": "function_value_parameters",
-          "named": true
-        },
-        {
-          "type": "not_nullable_type",
-          "named": true
-        },
         {
           "type": "nullable_type",
           "named": true
         },
         {
           "type": "parenthesized_type",
-          "named": true
-        },
-        {
-          "type": "simple_identifier",
           "named": true
         },
         {
@@ -5865,40 +5909,51 @@
   {
     "type": "parameter",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "function_type",
-          "named": true
-        },
-        {
-          "type": "not_nullable_type",
-          "named": true
-        },
-        {
-          "type": "nullable_type",
-          "named": true
-        },
-        {
-          "type": "parenthesized_type",
-          "named": true
-        },
-        {
-          "type": "simple_identifier",
-          "named": true
-        },
-        {
-          "type": "type_modifiers",
-          "named": true
-        },
-        {
-          "type": "user_type",
-          "named": true
-        }
-      ]
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "simple_identifier",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "dynamic",
+            "named": false
+          },
+          {
+            "type": "function_type",
+            "named": true
+          },
+          {
+            "type": "not_nullable_type",
+            "named": true
+          },
+          {
+            "type": "nullable_type",
+            "named": true
+          },
+          {
+            "type": "parenthesized_type",
+            "named": true
+          },
+          {
+            "type": "type_modifiers",
+            "named": true
+          },
+          {
+            "type": "user_type",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {

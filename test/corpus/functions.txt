@@ -8,8 +8,9 @@ fun main() {}
 
 (source_file
   (function_declaration
-    (simple_identifier) (function_value_parameters)
-    (function_body
+    name: (simple_identifier) 
+    parameters: (function_value_parameters)
+    body: (function_body
       (block))))
 
 ==================
@@ -23,8 +24,9 @@ fun <T> test() {}
 (source_file
   (function_declaration
     (type_parameters (type_parameter (type_identifier)))
-    (simple_identifier) (function_value_parameters)
-    (function_body
+    name: (simple_identifier) 
+    parameters: (function_value_parameters)
+    body: (function_body
       (block))))
 
 ==================
@@ -41,15 +43,15 @@ fun <T: Int> bar(foo: Int): T {}
         (type_identifier)
         (user_type
           (type_identifier))))
-    (simple_identifier)
-    (function_value_parameters
+    name: (simple_identifier)
+    parameters: (function_value_parameters
       (parameter
-        (simple_identifier)
-        (user_type
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))
-    (user_type
+    type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (block))))
 
 ==================
@@ -64,25 +66,25 @@ fun sum(a: Int, b: Int) = a + b
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters
+    name: (simple_identifier)
+    parameters: (function_value_parameters
       (parameter
-        (simple_identifier)
-        (user_type
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier)
           (type_arguments (type_projection (user_type (type_identifier)))))))
-    (function_body
+    body: (function_body
       (block)))
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters
+    name: (simple_identifier)
+    parameters: (function_value_parameters
       (parameter
-        (simple_identifier)
-        (user_type (type_identifier)))
+        name: (simple_identifier)
+        type: (user_type (type_identifier)))
       (parameter
-        (simple_identifier)
-        (user_type (type_identifier))))
-    (function_body
+        name: (simple_identifier)
+        type: (user_type (type_identifier))))
+    body: (function_body
       (additive_expression
         (simple_identifier)
         (simple_identifier)))))
@@ -97,10 +99,10 @@ fun answerToTheUltimateQuestionOfLifeTheUniverseAndEverything(): Int = 42
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type (type_identifier))
-    (function_body (integer_literal))))
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    type: (user_type (type_identifier))
+    body: (function_body (integer_literal))))
 
 ==================
 Functions with return calls
@@ -114,15 +116,15 @@ fun foo(p0: Int): Long {
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters
+    name: (simple_identifier)
+    parameters: (function_value_parameters
     (parameter
-      (simple_identifier)
-      (user_type
+      name: (simple_identifier)
+      type: (user_type
         (type_identifier))))
-    (user_type
+    type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (block
         (statements
           (jump_expression
@@ -146,9 +148,9 @@ override fun boo() = foo()
   (function_declaration
     modifiers: (modifiers
       (member_modifier))
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (call_expression
         (simple_identifier)
         (call_suffix
@@ -167,9 +169,9 @@ fun test() {
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (block
         (statements
           (assignment
@@ -216,18 +218,18 @@ val anon = fun(x: Int)
   (anonymous_function
   (function_value_parameters
     (parameter
-      (simple_identifier)
-      (user_type
+      name: (simple_identifier)
+      type: (user_type
         (type_identifier)))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (anonymous_function
     (function_value_parameters
       (parameter
-        (simple_identifier)
-        (user_type
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier)))))))
 
 ==================
@@ -282,17 +284,17 @@ val anon = fun() { assert(true) }
                   (boolean_literal)))))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (anonymous_function
       (function_value_parameters)
       (function_body
         (boolean_literal))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (anonymous_function
       (function_value_parameters)
       (function_body
         (block
@@ -314,9 +316,9 @@ fun `this is a test function`() = true
 
 (source_file
   (function_declaration
-   (simple_identifier)
-   (function_value_parameters)
-   (function_body (boolean_literal))))
+   name: (simple_identifier)
+   parameters: (function_value_parameters)
+   body: (function_body (boolean_literal))))
 
 ==================
 Function with null literal as expression body
@@ -328,6 +330,6 @@ fun f() = null
 
 (source_file
   (function_declaration
-   (simple_identifier)
-   (function_value_parameters)
-   (function_body (null_literal))))
+   name: (simple_identifier)
+   parameters: (function_value_parameters)
+   body: (function_body (null_literal))))

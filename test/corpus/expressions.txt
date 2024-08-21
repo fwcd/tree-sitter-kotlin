@@ -216,9 +216,9 @@ expect fun randomUUID(): String
   (function_declaration
     modifiers: (modifiers
       (platform_modifier))
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    type: (user_type
       (type_identifier))))
 
 ================================================================================
@@ -516,9 +516,9 @@ class Square() : Rectangle(), Polygon {
           (function_declaration
             modifiers: (modifiers
               (member_modifier))
-            (simple_identifier)
-            (function_value_parameters)
-            (function_body
+            name: (simple_identifier)
+            parameters: (function_value_parameters)
+            body: (function_body
               (block
                 (statements
                   (call_expression

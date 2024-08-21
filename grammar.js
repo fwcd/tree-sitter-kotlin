@@ -350,11 +350,11 @@ module.exports = grammar({
       "fun",
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),
-      $.simple_identifier,
-      $.function_value_parameters,
-      optional(seq(":", $._type)),
+      field('name', $.simple_identifier),
+      field('parameters', $.function_value_parameters),
+      optional(seq(":", field('type', $._type))),
       optional($.type_constraints),
-      optional($.function_body)
+      optional(field('body', $.function_body))
     )),
 
     function_body: $ => choice($.block, seq("=", $._expression)),
@@ -416,7 +416,7 @@ module.exports = grammar({
       optional(seq(":", $._type))
     ),
 
-    parameter: $ => seq($.simple_identifier, ":", $._type),
+    parameter: $ => seq(field('name', $.simple_identifier), ":", field('type', $._type)),
 
     object_declaration: $ => prec.right(seq(
       optional($.modifiers),

@@ -31,14 +31,14 @@ class HelloWorld {
     (type_identifier)
     (class_body
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-       (function_body
+       name: (simple_identifier)
+       parameters: (function_value_parameters)
+       body: (function_body
         (block)))
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-        (function_body
+       name: (simple_identifier)
+       parameters: (function_value_parameters)
+        body: (function_body
           (block))))))
 
 ================================================================================

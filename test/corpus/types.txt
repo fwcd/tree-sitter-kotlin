@@ -183,12 +183,12 @@ a as (first: A, second: B) -> Unit
     (function_type
       (function_type_parameters
         (parameter
-          (simple_identifier)
-          (user_type
+          name: (simple_identifier)
+          type: (user_type
             (type_identifier)))
         (parameter
-          (simple_identifier)
-          (user_type
+          name: (simple_identifier)
+          type: (user_type
             (type_identifier))))
       (user_type
         (type_identifier)))))
