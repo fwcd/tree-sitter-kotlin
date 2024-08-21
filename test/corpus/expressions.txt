@@ -214,7 +214,7 @@ expect fun randomUUID(): String
 
 (source_file
   (function_declaration
-    (modifiers
+    modifiers: (modifiers
       (platform_modifier))
     (simple_identifier)
     (function_value_parameters)
@@ -514,7 +514,7 @@ class Square() : Rectangle(), Polygon {
             (type_identifier)))
         (class_body
           (function_declaration
-            (modifiers
+            modifiers: (modifiers
               (member_modifier))
             (simple_identifier)
             (function_value_parameters)

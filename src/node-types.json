@@ -3760,7 +3760,18 @@
   {
     "type": "function_declaration",
     "named": true,
-    "fields": {},
+    "fields": {
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
@@ -3775,10 +3786,6 @@
         },
         {
           "type": "function_value_parameters",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         },
         {

@@ -346,7 +346,7 @@ module.exports = grammar({
     ),
 
     function_declaration: $ => prec.right(seq( // TODO
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "fun",
       optional($.type_parameters),
       optional(seq($._receiver_type, optional('.'))),

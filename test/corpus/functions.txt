@@ -144,7 +144,7 @@ override fun boo() = foo()
 
 (source_file
   (function_declaration
-    (modifiers
+    modifiers: (modifiers
       (member_modifier))
     (simple_identifier)
     (function_value_parameters)

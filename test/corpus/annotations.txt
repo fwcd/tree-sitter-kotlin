@@ -88,7 +88,7 @@ class X {
     (type_identifier)
     (class_body
       (function_declaration
-        (modifiers
+        modifiers: (modifiers
           (annotation (user_type (type_identifier)))
           (annotation (user_type (type_identifier))))
         (simple_identifier)
@@ -110,7 +110,7 @@ fun foo() = bar {}
 
 (source_file
   (function_declaration
-    (modifiers
+    modifiers: (modifiers
       (annotation
         (user_type
           (type_identifier))))
