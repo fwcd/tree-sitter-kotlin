@@ -240,7 +240,7 @@ module.exports = grammar({
 
     _class_parameters: $ => seq(
       "(",
-      optional(sep1($.class_parameter, ",")),
+      optional(sep1(field('parameter', $.class_parameter), ",")),
       optional(","),
       ")"
     ),
@@ -248,12 +248,12 @@ module.exports = grammar({
     binding_pattern_kind: $ => choice("val", "var"),
 
     class_parameter: $ => seq(
-      optional($.modifiers),
-      optional($.binding_pattern_kind),
-      $.simple_identifier,
+      optional(field('modifiers', $.modifiers)),
+      optional(field('binding_pattern', $.binding_pattern_kind)),
+      field('name', $.simple_identifier),
       ":",
-      $._type,
-      optional(seq("=", $._expression))
+      field('type', $._type),
+      optional(seq("=", field('initializer', $._expression)))
     ),
 
     _delegation_specifiers: $ => prec.left(sep1(
@@ -427,11 +427,11 @@ module.exports = grammar({
     )),
 
     secondary_constructor: $ => seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "constructor",
-      $.function_value_parameters,
+      field('parameters', $.function_value_parameters),
       optional(seq(":", $.constructor_delegation_call)),
-      optional($.block)
+      optional(field('block', $.block))
     ),
 
     constructor_delegation_call: $ => seq(choice("this", "super"), $.value_arguments),

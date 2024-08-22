@@ -148,15 +148,15 @@ data class Vector2D(
       (class_modifier))
     (type_identifier)
     (primary_constructor
-      (class_parameter
-        (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        binding_pattern: (binding_pattern_kind)
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier)))
-      (class_parameter
-        (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        binding_pattern: (binding_pattern_kind)
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))))
 
 ================================================================================
@@ -183,9 +183,9 @@ class D : SomeInterface
   (class_declaration
     (type_identifier)
     (primary_constructor
-      (class_parameter
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))
     (delegation_specifier
       (constructor_invocation
@@ -264,22 +264,23 @@ class Test(x: Int, y: Int) {
   (class_declaration
     (type_identifier)
     (primary_constructor
-      (class_parameter
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier)))
-      (class_parameter
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))
     (class_body
-      (secondary_constructor (function_value_parameters)
-        (constructor_delegation_call
-          (value_arguments
-            (value_argument
-              (integer_literal))
-            (value_argument
-              (integer_literal))))))))
+      (secondary_constructor 
+        parameters: (function_value_parameters)
+          (constructor_delegation_call
+            (value_arguments
+              (value_argument
+                (integer_literal))
+              (value_argument
+                (integer_literal))))))))
 
 ================================================================================
 Enum classes
@@ -314,10 +315,10 @@ enum class Color(val rgb: Int) {
   (class_declaration
     (type_identifier)
     (primary_constructor
-      (class_parameter
-        (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        binding_pattern: (binding_pattern_kind)
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))
     (enum_class_body
       (enum_entry
@@ -336,11 +337,11 @@ enum class Color(val rgb: Int) {
           (value_argument
             (hex_literal))))
       (function_declaration
-        (modifiers
+        modifiers: (modifiers
           (member_modifier))
-        (simple_identifier)
-        (function_value_parameters)
-        (function_body
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body
           (call_expression
             (navigation_expression
               (simple_identifier)
@@ -368,15 +369,15 @@ data class JwtConfiguration(
       (class_modifier))
     (type_identifier)
     (primary_constructor
-      (class_parameter
-        (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        binding_pattern: (binding_pattern_kind)
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier)))
-      (class_parameter
-        (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
+      parameter: (class_parameter
+        binding_pattern: (binding_pattern_kind)
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))))
 
 ================================================================================
@@ -397,10 +398,10 @@ value class Password(private val s: String)
       (class_modifier))
     (type_identifier)
     (primary_constructor
-      (class_parameter
-        (modifiers
+      parameter: (class_parameter
+        modifiers: (modifiers
           (visibility_modifier))
-        (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
+        binding_pattern: (binding_pattern_kind)
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))))
