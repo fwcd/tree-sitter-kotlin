@@ -450,10 +450,10 @@ module.exports = grammar({
     _enum_entries: $ => seq(sep1($.enum_entry, ","), optional(",")),
 
     enum_entry: $ => seq(
-      optional($.modifiers),
-      $.simple_identifier,
-      optional($.value_arguments),
-      optional($.class_body)
+      optional(field('modifiers', $.modifiers)),
+      field('name', $.simple_identifier),
+      optional(field('arguments', $.value_arguments)),
+      optional(field('body', $.class_body))
     ),
 
     // ==========

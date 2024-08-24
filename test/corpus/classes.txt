@@ -298,6 +298,21 @@ enum class Color(val rgb: Int) {
   override fun toString() = rgb.toString(16)
 }
 
+enum class ProtocolState {
+  WAITING {
+      override fun signal() = TALKING
+  },
+  TALKING {
+      override fun signal() = WAITING
+  };
+  abstract fun signal(): ProtocolState
+}
+
+enum class Enum {
+ @SerialName("constant")
+ Constant
+}
+
 --------------------------------------------------------------------------------
 
 (source_file
@@ -305,13 +320,13 @@ enum class Color(val rgb: Int) {
     (type_identifier)
     (enum_class_body
       (enum_entry
-        (simple_identifier))
+        name: (simple_identifier))
       (enum_entry
-        (simple_identifier))
+        name: (simple_identifier))
       (enum_entry
-        (simple_identifier))
+        name: (simple_identifier))
       (enum_entry
-        (simple_identifier))))
+        name: (simple_identifier))))
   (class_declaration
     (type_identifier)
     (primary_constructor
@@ -322,18 +337,18 @@ enum class Color(val rgb: Int) {
           (type_identifier))))
     (enum_class_body
       (enum_entry
-        (simple_identifier)
-        (value_arguments
+        name: (simple_identifier)
+        arguments: (value_arguments
           (value_argument
             (hex_literal))))
       (enum_entry
-        (simple_identifier)
-        (value_arguments
+        name: (simple_identifier)
+        arguments: (value_arguments
           (value_argument
             (hex_literal))))
       (enum_entry
-        (simple_identifier)
-        (value_arguments
+        name: (simple_identifier)
+        arguments: (value_arguments
           (value_argument
             (hex_literal))))
       (function_declaration
@@ -350,7 +365,51 @@ enum class Color(val rgb: Int) {
             (call_suffix
               (value_arguments
                 (value_argument
-                  (integer_literal))))))))))
+                  (integer_literal)))))))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        name: (simple_identifier)
+        body: (class_body
+          (function_declaration
+            modifiers: (modifiers
+              (member_modifier))
+            name: (simple_identifier)
+            parameters: (function_value_parameters)
+            body: (function_body
+              (simple_identifier)))))
+      (enum_entry
+        name: (simple_identifier)
+        body: (class_body
+          (function_declaration
+            modifiers: (modifiers
+              (member_modifier))
+            name: (simple_identifier)
+            parameters: (function_value_parameters)
+            body: (function_body
+              (simple_identifier)))))
+      (function_declaration
+        modifiers: (modifiers
+          (inheritance_modifier))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        type: (user_type
+          (type_identifier)))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        modifiers: (modifiers
+          (annotation
+            (constructor_invocation
+              (user_type
+                (type_identifier))
+              (value_arguments
+                (value_argument
+                  (string_literal
+                    (string_content)))))))
+        name: (simple_identifier)))))
 
 ================================================================================
 Data class with hanging comma
