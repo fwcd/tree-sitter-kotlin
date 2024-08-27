@@ -13,8 +13,9 @@ class Foo(){
 
 (source_file
   (class_declaration
-    (type_identifier)
-    (primary_constructor)
+    name: (simple_identifier)
+    (primary_constructor
+      (class_parameters))
     (class_body
       (property_declaration
         (binding_pattern_kind)
@@ -25,9 +26,9 @@ class Foo(){
         parameters: (function_value_parameters
           (function_value_parameter
             parameter: (parameter
-                        name: (simple_identifier)
-                        type: (user_type
-                          (type_identifier)))))
+              name: (simple_identifier)
+              type: (user_type
+                (type_identifier)))))
         block: (block
           (statements
             (assignment

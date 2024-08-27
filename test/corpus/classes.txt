@@ -9,9 +9,9 @@ class Empty2 {}
 
 (source_file
   (class_declaration
-    (type_identifier))
+    (simple_identifier))
   (class_declaration
-    (type_identifier)
+    (simple_identifier)
     (class_body)))
 
 ================================================================================
@@ -28,7 +28,7 @@ class HelloWorld {
 
 (source_file
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (class_body
       (function_declaration
        name: (simple_identifier)
@@ -51,7 +51,7 @@ class Container<T> {}
 
 (source_file
   (class_declaration
-    (type_identifier)
+    (simple_identifier)
     (type_parameters
       (type_parameter
         (type_identifier)))
@@ -71,17 +71,17 @@ class Strings {
 
 (source_file
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (class_body
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-       (function_body
+       name: (simple_identifier)
+       parameters: (function_value_parameters)
+       body: (function_body
         (string_literal (string_content))))
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)
-       (function_body
+       name: (simple_identifier)
+       parameters: (function_value_parameters)
+       body: (function_body
         (additive_expression
           (additive_expression
               (string_literal (string_content))
@@ -103,15 +103,15 @@ internal open class Test {
     (modifiers
       (visibility_modifier)
       (inheritance_modifier))
-    (type_identifier)
+    name: (simple_identifier)
     (class_body
       (function_declaration
-        (modifiers
+        modifiers: (modifiers
          (visibility_modifier)
          (inheritance_modifier)
          (function_modifier))
-        (simple_identifier)
-        (function_value_parameters)))))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)))))
 
 ================================================================================
 Objects
@@ -125,7 +125,7 @@ object Singleton {
 
 (source_file
   (object_declaration
-    (type_identifier)
+    (simple_identifier)
     (class_body
       (function_declaration
        (simple_identifier)
@@ -146,18 +146,19 @@ data class Vector2D(
   (class_declaration
     (modifiers
       (class_modifier))
-    (type_identifier)
+    name: (simple_identifier)
     (primary_constructor
-      parameter: (class_parameter
-        binding_pattern: (binding_pattern_kind)
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier)))
-      parameter: (class_parameter
-        binding_pattern: (binding_pattern_kind)
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier))))))
+      (class_parameters
+        (class_parameter
+          binding_pattern: (binding_pattern_kind)
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))
+        (class_parameter
+          binding_pattern: (binding_pattern_kind)
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))))))
 
 ================================================================================
 Inheritance
@@ -173,7 +174,7 @@ class D : SomeInterface
 
 (source_file
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (delegation_specifier
       (constructor_invocation
         (user_type
@@ -181,12 +182,13 @@ class D : SomeInterface
         (value_arguments)))
     (class_body))
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (primary_constructor
-      parameter: (class_parameter
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier))))
+      (class_parameters
+        (class_parameter
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))))
     (delegation_specifier
       (constructor_invocation
         (user_type
@@ -195,7 +197,7 @@ class D : SomeInterface
           (value_argument
             (simple_identifier))))))
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (delegation_specifier
       (user_type
         (type_identifier)))))
@@ -215,7 +217,7 @@ class Something {
 
 (source_file
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (class_body
       (property_declaration
         (binding_pattern_kind)
@@ -262,16 +264,17 @@ class Test(x: Int, y: Int) {
 
 (source_file
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (primary_constructor
-      parameter: (class_parameter
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier)))
-      parameter: (class_parameter
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier))))
+      (class_parameters
+        (class_parameter
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))
+        (class_parameter
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))))
     (class_body
       (secondary_constructor 
         parameters: (function_value_parameters)
@@ -317,7 +320,7 @@ enum class Enum {
 
 (source_file
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (enum_class_body
       (enum_entry
         name: (simple_identifier))
@@ -328,13 +331,14 @@ enum class Enum {
       (enum_entry
         name: (simple_identifier))))
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (primary_constructor
-      parameter: (class_parameter
-        binding_pattern: (binding_pattern_kind)
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier))))
+      (class_parameters
+        (class_parameter
+          binding_pattern: (binding_pattern_kind)
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))))
     (enum_class_body
       (enum_entry
         name: (simple_identifier)
@@ -367,7 +371,7 @@ enum class Enum {
                 (value_argument
                   (integer_literal)))))))))
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (enum_class_body
       (enum_entry
         name: (simple_identifier)
@@ -397,7 +401,7 @@ enum class Enum {
         type: (user_type
           (type_identifier)))))
   (class_declaration
-    (type_identifier)
+    name: (simple_identifier)
     (enum_class_body
       (enum_entry
         modifiers: (modifiers
@@ -426,18 +430,19 @@ data class JwtConfiguration(
   (class_declaration
     (modifiers
       (class_modifier))
-    (type_identifier)
+    name: (simple_identifier)
     (primary_constructor
-      parameter: (class_parameter
-        binding_pattern: (binding_pattern_kind)
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier)))
-      parameter: (class_parameter
-        binding_pattern: (binding_pattern_kind)
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier))))))
+      (class_parameters
+        (class_parameter
+          binding_pattern: (binding_pattern_kind)
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))
+        (class_parameter
+          binding_pattern: (binding_pattern_kind)
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))))))
 
 ================================================================================
 Value class: https://kotlinlang.org/docs/inline-classes.html
@@ -455,12 +460,13 @@ value class Password(private val s: String)
         (user_type
           (type_identifier)))
       (class_modifier))
-    (type_identifier)
+    name: (simple_identifier)
     (primary_constructor
-      parameter: (class_parameter
-        modifiers: (modifiers
-          (visibility_modifier))
-        binding_pattern: (binding_pattern_kind)
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier))))))
+      (class_parameters
+        (class_parameter
+          modifiers: (modifiers
+            (visibility_modifier))
+          binding_pattern: (binding_pattern_kind)
+          name: (simple_identifier)
+          type: (user_type
+            (type_identifier)))))))

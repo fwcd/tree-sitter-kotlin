@@ -1210,10 +1210,21 @@
   {
     "type": "class_declaration",
     "named": true,
-    "fields": {},
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "simple_identifier",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "class_body",
@@ -1237,10 +1248,6 @@
         },
         {
           "type": "type_constraints",
-          "named": true
-        },
-        {
-          "type": "type_identifier",
           "named": true
         },
         {
@@ -1492,6 +1499,21 @@
     }
   },
   {
+    "type": "class_parameters",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "class_parameter",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "collection_literal",
     "named": true,
     "fields": {},
@@ -1665,7 +1687,18 @@
   {
     "type": "companion_object",
     "named": true,
-    "fields": {},
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "simple_identifier",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": false,
@@ -1680,10 +1713,6 @@
         },
         {
           "type": "modifiers",
-          "named": true
-        },
-        {
-          "type": "type_identifier",
           "named": true
         }
       ]
@@ -5928,10 +5957,21 @@
   {
     "type": "object_declaration",
     "named": true,
-    "fields": {},
+    "fields": {
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "simple_identifier",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "class_body",
@@ -5943,10 +5983,6 @@
         },
         {
           "type": "modifiers",
-          "named": true
-        },
-        {
-          "type": "type_identifier",
           "named": true
         }
       ]
@@ -6686,22 +6722,15 @@
   {
     "type": "primary_constructor",
     "named": true,
-    "fields": {
-      "parameter": {
-        "multiple": true,
-        "required": false,
-        "types": [
-          {
-            "type": "class_parameter",
-            "named": true
-          }
-        ]
-      }
-    },
+    "fields": {},
     "children": {
-      "multiple": false,
-      "required": false,
+      "multiple": true,
+      "required": true,
       "types": [
+        {
+          "type": "class_parameters",
+          "named": true
+        },
         {
           "type": "modifiers",
           "named": true

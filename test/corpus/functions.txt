@@ -47,9 +47,9 @@ fun <T: Int> bar(foo: Int): T {}
     parameters: (function_value_parameters
       (function_value_parameter
         parameter: (parameter
-          name: (simple_identifier)
-          type: (user_type
-            (type_identifier)))))
+                      name: (simple_identifier)
+                      type: (user_type
+                        (type_identifier)))))
     type: (user_type
       (type_identifier))
     body: (function_body
@@ -72,9 +72,9 @@ fun sum(a: Int, b: Int) = a + b
       (function_value_parameter
         parameter: (parameter
           name: (simple_identifier)
-          type: (user_type
-            (type_identifier)
-            (type_arguments (type_projection (user_type (type_identifier))))))))
+                  type: (user_type
+                          (type_identifier)
+                          (type_arguments (type_projection (user_type (type_identifier))))))))
     body: (function_body
       (block)))
   (function_declaration
@@ -82,12 +82,12 @@ fun sum(a: Int, b: Int) = a + b
     parameters: (function_value_parameters
       (function_value_parameter
         parameter: (parameter
-          name: (simple_identifier)
-          type: (user_type (type_identifier))))
+                     name: (simple_identifier)
+                     type: (user_type (type_identifier))))
       (function_value_parameter    
         parameter: (parameter
-          name: (simple_identifier)
-          type: (user_type (type_identifier)))))
+                     name: (simple_identifier)
+                     type: (user_type (type_identifier)))))
     body: (function_body
       (additive_expression
         (simple_identifier)
@@ -124,9 +124,9 @@ fun foo(p0: Int): Long {
     parameters: (function_value_parameters
       (function_value_parameter
         parameter: (parameter
-          name: (simple_identifier)
-          type: (user_type
-                  (type_identifier)))))
+                     name: (simple_identifier)
+                     type: (user_type
+                            (type_identifier)))))
     type: (user_type
       (type_identifier))
     body: (function_body
@@ -224,9 +224,9 @@ val anon = fun(x: Int)
   (function_value_parameters
     (function_value_parameter
       parameter: (parameter
-        name: (simple_identifier)
-        type: (user_type
-          (type_identifier))))))
+                   name: (simple_identifier)
+                   type: (user_type
+                           (type_identifier))))))
   (property_declaration
     (binding_pattern_kind)
     var_decl: (variable_declaration
@@ -235,9 +235,9 @@ val anon = fun(x: Int)
     (function_value_parameters
       (function_value_parameter
         parameter: (parameter
-          name: (simple_identifier)
-          type: (user_type
-            (type_identifier))))))))
+                     name: (simple_identifier)
+                     type: (user_type
+                             (type_identifier))))))))
 
 ==================
 Anonymous function with return type
@@ -356,9 +356,9 @@ fun f(x: Int = 1) {
     parameters: (function_value_parameters
       (function_value_parameter
         parameter: (parameter
-          name: (simple_identifier)
-          type: (user_type
-            (type_identifier)))
+                     name: (simple_identifier)
+                     type: (user_type
+                             (type_identifier)))
         initializer: (integer_literal)))
     body: (function_body
       (block))))

@@ -96,7 +96,7 @@ class Foo
 
 (source_file
   (class_declaration
-    (type_identifier)
+    (simple_identifier)
     (delegation_specifier
       (user_type
         (type_identifier)))
@@ -158,7 +158,7 @@ class Foo {
 
 (source_file
   (class_declaration
-    (type_identifier)
+    (simple_identifier)
     (class_body
       (property_declaration
         (binding_pattern_kind)
