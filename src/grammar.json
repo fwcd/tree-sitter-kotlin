@@ -6291,13 +6291,8 @@
       ]
     },
     "null_literal": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "null"
-        }
-      ]
+      "type": "STRING",
+      "value": "null"
     },
     "_lexical_identifier": {
       "type": "CHOICE",

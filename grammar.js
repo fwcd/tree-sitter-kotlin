@@ -1211,9 +1211,7 @@ module.exports = grammar({
       $._escaped_identifier
     ),
 
-    null_literal: $ => seq(
-      "null"
-    ),
+    null_literal: $ => "null",
 
     // ==========
     // Identifiers
