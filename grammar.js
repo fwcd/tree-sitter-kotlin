@@ -829,16 +829,16 @@ module.exports = grammar({
 
     if_expression: $ => prec.right(seq(
       "if",
-      "(", $._expression, ")",
+      "(", field('condition', $._expression), ")",
       choice(
-        $.control_structure_body,
-        ";",
+        field('consequence', $.control_structure_body),
         seq(
-          optional($.control_structure_body),
+          optional(field('consequence', $.control_structure_body)),
           optional(";"),
-          "else",
-          choice($.control_structure_body, ";")
-        )
+          "else", 
+          choice(field('alternative', $.control_structure_body), ";")
+        ),
+        ";"
       )
     )),
 
