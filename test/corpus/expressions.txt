@@ -144,7 +144,8 @@ when (this) {
             (type_arguments
               (type_projection)))))
       (control_structure_body
-        (jump_expression)))))
+        (jump_expression
+          (null_literal))))))
 
 ================================================================================
 Value declaration with receiver type
@@ -573,3 +574,53 @@ class Square() : Rectangle(), Polygon {
                   (simple_identifier)))
               (call_suffix
                 (value_arguments)))))))))
+
+================================================================================
+If else-if else expression
+================================================================================
+
+if (cond1) {
+	println("cond1")
+} else if (cond2) {
+	println("cond2")
+} else {
+	println("cond3")
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_expression
+    condition: (simple_identifier)
+    consequence: (control_structure_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content))))))))
+    alternative:
+      (control_structure_body
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments
+                    (value_argument
+                      (string_literal
+                        (string_content))))))))
+          alternative:
+            (control_structure_body
+              (statements
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments
+                      (value_argument
+                        (string_literal
+                          (string_content))))))))))))
