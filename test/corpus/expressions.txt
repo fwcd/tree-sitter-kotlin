@@ -344,6 +344,26 @@ foo.forEach { (index, value) -> 2 }
             (integer_literal)))))))
 
 ================================================================================
+Function call with trailing lambda
+================================================================================
+
+with(s) { length }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (simple_identifier)
+    (call_suffix
+      (value_arguments
+        (value_argument
+          (simple_identifier)))
+      (annotated_lambda
+        (lambda_literal
+          (statements
+            (simple_identifier)))))))
+
+================================================================================
 Multiple Statements on a Single Line
 ================================================================================
 
