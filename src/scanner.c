@@ -514,6 +514,9 @@ void tree_sitter_kotlin_external_scanner_destroy(void *payload) {
 
 unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buffer) {
   Stack *stack = (Stack *)payload;
+  if (stack->size == 0) {
+    return 0;
+  }
   memcpy(buffer, stack->contents, stack->size);
   return stack->size;
 }
