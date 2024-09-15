@@ -9,7 +9,7 @@ for (value in values) {}
 (source_file
   (for_statement
     (variable_declaration
-      (simple_identifier))
+      id: (simple_identifier))
     (simple_identifier)
     (control_structure_body
       (block))))
@@ -53,8 +53,8 @@ val ty x get () = 3
 (source_file
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
+    var_decl: (variable_declaration
+      id: (simple_identifier))
     (getter
       (function_body
         (integer_literal))))
@@ -62,8 +62,8 @@ val ty x get () = 3
     (binding_pattern_kind)
     (user_type
       (type_identifier))
-    (variable_declaration
-      (simple_identifier))
+    var_decl: (variable_declaration
+      id: (simple_identifier))
     (getter
       (function_body
         (integer_literal)))))

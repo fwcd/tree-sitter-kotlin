@@ -10,7 +10,7 @@ class Empty
 (source_file
   (class_declaration
         (modifiers (annotation (user_type (type_identifier))))
-        (simple_identifier)))
+        name: (simple_identifier)))
 
 ==================
 Annotations with use-site-target
@@ -22,12 +22,12 @@ class Empty(@field:Test val x: Boolean)
 
 (source_file
   (class_declaration
-        (simple_identifier)
+        name: (simple_identifier)
         (primary_constructor (class_parameters (class_parameter
-            (modifiers (annotation (use_site_target) (user_type (type_identifier))))
-            (binding_pattern_kind)
-            (simple_identifier)
-            (user_type (type_identifier)))))))
+            modifiers: (modifiers (annotation (use_site_target) (user_type (type_identifier))))
+            binding_pattern: (binding_pattern_kind)
+            name: (simple_identifier)
+            type: (user_type (type_identifier)))))))
 
 ==================
 Multi-annotations
@@ -40,9 +40,11 @@ var x: Int
 
 (source_file
     (property_declaration
-        (modifiers (annotation (use_site_target) (user_type (type_identifier)) (user_type (type_identifier))))
+        modifiers: (modifiers (annotation (use_site_target) (user_type (type_identifier)) (user_type (type_identifier))))
         (binding_pattern_kind)
-        (variable_declaration (simple_identifier) (user_type (type_identifier)))))
+        var_decl: (variable_declaration 
+                    id: (simple_identifier) 
+                    type: (user_type (type_identifier)))))
 
 ==================
 Multiple annotations on a variable
@@ -57,15 +59,17 @@ class X {
 
 (source_file
   (class_declaration
-    (simple_identifier)
+    name: (simple_identifier)
     (class_body
       (property_declaration
-        (modifiers
+        modifiers: (modifiers
           (annotation (user_type (type_identifier)))
           (annotation (user_type (type_identifier)))
           (member_modifier))
         (binding_pattern_kind)
-        (variable_declaration (simple_identifier) (user_type (type_identifier)))
+        var_decl: (variable_declaration 
+          id: (simple_identifier) 
+          type: (user_type (type_identifier)))
       )
     )
   )

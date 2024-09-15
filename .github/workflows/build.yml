@@ -5,35 +5,33 @@ on:
     branches:
     - main
   pull_request:
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-      - name: Install dependencies
-        run: npm install
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up tree-sitter
+        uses: tree-sitter/setup-action/cli@v1
       - name: Generate parser
-        run: npm run generate
+        run: tree-sitter generate
       - name: Verify that generated parser matches the repository
         run: |
           diff=`git diff HEAD -- src`
           echo "$diff"
           test -z "$diff"
-      - name: Check the parser size
-        run: |
-          size_kib="$(du -sk src/parser.c | cut -f1)"
-          size_mib="$((size_kib / 1024))"
-          max_size_mib=35
-
-          echo "The parser is now at $size_mib MiB"
       - name: Run tests
-        run: npm test
+        run: tree-sitter test --show-fields
+      - name: Set up examples
+        run: |-
+          git clone https://github.com/JetBrains/kotlin examples/kotlin --single-branch --depth=1 --filter=blob:none        
+      - name: Parse examples
+        id: examples
+        continue-on-error: true
+        uses: tree-sitter/parse-action@v4
+        with:
+          files: examples/**/*.kt          
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
       - name: Build and test crate

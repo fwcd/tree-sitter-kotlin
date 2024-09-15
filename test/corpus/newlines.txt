@@ -32,9 +32,9 @@ fun foo()
 ---
 (source_file
    (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body 
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body 
     (integer_literal))))
 
 ================================================================================
@@ -50,17 +50,19 @@ fun foo()  {
 --------------------------------------------------------------------------------
 
 (source_file
-  (function_declaration (simple_identifier) (function_value_parameters)
-    (function_body
-      (block
-        (statements
-          (property_declaration
-            (binding_pattern_kind)
-            (variable_declaration
-              (simple_identifier))
-            (conjunction_expression
-              (simple_identifier)
-              (simple_identifier))))))))
+  (function_declaration 
+    name: (simple_identifier) 
+    parameters: (function_value_parameters)
+    body: (function_body
+            (block
+              (statements
+                (property_declaration
+                  (binding_pattern_kind)
+                  var_decl: (variable_declaration
+                    id: (simple_identifier))
+                  initializer: (conjunction_expression
+                    (simple_identifier)
+                    (simple_identifier))))))))
 
 ================================================================================
 Open brace after newline
@@ -73,11 +75,11 @@ fun foo():String
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (block
         (statements
           (jump_expression
@@ -96,7 +98,7 @@ class Foo
 
 (source_file
   (class_declaration
-    (simple_identifier)
+    name: (simple_identifier)
     (delegation_specifier
       (user_type
         (type_identifier)))
@@ -117,16 +119,16 @@ fun foo() {
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (block
         (statements
           (property_declaration
             (binding_pattern_kind)
-            (variable_declaration
-              (simple_identifier))
-            (elvis_expression
+            var_decl: (variable_declaration
+              id: (simple_identifier))
+            initializer: (elvis_expression
               (elvis_expression
                 (call_expression
                   (navigation_expression
@@ -158,13 +160,13 @@ class Foo {
 
 (source_file
   (class_declaration
-    (simple_identifier)
+    name: (simple_identifier)
     (class_body
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        var_decl: (variable_declaration
+          id: (simple_identifier)
+          type: (user_type
             (type_identifier))))
       (getter
         (function_body

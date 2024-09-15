@@ -9,9 +9,9 @@ class Empty2 {}
 
 (source_file
   (class_declaration
-    (simple_identifier))
+    name: (simple_identifier))
   (class_declaration
-    (simple_identifier)
+    name: (simple_identifier)
     (class_body)))
 
 ================================================================================
@@ -51,7 +51,7 @@ class Container<T> {}
 
 (source_file
   (class_declaration
-    (simple_identifier)
+    name: (simple_identifier)
     (type_parameters
       (type_parameter
         (type_identifier)))
@@ -125,11 +125,11 @@ object Singleton {
 
 (source_file
   (object_declaration
-    (simple_identifier)
+    name: (simple_identifier)
     (class_body
       (function_declaration
-       (simple_identifier)
-       (function_value_parameters)))))
+       name: (simple_identifier)
+       parameters: (function_value_parameters)))))
 
 ================================================================================
 Primary constructors

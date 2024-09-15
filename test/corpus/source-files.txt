@@ -18,9 +18,9 @@ val x = 4
           (string_literal (string_content))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (integer_literal)))
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (integer_literal)))
 
 ================================================================================
 Multiple file annotations
@@ -96,9 +96,9 @@ fun main() {
         (simple_identifier)
         (simple_identifier))))
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (block))))
 
 ================================================================================

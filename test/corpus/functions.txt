@@ -206,9 +206,9 @@ val anon = fun()
   (function_value_parameters))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function (function_value_parameters))))
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (anonymous_function (function_value_parameters))))
 
 ==================
 Anonymous function with parameters
@@ -255,9 +255,9 @@ val anon = fun(): Int
       (type_identifier)))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (anonymous_function
       (function_value_parameters)
       (user_type
         (type_identifier)))))

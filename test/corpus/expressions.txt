@@ -91,7 +91,7 @@ When expression
 ================================================================================
 
 val x = 1
-val y = when(x){
+val y = when(x) {
         1 -> true
         2 -> false
     }
@@ -101,14 +101,14 @@ val y = when(x){
 (source_file
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (integer_literal))
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (integer_literal))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (when_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (when_expression
       (when_subject
         (simple_identifier))
       (when_entry
@@ -160,9 +160,9 @@ val MyDate.s: String get() = "hello"
     (binding_pattern_kind)
     (user_type
       (type_identifier))
-    (variable_declaration
-      (simple_identifier)
-      (user_type
+    var_decl: (variable_declaration
+      id: (simple_identifier)
+      type: (user_type
         (type_identifier)))
     (getter
       (function_body
@@ -179,9 +179,9 @@ val x = expect(1)
 (source_file
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (call_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
@@ -270,23 +270,23 @@ val a = a<2>(3)
 (source_file
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (comparison_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (comparison_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (comparison_expression
       (simple_identifier)
       (simple_identifier)))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (comparison_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (comparison_expression
       (comparison_expression
         (simple_identifier)
         (simple_identifier))
@@ -294,9 +294,9 @@ val a = a<2>(3)
   (line_comment)
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (call_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (call_expression
       (simple_identifier)
       (call_suffix
         (type_arguments
@@ -308,9 +308,9 @@ val a = a<2>(3)
             (simple_identifier))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (comparison_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (comparison_expression
       (comparison_expression
         (simple_identifier)
         (integer_literal))
@@ -337,9 +337,9 @@ foo.forEach { (index, value) -> 2 }
           (lambda_parameters
             (multi_variable_declaration
               (variable_declaration
-                (simple_identifier))
+                id: (simple_identifier))
               (variable_declaration
-                (simple_identifier))))
+                id: (simple_identifier))))
           (statements
             (integer_literal)))))))
 
@@ -355,16 +355,16 @@ when (dir) {
 --------------------------------------------------------------------------------
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
       (block
         (statements
           (property_declaration
             (binding_pattern_kind)
-            (variable_declaration
-              (simple_identifier))
-            (navigation_expression
+            var_decl: (variable_declaration
+              id: (simple_identifier))
+            initializer: (navigation_expression
               (simple_identifier)
               (navigation_suffix
                 (simple_identifier))))
@@ -394,9 +394,9 @@ when (dir) {
           (statements
             (property_declaration
               (binding_pattern_kind)
-              (variable_declaration
-                (simple_identifier))
-              (navigation_expression
+              var_decl: (variable_declaration
+                id: (simple_identifier))
+              initializer: (navigation_expression
                 (simple_identifier)
                 (navigation_suffix
                   (simple_identifier))))
@@ -436,9 +436,9 @@ val comments = """ // and here """
 (source_file
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (call_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
@@ -446,9 +446,9 @@ val comments = """ // and here """
             (string_literal (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (call_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
@@ -456,9 +456,9 @@ val comments = """ // and here """
             (string_literal (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (call_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
@@ -466,9 +466,9 @@ val comments = """ // and here """
             (string_literal (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (call_expression
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (call_expression
       (simple_identifier)
       (call_suffix
         (value_arguments
@@ -476,14 +476,14 @@ val comments = """ // and here """
             (string_literal (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (string_literal (string_content)))
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (string_literal (string_content)))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (string_literal (string_content))))
+    var_decl: (variable_declaration
+      id: (simple_identifier))
+    initializer: (string_literal (string_content))))
 
 ================================================================================
 Qualified this/super expressions
