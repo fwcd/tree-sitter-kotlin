@@ -573,9 +573,22 @@ if (cond1) {
 --------------------------------------------------------------------------------
 
 (source_file
+  (if_expression
+    condition: (simple_identifier)
+    consequence: (control_structure_body
+      (block
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (string_literal
+                    (string_content)))))))))
+    alternative: (control_structure_body
       (if_expression
-        (simple_identifier)
-        (control_structure_body
+        condition: (simple_identifier)
+        consequence: (control_structure_body
           (block
             (statements
               (call_expression
@@ -585,29 +598,13 @@ if (cond1) {
                     (value_argument
                       (string_literal
                         (string_content)))))))))
-        (else
-          (control_structure_body
-            (if_expression
-              (simple_identifier)
-              (control_structure_body
-                (block
-                  (statements
-                    (call_expression
-                      (simple_identifier)
-                      (call_suffix
-                        (value_arguments
-                          (value_argument
-                            (string_literal
-                              (string_content)))))))))
-              (else
-                (control_structure_body
-                  (block
-                    (statements
-                      (call_expression
-                        (simple_identifier)
-                        (call_suffix
-                          (value_arguments
-                            (value_argument
-                              (string_literal
-                                (string_content)))))))))))))))
-
+        alternative: (control_structure_body
+          (block
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments
+                    (value_argument
+                      (string_literal
+                        (string_content)))))))))))))
