@@ -8,10 +8,10 @@ for (value in values) {}
 
 (source_file
   (for_statement
-    (variable_declaration
-      id: (simple_identifier))
-    (simple_identifier)
-    (control_structure_body
+    var_decl: (variable_declaration
+               id: (simple_identifier))
+    expression: (simple_identifier)
+    body: (control_structure_body
       (block))))
 
 ================================================================================
@@ -95,3 +95,37 @@ fun foo() {
               (simple_identifier)
               (call_suffix
                 (value_arguments)))))))))
+
+
+================================================================================
+Try catch
+================================================================================
+
+try {
+  doSomething()
+} catch (e: Exception) {
+  println(e)
+}
+
+--------------------------------------------------------------------------------
+
+ (source_file
+  (try_expression
+    (block
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))
+    (catch_block
+      name: (simple_identifier)
+      type: (user_type
+        (type_identifier))
+      body: (block
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier))))))))))
