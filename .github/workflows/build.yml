@@ -25,7 +25,11 @@ jobs:
         run: tree-sitter test --show-fields
       - name: Set up examples
         run: |-
-          git clone https://github.com/JetBrains/kotlin examples/kotlin --single-branch --depth=1 --filter=blob:none        
+          git clone https://github.com/square/okhttp.git examples/okhttp --single-branch --depth=1 --filter=blob:none   
+          git clone https://github.com/ktorio/ktor.git examples/ktor --single-branch --depth=1 --filter=blob:none   
+          git clone https://github.com/square/leakcanary.git examples/leakcanary --single-branch --depth=1 --filter=blob:none   
+          git clone https://github.com/JetBrains/compose-multiplatform.git examples/compose-multiplatform --single-branch --depth=1 --filter=blob:none   
+          git clone https://github.com/Kotlin/kotlinx.coroutines.git examples/kotlinx.coroutines --single-branch --depth=1 --filter=blob:none   
       - name: Parse examples
         id: examples
         continue-on-error: true
