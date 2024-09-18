@@ -334,13 +334,13 @@ foo.forEach { (index, value) -> 2 }
     (call_suffix
       (annotated_lambda
         (lambda_literal
-          (lambda_parameters
+          parameters: (lambda_parameters
             (multi_variable_declaration
               (variable_declaration
                 id: (simple_identifier))
               (variable_declaration
                 id: (simple_identifier))))
-          (statements
+          body: (statements
             (integer_literal)))))))
 
 ================================================================================
@@ -360,7 +360,7 @@ with(s) { length }
           (simple_identifier)))
       (annotated_lambda
         (lambda_literal
-          (statements
+          body: (statements
             (simple_identifier)))))))
 
 ================================================================================

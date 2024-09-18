@@ -780,8 +780,8 @@ module.exports = grammar({
 
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
       "{",
-      optional(seq(optional($.lambda_parameters), "->")),
-      optional($.statements),
+      optional(seq(optional(field('parameters', $.lambda_parameters)), "->")),
+      optional(field('body', $.statements)),
       "}"
     )),
 
