@@ -21,8 +21,8 @@ fun foo() {
           var_decl: (variable_declaration
             id: (simple_identifier))
           initializer: (call_expression
-            (simple_identifier)
-            (call_suffix
+            expression: (simple_identifier)
+            suffix: (call_suffix
               (value_arguments
                 (value_argument
                   (simple_identifier))))))

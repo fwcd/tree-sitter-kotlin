@@ -16,7 +16,7 @@ class Foo(){
     name: (simple_identifier)
     (primary_constructor
       (class_parameters))
-    (class_body
+    body: (class_body
       (property_declaration
         (binding_pattern_kind)
         var_decl: (variable_declaration
@@ -32,11 +32,12 @@ class Foo(){
         block: (block
           (statements
             (assignment
-              (directly_assignable_expression
-                (this_expression)
-                (navigation_suffix
-                  (simple_identifier)))
-              (simple_identifier))))))))
+              left: (directly_assignable_expression
+                (postfix_unary_expression
+                  (this_expression)
+                  (navigation_suffix
+                    (simple_identifier))))
+              right: (simple_identifier))))))))
 ================================================================================
 Index Assignment
 ================================================================================
@@ -66,9 +67,10 @@ fun main(){
                     (user_type
                       (type_identifier)))))))
           (assignment
-            (directly_assignable_expression
-              (simple_identifier)
-              (indexing_suffix
-                (integer_literal)))
-            (string_literal
+            left: (directly_assignable_expression
+              (postfix_unary_expression
+                (simple_identifier)
+                (indexing_suffix
+                  (integer_literal))))
+            right: (string_literal
               (string_content))))))))

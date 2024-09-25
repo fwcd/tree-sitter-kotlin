@@ -26,39 +26,39 @@ a ? . bar()
 
 (source_file
   (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
+    expression: (navigation_expression
+      expression: (simple_identifier)
+      suffix: (navigation_suffix
         (simple_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (value_arguments)))
   (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
+    expression: (navigation_expression
+      expression: (simple_identifier)
+      suffix: (navigation_suffix
         (simple_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (value_arguments)))
   (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
+    expression: (navigation_expression
+      expression: (simple_identifier)
+      suffix: (navigation_suffix
         (simple_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (value_arguments)))
   (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
+    expression: (navigation_expression
+      expression: (simple_identifier)
+      suffix: (navigation_suffix
         (simple_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (value_arguments)))
   (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
+    expression: (navigation_expression
+      expression: (simple_identifier)
+      suffix: (navigation_suffix
         (simple_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (value_arguments))))
 
 ================================================================================
@@ -72,14 +72,14 @@ sum(1, 2)
 
 (source_file
   (call_expression
-    (simple_identifier)
-    (call_suffix
+    expression: (simple_identifier)
+    suffix: (call_suffix
       (value_arguments
         (value_argument
           (string_literal (string_content))))))
   (call_expression
-    (simple_identifier)
-    (call_suffix
+    expression: (simple_identifier)
+    suffix: (call_suffix
       (value_arguments
         (value_argument
           (integer_literal))
@@ -182,8 +182,8 @@ val x = expect(1)
     var_decl: (variable_declaration
       id: (simple_identifier))
     initializer: (call_expression
-      (simple_identifier)
-      (call_suffix
+      expression: (simple_identifier)
+      suffix: (call_suffix
         (value_arguments
           (value_argument
             (integer_literal)))))))
@@ -198,8 +198,8 @@ expect(1)
 
 (source_file
   (call_expression
-    (simple_identifier)
-    (call_suffix
+    expression: (simple_identifier)
+    suffix: (call_suffix
       (value_arguments
         (value_argument
           (integer_literal))))))
@@ -232,8 +232,8 @@ foo<Int>(1)
 
 (source_file
   (call_expression
-    (simple_identifier)
-    (call_suffix
+    expression: (simple_identifier)
+    suffix: (call_suffix
       (type_arguments
         (type_projection
           (user_type
@@ -244,8 +244,8 @@ foo<Int>(1)
         (value_argument
           (integer_literal)))))
   (call_expression
-    (simple_identifier)
-    (call_suffix
+    expression: (simple_identifier)
+    suffix: (call_suffix
       (type_arguments
         (type_projection
           (user_type
@@ -297,8 +297,8 @@ val a = a<2>(3)
     var_decl: (variable_declaration
       id: (simple_identifier))
     initializer: (call_expression
-      (simple_identifier)
-      (call_suffix
+      expression: (simple_identifier)
+      suffix: (call_suffix
         (type_arguments
           (type_projection
             (user_type
@@ -327,11 +327,11 @@ foo.forEach { (index, value) -> 2 }
 
 (source_file
   (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
+    expression: (navigation_expression
+      expression: (simple_identifier)
+      suffix: (navigation_suffix
         (simple_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (annotated_lambda
         (lambda_literal
           parameters: (lambda_parameters
@@ -353,8 +353,8 @@ with(s) { length }
 
 (source_file
   (call_expression
-    (simple_identifier)
-    (call_suffix
+    expression: (simple_identifier)
+    suffix: (call_suffix
       (value_arguments
         (value_argument
           (simple_identifier)))
@@ -373,68 +373,73 @@ when (dir) {
   1 -> { val temp = b.y; b.y = b.z; b.z = temp }
 }
 --------------------------------------------------------------------------------
+
 (source_file
-  (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body
-      (block
-        (statements
-          (property_declaration
-            (binding_pattern_kind)
-            var_decl: (variable_declaration
-              id: (simple_identifier))
-            initializer: (navigation_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier))))
-          (assignment
-            (directly_assignable_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier)))
-            (navigation_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier))))
-          (assignment
-            (directly_assignable_expression
-              (simple_identifier)
-              (navigation_suffix
-                (simple_identifier)))
-            (simple_identifier))))))
-  (when_expression
-    (when_subject
-      (simple_identifier))
-    (when_entry
-      (when_condition
-        (integer_literal))
-      (control_structure_body
-        (block
-          (statements
-            (property_declaration
-              (binding_pattern_kind)
-              var_decl: (variable_declaration
-                id: (simple_identifier))
-              initializer: (navigation_expression
-                (simple_identifier)
-                (navigation_suffix
-                  (simple_identifier))))
-            (assignment
-              (directly_assignable_expression
-                (simple_identifier)
-                (navigation_suffix
-                  (simple_identifier)))
-              (navigation_expression
-                (simple_identifier)
-                (navigation_suffix
-                  (simple_identifier))))
-            (assignment
-              (directly_assignable_expression
-                (simple_identifier)
-                (navigation_suffix
-                  (simple_identifier)))
-              (simple_identifier))))))))
+      (function_declaration
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body
+          (block
+            (statements
+              (property_declaration
+                (binding_pattern_kind)
+                var_decl: (variable_declaration
+                  id: (simple_identifier))
+                initializer: (navigation_expression
+                  expression: (simple_identifier)
+                  suffix: (navigation_suffix
+                    (simple_identifier))))
+              (assignment
+                left: (directly_assignable_expression
+                  (postfix_unary_expression
+                    (simple_identifier)
+                    (navigation_suffix
+                      (simple_identifier))))
+                right: (navigation_expression
+                  expression: (simple_identifier)
+                  suffix: (navigation_suffix
+                    (simple_identifier))))
+              (assignment
+                left: (directly_assignable_expression
+                  (postfix_unary_expression
+                    (simple_identifier)
+                    (navigation_suffix
+                      (simple_identifier))))
+                right: (simple_identifier))))))
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (control_structure_body
+            (block
+              (statements
+                (property_declaration
+                  (binding_pattern_kind)
+                  var_decl: (variable_declaration
+                    id: (simple_identifier))
+                  initializer: (navigation_expression
+                    expression: (simple_identifier)
+                    suffix: (navigation_suffix
+                      (simple_identifier))))
+                (assignment
+                  left: (directly_assignable_expression
+                    (postfix_unary_expression
+                      (simple_identifier)
+                      (navigation_suffix
+                        (simple_identifier))))
+                  right: (navigation_expression
+                    expression: (simple_identifier)
+                    suffix: (navigation_suffix
+                      (simple_identifier))))
+                (assignment
+                  left: (directly_assignable_expression
+                    (postfix_unary_expression
+                      (simple_identifier)
+                      (navigation_suffix
+                        (simple_identifier))))
+                  right: (simple_identifier))))))))
 
 ================================================================================
 Comments in Strings
@@ -459,8 +464,8 @@ val comments = """ // and here """
     var_decl: (variable_declaration
       id: (simple_identifier))
     initializer: (call_expression
-      (simple_identifier)
-      (call_suffix
+      expression: (simple_identifier)
+      suffix: (call_suffix
         (value_arguments
           (value_argument
             (string_literal (string_content)))))))
@@ -469,8 +474,8 @@ val comments = """ // and here """
     var_decl: (variable_declaration
       id: (simple_identifier))
     initializer: (call_expression
-      (simple_identifier)
-      (call_suffix
+      expression: (simple_identifier)
+      suffix: (call_suffix
         (value_arguments
           (value_argument
             (string_literal (string_content)))))))
@@ -479,8 +484,8 @@ val comments = """ // and here """
     var_decl: (variable_declaration
       id: (simple_identifier))
     initializer: (call_expression
-      (simple_identifier)
-      (call_suffix
+      expression: (simple_identifier)
+      suffix: (call_suffix
         (value_arguments
           (value_argument
             (string_literal (string_content)))))))
@@ -489,8 +494,8 @@ val comments = """ // and here """
     var_decl: (variable_declaration
       id: (simple_identifier))
     initializer: (call_expression
-      (simple_identifier)
-      (call_suffix
+      expression: (simple_identifier)
+      suffix: (call_suffix
         (value_arguments
           (value_argument
             (string_literal (string_content)))))))
@@ -533,7 +538,7 @@ class Square() : Rectangle(), Polygon {
         (delegation_specifier
           (user_type
             (type_identifier)))
-        (class_body
+        body: (class_body
           (function_declaration
             modifiers: (modifiers
               (member_modifier))
@@ -543,39 +548,39 @@ class Square() : Rectangle(), Polygon {
               (block
                 (statements
                   (call_expression
-                    (navigation_expression
-                      (this_expression
+                    expression: (navigation_expression
+                      expression: (this_expression
                         (type_identifier))
-                      (navigation_suffix
+                      suffix: (navigation_suffix
                         (simple_identifier)))
-                    (call_suffix
+                    suffix: (call_suffix
                       (value_arguments)))
                   (call_expression
-                    (navigation_expression
-                      (super_expression
+                    expression: (navigation_expression
+                      expression: (super_expression
                         (type_identifier))
-                      (navigation_suffix
+                      suffix: (navigation_suffix
                         (simple_identifier)))
-                    (call_suffix
+                    suffix: (call_suffix
                       (value_arguments)))
                   (call_expression
-                    (navigation_expression
-                      (super_expression
+                    expression: (navigation_expression
+                      expression: (super_expression
                         (user_type
                           (type_identifier)))
-                      (navigation_suffix
+                      suffix: (navigation_suffix
                         (simple_identifier)))
-                    (call_suffix
+                    suffix: (call_suffix
                       (value_arguments)))
                   (call_expression
-                    (navigation_expression
-                      (super_expression
+                    expression: (navigation_expression
+                      expression: (super_expression
                         (user_type
                           (type_identifier))
                         (type_identifier))
-                      (navigation_suffix
+                      suffix: (navigation_suffix
                         (simple_identifier)))
-                    (call_suffix
+                    suffix: (call_suffix
                       (value_arguments))))))))))
 
 ================================================================================
@@ -599,8 +604,8 @@ if (cond1) {
       (block
         (statements
           (call_expression
-            (simple_identifier)
-            (call_suffix
+            expression: (simple_identifier)
+            suffix: (call_suffix
               (value_arguments
                 (value_argument
                   (string_literal
@@ -612,8 +617,8 @@ if (cond1) {
           (block
             (statements
               (call_expression
-                (simple_identifier)
-                (call_suffix
+                expression: (simple_identifier)
+                suffix: (call_suffix
                   (value_arguments
                     (value_argument
                       (string_literal
@@ -622,8 +627,8 @@ if (cond1) {
           (block
             (statements
               (call_expression
-                (simple_identifier)
-                (call_suffix
+                expression: (simple_identifier)
+                suffix: (call_suffix
                   (value_arguments
                     (value_argument
                       (string_literal

@@ -441,8 +441,12 @@
                 "type": "CHOICE",
                 "members": [
                   {
-                    "type": "SYMBOL",
-                    "name": "class_body"
+                    "type": "FIELD",
+                    "name": "body",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "class_body"
+                    }
                   },
                   {
                     "type": "BLANK"
@@ -1139,8 +1143,12 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "class_body"
+              "type": "FIELD",
+              "name": "body",
+              "content": {
+                "type": "SYMBOL",
+                "name": "class_body"
+              }
             },
             {
               "type": "BLANK"
@@ -1570,25 +1578,21 @@
             ]
           },
           {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "FIELD",
-                "name": "var_decl",
-                "content": {
+            "type": "FIELD",
+            "name": "var_decl",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
                   "type": "SYMBOL",
                   "name": "variable_declaration"
-                }
-              },
-              {
-                "type": "FIELD",
-                "name": "var_decl",
-                "content": {
+                },
+                {
                   "type": "SYMBOL",
                   "name": "multi_variable_declaration"
                 }
-              }
-            ]
+              ]
+            }
           },
           {
             "type": "CHOICE",
@@ -2003,8 +2007,12 @@
             "type": "CHOICE",
             "members": [
               {
-                "type": "SYMBOL",
-                "name": "class_body"
+                "type": "FIELD",
+                "name": "body",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "class_body"
+                }
               },
               {
                 "type": "BLANK"
@@ -2967,51 +2975,46 @@
       "name": "_automatic_semicolon"
     },
     "assignment": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "PREC_LEFT",
-          "value": 1,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "directly_assignable_expression"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_assignment_and_operator"
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_expression"
-              }
-            ]
+      "type": "PREC_LEFT",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "FIELD",
+            "name": "left",
+            "content": {
+              "type": "SYMBOL",
+              "name": "directly_assignable_expression"
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "op",
+            "content": {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "="
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_assignment_and_operator"
+                }
+              ]
+            }
+          },
+          {
+            "type": "FIELD",
+            "name": "right",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
           }
-        },
-        {
-          "type": "PREC_LEFT",
-          "value": 1,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "directly_assignable_expression"
-              },
-              {
-                "type": "STRING",
-                "value": "="
-              },
-              {
-                "type": "SYMBOL",
-                "name": "_expression"
-              }
-            ]
-          }
-        }
-      ]
+        ]
+      }
     },
     "_expression": {
       "type": "CHOICE",
@@ -3087,12 +3090,20 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "_expression"
+            "type": "FIELD",
+            "name": "expression",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
           },
           {
-            "type": "SYMBOL",
-            "name": "call_suffix"
+            "type": "FIELD",
+            "name": "suffix",
+            "content": {
+              "type": "SYMBOL",
+              "name": "call_suffix"
+            }
           }
         ]
       }
@@ -3121,12 +3132,20 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "_expression"
+            "type": "FIELD",
+            "name": "expression",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
           },
           {
-            "type": "SYMBOL",
-            "name": "navigation_suffix"
+            "type": "FIELD",
+            "name": "suffix",
+            "content": {
+              "type": "SYMBOL",
+              "name": "navigation_suffix"
+            }
           }
         ]
       }
@@ -5133,7 +5152,7 @@
         }
       ]
     },
-    "_postfix_unary_expression": {
+    "postfix_unary_expression": {
       "type": "SEQ",
       "members": [
         {
@@ -5157,7 +5176,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "_postfix_unary_expression"
+            "name": "postfix_unary_expression"
           },
           {
             "type": "SYMBOL",
@@ -6408,7 +6427,7 @@
       "simple_identifier"
     ],
     [
-      "_postfix_unary_expression",
+      "postfix_unary_expression",
       "_expression"
     ],
     [

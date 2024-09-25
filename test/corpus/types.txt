@@ -29,11 +29,11 @@ something as Some.NestedType
 (source_file
   (line_comment)
   (navigation_expression
-    (as_expression
+    expression: (as_expression
       (simple_identifier)
       (user_type
         (type_identifier)))
-    (navigation_suffix
+    suffix: (navigation_suffix
       (simple_identifier))))
 
 ================================================================================
@@ -48,17 +48,17 @@ somethingElse as A.Deeply.Nested.Type
 (source_file
   (line_comment)
   (navigation_expression
-    (navigation_expression
-      (navigation_expression
-        (as_expression
+    expression: (navigation_expression
+      expression: (navigation_expression
+        expression: (as_expression
           (simple_identifier)
           (user_type
             (type_identifier)))
-        (navigation_suffix
+        suffix: (navigation_suffix
           (simple_identifier)))
-      (navigation_suffix
+      suffix: (navigation_suffix
         (simple_identifier)))
-    (navigation_suffix
+    suffix: (navigation_suffix
       (simple_identifier))))
 
 ================================================================================
@@ -220,11 +220,11 @@ a as Foo(x = "hi", y = "bar")
 
 (source_file
   (call_expression
-    (as_expression
+    expression: (as_expression
       (simple_identifier)
       (user_type
         (type_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (value_arguments
         (value_argument
           (simple_identifier)
@@ -243,11 +243,11 @@ a as Foo(x = "hi", y = "bar",)
 
 (source_file
   (call_expression
-    (as_expression
+    expression: (as_expression
       (simple_identifier)
       (user_type
         (type_identifier)))
-    (call_suffix
+    suffix: (call_suffix
       (value_arguments
         (value_argument
           (simple_identifier)

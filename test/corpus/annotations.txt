@@ -60,7 +60,7 @@ class X {
 (source_file
   (class_declaration
     name: (simple_identifier)
-    (class_body
+    body: (class_body
       (property_declaration
         modifiers: (modifiers
           (annotation (user_type (type_identifier)))
@@ -90,7 +90,7 @@ class X {
 (source_file
   (class_declaration
     name: (simple_identifier)
-    (class_body
+    body: (class_body
       (function_declaration
         modifiers: (modifiers
           (annotation (user_type (type_identifier)))
@@ -122,8 +122,8 @@ fun foo() = bar {}
     parameters: (function_value_parameters)
     body: (function_body
       (call_expression
-        (simple_identifier)
-        (call_suffix
+        expression: (simple_identifier)
+        suffix: (call_suffix
           (annotated_lambda
             (lambda_literal)))))))
 

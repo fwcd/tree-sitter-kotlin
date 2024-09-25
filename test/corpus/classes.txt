@@ -12,7 +12,7 @@ class Empty2 {}
     name: (simple_identifier))
   (class_declaration
     name: (simple_identifier)
-    (class_body)))
+    body: (class_body)))
 
 ================================================================================
 Class with methods
@@ -29,7 +29,7 @@ class HelloWorld {
 (source_file
   (class_declaration
     name: (simple_identifier)
-    (class_body
+    body: (class_body
       (function_declaration
        name: (simple_identifier)
        parameters: (function_value_parameters)
@@ -55,7 +55,7 @@ class Container<T> {}
     (type_parameters
       (type_parameter
         (type_identifier)))
-    (class_body)))
+    body: (class_body)))
 
 ================================================================================
 Class with methods and expressions
@@ -72,7 +72,7 @@ class Strings {
 (source_file
   (class_declaration
     name: (simple_identifier)
-    (class_body
+    body: (class_body
       (function_declaration
        name: (simple_identifier)
        parameters: (function_value_parameters)
@@ -104,7 +104,7 @@ internal open class Test {
       (visibility_modifier)
       (inheritance_modifier))
     name: (simple_identifier)
-    (class_body
+    body: (class_body
       (function_declaration
         modifiers: (modifiers
          (visibility_modifier)
@@ -126,7 +126,7 @@ object Singleton {
 (source_file
   (object_declaration
     name: (simple_identifier)
-    (class_body
+    body: (class_body
       (function_declaration
        name: (simple_identifier)
        parameters: (function_value_parameters)))))
@@ -180,7 +180,7 @@ class D : SomeInterface
         (user_type
           (type_identifier))
         (value_arguments)))
-    (class_body))
+    body: (class_body))
   (class_declaration
     name: (simple_identifier)
     (primary_constructor
@@ -218,7 +218,7 @@ class Something {
 (source_file
   (class_declaration
     name: (simple_identifier)
-    (class_body
+    body: (class_body
       (property_declaration
         (binding_pattern_kind)
         var_decl:
@@ -275,7 +275,7 @@ class Test(x: Int, y: Int) {
           name: (simple_identifier)
           type: (user_type
             (type_identifier)))))
-    (class_body
+    body: (class_body
       (secondary_constructor 
         parameters: (function_value_parameters)
           (constructor_delegation_call
@@ -362,11 +362,11 @@ enum class Enum {
         parameters: (function_value_parameters)
         body: (function_body
           (call_expression
-            (navigation_expression
-              (simple_identifier)
-              (navigation_suffix
+            expression: (navigation_expression
+              expression: (simple_identifier)
+              suffix: (navigation_suffix
                 (simple_identifier)))
-            (call_suffix
+            suffix: (call_suffix
               (value_arguments
                 (value_argument
                   (integer_literal)))))))))
