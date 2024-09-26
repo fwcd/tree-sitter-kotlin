@@ -1244,6 +1244,10 @@
           "named": true
         },
         {
+          "type": "enum_entry",
+          "named": true
+        },
+        {
           "type": "function_declaration",
           "named": true
         },
@@ -1305,10 +1309,6 @@
       "types": [
         {
           "type": "delegation_specifier",
-          "named": true
-        },
-        {
-          "type": "enum_class_body",
           "named": true
         },
         {
@@ -2958,61 +2958,6 @@
         },
         {
           "type": "when_expression",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "enum_class_body",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "anonymous_initializer",
-          "named": true
-        },
-        {
-          "type": "class_declaration",
-          "named": true
-        },
-        {
-          "type": "companion_object",
-          "named": true
-        },
-        {
-          "type": "enum_entry",
-          "named": true
-        },
-        {
-          "type": "function_declaration",
-          "named": true
-        },
-        {
-          "type": "getter",
-          "named": true
-        },
-        {
-          "type": "object_declaration",
-          "named": true
-        },
-        {
-          "type": "property_declaration",
-          "named": true
-        },
-        {
-          "type": "secondary_constructor",
-          "named": true
-        },
-        {
-          "type": "setter",
-          "named": true
-        },
-        {
-          "type": "type_alias",
           "named": true
         }
       ]

@@ -320,8 +320,10 @@ enum class Enum {
 
 (source_file
   (class_declaration
+    (modifiers
+      (class_modifier))
     name: (simple_identifier)
-    (enum_class_body
+    body: (class_body
       (enum_entry
         name: (simple_identifier))
       (enum_entry
@@ -331,6 +333,8 @@ enum class Enum {
       (enum_entry
         name: (simple_identifier))))
   (class_declaration
+    (modifiers
+      (class_modifier))
     name: (simple_identifier)
     (primary_constructor
       (class_parameters
@@ -339,7 +343,7 @@ enum class Enum {
           name: (simple_identifier)
           type: (user_type
             (type_identifier)))))
-    (enum_class_body
+    body: (class_body
       (enum_entry
         name: (simple_identifier)
         arguments: (value_arguments
@@ -371,8 +375,10 @@ enum class Enum {
                 (value_argument
                   (integer_literal)))))))))
   (class_declaration
+    (modifiers
+      (class_modifier))
     name: (simple_identifier)
-    (enum_class_body
+    body: (class_body
       (enum_entry
         name: (simple_identifier)
         body: (class_body
@@ -401,8 +407,10 @@ enum class Enum {
         type: (user_type
           (type_identifier)))))
   (class_declaration
+    (modifiers
+      (class_modifier))
     name: (simple_identifier)
-    (enum_class_body
+    body: (class_body
       (enum_entry
         modifiers: (modifiers
           (annotation
@@ -470,3 +478,47 @@ value class Password(private val s: String)
           name: (simple_identifier)
           type: (user_type
             (type_identifier)))))))
+
+================================================================================
+Functional interfaces: https://kotlinlang.org/docs/fun-interfaces.html
+================================================================================
+
+fun interface Authenticator {
+  @Throws(IOException::class)
+  fun authenticate(
+    route: Route?,
+    response: Response,
+  ): Request?
+}
+--------------------------------------------------------------------------------
+
+(source_file
+      (class_declaration
+        name: (simple_identifier)
+        body: (class_body
+          (function_declaration
+            modifiers: (modifiers
+              (annotation
+                (constructor_invocation
+                  (user_type
+                    (type_identifier))
+                  (value_arguments
+                    (value_argument
+                      (callable_reference
+                        (type_identifier)))))))
+            name: (simple_identifier)
+            parameters: (function_value_parameters
+              (function_value_parameter
+                parameter: (parameter
+                  name: (simple_identifier)
+                  type: (nullable_type
+                    (user_type
+                      (type_identifier)))))
+              (function_value_parameter
+                parameter: (parameter
+                  name: (simple_identifier)
+                  type: (user_type
+                    (type_identifier)))))
+            type: (nullable_type
+              (user_type
+                (type_identifier)))))))

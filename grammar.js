@@ -110,6 +110,17 @@ module.exports = grammar({
     [$.type_modifiers],
     // ambiguity between associating type modifiers
     [$.not_nullable_type],
+
+    // Ambiguity in matching enum_entery elements in a list
+    // This is a shift-reduce conflict between:
+    //   - (_enum_entries  enum_entry  ',')  •
+    //   - (_enum_entries_repeat1  ','  •  enum_entry
+    // By defining a conflict here, we let the GLR parser explore both paths, 
+    // the reduce one will die out soon if there is no enum_entry to match further.
+    [$._enum_entries],
+    // Shift/reduce Ambiguity when parsing a class without body:
+    // 'if'  '('  _expression  ')'  'class'  simple_identifier  •
+    [$.class_declaration]
   ],
 
   externals: $ => [
@@ -209,35 +220,28 @@ module.exports = grammar({
     // Classes
     // ==========
 
-    class_declaration: $ => prec.right(choice(
-      seq(
-        optional($.modifiers),
-        choice("class", "interface"),
-        field('name', $.simple_identifier),
-        optional($.type_parameters),
-        optional($.primary_constructor),
-        optional(seq(":", $._delegation_specifiers)),
-        optional($.type_constraints),
-        optional(field('body', $.class_body))
-      ),
-      seq(
-        optional($.modifiers),
-        "enum", "class",
-        field('name', $.simple_identifier),
-        optional($.type_parameters),
-        optional($.primary_constructor),
-        optional(seq(":", $._delegation_specifiers)),
-        optional($.type_constraints),
-        optional($.enum_class_body)
-      )
-    )),
+    class_declaration: $ => seq(
+      optional($.modifiers),
+      choice("class", seq(optional("fun"), "interface")),
+      field('name', $.simple_identifier),
+      optional($.type_parameters),
+      optional($.primary_constructor),
+      optional(seq(":", $._delegation_specifiers)),
+      optional($.type_constraints),
+      optional(field('body', $.class_body))
+    ),
 
     primary_constructor: $ => seq(
       optional(seq(optional($.modifiers), "constructor")),
       $.class_parameters
     ),
 
-    class_body: $ => seq("{", optional($._class_member_declarations), "}"),
+    class_body: $ => seq(
+      "{",
+      seq(optional($._enum_entries), optional(";")),
+      optional($._class_member_declarations),
+      "}"
+    ),
 
     class_parameters: $ => seq(
       "(",
@@ -331,15 +335,15 @@ module.exports = grammar({
       ")"
     ),
 
-		function_value_parameter: $ => seq(
-			optional(field('modifiers', $.parameter_modifiers)),
-			field('parameter', $.parameter),
-			optional(seq("=", field('initializer', $._expression)))
-		),
+    function_value_parameter: $ => seq(
+      optional(field('modifiers', $.parameter_modifiers)),
+      field('parameter', $.parameter),
+      optional(seq("=", field('initializer', $._expression)))
+    ),
 
     _receiver_type: $ => seq(
       optional($.type_modifiers),
-      choice (
+      choice(
         $._type_reference,
         $.parenthesized_type,
         $.nullable_type
@@ -440,13 +444,6 @@ module.exports = grammar({
     // ==========
     // Enum classes
     // ==========
-
-    enum_class_body: $ => seq(
-      "{",
-      optional($._enum_entries),
-      optional(seq(";", optional($._class_member_declarations))),
-      "}"
-    ),
 
     _enum_entries: $ => seq(sep1($.enum_entry, ","), optional(",")),
 
@@ -605,8 +602,8 @@ module.exports = grammar({
 
     assignment: $ =>
       prec.left(PREC.ASSIGNMENT, seq(
-        field('left', $.directly_assignable_expression), 
-        field('op', choice('=', $._assignment_and_operator)), 
+        field('left', $.directly_assignable_expression),
+        field('op', choice('=', $._assignment_and_operator)),
         field('right', $._expression))),
 
     // ==========
@@ -836,7 +833,7 @@ module.exports = grammar({
         seq(
           optional(field('consequence', $.control_structure_body)),
           optional(";"),
-          "else", 
+          "else",
           choice(field('alternative', $.control_structure_body), ";")
         ),
         ";"
@@ -991,6 +988,7 @@ module.exports = grammar({
     _type_modifier: $ => choice($.annotation, "suspend"),
 
     class_modifier: $ => choice(
+      "enum",
       "sealed",
       "annotation",
       "data",
