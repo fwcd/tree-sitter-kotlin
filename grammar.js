@@ -118,9 +118,15 @@ module.exports = grammar({
     // By defining a conflict here, we let the GLR parser explore both paths, 
     // the reduce one will die out soon if there is no enum_entry to match further.
     [$._enum_entries],
-    // Shift/reduce Ambiguity when parsing a class without body:
+    // shift/reduce conflict when parsing a class without body:
     // 'if'  '('  _expression  ')'  'class'  simple_identifier  •
-    [$.class_declaration]
+    [$.class_declaration],
+    // shift/reduce conflicts when matching simple identifiers.
+    //   - 'import'  (identifier  simple_identifier  •  identifier_repeat1)
+    //   - 'import'  (identifier  simple_identifier)  •  '.'  …
+    // By defining a conflict here, we let the parser to continue. The second path
+    // eventually dies if there is no '.'
+    [$.identifier]
   ],
 
   externals: $ => [
@@ -179,14 +185,14 @@ module.exports = grammar({
 
     import_header: $ => seq(
       "import",
-      alias($._import_identifier, $.identifier),
-      optional(choice(seq(".", $.wildcard_import), $.import_alias)),
+      field('name', $.identifier),
+      optional(choice(seq(".", $.wildcard_import), $._import_alias)),
       $._semi
     ),
 
-    wildcard_import: _ => token.immediate("*"),
+    wildcard_import: _ =>"*",
 
-    import_alias: $ => seq("as", alias($.simple_identifier, $.type_identifier)),
+    _import_alias: $ => seq("as", field('alias', $.simple_identifier)),
 
     top_level_object: $ => seq($._declaration, optional($._semi)),
 
@@ -1101,13 +1107,6 @@ module.exports = grammar({
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),
-
-    // Adapted from tree-sitter-java, helps to avoid a conflic with
-    // wildcard_import node while being compatible with identifier
-    _import_identifier: $ => choice(
-      $.simple_identifier,
-      seq($._import_identifier, ".", $.simple_identifier),
-    ),
 
     // ====================
     // Lexical grammar

@@ -62,44 +62,37 @@ import java.util.StringBuilder
 
 import java.io.Path
 import java.io.Files
-fun main() {
-}
 
 --------------------------------------------------------------------------------
 
 (source_file
   (import_list
     (import_header
-      (identifier
+      name: (identifier
         (simple_identifier)
         (simple_identifier))
       (wildcard_import))
     (import_header
-      (identifier
+      name: (identifier
         (simple_identifier)
         (simple_identifier)
         (simple_identifier)))
     (import_header
-      (identifier
+      name: (identifier
         (simple_identifier)
         (simple_identifier)
         (simple_identifier))))
   (import_list
     (import_header
-      (identifier
+      name: (identifier
         (simple_identifier)
         (simple_identifier)
         (simple_identifier)))
     (import_header
-      (identifier
+      name: (identifier
         (simple_identifier)
         (simple_identifier)
-        (simple_identifier))))
-  (function_declaration
-    name: (simple_identifier)
-    parameters: (function_value_parameters)
-    body: (function_body
-      (block))))
+        (simple_identifier)))))
 
 ================================================================================
 Multiple Imports On A Single Line
@@ -112,12 +105,53 @@ import java.io.Path import java.io.Files
 (source_file
   (import_list
     (import_header
-      (identifier
+      name: (identifier
         (simple_identifier)
         (simple_identifier)
         (simple_identifier)))
     (import_header
-      (identifier
+      name: (identifier
         (simple_identifier)
         (simple_identifier)
         (simple_identifier)))))
+
+================================================================================
+Import Alias
+================================================================================
+
+import org.test.Message as TestMessage
+
+--------------------------------------------------------------------------------
+
+(source_file
+      (import_list
+        (import_header
+          name: (identifier
+            (simple_identifier)
+            (simple_identifier)
+            (simple_identifier))
+          alias: (simple_identifier))))
+
+================================================================================
+Import with * after whitespace
+================================================================================
+
+import java.util.concurrent.
+
+* import java.util.    *
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_list
+    (import_header
+      name: (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier))
+      (wildcard_import))
+    (import_header
+      name: (identifier
+        (simple_identifier)
+        (simple_identifier))
+      (wildcard_import))))
