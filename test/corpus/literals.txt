@@ -166,11 +166,13 @@ Real literals
 (source_file
   (real_literal)
   (prefix_expression
-    (real_literal))
+    op: (prefix_unary_operator)
+    expression: (real_literal))
   (real_literal)
   (real_literal)
   (prefix_expression
-    (real_literal)))
+    op: (prefix_unary_operator)
+    expression: (real_literal)))
 
 ================================================================================
 Unicode literals

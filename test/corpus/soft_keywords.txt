@@ -9,26 +9,27 @@ fun foo() {
 }
 
 ---
+
 (source_file
   (function_declaration
-  name: (simple_identifier)
-  parameters: (function_value_parameters)
-  body: (function_body
-    (block
-      (statements
-        (property_declaration
-          (binding_pattern_kind)
-          var_decl: (variable_declaration
-            id: (simple_identifier))
-          initializer: (call_expression
-            expression: (simple_identifier)
-            suffix: (call_suffix
-              (value_arguments
-                (value_argument
-                  (simple_identifier))))))
-        (postfix_expression
-          (indexing_expression
-            (simple_identifier)
-            (indexing_suffix
-              (integer_literal)))))))))
-
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body
+      (block
+        (statements
+          (property_declaration
+            (binding_pattern_kind)
+            var_decl: (variable_declaration
+              id: (simple_identifier))
+            initializer: (call_expression
+              expression: (simple_identifier)
+              suffix: (call_suffix
+                (value_arguments
+                  (value_argument
+                    (simple_identifier))))))
+          (postfix_expression
+            expression: (indexing_expression
+              (simple_identifier)
+              (indexing_suffix
+                (integer_literal)))
+            op: (postfix_unary_operator)))))))

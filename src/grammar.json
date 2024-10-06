@@ -2949,12 +2949,20 @@
         "type": "SEQ",
         "members": [
           {
-            "type": "SYMBOL",
-            "name": "_expression"
+            "type": "FIELD",
+            "name": "expression",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
           },
           {
-            "type": "SYMBOL",
-            "name": "_postfix_unary_operator"
+            "type": "FIELD",
+            "name": "op",
+            "content": {
+              "type": "SYMBOL",
+              "name": "postfix_unary_operator"
+            }
           }
         ]
       }
@@ -3044,14 +3052,22 @@
                 "name": "label"
               },
               {
-                "type": "SYMBOL",
-                "name": "_prefix_unary_operator"
+                "type": "FIELD",
+                "name": "op",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "prefix_unary_operator"
+                }
               }
             ]
           },
           {
-            "type": "SYMBOL",
-            "name": "_expression"
+            "type": "FIELD",
+            "name": "expression",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
           }
         ]
       }
@@ -4902,7 +4918,7 @@
         }
       ]
     },
-    "_prefix_unary_operator": {
+    "prefix_unary_operator": {
       "type": "CHOICE",
       "members": [
         {
@@ -4927,7 +4943,7 @@
         }
       ]
     },
-    "_postfix_unary_operator": {
+    "postfix_unary_operator": {
       "type": "CHOICE",
       "members": [
         {
@@ -5016,7 +5032,7 @@
       "members": [
         {
           "type": "SYMBOL",
-          "name": "_postfix_unary_operator"
+          "name": "postfix_unary_operator"
         },
         {
           "type": "SYMBOL",

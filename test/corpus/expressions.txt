@@ -633,3 +633,34 @@ if (cond1) {
                     (value_argument
                       (string_literal
                         (string_content)))))))))))))
+
+================================================================================
+Increment/decrement expressions
+================================================================================
+
+x++
+--x
+arr[0]++
+--arr[0]
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (postfix_expression
+    expression: (simple_identifier)
+    op: (postfix_unary_operator))
+  (prefix_expression
+    op: (prefix_unary_operator)
+    expression: (simple_identifier))
+  (postfix_expression
+    expression: (indexing_expression
+      (simple_identifier)
+      (indexing_suffix
+        (integer_literal)))
+    op: (postfix_unary_operator))
+  (prefix_expression
+    op: (prefix_unary_operator)
+    expression: (indexing_expression
+      (simple_identifier)
+      (indexing_suffix
+        (integer_literal)))))

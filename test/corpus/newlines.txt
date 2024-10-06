@@ -213,7 +213,8 @@ else boo()
 (source_file
   (if_expression
     condition: (prefix_expression
-      (simple_identifier))
+      op: (prefix_unary_operator)
+      expression: (simple_identifier))
     consequence: (control_structure_body
       (integer_literal))
     alternative:
@@ -234,7 +235,8 @@ if (!foo) 3 else boo()
 (source_file
   (if_expression
     condition: (prefix_expression
-      (simple_identifier))
+      op: (prefix_unary_operator)
+      expression: (simple_identifier))
     consequence: (control_structure_body
       (integer_literal))
     alternative:
