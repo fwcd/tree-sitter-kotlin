@@ -197,7 +197,7 @@ module.exports = grammar({
     top_level_object: $ => seq($._declaration, optional($._semi)),
 
     type_alias: $ => seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "typealias",
       alias($.simple_identifier, $.type_identifier),
       optional($.type_parameters),
@@ -227,7 +227,7 @@ module.exports = grammar({
     // ==========
 
     class_declaration: $ => seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       choice("class", seq(optional("fun"), "interface")),
       field('name', $.simple_identifier),
       optional($.type_parameters),
@@ -238,7 +238,7 @@ module.exports = grammar({
     ),
 
     primary_constructor: $ => seq(
-      optional(seq(optional($.modifiers), "constructor")),
+      optional(seq(optional(field('modifiers', $.modifiers)), "constructor")),
       $.class_parameters
     ),
 
@@ -326,7 +326,7 @@ module.exports = grammar({
     anonymous_initializer: $ => seq("init", $.block),
 
     companion_object: $ => seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "companion",
       "object",
       field('name', $.simple_identifier),
@@ -398,7 +398,7 @@ module.exports = grammar({
     property_delegate: $ => seq("by", $._expression),
 
     getter: $ => prec.right(seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "get",
       optional(seq(
         "(", ")",
@@ -408,7 +408,7 @@ module.exports = grammar({
     )),
 
     setter: $ => prec.right(seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "set",
       optional(seq(
         "(",
@@ -430,7 +430,7 @@ module.exports = grammar({
     parameter: $ => seq(field('name', $.simple_identifier), ":", field('type', $._type)),
 
     object_declaration: $ => prec.right(seq(
-      optional($.modifiers),
+      optional(field('modifiers', $.modifiers)),
       "object",
       field('name', $.simple_identifier),
       optional(seq(":", $._delegation_specifiers)),

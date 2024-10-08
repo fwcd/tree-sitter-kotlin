@@ -100,7 +100,7 @@ internal open class Test {
 
 (source_file
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (visibility_modifier)
       (inheritance_modifier))
     name: (simple_identifier)
@@ -144,7 +144,7 @@ data class Vector2D(
 
 (source_file
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (class_modifier))
     name: (simple_identifier)
     (primary_constructor
@@ -320,7 +320,7 @@ enum class Enum {
 
 (source_file
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (class_modifier))
     name: (simple_identifier)
     body: (class_body
@@ -333,7 +333,7 @@ enum class Enum {
       (enum_entry
         name: (simple_identifier))))
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (class_modifier))
     name: (simple_identifier)
     (primary_constructor
@@ -375,7 +375,7 @@ enum class Enum {
                 (value_argument
                   (integer_literal)))))))))
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (class_modifier))
     name: (simple_identifier)
     body: (class_body
@@ -407,7 +407,7 @@ enum class Enum {
         type: (user_type
           (type_identifier)))))
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (class_modifier))
     name: (simple_identifier)
     body: (class_body
@@ -436,7 +436,7 @@ data class JwtConfiguration(
 
 (source_file
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (class_modifier))
     name: (simple_identifier)
     (primary_constructor
@@ -463,7 +463,7 @@ value class Password(private val s: String)
 
 (source_file
   (class_declaration
-    (modifiers
+    modifiers: (modifiers
       (annotation
         (user_type
           (type_identifier)))

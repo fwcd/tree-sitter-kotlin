@@ -9,8 +9,8 @@ class Empty
 
 (source_file
   (class_declaration
-        (modifiers (annotation (user_type (type_identifier))))
-        name: (simple_identifier)))
+    modifiers: (modifiers (annotation (user_type (type_identifier))))
+    name: (simple_identifier)))
 
 ==================
 Annotations with use-site-target
@@ -22,12 +22,12 @@ class Empty(@field:Test val x: Boolean)
 
 (source_file
   (class_declaration
+    name: (simple_identifier)
+    (primary_constructor (class_parameters (class_parameter
+        modifiers: (modifiers (annotation (use_site_target) (user_type (type_identifier))))
+        binding_pattern: (binding_pattern_kind)
         name: (simple_identifier)
-        (primary_constructor (class_parameters (class_parameter
-            modifiers: (modifiers (annotation (use_site_target) (user_type (type_identifier))))
-            binding_pattern: (binding_pattern_kind)
-            name: (simple_identifier)
-            type: (user_type (type_identifier)))))))
+        type: (user_type (type_identifier)))))))
 
 ==================
 Multi-annotations

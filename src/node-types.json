@@ -1292,6 +1292,16 @@
           }
         ]
       },
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      },
       "name": {
         "multiple": false,
         "required": true,
@@ -1309,10 +1319,6 @@
       "types": [
         {
           "type": "delegation_specifier",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         },
         {
@@ -1771,6 +1777,16 @@
           }
         ]
       },
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      },
       "name": {
         "multiple": false,
         "required": true,
@@ -1788,10 +1804,6 @@
       "types": [
         {
           "type": "delegation_specifier",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         }
       ]
@@ -4185,7 +4197,18 @@
   {
     "type": "getter",
     "named": true,
-    "fields": {},
+    "fields": {
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": false,
@@ -4196,10 +4219,6 @@
         },
         {
           "type": "function_type",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         },
         {
@@ -5924,6 +5943,16 @@
           }
         ]
       },
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      },
       "name": {
         "multiple": false,
         "required": true,
@@ -5941,10 +5970,6 @@
       "types": [
         {
           "type": "delegation_specifier",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         }
       ]
@@ -6837,17 +6862,24 @@
   {
     "type": "primary_constructor",
     "named": true,
-    "fields": {},
+    "fields": {
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
           "type": "class_parameters",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         }
       ]
@@ -7669,7 +7701,18 @@
   {
     "type": "setter",
     "named": true,
-    "fields": {},
+    "fields": {
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": false,
@@ -7680,10 +7723,6 @@
         },
         {
           "type": "function_type",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         },
         {
@@ -8459,17 +8498,24 @@
   {
     "type": "type_alias",
     "named": true,
-    "fields": {},
+    "fields": {
+      "modifiers": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "modifiers",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
       "types": [
         {
           "type": "function_type",
-          "named": true
-        },
-        {
-          "type": "modifiers",
           "named": true
         },
         {
