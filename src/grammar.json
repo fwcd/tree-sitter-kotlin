@@ -3773,6 +3773,18 @@
           }
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": ","
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "STRING",
           "value": "]"
         }
@@ -6390,3 +6402,4 @@
   "inline": [],
   "supertypes": []
 }
+
