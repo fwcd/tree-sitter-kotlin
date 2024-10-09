@@ -58,8 +58,9 @@ val ty x get () = 3
         (integer_literal))))
   (property_declaration
     (binding_pattern_kind)
-    (user_type
-      (type_identifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
     (variable_declaration
       (simple_identifier))
     (getter
