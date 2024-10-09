@@ -205,7 +205,9 @@ a as T.() -> Unit
   (as_expression
     (simple_identifier)
     (function_type
-      (type_identifier)
+      (receiver_type
+        (user_type
+          (type_identifier)))
       (function_type_parameters)
       (user_type
         (type_identifier)))))
@@ -228,10 +230,12 @@ a as Foo(x = "hi", y = "bar")
       (value_arguments
         (value_argument
           (simple_identifier)
-          (string_literal (string_content)))
+          (string_literal
+            (string_content)))
         (value_argument
           (simple_identifier)
-          (string_literal (string_content)))))))
+          (string_literal
+            (string_content)))))))
 
 ================================================================================
 Type constructor with trailing comma
@@ -251,10 +255,12 @@ a as Foo(x = "hi", y = "bar",)
       (value_arguments
         (value_argument
           (simple_identifier)
-          (string_literal (string_content)))
+          (string_literal
+            (string_content)))
         (value_argument
           (simple_identifier)
-          (string_literal (string_content)))))))
+          (string_literal
+            (string_content)))))))
 
 ================================================================================
 Type alias with type parameters
@@ -316,3 +322,99 @@ a as @Foo T & F
         (type_identifier))
       (user_type
         (type_identifier)))))
+
+================================================================================
+functionType Foo.Bar.() -> Unit
+================================================================================
+
+val x: Foo.Bar.() -> Unit = {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (function_type
+        (receiver_type
+          (user_type
+            (type_identifier)
+            (type_identifier)))
+        (function_type_parameters)
+        (user_type
+          (type_identifier))))
+    (lambda_literal)))
+
+================================================================================
+functionType Foo.Bar.(foo: Int) -> Unit
+================================================================================
+
+val x: Foo.Bar.(foo: Int) -> Unit = {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (function_type
+        (receiver_type
+          (user_type
+            (type_identifier)
+            (type_identifier)))
+        (function_type_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (user_type
+          (type_identifier))))
+    (lambda_literal)))
+
+================================================================================
+functionType Foo.() -> Unit
+================================================================================
+
+val x: Foo.() -> Unit = {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (function_type
+        (receiver_type
+          (user_type
+            (type_identifier)))
+        (function_type_parameters)
+        (user_type
+          (type_identifier))))
+    (lambda_literal)))
+
+================================================================================
+bad: fun foo(fn: Foo.Bar.() -> Unit) {}
+================================================================================
+
+fun foo(fn: Foo.Bar.() -> Unit) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (function_type
+          (receiver_type
+            (user_type
+              (type_identifier)
+              (type_identifier)))
+          (function_type_parameters)
+          (user_type
+            (type_identifier)))))
+    (function_body)))
