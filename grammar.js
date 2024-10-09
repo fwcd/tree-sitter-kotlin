@@ -111,8 +111,8 @@ module.exports = grammar({
     // ambiguity between associating type modifiers
     [$.not_nullable_type],
 
-    [$._receiver_type],
-    [$._receiver_type, $._type],
+    [$.receiver_type],
+    [$.receiver_type, $._type],
   ],
 
   externals: $ => [
@@ -340,7 +340,7 @@ module.exports = grammar({
       optional(seq("=", $._expression))
     ),
 
-    _receiver_type: $ => seq(
+    receiver_type: $ => seq(
       optional($.type_modifiers),
       choice (
         $.parenthesized_type,
@@ -353,7 +353,7 @@ module.exports = grammar({
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
-      optional(seq($._receiver_type, optional('.'))),
+      optional(seq(field("receiver", $.receiver_type), optional('.'))),
       $.simple_identifier,
       $.function_value_parameters,
       optional(seq(":", $._type)),
@@ -373,7 +373,7 @@ module.exports = grammar({
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
-      optional(seq($._receiver_type, optional('.'))),
+      optional(seq(field("receiver", $.receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
       optional($.type_constraints),
       optional(choice(
@@ -516,8 +516,7 @@ module.exports = grammar({
     _type_projection_modifier: $ => $.variance_modifier,
 
     function_type: $ => seq(
-      // TODO: [receiverType {NL} '.' {NL}] functionTypeParameters {NL}  '->' {NL} type
-      optional(seq($._receiver_type, ".")), // TODO: Support "real" types
+      optional(seq(field("receiver", $.receiver_type), ".")),
       $.function_type_parameters,
       "->",
       $._type
