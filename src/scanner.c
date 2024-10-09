@@ -514,10 +514,10 @@ void tree_sitter_kotlin_external_scanner_destroy(void *payload) {
 
 unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buffer) {
   Stack *stack = (Stack *)payload;
-  if (stack->size == 0) {
-    return 0;
+  if (stack->size > 0) {
+    // it's an undefined behavior to memcpy 0 bytes
+    memcpy(buffer, stack->contents, stack->size);
   }
-  memcpy(buffer, stack->contents, stack->size);
   return stack->size;
 }
 
