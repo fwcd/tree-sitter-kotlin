@@ -94,7 +94,7 @@ module.exports = grammar({
     // ambiguity between multiple user types and class property/function declarations
     [$.user_type],
     [$.user_type, $.anonymous_function],
-    [$.user_type, $.function_type],
+    //[$.user_type, $.function_type],
 
     // ambiguity between annotated_lambda with modifiers and modifiers from var declarations
     [$.annotated_lambda, $.modifiers],
@@ -110,6 +110,9 @@ module.exports = grammar({
     [$.type_modifiers],
     // ambiguity between associating type modifiers
     [$.not_nullable_type],
+
+    [$._receiver_type],
+    [$._receiver_type, $._type],
   ],
 
   externals: $ => [
@@ -340,9 +343,9 @@ module.exports = grammar({
     _receiver_type: $ => seq(
       optional($.type_modifiers),
       choice (
-        $._type_reference,
         $.parenthesized_type,
-        $.nullable_type
+        $.nullable_type,
+        $._type_reference,
       )
     ),
 
@@ -464,10 +467,10 @@ module.exports = grammar({
     _type: $ => seq(
       optional($.type_modifiers),
       choice(
+        $.function_type,
         $.parenthesized_type,
         $.nullable_type,
         $._type_reference,
-        $.function_type,
         $.not_nullable_type
       )
     ),
@@ -513,7 +516,8 @@ module.exports = grammar({
     _type_projection_modifier: $ => $.variance_modifier,
 
     function_type: $ => seq(
-      optional(seq($._simple_user_type, ".")), // TODO: Support "real" types
+      // TODO: [receiverType {NL} '.' {NL}] functionTypeParameters {NL}  '->' {NL} type
+      optional(seq($._receiver_type, ".")), // TODO: Support "real" types
       $.function_type_parameters,
       "->",
       $._type
