@@ -31,35 +31,35 @@ a ? . bar()
       suffix: (navigation_suffix
         (simple_identifier)))
     suffix: (call_suffix
-      (value_arguments)))
+      args: (value_arguments)))
   (call_expression
     expression: (navigation_expression
       expression: (simple_identifier)
       suffix: (navigation_suffix
         (simple_identifier)))
     suffix: (call_suffix
-      (value_arguments)))
+      args: (value_arguments)))
   (call_expression
     expression: (navigation_expression
       expression: (simple_identifier)
       suffix: (navigation_suffix
         (simple_identifier)))
     suffix: (call_suffix
-      (value_arguments)))
+      args: (value_arguments)))
   (call_expression
     expression: (navigation_expression
       expression: (simple_identifier)
       suffix: (navigation_suffix
         (simple_identifier)))
     suffix: (call_suffix
-      (value_arguments)))
+      args: (value_arguments)))
   (call_expression
     expression: (navigation_expression
       expression: (simple_identifier)
       suffix: (navigation_suffix
         (simple_identifier)))
     suffix: (call_suffix
-      (value_arguments))))
+      args: (value_arguments))))
 
 ================================================================================
 Function calls
@@ -74,13 +74,13 @@ sum(1, 2)
   (call_expression
     expression: (simple_identifier)
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (string_literal (string_content))))))
   (call_expression
     expression: (simple_identifier)
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (integer_literal))
         (value_argument
@@ -184,7 +184,7 @@ val x = expect(1)
     initializer: (call_expression
       expression: (simple_identifier)
       suffix: (call_suffix
-        (value_arguments
+        args: (value_arguments
           (value_argument
             (integer_literal)))))))
 
@@ -200,7 +200,7 @@ expect(1)
   (call_expression
     expression: (simple_identifier)
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (integer_literal))))))
 
@@ -238,7 +238,7 @@ foo<Int>(1)
         (type_projection
           (user_type
             (type_identifier))))
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (integer_literal))
         (value_argument
@@ -250,7 +250,7 @@ foo<Int>(1)
         (type_projection
           (user_type
             (type_identifier))))
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (integer_literal))))))
 
@@ -303,7 +303,7 @@ val a = a<2>(3)
           (type_projection
             (user_type
               (type_identifier))))
-        (value_arguments
+        args: (value_arguments
           (value_argument
             (simple_identifier))))))
   (property_declaration
@@ -332,7 +332,7 @@ foo.forEach { (index, value) -> 2 }
       suffix: (navigation_suffix
         (simple_identifier)))
     suffix: (call_suffix
-      (annotated_lambda
+      lambda_arg: (annotated_lambda
         (lambda_literal
           parameters: (lambda_parameters
             (multi_variable_declaration
@@ -355,10 +355,10 @@ with(s) { length }
   (call_expression
     expression: (simple_identifier)
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (simple_identifier)))
-      (annotated_lambda
+      lambda_arg: (annotated_lambda
         (lambda_literal
           body: (statements
             (simple_identifier)))))))
@@ -466,7 +466,7 @@ val comments = """ // and here """
     initializer: (call_expression
       expression: (simple_identifier)
       suffix: (call_suffix
-        (value_arguments
+        args: (value_arguments
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
@@ -476,7 +476,7 @@ val comments = """ // and here """
     initializer: (call_expression
       expression: (simple_identifier)
       suffix: (call_suffix
-        (value_arguments
+        args: (value_arguments
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
@@ -486,7 +486,7 @@ val comments = """ // and here """
     initializer: (call_expression
       expression: (simple_identifier)
       suffix: (call_suffix
-        (value_arguments
+        args: (value_arguments
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
@@ -496,7 +496,7 @@ val comments = """ // and here """
     initializer: (call_expression
       expression: (simple_identifier)
       suffix: (call_suffix
-        (value_arguments
+        args: (value_arguments
           (value_argument
             (string_literal (string_content)))))))
   (property_declaration
@@ -554,7 +554,7 @@ class Square() : Rectangle(), Polygon {
                       suffix: (navigation_suffix
                         (simple_identifier)))
                     suffix: (call_suffix
-                      (value_arguments)))
+                      args: (value_arguments)))
                   (call_expression
                     expression: (navigation_expression
                       expression: (super_expression
@@ -562,7 +562,7 @@ class Square() : Rectangle(), Polygon {
                       suffix: (navigation_suffix
                         (simple_identifier)))
                     suffix: (call_suffix
-                      (value_arguments)))
+                      args: (value_arguments)))
                   (call_expression
                     expression: (navigation_expression
                       expression: (super_expression
@@ -571,7 +571,7 @@ class Square() : Rectangle(), Polygon {
                       suffix: (navigation_suffix
                         (simple_identifier)))
                     suffix: (call_suffix
-                      (value_arguments)))
+                      args: (value_arguments)))
                   (call_expression
                     expression: (navigation_expression
                       expression: (super_expression
@@ -581,7 +581,7 @@ class Square() : Rectangle(), Polygon {
                       suffix: (navigation_suffix
                         (simple_identifier)))
                     suffix: (call_suffix
-                      (value_arguments))))))))))
+                      args: (value_arguments))))))))))
 
 ================================================================================
 If else-if else expression
@@ -606,7 +606,7 @@ if (cond1) {
           (call_expression
             expression: (simple_identifier)
             suffix: (call_suffix
-              (value_arguments
+              args: (value_arguments
                 (value_argument
                   (string_literal
                     (string_content)))))))))
@@ -619,7 +619,7 @@ if (cond1) {
               (call_expression
                 expression: (simple_identifier)
                 suffix: (call_suffix
-                  (value_arguments
+                  args: (value_arguments
                     (value_argument
                       (string_literal
                         (string_content)))))))))
@@ -629,7 +629,7 @@ if (cond1) {
               (call_expression
                 expression: (simple_identifier)
                 suffix: (call_suffix
-                  (value_arguments
+                  args: (value_arguments
                     (value_argument
                       (string_literal
                         (string_content)))))))))))))

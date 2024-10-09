@@ -225,7 +225,7 @@ a as Foo(x = "hi", y = "bar")
       (user_type
         (type_identifier)))
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (simple_identifier)
           (string_literal (string_content)))
@@ -248,7 +248,7 @@ a as Foo(x = "hi", y = "bar",)
       (user_type
         (type_identifier)))
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (simple_identifier)
           (string_literal (string_content)))

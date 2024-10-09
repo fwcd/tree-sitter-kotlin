@@ -139,7 +139,7 @@ fun foo(p0: Int): Long {
                 suffix: (navigation_suffix
                   (simple_identifier)))
               suffix: (call_suffix
-                (value_arguments)))))))))
+                args: (value_arguments)))))))))
 
 =====================
 Override functions
@@ -159,7 +159,7 @@ override fun boo() = foo()
       (call_expression
         expression: (simple_identifier)
         suffix: (call_suffix
-          (value_arguments))))))
+          args: (value_arguments))))))
 
 =====================
 Set function call
@@ -186,7 +186,7 @@ fun test() {
           (call_expression
             expression: (simple_identifier)
             suffix: (call_suffix
-              (value_arguments
+              args: (value_arguments
                 (value_argument
                   (simple_identifier))
                 (value_argument
@@ -286,7 +286,7 @@ val anon = fun() { assert(true) }
           (call_expression
             expression: (simple_identifier)
             suffix: (call_suffix
-              (value_arguments
+              args: (value_arguments
                 (value_argument
                   (boolean_literal)))))))))
   (property_declaration
@@ -309,7 +309,7 @@ val anon = fun() { assert(true) }
             (call_expression
               expression: (simple_identifier)
               suffix: (call_suffix
-                (value_arguments
+                args: (value_arguments
                   (value_argument
                     (boolean_literal)))))))))))
 

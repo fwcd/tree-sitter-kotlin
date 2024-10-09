@@ -371,7 +371,7 @@ enum class Enum {
               suffix: (navigation_suffix
                 (simple_identifier)))
             suffix: (call_suffix
-              (value_arguments
+              args: (value_arguments
                 (value_argument
                   (integer_literal)))))))))
   (class_declaration

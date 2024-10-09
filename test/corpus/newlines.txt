@@ -16,11 +16,11 @@ bar.foo()
           suffix: (navigation_suffix
             (simple_identifier)))
         suffix: (call_suffix
-          (value_arguments)))
+          args: (value_arguments)))
       suffix: (navigation_suffix
         (simple_identifier)))
     suffix: (call_suffix
-      (value_arguments))))
+      args: (value_arguments))))
 
 ================================================================================
 Eq after newline
@@ -136,7 +136,7 @@ fun foo() {
                     suffix: (navigation_suffix
                       (simple_identifier)))
                   suffix: (call_suffix
-                    (value_arguments
+                    args: (value_arguments
                       (value_argument
                         (boolean_literal)))))
                 (call_expression
@@ -145,7 +145,7 @@ fun foo() {
                     suffix: (navigation_suffix
                       (simple_identifier)))
                   suffix: (call_suffix
-                    (value_arguments))))
+                    args: (value_arguments))))
               (jump_expression))))))))
 
 ================================================================================
@@ -174,7 +174,7 @@ class Foo {
             (call_expression
               expression: (simple_identifier)
               suffix: (call_suffix
-                (value_arguments)))
+                args: (value_arguments)))
             (integer_literal)))))))
 
 ================================================================================
@@ -195,7 +195,7 @@ foo(1,
   (call_expression
     expression: (simple_identifier)
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (integer_literal))
         (value_argument
@@ -222,7 +222,7 @@ else boo()
         (call_expression
           expression: (simple_identifier)
           suffix: (call_suffix
-            (value_arguments))))))
+            args: (value_arguments))))))
 
 ================================================================================
 Else on the same line
@@ -244,4 +244,4 @@ if (!foo) 3 else boo()
         (call_expression
           expression: (simple_identifier)
           suffix: (call_suffix
-            (value_arguments))))))
+            args: (value_arguments))))))

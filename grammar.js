@@ -704,8 +704,8 @@ module.exports = grammar({
       // this introduces ambiguities with 'less than' for comparisons
       optional($.type_arguments),
       choice(
-        prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
-        $.value_arguments
+        prec(PREC.ARGUMENTS, seq(optional(field('args', $.value_arguments)), field('lambda_arg', $.annotated_lambda))),
+        field('args', $.value_arguments)
       )
     )),
 

@@ -899,21 +899,34 @@
   {
     "type": "call_suffix",
     "named": true,
-    "fields": {},
+    "fields": {
+      "args": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "value_arguments",
+            "named": true
+          }
+        ]
+      },
+      "lambda_arg": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "annotated_lambda",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
-      "multiple": true,
-      "required": true,
+      "multiple": false,
+      "required": false,
       "types": [
         {
-          "type": "annotated_lambda",
-          "named": true
-        },
-        {
           "type": "type_arguments",
-          "named": true
-        },
-        {
-          "type": "value_arguments",
           "named": true
         }
       ]

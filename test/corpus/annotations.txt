@@ -124,7 +124,7 @@ fun foo() = bar {}
       (call_expression
         expression: (simple_identifier)
         suffix: (call_suffix
-          (annotated_lambda
+          lambda_arg: (annotated_lambda
             (lambda_literal)))))))
 
 

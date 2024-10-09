@@ -186,7 +186,7 @@ assertEquals("\u214E\uA7B5\u2CEF", "\u2132\uA7B4\u2CEF".lowercase())
   (call_expression
     expression: (simple_identifier)
     suffix: (call_suffix
-      (value_arguments
+      args: (value_arguments
         (value_argument
           (string_literal (string_content)))
         (value_argument
@@ -196,7 +196,7 @@ assertEquals("\u214E\uA7B5\u2CEF", "\u2132\uA7B4\u2CEF".lowercase())
               suffix: (navigation_suffix
                 (simple_identifier)))
             suffix: (call_suffix
-              (value_arguments))))))))
+              args: (value_arguments))))))))
 
 ================================================================================
 Unsigned literal

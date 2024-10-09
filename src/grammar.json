@@ -3519,8 +3519,12 @@
                       "type": "CHOICE",
                       "members": [
                         {
-                          "type": "SYMBOL",
-                          "name": "value_arguments"
+                          "type": "FIELD",
+                          "name": "args",
+                          "content": {
+                            "type": "SYMBOL",
+                            "name": "value_arguments"
+                          }
                         },
                         {
                           "type": "BLANK"
@@ -3528,15 +3532,23 @@
                       ]
                     },
                     {
-                      "type": "SYMBOL",
-                      "name": "annotated_lambda"
+                      "type": "FIELD",
+                      "name": "lambda_arg",
+                      "content": {
+                        "type": "SYMBOL",
+                        "name": "annotated_lambda"
+                      }
                     }
                   ]
                 }
               },
               {
-                "type": "SYMBOL",
-                "name": "value_arguments"
+                "type": "FIELD",
+                "name": "args",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "value_arguments"
+                }
               }
             ]
           }

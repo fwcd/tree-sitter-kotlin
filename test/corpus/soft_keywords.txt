@@ -24,7 +24,7 @@ fun foo() {
             initializer: (call_expression
               expression: (simple_identifier)
               suffix: (call_suffix
-                (value_arguments
+                args: (value_arguments
                   (value_argument
                     (simple_identifier))))))
           (postfix_expression
