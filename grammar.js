@@ -751,7 +751,13 @@ module.exports = grammar({
 
     parenthesized_expression: $ => seq("(", $._expression, ")"),
 
-    collection_literal: $ => seq("[", $._expression, repeat(seq(",", $._expression)), "]"),
+    // https://kotlinlang.org/spec/syntax-and-grammar.html#grammar-rule-collectionLiteral
+    collection_literal: $ => seq(
+      "[",
+      $._expression,
+      repeat(seq(",", $._expression)),
+      optional(","),
+      "]"),
 
     _literal_constant: $ => choice(
       $.boolean_literal,
@@ -836,7 +842,7 @@ module.exports = grammar({
         seq(
           optional(field('consequence', $.control_structure_body)),
           optional(";"),
-          "else", 
+          "else",
           choice(field('alternative', $.control_structure_body), ";")
         ),
         ";"

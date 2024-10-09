@@ -38,6 +38,12 @@ To run the unit tests, run:
 
 >`npm run test`
 
+It is also helpful to run the parser on a real Kotlin project's source files.
+
+```shell
+./node_modules/.bin/tree-sitter parse "/path/to/some/project/**/*.kt"  --quiet --stat
+```
+
 ## WebAssembly
 
 ### Compilation
