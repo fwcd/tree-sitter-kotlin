@@ -67,4 +67,33 @@ fun main(){
             (simple_identifier)
             (indexing_suffix
               (integer_literal)))
-          (string_literal (string_content)))))))
+          (string_literal
+            (string_content)))))))
+
+================================================================================
+Call assignment
+================================================================================
+
+fun main(){
+  Foo(context).elem = var1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (assignment
+          (directly_assignable_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (simple_identifier)))))
+            (navigation_suffix
+              (simple_identifier)))
+          (simple_identifier))))))

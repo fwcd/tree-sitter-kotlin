@@ -623,7 +623,6 @@ module.exports = grammar({
 
     _unary_expression: $ => choice(
       $.postfix_expression,
-      $.call_expression,
       $.indexing_expression,
       $.navigation_expression,
       $.prefix_expression,
@@ -738,6 +737,7 @@ module.exports = grammar({
       $._literal_constant,
       $.string_literal,
       $.callable_reference,
+      $.call_expression,
       $._function_literal,
       $.object_literal,
       $.collection_literal,
@@ -836,7 +836,7 @@ module.exports = grammar({
         seq(
           optional(field('consequence', $.control_structure_body)),
           optional(";"),
-          "else", 
+          "else",
           choice(field('alternative', $.control_structure_body), ";")
         ),
         ";"
