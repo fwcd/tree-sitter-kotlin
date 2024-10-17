@@ -624,3 +624,22 @@ if (cond1) {
                       (value_argument
                         (string_literal
                           (string_content))))))))))))
+
+================================================================================
+Infix syntax for function application
+================================================================================
+
+1 x 2
+1 e 2
+
+---
+
+(source_file
+  (infix_expression
+    (integer_literal)
+    (simple_identifier)
+    (integer_literal))
+  (infix_expression
+    (integer_literal)
+    (simple_identifier)
+    (integer_literal)))
