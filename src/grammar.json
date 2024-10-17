@@ -2919,10 +2919,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "call_expression"
-        },
-        {
-          "type": "SYMBOL",
           "name": "indexing_expression"
         },
         {
@@ -3689,6 +3685,10 @@
         {
           "type": "SYMBOL",
           "name": "callable_reference"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "call_expression"
         },
         {
           "type": "SYMBOL",
@@ -6390,3 +6390,4 @@
   "inline": [],
   "supertypes": []
 }
+
