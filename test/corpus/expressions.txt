@@ -626,20 +626,79 @@ if (cond1) {
                           (string_content))))))))))))
 
 ================================================================================
+If-else without braces or semicolons or newlines
+================================================================================
+
+if (true) a else if (true) b else c
+
+---
+
+(source_file
+  (if_expression
+    (boolean_literal)
+    (control_structure_body
+      (simple_identifier))
+    (control_structure_body
+      (if_expression
+        (boolean_literal)
+        (control_structure_body
+          (simple_identifier))
+        (control_structure_body
+          (simple_identifier))))))
+
+================================================================================
 Infix syntax for function application
 ================================================================================
 
-1 x 2
-1 e 2
+a mul b
 
 ---
 
 (source_file
   (infix_expression
-    (integer_literal)
     (simple_identifier)
-    (integer_literal))
+    (simple_identifier)
+    (simple_identifier)))
+
+================================================================================
+Infix syntax, edge case 1
+================================================================================
+
+a exxx b
+a ixxx b
+
+---
+
+(source_file
   (infix_expression
-    (integer_literal)
     (simple_identifier)
-    (integer_literal)))
+    (simple_identifier)
+    (simple_identifier))
+  (infix_expression
+    (simple_identifier)
+    (simple_identifier)
+    (simple_identifier)))
+
+================================================================================
+Infix syntax, edge case 2
+================================================================================
+
+a else_ b
+a import_ b
+a imports b
+
+---
+
+(source_file
+  (infix_expression
+    (simple_identifier)
+    (simple_identifier)
+    (simple_identifier))
+  (infix_expression
+    (simple_identifier)
+    (simple_identifier)
+    (simple_identifier))
+  (infix_expression
+    (simple_identifier)
+    (simple_identifier)
+    (simple_identifier)))
