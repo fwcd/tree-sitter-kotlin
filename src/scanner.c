@@ -296,8 +296,8 @@ static bool scan_automatic_semicolon(TSLexer *lexer) {
 
   if (sameline) {
     switch (lexer->lookahead) {
-      // Insert imaginary semicolon before an 'import' but in front of other
-      // words or keywords starting with 'i'
+      // Insert imaginary semicolon before an 'import' but not in front
+      // of other words or keywords starting with 'i'
       case 'i':
         return scan_for_word(lexer, "mport", 5);
 
