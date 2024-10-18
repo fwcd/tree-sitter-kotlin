@@ -243,7 +243,7 @@ static bool is_word_char(int32_t c) {
   return (iswalnum(c) || c == '_');
 }
 
-// Scan for a fragment of a nonempty alphanumeric identifier or
+// Scan for [the end of] a nonempty alphanumeric identifier or
 // alphanumeric keyword (including '_').
 static bool scan_for_word(TSLexer *lexer, const char* word, unsigned len) {
     skip(lexer);
