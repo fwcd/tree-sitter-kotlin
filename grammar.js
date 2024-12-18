@@ -94,7 +94,7 @@ module.exports = grammar({
     // ambiguity between multiple user types and class property/function declarations
     [$.user_type],
     [$.user_type, $.anonymous_function],
-    [$.user_type, $.function_type],
+    //[$.user_type, $.function_type],
 
     // ambiguity between annotated_lambda with modifiers and modifiers from var declarations
     [$.annotated_lambda, $.modifiers],
@@ -110,6 +110,9 @@ module.exports = grammar({
     [$.type_modifiers],
     // ambiguity between associating type modifiers
     [$.not_nullable_type],
+
+    [$.receiver_type],
+    [$.receiver_type, $._type],
   ],
 
   externals: $ => [
@@ -337,12 +340,12 @@ module.exports = grammar({
       optional(seq("=", $._expression))
     ),
 
-    _receiver_type: $ => seq(
+    receiver_type: $ => seq(
       optional($.type_modifiers),
       choice (
-        $._type_reference,
         $.parenthesized_type,
-        $.nullable_type
+        $.nullable_type,
+        $._type_reference,
       )
     ),
 
@@ -350,7 +353,7 @@ module.exports = grammar({
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
-      optional(seq($._receiver_type, optional('.'))),
+      optional(seq(field("receiver", $.receiver_type), optional('.'))),
       $.simple_identifier,
       $.function_value_parameters,
       optional(seq(":", $._type)),
@@ -370,7 +373,7 @@ module.exports = grammar({
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
-      optional(seq($._receiver_type, optional('.'))),
+      optional(seq(field("receiver", $.receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
       optional($.type_constraints),
       optional(choice(
@@ -464,10 +467,10 @@ module.exports = grammar({
     _type: $ => seq(
       optional($.type_modifiers),
       choice(
+        $.function_type,
         $.parenthesized_type,
         $.nullable_type,
         $._type_reference,
-        $.function_type,
         $.not_nullable_type
       )
     ),
@@ -513,7 +516,7 @@ module.exports = grammar({
     _type_projection_modifier: $ => $.variance_modifier,
 
     function_type: $ => seq(
-      optional(seq($._simple_user_type, ".")), // TODO: Support "real" types
+      optional(seq(field("receiver", $.receiver_type), ".")),
       $.function_type_parameters,
       "->",
       $._type
@@ -623,7 +626,6 @@ module.exports = grammar({
 
     _unary_expression: $ => choice(
       $.postfix_expression,
-      $.call_expression,
       $.indexing_expression,
       $.navigation_expression,
       $.prefix_expression,
@@ -738,6 +740,7 @@ module.exports = grammar({
       $._literal_constant,
       $.string_literal,
       $.callable_reference,
+      $.call_expression,
       $._function_literal,
       $.object_literal,
       $.collection_literal,
@@ -751,7 +754,13 @@ module.exports = grammar({
 
     parenthesized_expression: $ => seq("(", $._expression, ")"),
 
-    collection_literal: $ => seq("[", $._expression, repeat(seq(",", $._expression)), "]"),
+    // https://kotlinlang.org/spec/syntax-and-grammar.html#grammar-rule-collectionLiteral
+    collection_literal: $ => seq(
+      "[",
+      $._expression,
+      repeat(seq(",", $._expression)),
+      optional(","),
+      "]"),
 
     _literal_constant: $ => choice(
       $.boolean_literal,
@@ -836,7 +845,7 @@ module.exports = grammar({
         seq(
           optional(field('consequence', $.control_structure_body)),
           optional(";"),
-          "else", 
+          "else",
           choice(field('alternative', $.control_structure_body), ";")
         ),
         ";"

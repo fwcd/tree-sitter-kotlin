@@ -76,7 +76,8 @@ sum(1, 2)
     (call_suffix
       (value_arguments
         (value_argument
-          (string_literal (string_content))))))
+          (string_literal
+            (string_content))))))
   (call_expression
     (simple_identifier)
     (call_suffix
@@ -158,15 +159,17 @@ val MyDate.s: String get() = "hello"
 (source_file
   (property_declaration
     (binding_pattern_kind)
-    (user_type
-      (type_identifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
     (variable_declaration
       (simple_identifier)
       (user_type
         (type_identifier)))
     (getter
       (function_body
-        (string_literal (string_content))))))
+        (string_literal
+          (string_content))))))
 
 ================================================================================
 Expect as an expression
@@ -462,7 +465,8 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal (string_content)))))))
+            (string_literal
+              (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
     (variable_declaration
@@ -472,7 +476,8 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal (string_content)))))))
+            (string_literal
+              (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
     (variable_declaration
@@ -482,7 +487,8 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal (string_content)))))))
+            (string_literal
+              (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
     (variable_declaration
@@ -492,17 +498,20 @@ val comments = """ // and here """
       (call_suffix
         (value_arguments
           (value_argument
-            (string_literal (string_content)))))))
+            (string_literal
+              (string_content)))))))
   (property_declaration
     (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
-    (string_literal (string_content)))
+    (string_literal
+      (string_content)))
   (property_declaration
     (binding_pattern_kind)
     (variable_declaration
       (simple_identifier))
-    (string_literal (string_content))))
+    (string_literal
+      (string_content))))
 
 ================================================================================
 Qualified this/super expressions
@@ -601,26 +610,24 @@ if (cond1) {
               (value_argument
                 (string_literal
                   (string_content))))))))
-    alternative:
-      (control_structure_body
-        (if_expression
-          condition: (simple_identifier)
-          consequence: (control_structure_body
-            (statements
-              (call_expression
-                (simple_identifier)
-                (call_suffix
-                  (value_arguments
-                    (value_argument
-                      (string_literal
-                        (string_content))))))))
-          alternative:
-            (control_structure_body
-              (statements
-                (call_expression
-                  (simple_identifier)
-                  (call_suffix
-                    (value_arguments
-                      (value_argument
-                        (string_literal
-                          (string_content))))))))))))
+    alternative: (control_structure_body
+      (if_expression
+        condition: (simple_identifier)
+        consequence: (control_structure_body
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (string_literal
+                      (string_content))))))))
+        alternative: (control_structure_body
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (string_literal
+                      (string_content))))))))))))

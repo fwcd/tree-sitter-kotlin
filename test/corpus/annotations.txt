@@ -124,3 +124,50 @@ fun foo() = bar {}
             (lambda_literal)))))))
 
 
+==================
+Comma in annotation property
+==================
+
+class EnvironmentSpec {
+    @Option(
+      names = ["--environment", "--env"],
+      arity = "0..1",
+      description = [
+          "Which environment to use",
+      ],
+    )
+    var environment: Environment
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (modifiers
+          (annotation
+            (constructor_invocation
+              (user_type
+                (type_identifier))
+              (value_arguments
+                (value_argument
+                  (simple_identifier)
+                  (collection_literal
+                    (string_literal (string_content))
+                    (string_literal (string_content))))
+                (value_argument
+                  (simple_identifier)
+                  (string_literal (string_content)))
+                (value_argument
+                  (simple_identifier)
+                  (collection_literal
+                    (string_literal (string_content))
+                  ))))))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+      ))))
