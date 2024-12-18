@@ -236,12 +236,23 @@ static bool scan_whitespace_and_comments(TSLexer *lexer) {
   return lexer->lookahead != '/';
 }
 
+// Test for any identifier character other than the first character.
+// This is meant to match the regexp [\p{L}_\p{Nd}]
+// as found in '_alpha_identifier' (see grammar.js).
+static bool is_word_char(int32_t c) {
+  return (iswalnum(c) || c == '_');
+}
+
+// Scan for [the end of] a nonempty alphanumeric identifier or
+// alphanumeric keyword (including '_').
 static bool scan_for_word(TSLexer *lexer, const char* word, unsigned len) {
     skip(lexer);
     for (unsigned i = 0; i < len; ++i) {
       if (lexer->lookahead != word[i]) return false;
       skip(lexer);
     }
+    // check that the identifier stops here
+    if (is_word_char(lexer->lookahead)) return false;
     return true;
 }
 
@@ -285,10 +296,8 @@ static bool scan_automatic_semicolon(TSLexer *lexer) {
 
   if (sameline) {
     switch (lexer->lookahead) {
-      // Don't insert a semicolon before an else
-      case 'e':
-        return !scan_for_word(lexer, "lse", 3);
-
+      // Insert imaginary semicolon before an 'import' but not in front
+      // of other words or keywords starting with 'i'
       case 'i':
         return scan_for_word(lexer, "mport", 5);
 
@@ -297,6 +306,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer) {
         lexer->mark_end(lexer);
         return true;
 
+      // Don't insert a semicolon in other cases
       default:
         return false;
     }
