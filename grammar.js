@@ -749,7 +749,7 @@ module.exports = grammar({
 
     type_arguments: $ => seq("<", sep1($.type_projection, ","), ">"),
 
-    value_arguments: $ => seq("(", optional(sep1($.value_argument, ",")), ")"),
+    value_arguments: $ => seq("(", optional(sep1($.value_argument, ",")), optional(","), ")"),
 
     value_argument: $ => seq(
       optional($.annotation),
