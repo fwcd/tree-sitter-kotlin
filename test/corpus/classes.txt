@@ -392,3 +392,39 @@ value class Password(private val s: String)
         (simple_identifier)
         (user_type
           (type_identifier))))))
+
+================================================================================
+Interface
+================================================================================
+
+interface Foo {
+    fun bar()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
+
+================================================================================
+Functional Interface
+================================================================================
+
+fun interface Foo {
+    fun bar()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
