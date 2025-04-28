@@ -286,7 +286,7 @@ module.exports = grammar({
       $._expression
     ),
 
-    type_parameters: $ => seq("<", sep1($.type_parameter, ","), ">"),
+    type_parameters: $ => seq("<", sep1($.type_parameter, ","), optional(","), ">"),
 
     type_parameter: $ => seq(
       optional($.type_parameter_modifiers),
@@ -714,7 +714,7 @@ module.exports = grammar({
       $.lambda_literal
     ),
 
-    type_arguments: $ => seq("<", sep1($.type_projection, ","), ">"),
+    type_arguments: $ => seq("<", sep1($.type_projection, ","), optional(","), ">"),
 
     value_arguments: $ => seq(
       "(",
