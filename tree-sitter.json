@@ -12,7 +12,7 @@
     }
   ],
   "metadata": {
-    "version": "0.3.9",
+    "version": "0.4.0",
     "license": "MIT",
     "description": "Tree-sitter grammar for Kotlin",
     "authors": [
@@ -21,7 +21,7 @@
       }
     ],
     "links": {
-      "repository": "git+https://github.com/fwcd/tree-sitter-kotlin.git"
+      "repository": "git+https://github.com/dan0v/tree-sitter-kotlin.git"
     }
   },
   "bindings": {

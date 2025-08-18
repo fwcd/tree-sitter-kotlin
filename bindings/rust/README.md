@@ -3,8 +3,8 @@
 This crate provides a Kotlin grammar for the [tree-sitter](https://tree-sitter.github.io/tree-sitter/) parsing library. To use this crate, add it to the `[dependencies]` section of your `Cargo.toml` file:
 
 ```toml
-tree-sitter = "0.23"
-tree-sitter-kotlin = "0.3.9"
+tree-sitter = "0.25.3"
+tree-sitter-kotlin = { git = "https://github.com/dan0v/tree-sitter-kotlin.git" }
 ```
 
 Typically, you will use the `language` function to add this grammar to a tree-sitter [`Parser`](https://docs.rs/tree-sitter/*/tree_sitter/struct.Parser.html), and then use the parser to parse some code:
