@@ -17,7 +17,7 @@
 //! let language = tree_sitter_kotlin::LANGUAGE;
 //! parser
 //!     .set_language(&language.into())
-//!     .expect("Error loading Kotlin parser");
+//!     .expect("Error loading Kotlin grammar");
 //! let tree = parser.parse(code, None).unwrap();
 //! ```
 //!
