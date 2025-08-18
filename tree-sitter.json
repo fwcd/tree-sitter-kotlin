@@ -21,7 +21,7 @@
       }
     ],
     "links": {
-      "repository": "git+https://github.com/dan0v/tree-sitter-kotlin.git"
+      "repository": "git+https://github.com/fwcd/tree-sitter-kotlin.git"
     }
   },
   "bindings": {

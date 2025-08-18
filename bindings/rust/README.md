@@ -4,7 +4,7 @@ This crate provides a Kotlin grammar for the [tree-sitter](https://tree-sitter.g
 
 ```toml
 tree-sitter = "0.25.3"
-tree-sitter-kotlin = { git = "https://github.com/dan0v/tree-sitter-kotlin.git" }
+tree-sitter-kotlin = "0.4.0"
 ```
 
 Typically, you will use the `language` function to add this grammar to a tree-sitter [`Parser`](https://docs.rs/tree-sitter/*/tree_sitter/struct.Parser.html), and then use the parser to parse some code:
@@ -17,6 +17,9 @@ let code = r#"
   )
 "#;
 let mut parser = Parser::new();
-parser.set_language(&tree_sitter_kotlin::language()).expect("Error loading Kotlin grammar");
-let parsed = parser.parse(code, None);
+let language = tree_sitter_kotlin::LANGUAGE;
+parser
+  .set_language(&language.into())
+  .expect("Error loading Kotlin parser");
+let tree = parser.parse(code, None).unwrap();
 ```
