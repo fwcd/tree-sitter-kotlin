@@ -183,7 +183,6 @@
 		"require"
 		"requireNotNull"
 		"with"
-		"suspend"
 		"synchronized"
 ))
 
