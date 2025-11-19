@@ -664,8 +664,6 @@ module.exports = grammar({
       $.check_expression,
       $.comparison_expression,
       $.equality_expression,
-      $.comparison_expression,
-      $.equality_expression,
       $.conjunction_expression,
       $.disjunction_expression
     ),
