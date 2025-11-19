@@ -1107,8 +1107,14 @@ module.exports = grammar({
       "value",
       "actual",
       "set",
-      "get"
-      // TODO: More soft keywords
+      "get",
+      "field",
+      "property",
+      "receiver",
+      "param",
+      "setparam",
+      "delegate",
+      "file"
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),
