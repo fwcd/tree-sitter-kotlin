@@ -3154,14 +3154,6 @@
         },
         {
           "type": "SYMBOL",
-          "name": "comparison_expression"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "equality_expression"
-        },
-        {
-          "type": "SYMBOL",
           "name": "conjunction_expression"
         },
         {
