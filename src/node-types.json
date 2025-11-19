@@ -478,6 +478,25 @@
     }
   },
   {
+    "type": "assignable_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "parenthesized_assignable_expression",
+          "named": true
+        },
+        {
+          "type": "prefix_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "assignment",
     "named": true,
     "fields": {},
@@ -495,6 +514,10 @@
         },
         {
           "type": "as_expression",
+          "named": true
+        },
+        {
+          "type": "assignable_expression",
           "named": true
         },
         {
@@ -2345,6 +2368,10 @@
         },
         {
           "type": "object_literal",
+          "named": true
+        },
+        {
+          "type": "parenthesized_directly_assignable_expression",
           "named": true
         },
         {
@@ -5958,6 +5985,36 @@
     }
   },
   {
+    "type": "parenthesized_assignable_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "assignable_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "parenthesized_directly_assignable_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "directly_assignable_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "parenthesized_expression",
     "named": true,
     "fields": {},
@@ -7401,6 +7458,7 @@
   {
     "type": "source_file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -9459,6 +9517,10 @@
     "named": false
   },
   {
+    "type": "?",
+    "named": false
+  },
+  {
     "type": "?.",
     "named": false
   },
@@ -9668,11 +9730,13 @@
   },
   {
     "type": "line_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "multiline_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "noinline",

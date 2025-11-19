@@ -113,6 +113,9 @@ module.exports = grammar({
 
     [$.receiver_type],
     [$.receiver_type, $._type],
+
+    // ambiguity between prefix expression in unary and assignable contexts
+    [$._unary_expression, $.assignable_expression],
   ],
 
   externals: $ => [
@@ -609,7 +612,7 @@ module.exports = grammar({
     assignment: $ => choice(
       prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
       prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression)),
-      // TODO
+      prec.left(PREC.ASSIGNMENT, seq($.assignable_expression, $._assignment_and_operator, $._expression))
     ),
 
     // ==========
@@ -971,9 +974,26 @@ module.exports = grammar({
       PREC.ASSIGNMENT,
       choice(
         $._postfix_unary_expression,
-        $.simple_identifier
-        // TODO
+        $.simple_identifier,
+        $.parenthesized_directly_assignable_expression
       )
+    ),
+
+    parenthesized_directly_assignable_expression: $ => seq(
+      "(",
+      $.directly_assignable_expression,
+      ")"
+    ),
+
+    assignable_expression: $ => choice(
+      $.prefix_expression,
+      $.parenthesized_assignable_expression
+    ),
+
+    parenthesized_assignable_expression: $ => seq(
+      "(",
+      $.assignable_expression,
+      ")"
     ),
 
     // ==========

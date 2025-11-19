@@ -1,4 +1,5 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "kotlin",
   "word": "_alpha_identifier",
   "rules": {
@@ -2931,6 +2932,27 @@
               }
             ]
           }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "assignable_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_assignment_and_operator"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_expression"
+              }
+            ]
+          }
         }
       ]
     },
@@ -5087,9 +5109,60 @@
           {
             "type": "SYMBOL",
             "name": "simple_identifier"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "parenthesized_directly_assignable_expression"
           }
         ]
       }
+    },
+    "parenthesized_directly_assignable_expression": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "SYMBOL",
+          "name": "directly_assignable_expression"
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        }
+      ]
+    },
+    "assignable_expression": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "prefix_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "parenthesized_assignable_expression"
+        }
+      ]
+    },
+    "parenthesized_assignable_expression": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "SYMBOL",
+          "name": "assignable_expression"
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        }
+      ]
     },
     "modifiers": {
       "type": "PREC_LEFT",
@@ -6422,6 +6495,10 @@
     [
       "receiver_type",
       "_type"
+    ],
+    [
+      "_unary_expression",
+      "assignable_expression"
     ]
   ],
   "precedences": [],
@@ -6456,5 +6533,6 @@
     }
   ],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }
