@@ -9432,6 +9432,10 @@
     "named": false
   },
   {
+    "type": "..<",
+    "named": false
+  },
+  {
     "type": "/",
     "named": false
   },
@@ -9693,11 +9697,13 @@
   },
   {
     "type": "line_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "multiline_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "noinline",
