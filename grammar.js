@@ -668,7 +668,7 @@ module.exports = grammar({
 
     additive_expression: $ => prec.left(PREC.ADDITIVE, seq($._expression, $._additive_operator, $._expression)),
 
-    range_expression: $ => prec.left(PREC.RANGE, seq($._expression, "..", $._expression)),
+    range_expression: $ => prec.left(PREC.RANGE, seq($._expression, choice("..", "..<"), $._expression)),
 
     infix_expression: $ => prec.left(PREC.INFIX, seq($._expression, $.simple_identifier, $._expression)),
 
