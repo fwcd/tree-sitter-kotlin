@@ -1,4 +1,5 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "kotlin",
   "word": "_alpha_identifier",
   "rules": {
@@ -6130,7 +6131,7 @@
               "members": [
                 {
                   "type": "PATTERN",
-                  "value": "[01]"
+                  "value": "[01]+"
                 },
                 {
                   "type": "REPEAT",
@@ -6143,7 +6144,7 @@
                       },
                       {
                         "type": "PATTERN",
-                        "value": "[01]"
+                        "value": "[01]+"
                       }
                     ]
                   }
@@ -6456,5 +6457,6 @@
     }
   ],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }
