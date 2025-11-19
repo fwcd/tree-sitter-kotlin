@@ -3215,8 +3215,17 @@
             "name": "_expression"
           },
           {
-            "type": "STRING",
-            "value": ".."
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": ".."
+              },
+              {
+                "type": "STRING",
+                "value": "..<"
+              }
+            ]
           },
           {
             "type": "SYMBOL",
@@ -6593,5 +6602,6 @@
     }
   ],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }
