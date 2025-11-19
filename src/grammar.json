@@ -1,4 +1,5 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "kotlin",
   "word": "_alpha_identifier",
   "rules": {
@@ -821,6 +822,19 @@
           {
             "type": "SYMBOL",
             "name": "function_type"
+          },
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "suspend"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_type"
+              }
+            ]
           }
         ]
       }
@@ -6422,6 +6436,10 @@
     [
       "receiver_type",
       "_type"
+    ],
+    [
+      "delegation_specifier",
+      "_type_modifier"
     ]
   ],
   "precedences": [],
@@ -6456,5 +6474,6 @@
     }
   ],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }

@@ -113,6 +113,9 @@ module.exports = grammar({
 
     [$.receiver_type],
     [$.receiver_type, $._type],
+
+    // ambiguity between suspend in delegation and type modifier
+    [$.delegation_specifier, $._type_modifier],
   ],
 
   externals: $ => [
@@ -270,7 +273,8 @@ module.exports = grammar({
       $.constructor_invocation,
       $.explicit_delegation,
       $.user_type,
-      $.function_type
+      $.function_type,
+      seq("suspend", $._type)
     )),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),

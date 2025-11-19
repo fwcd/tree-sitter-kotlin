@@ -2249,8 +2249,8 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
-      "required": true,
+      "multiple": true,
+      "required": false,
       "types": [
         {
           "type": "constructor_invocation",
@@ -2262,6 +2262,22 @@
         },
         {
           "type": "function_type",
+          "named": true
+        },
+        {
+          "type": "not_nullable_type",
+          "named": true
+        },
+        {
+          "type": "nullable_type",
+          "named": true
+        },
+        {
+          "type": "parenthesized_type",
+          "named": true
+        },
+        {
+          "type": "type_modifiers",
           "named": true
         },
         {
@@ -7401,6 +7417,7 @@
   {
     "type": "source_file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -9459,6 +9476,10 @@
     "named": false
   },
   {
+    "type": "?",
+    "named": false
+  },
+  {
     "type": "?.",
     "named": false
   },
@@ -9668,11 +9689,13 @@
   },
   {
     "type": "line_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "multiline_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "noinline",
