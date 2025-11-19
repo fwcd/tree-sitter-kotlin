@@ -2348,6 +2348,10 @@
           "named": true
         },
         {
+          "type": "parenthesized_directly_assignable_expression",
+          "named": true
+        },
+        {
           "type": "parenthesized_expression",
           "named": true
         },
@@ -5958,6 +5962,21 @@
     }
   },
   {
+    "type": "parenthesized_directly_assignable_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "directly_assignable_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "parenthesized_expression",
     "named": true,
     "fields": {},
@@ -7401,6 +7420,7 @@
   {
     "type": "source_file",
     "named": true,
+    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -9459,6 +9479,10 @@
     "named": false
   },
   {
+    "type": "?",
+    "named": false
+  },
+  {
     "type": "?.",
     "named": false
   },
@@ -9668,11 +9692,13 @@
   },
   {
     "type": "line_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "multiline_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "noinline",

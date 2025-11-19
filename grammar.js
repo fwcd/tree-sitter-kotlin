@@ -971,9 +971,15 @@ module.exports = grammar({
       PREC.ASSIGNMENT,
       choice(
         $._postfix_unary_expression,
-        $.simple_identifier
-        // TODO
+        $.simple_identifier,
+        $.parenthesized_directly_assignable_expression
       )
+    ),
+
+    parenthesized_directly_assignable_expression: $ => seq(
+      "(",
+      $.directly_assignable_expression,
+      ")"
     ),
 
     // ==========

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/grammar.schema.json",
   "name": "kotlin",
   "word": "_alpha_identifier",
   "rules": {
@@ -5087,9 +5088,30 @@
           {
             "type": "SYMBOL",
             "name": "simple_identifier"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "parenthesized_directly_assignable_expression"
           }
         ]
       }
+    },
+    "parenthesized_directly_assignable_expression": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "("
+        },
+        {
+          "type": "SYMBOL",
+          "name": "directly_assignable_expression"
+        },
+        {
+          "type": "STRING",
+          "value": ")"
+        }
+      ]
     },
     "modifiers": {
       "type": "PREC_LEFT",
@@ -6456,5 +6478,6 @@
     }
   ],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }
