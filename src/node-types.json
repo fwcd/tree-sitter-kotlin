@@ -7420,7 +7420,6 @@
   {
     "type": "source_file",
     "named": true,
-    "root": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -9479,10 +9478,6 @@
     "named": false
   },
   {
-    "type": "?",
-    "named": false
-  },
-  {
     "type": "?.",
     "named": false
   },
@@ -9692,13 +9687,11 @@
   },
   {
     "type": "line_comment",
-    "named": true,
-    "extra": true
+    "named": true
   },
   {
     "type": "multiline_comment",
-    "named": true,
-    "extra": true
+    "named": true
   },
   {
     "type": "noinline",
