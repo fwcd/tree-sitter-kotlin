@@ -149,6 +149,33 @@ when (this) {
           (null_literal))))))
 
 ================================================================================
+Expressions with Soft Keywords
+================================================================================
+
+when {
+  hasEnum() -> enum.loc.filename
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (when_expression
+    (when_entry
+      (when_condition
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (control_structure_body
+        (navigation_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (navigation_suffix
+            (simple_identifier)))))))
+
+================================================================================
 Value declaration with receiver type
 ================================================================================
 
@@ -375,6 +402,7 @@ fun main() { val temp = b.y; b.y = b.z; b.z = temp }
 when (dir) {
   1 -> { val temp = b.y; b.y = b.z; b.z = temp }
 }
+
 --------------------------------------------------------------------------------
 
 (source_file
