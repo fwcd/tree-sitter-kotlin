@@ -3,12 +3,20 @@ Top-level functions
 ==================
 
 fun main() {}
+operator fun main() {}
 
 ---
 
 (source_file
   (function_declaration
-    (simple_identifier) (function_value_parameters)
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (modifiers
+      (function_modifier))
+    (simple_identifier)
+    (function_value_parameters)
     (function_body)))
 
 ==================
