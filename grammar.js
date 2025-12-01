@@ -72,6 +72,8 @@ module.exports = grammar({
     [$.platform_modifier, $.simple_identifier],
     // "data", "inner" as class modifier or id
     [$.class_modifier, $.simple_identifier],
+    // "internal" as visibility modifier conflicts with internal as an identifier
+    [$.visibility_modifier, $.simple_identifier],
 
     // "<x>.<y> = z assignment conflicts with <x>.<y>() function call"
     [$._postfix_unary_expression, $._expression],
@@ -1110,6 +1112,7 @@ module.exports = grammar({
       "get",
       "enum",
       "annotation",
+      "internal",
       // TODO: More soft keywords
     ),
 

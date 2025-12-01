@@ -158,6 +158,8 @@ when {
 
 annotations.filter { annotation -> true }
 
+availability.associate { internal -> false }.toMap()
+
 --------------------------------------------------------------------------------
 
 (source_file
@@ -188,7 +190,26 @@ annotations.filter { annotation -> true }
             (variable_declaration
               (simple_identifier)))
           (statements
-            (boolean_literal)))))))
+            (boolean_literal))))))
+  (call_expression
+    (navigation_expression
+      (call_expression
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (simple_identifier)))
+        (call_suffix
+          (annotated_lambda
+            (lambda_literal
+              (lambda_parameters
+                (variable_declaration
+                  (simple_identifier)))
+              (statements
+                (boolean_literal))))))
+      (navigation_suffix
+        (simple_identifier)))
+    (call_suffix
+      (value_arguments))))
 
 ================================================================================
 Value declaration with receiver type

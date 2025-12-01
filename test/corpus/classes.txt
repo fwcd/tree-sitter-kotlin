@@ -4,6 +4,7 @@ Classes
 
 class Empty
 class Empty2 {}
+internal class Empty3 {}
 
 --------------------------------------------------------------------------------
 
@@ -11,6 +12,11 @@ class Empty2 {}
   (class_declaration
     (type_identifier))
   (class_declaration
+    (type_identifier)
+    (class_body))
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
     (type_identifier)
     (class_body)))
 
@@ -401,10 +407,22 @@ interface Foo {
     fun bar()
 }
 
+internal interface Bar {
+    fun foo()
+}
+
 --------------------------------------------------------------------------------
 
 (source_file
   (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters))))
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
     (type_identifier)
     (class_body
       (function_declaration
