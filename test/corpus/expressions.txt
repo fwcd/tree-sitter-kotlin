@@ -585,6 +585,10 @@ when {
   else -> null
 }
 
+fun <T> copyWhenGreater(list: List<T>, threshold: T): List<String>
+    where T : CharSequence,
+          T : Comparable<T>
+
 --------------------------------------------------------------------------------
 
 (source_file
@@ -638,7 +642,44 @@ when {
             (type_identifier)))))
     (when_entry
       (control_structure_body
-        (null_literal)))))
+        (null_literal))))
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier))))))
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier)))))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))))))))
 
 ================================================================================
 Comments in Strings
