@@ -4,10 +4,16 @@ Type references
 
 something as Int
 something as A
+something
+  as A
 
 --------------------------------------------------------------------------------
 
 (source_file
+  (as_expression
+    (simple_identifier)
+    (user_type
+      (type_identifier)))
   (as_expression
     (simple_identifier)
     (user_type
