@@ -505,6 +505,7 @@ fun main() { val temp = b.y; b.y = b.z; b.z = temp }
 when (dir) {
   1 -> { val temp = b.y; b.y = b.z; b.z = temp }
 }
+
 --------------------------------------------------------------------------------
 
 (source_file
@@ -567,6 +568,77 @@ when (dir) {
               (navigation_suffix
                 (simple_identifier)))
             (simple_identifier)))))))
+
+================================================================================
+Statements with Line Breaks
+================================================================================
+
+when {
+  id != null -> x.nodes.fromId(id)
+                        as Foo?
+  else -> null
+}
+
+when {
+  id != null -> x.nodes.fromId(id)
+                        as? Foo
+  else -> null
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (when_expression
+    (when_entry
+      (when_condition
+        (equality_expression
+          (simple_identifier)
+          (null_literal)))
+      (control_structure_body
+        (as_expression
+          (call_expression
+            (navigation_expression
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (navigation_suffix
+                (simple_identifier)))
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier)))))
+          (nullable_type
+            (user_type
+              (type_identifier))))))
+    (when_entry
+      (control_structure_body
+        (null_literal))))
+  (when_expression
+    (when_entry
+      (when_condition
+        (equality_expression
+          (simple_identifier)
+          (null_literal)))
+      (control_structure_body
+        (as_expression
+          (call_expression
+            (navigation_expression
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (navigation_suffix
+                (simple_identifier)))
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier)))))
+          (user_type
+            (type_identifier)))))
+    (when_entry
+      (control_structure_body
+        (null_literal)))))
 
 ================================================================================
 Comments in Strings
