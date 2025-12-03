@@ -355,6 +355,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer) {
     case 'a':
       return !scan_for_word(lexer, "s", 1);
 
+    // Don't insert a semicolon before a where
+    case 'w':
+      return !scan_for_word(lexer, "here", 4);
+
     // Don't insert a semicolon before `in` or `instanceof`, but do insert one
     // before an identifier or an import.
     case 'i':
