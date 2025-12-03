@@ -874,7 +874,7 @@ module.exports = grammar({
 
     when_entry: $ => seq(
       choice(
-        seq($.when_condition, repeat(seq(",", $.when_condition))),
+        seq($.when_condition, repeat(seq(",", $.when_condition)), optional(",")),
         "else"
       ),
       "->",
@@ -885,7 +885,7 @@ module.exports = grammar({
     when_condition: $ => choice(
       $._expression,
       $.range_test,
-      $.type_test
+      $.type_test,
     ),
 
     range_test: $ => seq($._in_operator, $._expression),

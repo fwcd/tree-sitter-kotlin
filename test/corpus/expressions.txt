@@ -96,6 +96,11 @@ val y = when(x){
         1 -> true
         2 -> false
     }
+val z = when(x) {
+        1,2 -> 0
+        3,4 -> 1
+        5,  -> 2
+}
 
 --------------------------------------------------------------------------------
 
@@ -121,7 +126,33 @@ val y = when(x){
         (when_condition
           (integer_literal))
         (control_structure_body
-          (boolean_literal))))))
+          (boolean_literal)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (when_expression
+      (when_subject
+        (simple_identifier))
+      (when_entry
+        (when_condition
+          (integer_literal))
+        (when_condition
+          (integer_literal))
+        (control_structure_body
+          (integer_literal)))
+      (when_entry
+        (when_condition
+          (integer_literal))
+        (when_condition
+          (integer_literal))
+        (control_structure_body
+          (integer_literal)))
+      (when_entry
+        (when_condition
+          (integer_literal))
+        (control_structure_body
+          (integer_literal))))))
 
 ================================================================================
 When expression with type arguments
