@@ -51,7 +51,7 @@ const PREC = {
 };
 const DEC_DIGITS = token(sep1(/[0-9]+/, /_+/));
 const HEX_DIGITS = token(sep1(/[0-9a-fA-F]+/, /_+/));
-const BIN_DIGITS = token(sep1(/[01]/, /_+/));
+const BIN_DIGITS = token(sep1(/[01]+/, /_+/));
 const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), DEC_DIGITS));
 
 module.exports = grammar({
