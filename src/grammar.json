@@ -5531,6 +5531,22 @@
         {
           "type": "STRING",
           "value": "get"
+        },
+        {
+          "type": "STRING",
+          "value": "enum"
+        },
+        {
+          "type": "STRING",
+          "value": "annotation"
+        },
+        {
+          "type": "STRING",
+          "value": "internal"
+        },
+        {
+          "type": "STRING",
+          "value": "operator"
         }
       ]
     },
@@ -6330,6 +6346,14 @@
     ],
     [
       "class_modifier",
+      "simple_identifier"
+    ],
+    [
+      "visibility_modifier",
+      "simple_identifier"
+    ],
+    [
+      "function_modifier",
       "simple_identifier"
     ],
     [
