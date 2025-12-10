@@ -12,6 +12,24 @@ Multiplication expression
     (integer_literal)))
 
 ================================================================================
+Prefix expressions
+================================================================================
+
+!isLastField
+!x
+++x
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (prefix_expression
+    (simple_identifier))
+  (prefix_expression
+    (simple_identifier))
+  (prefix_expression
+    (simple_identifier)))
+
+================================================================================
 Safe Navigation
 ================================================================================
 
@@ -124,11 +142,46 @@ val y = when(x){
           (boolean_literal))))))
 
 ================================================================================
+When expression with prefix unary expressions
+================================================================================
+
+when {
+  !x -> false
+  !isLastField -> false
+  isLastField && x -> false
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (when_expression
+    (when_entry
+      (when_condition
+        (prefix_expression
+          (simple_identifier)))
+      (control_structure_body
+        (boolean_literal)))
+    (when_entry
+      (when_condition
+        (prefix_expression
+          (simple_identifier)))
+      (control_structure_body
+        (boolean_literal)))
+    (when_entry
+      (when_condition
+        (conjunction_expression
+          (simple_identifier)
+          (simple_identifier)))
+      (control_structure_body
+        (boolean_literal)))))
+
+================================================================================
 When expression with type arguments
 ================================================================================
 
 when (this) {
     is DispatchedCoroutine<*> -> return null
+    !is DispatchedCoroutine<*> -> return null
 }
 
 --------------------------------------------------------------------------------
@@ -137,6 +190,16 @@ when (this) {
   (when_expression
     (when_subject
       (this_expression))
+    (when_entry
+      (when_condition
+        (type_test
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection)))))
+      (control_structure_body
+        (jump_expression
+          (null_literal))))
     (when_entry
       (when_condition
         (type_test
@@ -446,12 +509,12 @@ val comments = foo("//")
 val comments = foo("hello //")
 val comments = foo("// there")
 val comments = foo("hello // there")
-val comments = """ 
+val comments = """
   // hey there's a
-  
+
   /* comment or two here */
 """
-val comments = """ // and here """ 
+val comments = """ // and here """
 
 --------------------------------------------------------------------------------
 
@@ -589,11 +652,11 @@ If else-if else expression
 ================================================================================
 
 if (cond1) {
-	println("cond1")
+  println("cond1")
 } else if (cond2) {
-	println("cond2")
+  println("cond2")
 } else {
-	println("cond3")
+  println("cond3")
 }
 
 --------------------------------------------------------------------------------
