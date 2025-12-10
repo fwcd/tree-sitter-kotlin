@@ -3291,6 +3291,18 @@
                 "type": "SEQ",
                 "members": [
                   {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "!"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  },
+                  {
                     "type": "SYMBOL",
                     "name": "_in_operator"
                   },
@@ -3303,6 +3315,18 @@
               {
                 "type": "SEQ",
                 "members": [
+                  {
+                    "type": "CHOICE",
+                    "members": [
+                      {
+                        "type": "STRING",
+                        "value": "!"
+                      },
+                      {
+                        "type": "BLANK"
+                      }
+                    ]
+                  },
                   {
                     "type": "SYMBOL",
                     "name": "_is_operator"
@@ -4564,6 +4588,18 @@
       "type": "SEQ",
       "members": [
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "!"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "SYMBOL",
           "name": "_in_operator"
         },
@@ -4576,6 +4612,18 @@
     "type_test": {
       "type": "SEQ",
       "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "!"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
         {
           "type": "SYMBOL",
           "name": "_is_operator"
@@ -4869,10 +4917,6 @@
         {
           "type": "STRING",
           "value": "in"
-        },
-        {
-          "type": "STRING",
-          "value": "!in"
         }
       ]
     },
@@ -4882,10 +4926,6 @@
         {
           "type": "STRING",
           "value": "is"
-        },
-        {
-          "type": "STRING",
-          "value": "!is"
         }
       ]
     },
