@@ -9340,14 +9340,6 @@
     "named": false
   },
   {
-    "type": "!in",
-    "named": false
-  },
-  {
-    "type": "!is",
-    "named": false
-  },
-  {
     "type": "#!",
     "named": false
   },
