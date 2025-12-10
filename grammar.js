@@ -677,8 +677,8 @@ module.exports = grammar({
     elvis_expression: $ => prec.left(PREC.ELVIS, seq($._expression, "?:", $._expression)),
 
     check_expression: $ => prec.left(PREC.CHECK, seq($._expression, choice(
-      seq($._in_operator, $._expression),
-      seq($._is_operator, $._type)))),
+      seq(optional("!"), $._in_operator, $._expression),
+      seq(optional("!"), $._is_operator, $._type)))),
 
     comparison_expression: $ => prec.left(PREC.COMPARISON, seq($._expression, $._comparison_operator, $._expression)),
 
@@ -890,9 +890,9 @@ module.exports = grammar({
       $.type_test
     ),
 
-    range_test: $ => seq($._in_operator, $._expression),
+    range_test: $ => seq(optional("!"), $._in_operator, $._expression),
 
-    type_test: $ => seq($._is_operator, $._type),
+    type_test: $ => seq(optional("!"), $._is_operator, $._type),
 
     try_expression: $ => seq(
       "try",
@@ -937,9 +937,9 @@ module.exports = grammar({
 
     _comparison_operator: $ => choice("<", ">", "<=", ">="),
 
-    _in_operator: $ => choice("in", "!in"),
+    _in_operator: $ => choice("in"),
 
-    _is_operator: $ => choice("is", "!is"),
+    _is_operator: $ => choice("is"),
 
     _additive_operator: $ => choice("+", "-"),
 

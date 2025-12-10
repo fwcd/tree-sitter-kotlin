@@ -30,12 +30,13 @@ fun foo()
     = 1
 
 ---
+
 (source_file
-   (function_declaration
+  (function_declaration
     (simple_identifier)
     (function_value_parameters)
-    (function_body 
-    (integer_literal))))
+    (function_body
+      (integer_literal))))
 
 ================================================================================
 Binary operator after newline
@@ -50,16 +51,18 @@ fun foo()  {
 --------------------------------------------------------------------------------
 
 (source_file
-  (function_declaration (simple_identifier) (function_value_parameters)
-     (function_body
-        (statements
-           (property_declaration
-              (binding_pattern_kind)
-              (variable_declaration
-               (simple_identifier))
-              (conjunction_expression
-               (simple_identifier)
-               (simple_identifier)))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (conjunction_expression
+            (simple_identifier)
+            (simple_identifier)))))))
 
 ================================================================================
 Open brace after newline
@@ -79,7 +82,8 @@ fun foo():String
     (function_body
       (statements
         (jump_expression
-          (string_literal (string_content)))))))
+          (string_literal
+            (string_content)))))))
 
 ================================================================================
 Colon after newline
@@ -114,8 +118,8 @@ fun foo() {
 
 (source_file
   (function_declaration
-   (simple_identifier)
-  (function_value_parameters)
+    (simple_identifier)
+    (function_value_parameters)
     (function_body
       (statements
         (property_declaration
@@ -210,12 +214,11 @@ else boo()
       (simple_identifier))
     consequence: (control_structure_body
       (integer_literal))
-    alternative:
-      (control_structure_body
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments))))))
+    alternative: (control_structure_body
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))))
 
 ================================================================================
 Else on the same line
@@ -231,9 +234,8 @@ if (!foo) 3 else boo()
       (simple_identifier))
     consequence: (control_structure_body
       (integer_literal))
-    alternative:
-      (control_structure_body
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments))))))
+    alternative: (control_structure_body
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))))
