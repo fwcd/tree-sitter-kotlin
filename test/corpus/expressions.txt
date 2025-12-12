@@ -106,6 +106,27 @@ sum(1, 2)
           (integer_literal))))))
 
 ================================================================================
+Check expression
+================================================================================
+
+count in 1..45
+day in 1..7
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (check_expression
+    (simple_identifier)
+    (range_expression
+      (integer_literal)
+      (integer_literal)))
+  (check_expression
+    (simple_identifier)
+    (range_expression
+      (integer_literal)
+      (integer_literal))))
+
+================================================================================
 When expression
 ================================================================================
 
@@ -113,6 +134,7 @@ val x = 1
 val y = when(x){
         1 -> true
         2 -> false
+        in 3..10 -> true
     }
 
 --------------------------------------------------------------------------------
@@ -138,6 +160,14 @@ val y = when(x){
       (when_entry
         (when_condition
           (integer_literal))
+        (control_structure_body
+          (boolean_literal)))
+      (when_entry
+        (when_condition
+          (range_test
+            (range_expression
+              (integer_literal)
+              (integer_literal))))
         (control_structure_body
           (boolean_literal))))))
 
