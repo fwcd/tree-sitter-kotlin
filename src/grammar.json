@@ -839,6 +839,19 @@
                 "value": ")"
               }
             ]
+          },
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "suspend"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "function_type"
+              }
+            ]
           }
         ]
       }
@@ -4327,6 +4340,18 @@
         "type": "SEQ",
         "members": [
           {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "suspend"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
             "type": "STRING",
             "value": "fun"
           },
@@ -5803,6 +5828,10 @@
         {
           "type": "STRING",
           "value": "override"
+        },
+        {
+          "type": "STRING",
+          "value": "suspend"
         }
       ]
     },
@@ -6672,6 +6701,36 @@
       "anonymous_function"
     ],
     [
+      "function_modifier",
+      "simple_identifier"
+    ],
+    [
+      "_type_modifier",
+      "simple_identifier"
+    ],
+    [
+      "delegation_specifier",
+      "_type_modifier",
+      "simple_identifier"
+    ],
+    [
+      "anonymous_function",
+      "function_modifier"
+    ],
+    [
+      "anonymous_function",
+      "simple_identifier"
+    ],
+    [
+      "anonymous_function",
+      "function_modifier",
+      "simple_identifier"
+    ],
+    [
+      "annotated_lambda",
+      "modifiers"
+    ],
+    [
       "setter",
       "simple_identifier"
     ],
@@ -6702,6 +6761,10 @@
     [
       "object_literal",
       "object_declaration"
+    ],
+    [
+      "delegation_specifier",
+      "_type_modifier"
     ],
     [
       "type_modifiers"
