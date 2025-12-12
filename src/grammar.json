@@ -821,6 +821,19 @@
           {
             "type": "SYMBOL",
             "name": "function_type"
+          },
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "suspend"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "function_type"
+              }
+            ]
           }
         ]
       }
@@ -4116,6 +4129,18 @@
         "type": "SEQ",
         "members": [
           {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "suspend"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
             "type": "STRING",
             "value": "fun"
           },
@@ -5531,6 +5556,10 @@
         {
           "type": "STRING",
           "value": "get"
+        },
+        {
+          "type": "STRING",
+          "value": "suspend"
         }
       ]
     },
@@ -6393,6 +6422,36 @@
     [
       "user_type",
       "anonymous_function"
+    ],
+    [
+      "function_modifier",
+      "simple_identifier"
+    ],
+    [
+      "_type_modifier",
+      "simple_identifier"
+    ],
+    [
+      "delegation_specifier",
+      "_type_modifier"
+    ],
+    [
+      "delegation_specifier",
+      "_type_modifier",
+      "simple_identifier"
+    ],
+    [
+      "anonymous_function",
+      "function_modifier"
+    ],
+    [
+      "anonymous_function",
+      "simple_identifier"
+    ],
+    [
+      "anonymous_function",
+      "function_modifier",
+      "simple_identifier"
     ],
     [
       "annotated_lambda",
