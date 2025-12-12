@@ -98,6 +98,14 @@ module.exports = grammar({
     [$.user_type, $.anonymous_function],
     //[$.user_type, $.function_type],
 
+    // ambiguity caused by 'suspend'
+    [$.function_modifier, $.simple_identifier],
+    [$._type_modifier, $.simple_identifier],
+    [$.delegation_specifier, $._type_modifier, $.simple_identifier],
+
+    // ambiguity between annotated_lambda with modifiers and modifiers from var declarations
+    [$.annotated_lambda, $.modifiers],
+
     // ambiguity between simple identifier 'set/get' with actual setter/getter functions.
     [$.setter, $.simple_identifier],
     [$.getter, $.simple_identifier],
@@ -1178,7 +1186,8 @@ module.exports = grammar({
       "actual",
       "set",
       "get",
-      "override"
+      "override",
+      "suspend"
       // TODO: More soft keywords
     ),
 
