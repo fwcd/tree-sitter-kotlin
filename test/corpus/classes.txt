@@ -116,6 +116,27 @@ internal open class Test {
         (function_value_parameters)))))
 
 ================================================================================
+Class with modifier and delegation specifier
+================================================================================
+
+abstract class S : suspend (Req) -> Resp
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (inheritance_modifier))
+    (type_identifier)
+    (delegation_specifier
+      (function_type
+        (function_type_parameters
+          (user_type
+            (type_identifier)))
+        (user_type
+          (type_identifier))))))
+
+================================================================================
 Objects
 ================================================================================
 
