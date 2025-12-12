@@ -611,7 +611,7 @@ values.map { suspend { it().await() } }
                           (navigation_suffix
                             (simple_identifier)))
                         (call_suffix
-                          (value_arguments)))))))))))))))
+                          (value_arguments))))))))))))))
 
 ================================================================================
 Function call with trailing lambda
