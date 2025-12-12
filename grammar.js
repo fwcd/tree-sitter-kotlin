@@ -106,6 +106,9 @@ module.exports = grammar({
     // ambiguity between parameter modifiers in anonymous functions
     [$.parameter_modifiers, $._type_modifier],
 
+    // ambiguity between use of suspend in type and delegation specifiers
+    [$.delegation_specifier, $._type_modifier],
+
     // ambiguity between type modifiers before an @
     [$.type_modifiers],
     // ambiguity between associating type modifiers
@@ -270,7 +273,8 @@ module.exports = grammar({
       $.constructor_invocation,
       $.explicit_delegation,
       $.user_type,
-      $.function_type
+      $.function_type,
+      seq("suspend", $.function_type)
     )),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
