@@ -101,6 +101,9 @@ module.exports = grammar({
     [$._type_modifier, $.simple_identifier],
     [$.delegation_specifier, $._type_modifier],
     [$.delegation_specifier, $._type_modifier, $.simple_identifier],
+    [$.anonymous_function, $.function_modifier],
+    [$.anonymous_function, $.simple_identifier],
+    [$.anonymous_function, $.function_modifier, $.simple_identifier],
 
     // ambiguity between annotated_lambda with modifiers and modifiers from var declarations
     [$.annotated_lambda, $.modifiers],
@@ -815,6 +818,7 @@ module.exports = grammar({
     ),
 
     anonymous_function: $ => prec.right(seq(
+      optional("suspend"),
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
       $.function_value_parameters,

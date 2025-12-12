@@ -297,6 +297,30 @@ val anon = fun() { assert(true) }
                   (boolean_literal))))))))))
 
 ==================
+Anonymous suspend function with body
+==================
+
+val anon = suspend fun() { assert(true) }
+
+---
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (anonymous_function
+      (function_value_parameters)
+      (function_body
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (boolean_literal))))))))))
+
+==================
 Function with backticked name
 ==================
 
