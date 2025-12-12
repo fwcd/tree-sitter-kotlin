@@ -347,6 +347,41 @@ foo.forEach { (index, value) -> 2 }
             (integer_literal)))))))
 
 ================================================================================
+Lambda Expression with suspend
+================================================================================
+
+values.map { suspend { it().await() } }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (simple_identifier)))
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (annotated_lambda
+                  (lambda_literal
+                    (statements
+                      (call_expression
+                        (navigation_expression
+                          (call_expression
+                            (simple_identifier)
+                            (call_suffix
+                              (value_arguments)))
+                          (navigation_suffix
+                            (simple_identifier)))
+                        (call_suffix
+                          (value_arguments))))))))))))))
+
+================================================================================
 Function call with trailing lambda
 ================================================================================
 
@@ -446,12 +481,12 @@ val comments = foo("//")
 val comments = foo("hello //")
 val comments = foo("// there")
 val comments = foo("hello // there")
-val comments = """ 
+val comments = """
   // hey there's a
-  
+
   /* comment or two here */
 """
-val comments = """ // and here """ 
+val comments = """ // and here """
 
 --------------------------------------------------------------------------------
 
@@ -589,11 +624,11 @@ If else-if else expression
 ================================================================================
 
 if (cond1) {
-	println("cond1")
+  println("cond1")
 } else if (cond2) {
-	println("cond2")
+  println("cond2")
 } else {
-	println("cond3")
+  println("cond3")
 }
 
 --------------------------------------------------------------------------------
