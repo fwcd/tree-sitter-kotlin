@@ -112,6 +112,9 @@ module.exports = grammar({
     [$.object_literal, $.simple_identifier],
     [$.object_literal, $.object_declaration],
 
+    // ambiguity between use of suspend in type and delegation specifiers
+    [$.delegation_specifier, $._type_modifier],
+
     // ambiguity between type modifiers before an @
     [$.type_modifiers],
     // ambiguity between associating type modifiers
@@ -292,6 +295,7 @@ module.exports = grammar({
       // The grammar doesn't explicitly define it, but parenthesized function
       // types seem to work!
       seq('(', $.function_type, ')'),
+      seq("suspend", $.function_type)
     )),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
