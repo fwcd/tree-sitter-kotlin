@@ -72,6 +72,8 @@ module.exports = grammar({
     [$.platform_modifier, $.simple_identifier],
     // "data", "inner" as class modifier or id
     [$.class_modifier, $.simple_identifier],
+    // "override" as member modifier conflicts with override as an identifier
+    [$.member_modifier, $.simple_identifier],
 
     // "<x>.<y> = z assignment conflicts with <x>.<y>() function call"
     [$._postfix_unary_expression, $._expression],
@@ -980,7 +982,7 @@ module.exports = grammar({
     // Modifiers
     // ==========
 
-    modifiers: $ => prec.left(repeat1(choice($.annotation, $._modifier))),
+    modifiers: $ => prec.right(repeat1(choice($.annotation, $._modifier))),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
 
@@ -1107,7 +1109,8 @@ module.exports = grammar({
       "value",
       "actual",
       "set",
-      "get"
+      "get",
+      "override"
       // TODO: More soft keywords
     ),
 

@@ -348,6 +348,11 @@ data class JwtConfiguration(
    val realm: String,
 )
 
+data class JwtConfiguration(
+   final override val audience: String,
+   final override val realm: String,
+)
+
 --------------------------------------------------------------------------------
 
 (source_file
@@ -362,6 +367,27 @@ data class JwtConfiguration(
         (user_type
           (type_identifier)))
       (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))))
+  (class_declaration
+    (modifiers
+      (class_modifier))
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (modifiers
+          (inheritance_modifier)
+          (member_modifier))
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (modifiers
+          (inheritance_modifier)
+          (member_modifier))
         (binding_pattern_kind)
         (simple_identifier)
         (user_type
