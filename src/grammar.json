@@ -4218,6 +4218,23 @@
       "type": "SEQ",
       "members": [
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "data"
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "STRING",
           "value": "object"
         },
@@ -4243,8 +4260,16 @@
           ]
         },
         {
-          "type": "SYMBOL",
-          "name": "class_body"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "class_body"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
         }
       ]
     },
@@ -6409,6 +6434,26 @@
     [
       "parameter_modifiers",
       "_type_modifier"
+    ],
+    [
+      "object_literal"
+    ],
+    [
+      "object_literal",
+      "class_modifier"
+    ],
+    [
+      "object_literal",
+      "class_modifier",
+      "simple_identifier"
+    ],
+    [
+      "object_literal",
+      "simple_identifier"
+    ],
+    [
+      "object_literal",
+      "object_declaration"
     ],
     [
       "type_modifiers"
