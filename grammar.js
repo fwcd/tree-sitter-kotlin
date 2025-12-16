@@ -106,6 +106,13 @@ module.exports = grammar({
     // ambiguity between parameter modifiers in anonymous functions
     [$.parameter_modifiers, $._type_modifier],
 
+    // ambiguity for object literal
+    [$.object_literal],
+    [$.object_literal, $.class_modifier],
+    [$.object_literal, $.class_modifier, $.simple_identifier],
+    [$.object_literal, $.simple_identifier],
+    [$.object_literal, $.object_declaration],
+
     // ambiguity between type modifiers before an @
     [$.type_modifiers],
     // ambiguity between associating type modifiers
@@ -821,9 +828,10 @@ module.exports = grammar({
     ),
 
     object_literal: $ => seq(
+      optional(seq("data")),
       "object",
       optional(seq(":", $._delegation_specifiers)),
-      $.class_body
+      optional($.class_body),
     ),
 
     this_expression: $ => choice(
