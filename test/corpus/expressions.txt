@@ -149,6 +149,29 @@ when (this) {
           (null_literal))))))
 
 ================================================================================
+Expressions with Soft Keywords
+================================================================================
+
+overrides.find { override -> true }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (simple_identifier)))
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal
+          (lambda_parameters
+            (variable_declaration
+              (simple_identifier)))
+          (statements
+            (boolean_literal)))))))
+
+================================================================================
 Value declaration with receiver type
 ================================================================================
 
@@ -446,12 +469,12 @@ val comments = foo("//")
 val comments = foo("hello //")
 val comments = foo("// there")
 val comments = foo("hello // there")
-val comments = """ 
+val comments = """
   // hey there's a
-  
+
   /* comment or two here */
 """
-val comments = """ // and here """ 
+val comments = """ // and here """
 
 --------------------------------------------------------------------------------
 
@@ -589,11 +612,11 @@ If else-if else expression
 ================================================================================
 
 if (cond1) {
-	println("cond1")
+  println("cond1")
 } else if (cond2) {
-	println("cond2")
+  println("cond2")
 } else {
-	println("cond3")
+  println("cond3")
 }
 
 --------------------------------------------------------------------------------

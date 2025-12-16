@@ -5092,7 +5092,7 @@
       }
     },
     "modifiers": {
-      "type": "PREC_LEFT",
+      "type": "PREC_RIGHT",
       "value": 0,
       "content": {
         "type": "REPEAT1",
@@ -5531,6 +5531,10 @@
         {
           "type": "STRING",
           "value": "get"
+        },
+        {
+          "type": "STRING",
+          "value": "override"
         }
       ]
     },
@@ -6330,6 +6334,10 @@
     ],
     [
       "class_modifier",
+      "simple_identifier"
+    ],
+    [
+      "member_modifier",
       "simple_identifier"
     ],
     [
