@@ -894,7 +894,137 @@
         },
         {
           "type": "SYMBOL",
-          "name": "_expression"
+          "name": "_expression_no_trailing_lambda"
+        }
+      ]
+    },
+    "_expression_no_trailing_lambda": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_unary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_binary_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_primary_expression_no_trailing_lambda"
+        }
+      ]
+    },
+    "_primary_expression_no_trailing_lambda": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "parenthesized_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "simple_identifier"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_literal_constant"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "string_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "callable_reference"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "call_expression_no_trailing_lambda"
+          },
+          "named": true,
+          "value": "call_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_function_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "object_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "collection_literal"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "this_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "super_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "if_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "when_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "try_expression"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "jump_expression"
+        }
+      ]
+    },
+    "call_expression_no_trailing_lambda": {
+      "type": "PREC_LEFT",
+      "value": 16,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "_expression_no_trailing_lambda"
+          },
+          {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_call_suffix_no_trailing_lambda"
+            },
+            "named": true,
+            "value": "call_suffix"
+          }
+        ]
+      }
+    },
+    "_call_suffix_no_trailing_lambda": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "type_arguments"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "value_arguments"
         }
       ]
     },
@@ -6589,6 +6719,19 @@
     [
       "delegation_specifier",
       "_type"
+    ],
+    [
+      "_expression",
+      "_expression_no_trailing_lambda"
+    ],
+    [
+      "_primary_expression",
+      "_primary_expression_no_trailing_lambda"
+    ],
+    [
+      "_primary_expression",
+      "_primary_expression_no_trailing_lambda",
+      "callable_reference"
     ]
   ],
   "precedences": [],

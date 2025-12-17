@@ -141,19 +141,15 @@ object : C by c {
       (explicit_delegation
         (user_type
           (type_identifier))
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (annotated_lambda
-              (lambda_literal
-                (statements
-                  (function_declaration
-                    (modifiers
-                      (member_modifier))
-                    (simple_identifier)
-                    (function_value_parameters)
-                    (function_body
-                      (simple_identifier))))))))))))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (simple_identifier))))))
 
 ================================================================================
 Primary constructors
@@ -223,6 +219,172 @@ class D : SomeInterface
     (delegation_specifier
       (user_type
         (type_identifier)))))
+
+================================================================================
+Class with explicit interface delegation
+================================================================================
+
+class Derived(b: Base) : Base by b {
+    override fun print() { println("Derived") }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (string_literal
+                      (string_content))))))))))))
+
+================================================================================
+Object declaration with explicit delegation
+================================================================================
+
+object AppConfig : Config by DefaultConfig {
+    override fun get(key: String) = "custom"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body
+          (string_literal
+            (string_content)))))))
+
+================================================================================
+Class with multiple delegation specifiers
+================================================================================
+
+class MyClass : InterfaceA by delegateA, InterfaceB by delegateB {
+    fun myMethod() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Property delegation
+================================================================================
+
+class Example {
+    val lazyValue: String by lazy { "computed" }
+    var observed: Int by Delegates.observable(0) { _, old, new -> println("$old -> $new") }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (property_delegate
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (string_literal
+                      (string_content)))))))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (property_delegate
+          (call_expression
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier)))
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (integer_literal)))
+              (annotated_lambda
+                (lambda_literal
+                  (lambda_parameters
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier)))
+                  (statements
+                    (call_expression
+                      (simple_identifier)
+                      (call_suffix
+                        (value_arguments
+                          (value_argument
+                            (string_literal
+                              (interpolated_identifier)
+                              (string_content)
+                              (interpolated_identifier))))))))))))))))
 
 ================================================================================
 Properties
@@ -481,7 +643,6 @@ fun interface Foo {
       (function_declaration
         (simple_identifier)
         (function_value_parameters)))))
-
 
 ================================================================================
 Interface with function type delegation specifier
