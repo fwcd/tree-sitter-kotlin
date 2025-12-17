@@ -113,6 +113,15 @@ module.exports = grammar({
 
     [$.receiver_type],
     [$.receiver_type, $._type],
+
+    // Ambiguity between regular expressions and the no-trailing-lambda variant
+    // used in explicit_delegation to prevent `{ }` after `by expr` being parsed
+    // as a trailing lambda instead of class_body.
+    [$._expression, $._expression_no_trailing_lambda],
+    [$._primary_expression, $._primary_expression_no_trailing_lambda],
+    // Three-way conflict: callable_reference (Foo::bar) starts with simple_identifier
+    // which both primary_expression variants can match.
+    [$._primary_expression, $._primary_expression_no_trailing_lambda, $.callable_reference],
   ],
 
   externals: $ => [
@@ -283,7 +292,49 @@ module.exports = grammar({
         $.function_type
       ),
       "by",
-      $._expression
+      // Use a restricted expression that doesn't allow trailing lambda calls
+      // to avoid ambiguity with class_body in object literals.
+      // e.g., `object : Interface by delegate { }` - the `{` should be class_body, not a lambda.
+      // If a trailing lambda delegate is truly needed, use parentheses:
+      // `object : Interface by (factory { config }) { ... }`
+      $._expression_no_trailing_lambda
+    ),
+
+    // Expression variant that doesn't allow call expressions with trailing lambdas.
+    // This is used in explicit_delegation to prevent ambiguity with class_body.
+    _expression_no_trailing_lambda: $ => choice(
+      $._unary_expression,
+      $._binary_expression,
+      $._primary_expression_no_trailing_lambda
+    ),
+
+    _primary_expression_no_trailing_lambda: $ => choice(
+      $.parenthesized_expression,
+      $.simple_identifier,
+      $._literal_constant,
+      $.string_literal,
+      $.callable_reference,
+      alias($.call_expression_no_trailing_lambda, $.call_expression),
+      $._function_literal,
+      $.object_literal,
+      $.collection_literal,
+      $.this_expression,
+      $.super_expression,
+      $.if_expression,
+      $.when_expression,
+      $.try_expression,
+      $.jump_expression
+    ),
+
+    // Call expression that only allows value_arguments, not trailing lambdas
+    call_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, seq(
+      $._expression_no_trailing_lambda,
+      alias($._call_suffix_no_trailing_lambda, $.call_suffix)
+    )),
+
+    _call_suffix_no_trailing_lambda: $ => seq(
+      optional($.type_arguments),
+      $.value_arguments
     ),
 
     type_parameters: $ => seq("<", sep1($.type_parameter, ","), optional(","), ">"),

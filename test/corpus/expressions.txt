@@ -709,3 +709,145 @@ a imports b
     (simple_identifier)
     (simple_identifier)
     (simple_identifier)))
+
+================================================================================
+Object literal with explicit delegation
+================================================================================
+
+val proxy = object : Handler by defaultHandler {
+    override fun handle() = "proxied"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (explicit_delegation
+          (user_type
+            (type_identifier))
+          (simple_identifier)))
+      (class_body
+        (function_declaration
+          (modifiers
+            (member_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body
+            (string_literal
+              (string_content))))))))
+
+================================================================================
+Object literal with delegation and call expression delegate
+================================================================================
+
+val proxy = object : Handler by getHandler() {
+    override fun handle() = "proxied"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (explicit_delegation
+          (user_type
+            (type_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments)))))
+      (class_body
+        (function_declaration
+          (modifiers
+            (member_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body
+            (string_literal
+              (string_content))))))))
+
+================================================================================
+Object literal with nested object literal delegate
+================================================================================
+
+val x = object : A by object : A {
+    override fun m() = "inner"
+} {
+    override fun m() = "outer"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (explicit_delegation
+          (user_type
+            (type_identifier))
+          (object_literal
+            (delegation_specifier
+              (user_type
+                (type_identifier)))
+            (class_body
+              (function_declaration
+                (modifiers
+                  (member_modifier))
+                (simple_identifier)
+                (function_value_parameters)
+                (function_body
+                  (string_literal
+                    (string_content))))))))
+      (class_body
+        (function_declaration
+          (modifiers
+            (member_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body
+            (string_literal
+              (string_content))))))))
+
+================================================================================
+Object literal with navigation expression delegate
+================================================================================
+
+val x = object : Interface by delegateHolder.delegate {
+    override fun method() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (explicit_delegation
+          (user_type
+            (type_identifier))
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))))
+      (class_body
+        (function_declaration
+          (modifiers
+            (member_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
