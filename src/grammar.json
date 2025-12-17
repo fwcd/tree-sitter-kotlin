@@ -822,6 +822,23 @@
           {
             "type": "SYMBOL",
             "name": "function_type"
+          },
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "("
+              },
+              {
+                "type": "SYMBOL",
+                "name": "function_type"
+              },
+              {
+                "type": "STRING",
+                "value": ")"
+              }
+            ]
           }
         ]
       }
@@ -6567,6 +6584,10 @@
     ],
     [
       "receiver_type",
+      "_type"
+    ],
+    [
+      "delegation_specifier",
       "_type"
     ]
   ],

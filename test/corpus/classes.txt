@@ -481,3 +481,52 @@ fun interface Foo {
       (function_declaration
         (simple_identifier)
         (function_value_parameters)))))
+
+
+================================================================================
+Interface with function type delegation specifier
+================================================================================
+
+interface Foo<A, B> : (T, A?) -> B?
+
+interface Foo<A, B> : ((T, A?) -> B?)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (delegation_specifier
+      (function_type
+        (function_type_parameters
+          (user_type
+            (type_identifier))
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (nullable_type
+          (user_type
+            (type_identifier))))))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (delegation_specifier
+      (function_type
+        (function_type_parameters
+          (user_type
+            (type_identifier))
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (nullable_type
+          (user_type
+            (type_identifier)))))))
