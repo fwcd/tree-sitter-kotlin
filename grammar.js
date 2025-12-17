@@ -119,6 +119,9 @@ module.exports = grammar({
 
     [$.receiver_type],
     [$.receiver_type, $._type],
+
+    // parenthesized function type?
+    [$.delegation_specifier, $._type],
   ],
 
   externals: $ => [
@@ -276,7 +279,10 @@ module.exports = grammar({
       $.constructor_invocation,
       $.explicit_delegation,
       $.user_type,
-      $.function_type
+      $.function_type,
+      // The grammar doesn't explicitly define it, but parenthesized function
+      // types seem to work!
+      seq('(', $.function_type, ')'),
     )),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
