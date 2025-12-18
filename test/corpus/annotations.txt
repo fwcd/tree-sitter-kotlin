@@ -123,6 +123,74 @@ fun foo() = bar {}
           (annotated_lambda
             (lambda_literal)))))))
 
+=====================
+Functions with multiple annotations
+=====================
+
+@Another
+@Test
+fun foo() = bar {}
+
+---
+
+(source_file
+  (function_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (annotation
+        (user_type
+          (type_identifier))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (annotated_lambda
+            (lambda_literal)))))))
+
+=====================
+Functions with multiple annotations and type params
+=====================
+
+@Another("y")
+@Test("x")
+fun <T> fooFunc() = bar {}
+
+---
+
+(source_file
+  (function_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (string_literal
+                (string_content))))))
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (string_literal
+                (string_content)))))))
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (annotated_lambda
+            (lambda_literal)))))))
 
 ==================
 Comma in annotation property
