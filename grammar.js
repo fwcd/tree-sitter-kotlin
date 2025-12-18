@@ -42,6 +42,7 @@ const PREC = {
   VAR_DECL: 3,
   SPREAD: 2,
   SIMPLE_USER_TYPE: 2,
+  MODIFIERS: 1,
   ASSIGNMENT: 1,
   BLOCK: 1,
   ARGUMENTS: 1,
@@ -89,7 +90,6 @@ module.exports = grammar({
 
     // ambiguity between prefix expressions and annotations before functions
     [$._statement, $.prefix_expression],
-    [$._statement, $.prefix_expression, $.modifiers],
     [$.prefix_expression, $.when_subject],
     [$.prefix_expression, $.value_argument],
 
@@ -97,9 +97,6 @@ module.exports = grammar({
     [$.user_type],
     [$.user_type, $.anonymous_function],
     //[$.user_type, $.function_type],
-
-    // ambiguity between annotated_lambda with modifiers and modifiers from var declarations
-    [$.annotated_lambda, $.modifiers],
 
     // ambiguity between simple identifier 'set/get' with actual setter/getter functions.
     [$.setter, $.simple_identifier],
@@ -990,7 +987,9 @@ module.exports = grammar({
     // Modifiers
     // ==========
 
-    modifiers: $ => prec.right(repeat1(choice($.annotation, $._modifier))),
+    modifiers: $ => prec.right(
+      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $._modifier)))
+    ),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
 
