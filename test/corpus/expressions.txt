@@ -347,6 +347,50 @@ foo.forEach { (index, value) -> 2 }
             (integer_literal)))))))
 
 ================================================================================
+Lambda literals with multi variable declaration with types
+================================================================================
+
+val baz =
+  { (foo, bar): Pair<Foo, List<Bar>?> -> (bar ?: listOf()) }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (lambda_parameters
+        (multi_variable_declaration
+          (variable_declaration
+            (simple_identifier))
+          (variable_declaration
+            (simple_identifier)))
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))
+            (type_projection
+              (nullable_type
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier))))))))))
+      (statements
+        (parenthesized_expression
+          (elvis_expression
+            (simple_identifier)
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
 Function call with trailing lambda
 ================================================================================
 
@@ -446,12 +490,12 @@ val comments = foo("//")
 val comments = foo("hello //")
 val comments = foo("// there")
 val comments = foo("hello // there")
-val comments = """ 
+val comments = """
   // hey there's a
-  
+
   /* comment or two here */
 """
-val comments = """ // and here """ 
+val comments = """ // and here """
 
 --------------------------------------------------------------------------------
 
@@ -589,11 +633,11 @@ If else-if else expression
 ================================================================================
 
 if (cond1) {
-	println("cond1")
+  println("cond1")
 } else if (cond2) {
-	println("cond2")
+  println("cond2")
 } else {
-	println("cond3")
+  println("cond3")
 }
 
 --------------------------------------------------------------------------------
