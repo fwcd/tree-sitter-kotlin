@@ -804,7 +804,7 @@ module.exports = grammar({
 
     _lambda_parameter: $ => choice(
       $.variable_declaration,
-      $.multi_variable_declaration
+      seq($.multi_variable_declaration, optional(seq(":", $._type)))
     ),
 
     anonymous_function: $ => prec.right(seq(
