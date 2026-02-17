@@ -8,7 +8,8 @@
       "file-types": [
         "kt",
         "kts"
-      ]
+      ],
+      "highlights": "queries/highlights.scm"
     }
   ],
   "metadata": {
