@@ -1,0 +1,747 @@
+==================
+DocCommentAfterFileAnnotations
+==================
+
+// COMPILATION_ERRORS
+
+@file:[Volatile]
+/**
+ * Doc comment
+ */
+class C{}
+
+---
+
+(source_file
+  (line_comment)
+  (file_annotation
+    (user_type
+      (type_identifier))
+    (multiline_comment))
+  (class_declaration
+    (type_identifier)
+    (class_body)))
+
+==================
+DocCommentForFirstDeclaration
+==================
+
+/**
+ * Doc comment
+ */
+fun foo() {}
+
+---
+
+(source_file
+  (multiline_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+==================
+DocCommentOnPackageDirectiveLine
+==================
+
+package p1.p2;/** some */
+fun foo(){}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)))
+  (multiline_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+==================
+DocCommentsBinding
+==================
+
+/**
+ * Doc comment for A
+ */
+// some comment
+class A(
+        /**
+         * Doc comment for val-parameter
+         */
+        /*var*/val p: Int
+) {
+    /**
+     * Doc comment for function
+     */
+    fun foo() {
+        /**
+         * Doc comment for local function
+         */
+        fun localFoo() { }
+        /**
+         * Doc comment for local class
+         */
+        class LocalClass
+    }
+
+    /**
+     * Doc comment for property
+     */
+    var property: Int
+      /** Doc comment for getter */
+      get() = 1
+      /** Doc comment for setter */
+      set(value) {}
+}
+
+/**
+ * Doc comment for B
+ */
+class B {
+
+}
+
+---
+
+(source_file
+  (multiline_comment)
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (multiline_comment)
+      (multiline_comment)
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (multiline_comment)
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (multiline_comment)
+          (statements
+            (function_declaration
+              (simple_identifier)
+              (function_value_parameters)
+              (function_body))
+            (multiline_comment)
+            (class_declaration
+              (type_identifier)))))
+      (multiline_comment)
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (multiline_comment)
+      (getter
+        (function_body
+          (integer_literal)))
+      (multiline_comment)
+      (setter
+        (parameter_with_optional_type
+          (simple_identifier))
+        (function_body))))
+  (multiline_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body)))
+
+==================
+DuplicateAccessor
+==================
+
+// COMPILATION_ERRORS
+
+val a : Int
+    get() = 0
+    get() = 0
+
+---
+
+(source_file
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (getter
+    (function_body
+      (integer_literal)))
+  (getter
+    (function_body
+      (integer_literal))))
+
+==================
+DynamicReceiver
+==================
+
+// COMPILATION_ERRORS
+
+fun dynamic.foo()
+fun dynamic?.foo()
+val dynamic.foo: Int
+val dynamic?.foo: Int
+
+val foo: dynamic.() -> Unit
+
+// testing look-ahead with comments and whitespace
+
+fun dynamic . foo()
+fun dynamic
+        .foo()
+fun dynamic// line-comment
+        .foo()
+fun dynamic/*
+*/.foo()
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    receiver: (receiver_type)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type
+      (nullable_type))
+    (simple_identifier)
+    (function_value_parameters))
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (nullable_type))
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (function_type
+        receiver: (receiver_type)
+        (function_type_parameters)
+        (user_type
+          (type_identifier)))))
+  (line_comment)
+  (function_declaration
+    receiver: (receiver_type)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type)
+    (line_comment)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type)
+    (multiline_comment)
+    (simple_identifier)
+    (function_value_parameters)))
+
+==================
+dataClass
+==================
+
+package a.b.c
+
+public data class DataClass(val i: Int, val j: String) {
+    fun f() = 3
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (class_modifier))
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (integer_literal))))))
+
+==================
+dataObject
+==================
+
+// FILE: DataObject.kt
+data object DataObject
+
+---
+
+(source_file
+  (line_comment)
+  (object_declaration
+    (modifiers
+      (class_modifier))
+    (type_identifier)))
+
+==================
+defaultImplsInInterface
+==================
+
+// JVM_DEFAULT: no-compatibility
+
+package a
+
+interface DefaultImplsInInterface {
+    val isVisible: Boolean
+    val isPersistent: Boolean
+    suspend fun show(mutatePriority: Int)
+    fun dismiss()
+    fun onDispose()
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (function_declaration
+        (modifiers
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
+
+==================
+definitelyNotNullTypes
+==================
+
+class DefinitelyNotNullTypes<T>(private val x: T & Any) {
+    fun foo(xs: List<T & Any>): T & Any {
+        return if (xs.isNotEmpty()) xs[0] else x
+    }
+
+    fun <R> bar(x: R & Any, action: (R & Any) -> R & Any): R & Any {
+        return action(x)
+    }
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (class_parameter
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (simple_identifier)
+        (not_nullable_type
+          (user_type
+            (type_identifier))
+          (user_type
+            (type_identifier)))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (not_nullable_type
+                    (user_type
+                      (type_identifier))
+                    (user_type
+                      (type_identifier))))))))
+        (not_nullable_type
+          (user_type
+            (type_identifier))
+          (user_type
+            (type_identifier)))
+        (function_body
+          (statements
+            (jump_expression
+              (if_expression
+                condition: (call_expression
+                  (navigation_expression
+                    (simple_identifier)
+                    (navigation_suffix
+                      (simple_identifier)))
+                  (call_suffix
+                    (value_arguments)))
+                consequence: (control_structure_body
+                  (indexing_expression
+                    (simple_identifier)
+                    (indexing_suffix
+                      (integer_literal))))
+                alternative: (control_structure_body
+                  (simple_identifier)))))))
+      (function_declaration
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (not_nullable_type
+              (user_type
+                (type_identifier))
+              (user_type
+                (type_identifier))))
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters
+                (not_nullable_type
+                  (user_type
+                    (type_identifier))
+                  (user_type
+                    (type_identifier))))
+              (not_nullable_type
+                (user_type
+                  (type_identifier))
+                (user_type
+                  (type_identifier))))))
+        (not_nullable_type
+          (user_type
+            (type_identifier))
+          (user_type
+            (type_identifier)))
+        (function_body
+          (statements
+            (jump_expression
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments
+                    (value_argument
+                      (simple_identifier))))))))))))
+
+==================
+delegatedWithInitializer
+==================
+
+// WITH_STDLIB
+
+class MyClass {
+    companion object {
+        const val token = "token"
+    }
+
+    val token by lazy { MyClass.token }
+}
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_object
+        (class_body
+          (property_declaration
+            (modifiers
+              (property_modifier))
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (string_literal
+              (string_content)))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (property_delegate
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (navigation_expression
+                      (simple_identifier)
+                      (navigation_suffix
+                        (simple_identifier)))))))))))))
+
+==================
+delegation
+==================
+
+interface T {
+    fun f()
+    val g: Int
+}
+
+class A() : T {
+    override val g = 3
+    override fun f() {
+    }
+}
+
+class Delegation(val c: Int = 3, a: A) : T by a {
+    fun ff(): Int = 3
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))))
+  (class_declaration
+    (type_identifier)
+    (primary_constructor)
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (property_declaration
+        (modifiers
+          (member_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal))
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))))
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))
+        (integer_literal))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (function_declaration
+                    (simple_identifier)
+                    (function_value_parameters)
+                    (user_type
+                      (type_identifier))
+                    (function_body
+                      (integer_literal))))))))))))
+
+==================
+dependencyOnNestedClasses
+==================
+
+// FILE: DependencyOnNestedClasses.kt
+package test
+
+import dependency.*
+
+public class DependencyOnNestedClasses : D.Nested() {
+    fun f(nc: D.Companion.NestedInClassObject, i: D.Inner, ii: D.Inner.Inner, nn: D.Nested.Nested): D.Nested {
+        return D.Nested()
+    }
+}
+
+// FILE: dependency.kt
+package dependency
+
+class D {
+    inner class Inner {
+        inner class Inner
+    }
+    open class Nested {
+        class Nested
+    }
+
+    companion object {
+        class NestedInClassObject
+    }
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier))
+      (wildcard_import)))
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier)
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_identifier))))
+        (user_type
+          (type_identifier)
+          (type_identifier))
+        (function_body
+          (statements
+            (jump_expression
+              (call_expression
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))
+                (call_suffix
+                  (value_arguments)))))))))
+  (line_comment)
+  (infix_expression
+    (infix_expression
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier))
+    (simple_identifier)
+    (lambda_literal
+      (statements
+        (class_declaration
+          (modifiers
+            (class_modifier))
+          (type_identifier)
+          (class_body
+            (class_declaration
+              (modifiers
+                (class_modifier))
+              (type_identifier))))
+        (class_declaration
+          (modifiers
+            (inheritance_modifier))
+          (type_identifier)
+          (class_body
+            (class_declaration
+              (type_identifier))))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (lambda_literal
+            (statements
+              (class_declaration
+                (type_identifier)))))))))
+

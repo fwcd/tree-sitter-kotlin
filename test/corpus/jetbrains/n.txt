@@ -1,0 +1,688 @@
+==================
+NamedClassObject
+==================
+
+// COMPILATION_ERRORS
+
+class A {
+    companion object Companion
+
+    companion object B
+
+    companion object C {}
+
+    companion object
+
+    object C
+}
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_object
+        (type_identifier))
+      (companion_object
+        (type_identifier))
+      (companion_object
+        (type_identifier)
+        (class_body))
+      (companion_object)
+      (object_declaration
+        (type_identifier)))))
+
+==================
+NestedComments
+==================
+
+// COMPILATION_ERRORS
+
+fun doo() {
+/*/b
+// */
+b
+/**/
+b
+/* */
+b
+/*/**/*/
+b
+/***/
+b
+/** /***/*/
+b
+/** /**
+
+*/***/
+b
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (multiline_comment)
+      (statements
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)))))
+
+==================
+NewlinesInParentheses
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+  val a = a + b
+  val a = a +
+    b
+  val a = a
+  + b
+  val a = (a
+  + b)
+  val a = ({a
+  + b})
+  val a = ({a
+  + b}
+  + b)
+
+  val a = b[c
+    + d]
+  val a = b[{c
+    + d}]
+  val a = b[{c
+    + d}
+    + d]
+
+  when (e) {
+    is T
+    <X>
+    -> a
+    in f
+    () -> a
+    !is T
+    <X> -> a
+    !in f
+    () -> a
+    f
+    () -> a
+  }
+  val f = a is T
+  <X>
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (additive_expression
+            (simple_identifier)
+            (simple_identifier)))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (additive_expression
+            (simple_identifier)
+            (simple_identifier)))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (additive_expression
+            (simple_identifier)
+            (simple_identifier)))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (parenthesized_expression
+            (additive_expression
+              (simple_identifier)
+              (simple_identifier))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (parenthesized_expression
+            (lambda_literal
+              (statements
+                (additive_expression
+                  (simple_identifier)
+                  (simple_identifier))))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (parenthesized_expression
+            (additive_expression
+              (lambda_literal
+                (statements
+                  (additive_expression
+                    (simple_identifier)
+                    (simple_identifier))))
+              (simple_identifier))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (indexing_expression
+            (simple_identifier)
+            (indexing_suffix
+              (additive_expression
+                (simple_identifier)
+                (simple_identifier)))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (indexing_expression
+            (simple_identifier)
+            (indexing_suffix
+              (lambda_literal
+                (statements
+                  (additive_expression
+                    (simple_identifier)
+                    (simple_identifier)))))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (indexing_expression
+            (simple_identifier)
+            (indexing_suffix
+              (additive_expression
+                (lambda_literal
+                  (statements
+                    (additive_expression
+                      (simple_identifier)
+                      (simple_identifier))))
+                (simple_identifier)))))
+        (when_expression
+          (when_subject
+            (simple_identifier))
+          (when_entry
+            (when_condition
+              (type_test
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))
+            (control_structure_body
+              (check_expression
+                (simple_identifier)
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments))))))
+          (when_entry
+            (when_condition
+              (simple_identifier
+                (MISSING _alpha_identifier)))
+            (control_structure_body
+              (simple_identifier)))
+          (when_entry
+            (when_condition
+              (type_test
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))
+            (control_structure_body
+              (simple_identifier)))
+          (when_entry
+            (when_condition
+              (range_test
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments)))))
+            (control_structure_body
+              (simple_identifier)))
+          (when_entry
+            (when_condition
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments))))
+            (control_structure_body
+              (simple_identifier))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (check_expression
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))))))))))
+
+==================
+NonTypeBeforeDotInBaseClass
+==================
+
+// COMPILATION_ERRORS
+
+class ClassB() {
+    class ClassC: super.ClassA() {
+    }
+}
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (primary_constructor)
+    (class_body
+      (class_declaration
+        (type_identifier)
+        (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier)
+              (type_identifier))
+            (value_arguments)))
+        (class_body)))))
+
+==================
+NotIsAndNotIn
+==================
+
+// COMPILATION_ERRORS
+
+fun test() {
+  a !is B
+  a !in B
+  !isBoolean(a)
+  !inRange(a)
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (check_expression
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (check_expression
+          (simple_identifier)
+          (simple_identifier))
+        (prefix_expression
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier))))))
+        (prefix_expression
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier))))))))))
+
+==================
+namedCompanionObject
+==================
+
+package test
+
+class NamedCompanionObject {
+    fun f() {
+    }
+
+    val c = 1
+
+    public companion object Named {
+        val j = 0
+        fun z() = 0
+
+        class A {
+            class B {
+                val i: Int = 0
+                fun f() = 0
+            }
+        }
+    }
+
+
+    class B {
+        companion object NamedInB {
+            class C {
+                companion object NamedInC {
+                    class D {
+                        companion object Companion {
+                            val i = 3
+                            fun f() {
+                            }
+
+                            enum class En {
+                                A;
+
+                                companion object NamedInEn
+                            }
+
+                            annotation class Anno
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal))
+      (companion_object
+        (modifiers
+          (visibility_modifier))
+        (type_identifier)
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body
+              (integer_literal)))
+          (class_declaration
+            (type_identifier)
+            (class_body
+              (class_declaration
+                (type_identifier)
+                (class_body
+                  (property_declaration
+                    (binding_pattern_kind)
+                    (variable_declaration
+                      (simple_identifier)
+                      (user_type
+                        (type_identifier)))
+                    (integer_literal))
+                  (function_declaration
+                    (simple_identifier)
+                    (function_value_parameters)
+                    (function_body
+                      (integer_literal)))))))))
+      (class_declaration
+        (type_identifier)
+        (class_body
+          (companion_object
+            (type_identifier)
+            (class_body
+              (class_declaration
+                (type_identifier)
+                (class_body
+                  (companion_object
+                    (type_identifier)
+                    (class_body
+                      (class_declaration
+                        (type_identifier)
+                        (class_body
+                          (companion_object
+                            (type_identifier)
+                            (class_body
+                              (property_declaration
+                                (binding_pattern_kind)
+                                (variable_declaration
+                                  (simple_identifier))
+                                (integer_literal))
+                              (function_declaration
+                                (simple_identifier)
+                                (function_value_parameters)
+                                (function_body))
+                              (class_declaration
+                                (type_identifier)
+                                (enum_class_body
+                                  (enum_entry
+                                    (simple_identifier))
+                                  (companion_object
+                                    (type_identifier))))
+                              (class_declaration
+                                (modifiers
+                                  (class_modifier))
+                                (type_identifier)))))))))))))))))
+
+==================
+nestedClasses
+==================
+
+package test
+
+class NestedClasses<TOuter> {
+    fun f() {
+    }
+
+    val c: Int = 0
+
+    private class Nested<TN> {
+        fun f(p1: TN) {
+        }
+
+        val c = 1
+
+        public class NN<TNN> {
+            fun f(p1: TNN) {
+            }
+
+            val c = 1
+        }
+
+        inner class NI<TNI : TN> {
+            fun f(p1: TN, p2: TNI) {
+            }
+        }
+    }
+
+    public inner class Inner<TI : TOuter> {
+        fun f(p1: TI) {
+        }
+
+        private inner class II<TII> {
+            fun f(p1: TII, p2: II<NestedClasses<TOuter>>, p3: TOuter) {
+            }
+        }
+    }
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (integer_literal))
+      (class_declaration
+        (modifiers
+          (visibility_modifier))
+        (type_identifier)
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters
+              (parameter
+                (simple_identifier)
+                (user_type
+                  (type_identifier))))
+            (function_body))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (class_declaration
+            (modifiers
+              (visibility_modifier))
+            (type_identifier)
+            (type_parameters
+              (type_parameter
+                (type_identifier)))
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (function_body))
+              (property_declaration
+                (binding_pattern_kind)
+                (variable_declaration
+                  (simple_identifier))
+                (integer_literal))))
+          (class_declaration
+            (modifiers
+              (class_modifier))
+            (type_identifier)
+            (type_parameters
+              (type_parameter
+                (type_identifier)
+                (user_type
+                  (type_identifier))))
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier)))
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (function_body))))))
+      (class_declaration
+        (modifiers
+          (visibility_modifier)
+          (class_modifier))
+        (type_identifier)
+        (type_parameters
+          (type_parameter
+            (type_identifier)
+            (user_type
+              (type_identifier))))
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters
+              (parameter
+                (simple_identifier)
+                (user_type
+                  (type_identifier))))
+            (function_body))
+          (class_declaration
+            (modifiers
+              (visibility_modifier)
+              (class_modifier))
+            (type_identifier)
+            (type_parameters
+              (type_parameter
+                (type_identifier)))
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier)))
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier)
+                      (type_arguments
+                        (type_projection
+                          (user_type
+                            (type_identifier)
+                            (type_arguments
+                              (type_projection
+                                (user_type
+                                  (type_identifier)))))))))
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (function_body)))))))))
+

@@ -1,0 +1,277 @@
+==================
+BabySteps
+==================
+
+// COMPILATION_ERRORS
+
+package foo
+
+class Runnable<a,a>(a : doo = 0) : foo(d=0), bar by x, bar {
+
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))
+        (integer_literal)))
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments
+          (value_argument
+            (simple_identifier)
+            (integer_literal)))))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))
+
+==================
+BlockCommentAtBeginningOfFile3
+==================
+
+// COMPILATION_ERRORS
+
+/*
+
+fooo
+
+---
+
+(source_file
+  (line_comment)
+  (multiplicative_expression
+    (simple_identifier
+      (MISSING _alpha_identifier))
+    (spread_expression
+      (simple_identifier))))
+
+==================
+BlockCommentAtBeginningOfFile4
+==================
+
+// COMPILATION_ERRORS
+
+/*
+
+/*foo*/
+
+asdfas
+
+---
+
+(source_file
+  (line_comment)
+  (multiplicative_expression
+    (simple_identifier
+      (MISSING _alpha_identifier))
+    (spread_expression
+      (multiline_comment)
+      (simple_identifier))))
+
+==================
+ByClauses
+==================
+
+// COMPILATION_ERRORS
+
+class A : b by a {
+  companion object {}
+}
+class A : b by a + b() * 5 {
+  companion object {}
+}
+class A : b by (a) {
+  companion object {}
+}
+class A : b by (a {}) {
+  companion object {}
+}
+class A : b by a[a {}] {
+  companion object {}
+}
+class A : b by a(a {}) {
+  companion object {}
+}
+class A : b by object {
+  fun f() = a {}
+} {
+  companion object {}
+}
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (additive_expression
+          (simple_identifier)
+          (multiplicative_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (integer_literal)
+              (call_suffix
+                (annotated_lambda
+                  (lambda_literal
+                    (statements
+                      (infix_expression
+                        (simple_identifier)
+                        (simple_identifier)
+                        (lambda_literal))))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (parenthesized_expression
+            (simple_identifier))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (parenthesized_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (annotated_lambda
+                  (lambda_literal)))))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (indexing_expression
+            (simple_identifier)
+            (indexing_suffix
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (annotated_lambda
+                    (lambda_literal))))))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (annotated_lambda
+                      (lambda_literal))))))
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (object_literal
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters)
+                (function_body
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (annotated_lambda
+                        (lambda_literal))))))))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal)))))))))))
+

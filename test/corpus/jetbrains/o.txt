@@ -1,0 +1,149 @@
+==================
+ObjectLiteralAsStatement
+==================
+
+// LIBRARY_PLATFORMS: JVM
+fun main(args : Array<String>) {
+    object : Thread() {
+    }.run()
+
+    object {
+    }
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))))))
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (object_literal
+              (delegation_specifier
+                (constructor_invocation
+                  (user_type
+                    (type_identifier))
+                  (value_arguments)))
+              (class_body))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))
+        (object_literal
+          (class_body))))))
+
+==================
+objects
+==================
+
+public object Objects {
+
+    val c = 0
+
+    fun f() {
+    }
+
+    fun g() = 1
+
+    private object InnerObject : A {
+        val c = 0
+
+        fun f() {
+        }
+    }
+
+    public object OtherObject : NestedClass() {
+
+        val c = 0
+
+        fun f() {
+        }
+    }
+
+    public open class NestedClass
+
+
+}
+
+interface A {
+}
+
+---
+
+(source_file
+  (object_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (integer_literal)))
+      (object_declaration
+        (modifiers
+          (visibility_modifier))
+        (type_identifier)
+        (delegation_specifier
+          (user_type
+            (type_identifier)))
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body))))
+      (object_declaration
+        (modifiers
+          (visibility_modifier))
+        (type_identifier)
+        (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments)))
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body))))
+      (class_declaration
+        (modifiers
+          (visibility_modifier)
+          (inheritance_modifier))
+        (type_identifier))))
+  (class_declaration
+    (type_identifier)
+    (class_body)))
+

@@ -1,0 +1,184 @@
+==================
+LineCommentAfterFileAnnotations
+==================
+
+// COMPILATION_ERRORS
+
+@file:[Volatile]
+// class C
+class C{}
+
+---
+
+(source_file
+  (line_comment)
+  (file_annotation
+    (user_type
+      (type_identifier))
+    (line_comment))
+  (class_declaration
+    (type_identifier)
+    (class_body)))
+
+==================
+LineCommentForFirstDeclaration
+==================
+
+// This is foo
+fun foo() {}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+==================
+LineCommentsInBlock
+==================
+
+fun test() {
+    // start
+    foo()
+
+    // middle
+
+    foo()
+
+    // end
+}
+
+fun foo() {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (line_comment)
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (line_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (line_comment))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+==================
+LongPackageName
+==================
+
+package foo.bar.baz.buzz
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier))))
+
+==================
+localClass
+==================
+
+// LIBRARY_PLATFORMS: JVM
+package test
+
+class LocalClass {
+    private fun foo() = run {
+        class Local
+
+        Local()
+    }
+
+    private val bar = object {}
+
+    private val sam = Runnable {}
+
+    private val sub = object : Runnable {
+        override fun run() {
+        }
+    }
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (modifiers
+          (visibility_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (class_declaration
+                      (type_identifier))
+                    (call_expression
+                      (simple_identifier)
+                      (call_suffix
+                        (value_arguments))))))))))
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (object_literal
+          (class_body)))
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal)))))
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (object_literal
+          (delegation_specifier
+            (user_type
+              (type_identifier)))
+          (class_body
+            (function_declaration
+              (modifiers
+                (member_modifier))
+              (simple_identifier)
+              (function_value_parameters)
+              (function_body))))))))
+

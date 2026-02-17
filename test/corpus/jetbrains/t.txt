@@ -1,0 +1,2397 @@
+==================
+TraitConstructor
+==================
+
+// COMPILATION_ERRORS
+
+interface TestTrait(val a: Int, var b: String, c: Double)
+interface TestTrait()
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))))
+  (class_declaration
+    (type_identifier)
+    (primary_constructor)))
+
+==================
+TypeAlias
+==================
+
+// COMPILATION_ERRORS
+
+package foo.bar.goo
+
+typealias foo = bar
+typealias foo<T> = bar
+typealias foo<T : foo> = bar
+typealias foo<A, B> = bar
+typealias foo<A, B : A> = bar
+
+typealias foo = bar ;
+typealias foo<T> = bar ;
+
+typealias foo<T : foo> = bar ;
+typealias foo<A, B> = bar ;
+typealias foo<A, B : A> = bar ;
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier))))
+
+==================
+TypeConstraints
+==================
+
+// COMPILATION_ERRORS
+
+class foo<T> where T : T {
+
+}
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+==================
+TypeModifiers
+==================
+
+// COMPILATION_ERRORS
+
+val p1: suspend a
+val p2: suspend (a) -> a
+val p3: suspend (a) -> suspend a
+val p4: suspend a.() -> a
+val p4a: @a a.() -> a
+val p5: (suspend a).() -> a
+val p5a: (@a a).() -> a
+val p6: a<in suspend a>
+val p7: a<out suspend @a a>
+val p8: a<out @a suspend @a a>
+val p9: a<out @[a] suspend @[a] a>
+val p10: suspend a<a>
+val p11: suspend @a a
+val p12: @a suspend a
+val p13: @a suspend @a a
+val p14: @[a] suspend @[a] a
+val p15: suspend (suspend (() -> Unit)) -> Unit
+
+@a fun @a a.f1() {}
+fun (@a a.(a) -> a).f2() {}
+
+---
+
+(source_file
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers)
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers)
+      (function_type
+        (function_type_parameters
+          (user_type
+            (type_identifier)))
+        (user_type
+          (type_identifier)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers)
+      (function_type
+        (function_type_parameters
+          (user_type
+            (type_identifier)))
+        (type_modifiers)
+        (user_type
+          (type_identifier)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers)
+      (function_type
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)))
+        (function_type_parameters)
+        (user_type
+          (type_identifier)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (function_type
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)))
+        (function_type_parameters)
+        (user_type
+          (type_identifier)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (function_type
+        receiver: (receiver_type
+          (parenthesized_type
+            (type_modifiers)
+            (user_type
+              (type_identifier))))
+        (function_type_parameters)
+        (user_type
+          (type_identifier)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (function_type
+        receiver: (receiver_type
+          (parenthesized_type
+            (type_modifiers
+              (annotation
+                (user_type
+                  (type_identifier))))
+            (user_type
+              (type_identifier))))
+        (function_type_parameters)
+        (user_type
+          (type_identifier)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (type_projection_modifiers
+              (variance_modifier))
+            (type_modifiers)
+            (user_type
+              (type_identifier)))))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (type_projection_modifiers
+              (variance_modifier))
+            (type_modifiers
+              (annotation
+                (user_type
+                  (type_identifier))))
+            (user_type
+              (type_identifier)))))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (type_projection_modifiers
+              (variance_modifier))
+            (type_modifiers
+              (annotation
+                (user_type
+                  (type_identifier)))
+              (annotation
+                (user_type
+                  (type_identifier))))
+            (user_type
+              (type_identifier)))))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (type_projection_modifiers
+              (variance_modifier))
+            (type_modifiers
+              (annotation
+                (user_type
+                  (type_identifier)))
+              (annotation
+                (user_type
+                  (type_identifier))))
+            (user_type
+              (type_identifier)))))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier)))))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier)))
+        (annotation
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier)))
+        (annotation
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers)
+      (function_type
+        (function_type_parameters
+          (type_modifiers)
+          (parenthesized_type
+            (function_type
+              (function_type_parameters)
+              (user_type
+                (type_identifier)))))
+        (user_type
+          (type_identifier)))))
+  (function_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier))))
+    receiver: (receiver_type
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    receiver: (receiver_type
+      (parenthesized_type
+        (type_modifiers
+          (annotation
+            (user_type
+              (type_identifier))))
+        (function_type
+          receiver: (receiver_type
+            (user_type
+              (type_identifier)))
+          (function_type_parameters
+            (user_type
+              (type_identifier)))
+          (user_type
+            (type_identifier)))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+==================
+TypeParametersBeforeName
+==================
+
+// COMPILATION_ERRORS
+
+fun <A, B> foo()
+fun <A, B> @[a] foo()
+fun <A, B> @[a] T.foo()
+
+val <A> List<A>.foo
+var <A> List<A>.foo
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    receiver: (receiver_type
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier)))
+    (simple_identifier
+      (MISSING _alpha_identifier))
+    (function_value_parameters))
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    receiver: (receiver_type
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters))
+  (property_declaration
+    (binding_pattern_kind)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))))
+    (variable_declaration
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))))
+    (variable_declaration
+      (simple_identifier))))
+
+==================
+TypealiasIsKeyword
+==================
+
+// COMPILATION_ERRORS
+
+val typealias = 0
+
+---
+
+(source_file
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+==================
+topJvmPackageName
+==================
+
+// LIBRARY_PLATFORMS: JVM
+@file:Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE", "INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+@file:JvmName("OtherKt")
+@file:kotlin.jvm.JvmPackageName("some.other.jvm")
+package some.other
+
+@SinceKotlin("1.2")
+fun foo() {}
+
+---
+
+(source_file
+  (line_comment)
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content)))
+        (value_argument
+          (string_literal
+            (string_content)))
+        (value_argument
+          (string_literal
+            (string_content)))
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier)
+        (type_identifier)
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)))
+  (function_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (string_literal
+                (string_content)))))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+==================
+topJvmPackageNameMultifile
+==================
+
+// LIBRARY_PLATFORMS: JVM
+@file:Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE", "INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+@file:JvmName("OtherKt")
+@file:JvmMultifileClass
+@file:kotlin.jvm.JvmPackageName("some.other.jvm")
+package some.other
+
+@SinceKotlin("1.2")
+fun foo() {}
+
+---
+
+(source_file
+  (line_comment)
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content)))
+        (value_argument
+          (string_literal
+            (string_content)))
+        (value_argument
+          (string_literal
+            (string_content)))
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (file_annotation
+    (user_type
+      (type_identifier)))
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier)
+        (type_identifier)
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)))
+  (function_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (string_literal
+                (string_content)))))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+==================
+topLevelMembers
+==================
+
+package foo.TopLevelMembers
+
+fun funWithBlockBody() {
+}
+
+private fun funWithExprBody() = 3
+
+private fun funWithParams(c: Int) {
+}
+
+public val immutable: Double = 0.0
+
+public var mutable: Float = 0.0f
+
+public val String.ext: String
+    get() = this
+
+public fun Int.ext(i: Int = 3): Int = this + i
+
+private fun funWithVarargParam(c: Int, vararg v: Int) {
+}
+
+private fun probablyNothing(): Nothing = throw IllegalStateException()
+
+private val certainlyNothing: kotlin.Nothing = throw IllegalStateException()
+
+private typealias Alias<E> = (E) -> E
+
+class Nothing
+
+@Target(AnnotationTarget.FIELD)
+annotation class A
+
+class D
+
+public val D.Main: D? get() = null
+
+@A internal val Main: D? = null
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (integer_literal)))
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body))
+  (property_declaration
+    (modifiers
+      (visibility_modifier))
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (real_literal))
+  (property_declaration
+    (modifiers
+      (visibility_modifier))
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (real_literal))
+  (property_declaration
+    (modifiers
+      (visibility_modifier))
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (getter
+    (function_body
+      (this_expression)))
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (integer_literal))
+    (user_type
+      (type_identifier))
+    (function_body
+      (additive_expression
+        (this_expression)
+        (simple_identifier))))
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (parameter_modifiers
+        (parameter_modifier))
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body))
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters)
+    (user_type
+      (type_identifier))
+    (function_body
+      (jump_expression
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))))
+  (property_declaration
+    (modifiers
+      (visibility_modifier))
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_identifier)))
+    (jump_expression
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments)))))
+  (type_alias
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (function_type
+      (function_type_parameters
+        (user_type
+          (type_identifier)))
+      (user_type
+        (type_identifier))))
+  (class_declaration
+    (type_identifier))
+  (class_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))))))
+      (class_modifier))
+    (type_identifier))
+  (class_declaration
+    (type_identifier))
+  (property_declaration
+    (modifiers
+      (visibility_modifier))
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (variable_declaration
+      (simple_identifier)
+      (nullable_type
+        (user_type
+          (type_identifier))))
+    (getter
+      (function_body
+        (null_literal))))
+  (property_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (visibility_modifier))
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (nullable_type
+        (user_type
+          (type_identifier))))
+    (null_literal)))
+
+==================
+typeAliasExpansion
+==================
+
+package test
+
+typealias StringAlias = String
+typealias EntryAlias = Map.Entry<String, Int>
+typealias FunctionAlias = (String) -> Int
+
+typealias NestedStringAlias = StringAlias
+typealias NestedFunctionAlias = FunctionAlias
+
+typealias ParameterizedListAlias<A> = List<A>
+
+typealias NestedListAliasWithTypeArgument = ParameterizedListAlias<String>
+typealias NestedListAliasWithAliasTypeArgument = ParameterizedListAlias<StringAlias>
+typealias NestedListAliasWithNestedAliasTypeArgument = ParameterizedListAlias<NestedStringAlias>
+
+typealias NestedParameterizedListAlias<A> = ParameterizedListAlias<ParameterizedListAlias<A>>
+
+typealias NullableStringAlias = String?
+typealias NestedNullableStringAlias = NullableStringAlias
+typealias NullableNestedStringAlias = StringAlias?
+
+typealias NullableFunctionAlias = ((String) -> Int)?
+typealias NestedNullableFunctionAlias = NullableFunctionAlias
+typealias NullableNestedFunctionAlias = FunctionAlias?
+
+class TypeAliasExpansion {
+    fun entryToString(entry: EntryAlias): StringAlias = entry.key
+
+    val functionAlias: FunctionAlias = { name -> name.length }
+
+    val nestedStringAlias: NestedStringAlias = ""
+    val nestedFunctionAlias: NestedFunctionAlias = { name -> name.length }
+
+    val parameterizedListAliasWithString: ParameterizedListAlias<String> = emptyList()
+    val parameterizedListAliasWithStringAlias: ParameterizedListAlias<StringAlias> = emptyList()
+    val parameterizedListAliasWithNestedStringAlias: ParameterizedListAlias<NestedStringAlias> = emptyList()
+    val parameterizedListAliasWithParameterizedListAliasWithStringAlias: ParameterizedListAlias<ParameterizedListAlias<StringAlias>> =
+        emptyList()
+
+    val nestedListAliasWithTypeArgument: NestedListAliasWithTypeArgument = emptyList()
+    val nestedListAliasWithAliasTypeArgument: NestedListAliasWithAliasTypeArgument = emptyList()
+    val nestedListAliasWithNestedAliasTypeArgument: NestedListAliasWithNestedAliasTypeArgument = emptyList()
+
+    val nestedParameterizedListAliasWithString: NestedParameterizedListAlias<String> = emptyList()
+    val nestedParameterizedListAliasWithStringAlias: NestedParameterizedListAlias<StringAlias> = emptyList()
+    val nestedParameterizedListAliasWithNestedStringAlias: NestedParameterizedListAlias<NestedStringAlias> = emptyList()
+
+    val stringAliasNullable: StringAlias? = null
+    val nestedStringAliasNullable: NestedStringAlias? = null
+
+    val nullableStringAlias: NullableStringAlias = null
+    val nullableStringAliasNullable: NullableStringAlias? = null
+
+    val nestedNullableStringAlias: NestedNullableStringAlias = null
+    val nestedNullableStringAliasNullable: NestedNullableStringAlias? = null
+
+    val nullableNestedStringAlias: NullableNestedStringAlias = null
+    val nullableNestedStringAliasNullable: NullableNestedStringAlias? = null
+
+    val functionAliasNullable: FunctionAlias? = null
+    val nestedFunctionAliasNullable: NestedFunctionAlias? = null
+
+    val nullableFunctionAlias: NullableFunctionAlias = null
+    val nullableFunctionAliasNullable: NullableFunctionAlias? = null
+
+    val nestedNullableFunctionAlias: NestedNullableFunctionAlias = null
+    val nestedNullableFunctionAliasNullable: NestedNullableFunctionAlias? = null
+
+    val nullableNestedFunctionAlias: NullableNestedFunctionAlias = null
+    val nullableNestedFunctionAliasNullable: NullableNestedFunctionAlias? = null
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier)))
+        (type_projection
+          (user_type
+            (type_identifier))))))
+  (type_alias
+    (type_identifier)
+    (function_type
+      (function_type_parameters
+        (user_type
+          (type_identifier)))
+      (user_type
+        (type_identifier))))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier))))))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier))))))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier))))))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier))))))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)))))))))
+  (type_alias
+    (type_identifier)
+    (nullable_type
+      (user_type
+        (type_identifier))))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (nullable_type
+      (user_type
+        (type_identifier))))
+  (type_alias
+    (type_identifier)
+    (nullable_type
+      (parenthesized_type
+        (function_type
+          (function_type_parameters
+            (user_type
+              (type_identifier)))
+          (user_type
+            (type_identifier))))))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (nullable_type
+      (user_type
+        (type_identifier))))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (user_type
+          (type_identifier))
+        (function_body
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (lambda_literal
+          (lambda_parameters
+            (variable_declaration
+              (simple_identifier)))
+          (statements
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier))))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (string_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (lambda_literal
+          (lambda_parameters
+            (variable_declaration
+              (simple_identifier)))
+          (statements
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier))))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (null_literal))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal)))))
+
+==================
+typeBoundsAndDelegationSpecifiers
+==================
+
+package test
+
+open class A
+interface T
+
+class TypeBoundsAndDelegationSpecifiers<H : Any?, G : Any, C: T>() : A(), T where H : List<String>, G : CharSequence, C: Any?
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (inheritance_modifier))
+    (type_identifier))
+  (class_declaration
+    (type_identifier))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (primary_constructor)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier))))))
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_constraint
+        (type_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier)))))))
+
+==================
+typeModifiers2
+==================
+
+public class TypeModifiers {
+    val function: () -> Unit = null!!
+
+    val suspendFunction: suspend () -> Unit = null!!
+
+    val suspendExtFunction: suspend Any.() -> Unit = null!!
+
+    val functionOnSuspendFunction: (suspend () -> Unit).() -> Unit = null!!
+}
+
+---
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            (function_type_parameters)
+            (user_type
+              (type_identifier))))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (type_modifiers)
+          (function_type
+            (function_type_parameters)
+            (user_type
+              (type_identifier))))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (type_modifiers)
+          (function_type
+            receiver: (receiver_type
+              (user_type
+                (type_identifier)))
+            (function_type_parameters)
+            (user_type
+              (type_identifier))))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            receiver: (receiver_type
+              (parenthesized_type
+                (type_modifiers)
+                (function_type
+                  (function_type_parameters)
+                  (user_type
+                    (type_identifier)))))
+            (function_type_parameters)
+            (user_type
+              (type_identifier))))
+        (postfix_expression
+          (null_literal))))))
+
+==================
+typeParams
+==================
+
+// LIBRARY_PLATFORMS: JVM
+package test
+
+import java.io.Serializable
+
+class TypeParams<in T1 : Any, out T2, T3 : (Int) -> Int, T4, T5 : Any?, T6 : T5, T7> where T1 : Cloneable?, T1 : Serializable, T2 : String, T7 : T6 {
+
+    fun useParams(p1: T1, p2: (T2) -> Unit, p3: T3, p4: T4, P5: T5) {
+    }
+
+    fun useParamsInOtherOrder(p1: T3, p2: T3, p3: T1, p4: T5, P5: T1) {
+    }
+
+    fun useParamsInTypeArg(p1: List<T1>, p2: Map<T4?, T5?>, p3: (T4).(T2, T3) -> T1) {
+
+    }
+
+    fun <G1, G2, G3> withOwnParams(p1: G1, p2: G2, p3: G3, p4: T1, p5: (T2) -> Unit) {
+    }
+
+    fun <G1 : Any?, G2 : G1, G3, G4> withOwnParamsAndTypeConstraints(p1: G1, p2: G2, p3: G3, p4: T1, p5: (T2) -> Unit) where G4 : G1, G3 : String, G3 : Serializable? {
+    }
+
+    fun <T1, T2, T3> withOwnParamsClashing(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5) {
+    }
+
+    fun <T1> T1.withOwnParamExtension(p: T1) {
+    }
+
+    val <G1> G1.withOwnParam: G1
+        get() = throw IllegalStateException()
+
+    val <G1: Int?> G1.withOwnBoundedParam: G1
+        get() = throw IllegalStateException()
+
+    val <G1: T4> G1.withOwnBoundedParamByOther: G1
+        get() = throw IllegalStateException()
+
+    val useSomeParam: T2
+        get() = throw IllegalStateException()
+
+
+    public inline fun <reified G, reified T> f(g: G, body: (G)-> T): T = body(g)
+
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier))))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (function_type
+          (function_type_parameters
+            (user_type
+              (type_identifier)))
+          (user_type
+            (type_identifier))))
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_parameter
+        (type_identifier)))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))))
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters
+                (user_type
+                  (type_identifier)))
+              (user_type
+                (type_identifier))))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (nullable_type
+                    (user_type
+                      (type_identifier))))
+                (type_projection
+                  (nullable_type
+                    (user_type
+                      (type_identifier)))))))
+          (parameter
+            (simple_identifier)
+            (function_type
+              receiver: (receiver_type
+                (parenthesized_type
+                  (user_type
+                    (type_identifier))))
+              (function_type_parameters
+                (user_type
+                  (type_identifier))
+                (user_type
+                  (type_identifier)))
+              (user_type
+                (type_identifier)))))
+        (function_body))
+      (function_declaration
+        (type_parameters
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier)))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters
+                (user_type
+                  (type_identifier)))
+              (user_type
+                (type_identifier)))))
+        (function_body))
+      (function_declaration
+        (type_parameters
+          (type_parameter
+            (type_identifier)
+            (nullable_type
+              (user_type
+                (type_identifier))))
+          (type_parameter
+            (type_identifier)
+            (user_type
+              (type_identifier)))
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier)))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters
+                (user_type
+                  (type_identifier)))
+              (user_type
+                (type_identifier)))))
+        (type_constraints
+          (type_constraint
+            (type_identifier)
+            (user_type
+              (type_identifier)))
+          (type_constraint
+            (type_identifier)
+            (user_type
+              (type_identifier)))
+          (type_constraint
+            (type_identifier)
+            (nullable_type
+              (user_type
+                (type_identifier)))))
+        (function_body))
+      (function_declaration
+        (type_parameters
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier)))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body))
+      (function_declaration
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body))
+      (property_declaration
+        (binding_pattern_kind)
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)))
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (getter
+        (function_body
+          (jump_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))
+      (property_declaration
+        (binding_pattern_kind)
+        (type_parameters
+          (type_parameter
+            (type_identifier)
+            (nullable_type
+              (user_type
+                (type_identifier)))))
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)))
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (getter
+        (function_body
+          (jump_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))
+      (property_declaration
+        (binding_pattern_kind)
+        (type_parameters
+          (type_parameter
+            (type_identifier)
+            (user_type
+              (type_identifier))))
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)))
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (getter
+        (function_body
+          (jump_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (getter
+        (function_body
+          (jump_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))
+      (function_declaration
+        (modifiers
+          (visibility_modifier)
+          (function_modifier))
+        (type_parameters
+          (type_parameter
+            (type_parameter_modifiers
+              (reification_modifier))
+            (type_identifier))
+          (type_parameter
+            (type_parameter_modifiers
+              (reification_modifier))
+            (type_identifier)))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters
+                (user_type
+                  (type_identifier)))
+              (user_type
+                (type_identifier)))))
+        (user_type
+          (type_identifier))
+        (function_body
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier))))))))))
+
+==================
+types
+==================
+
+package test
+
+abstract class Types {
+    val nullable: Int? = null
+    abstract val list: List<Int>
+    abstract val map: Map<Int, Int>
+    abstract val nullableMap: Map<Int?, Int?>?
+    abstract val projections: Map<in Int, out String>
+    val function: () -> Unit = {}
+    abstract val functionWithParam: (String, Int) -> List<String>
+    abstract val extFunction: String.() -> List<String>
+    abstract val extFunctionWithParam: String.(Int, String) -> List<String>
+
+    abstract val extFunctionWithNullables: String.(Int?, String?) -> List<String?>?
+    abstract val deepExtFunctionType: String.((Int) -> Int, String?) -> List<String?>?
+
+    public fun <P1, P2, P3, R> Function3<P1, P2, P3, R>.extOnFunctionType() {
+    }
+
+    abstract val starList: List<*>
+    abstract val starFun: Function1<*, *>
+    abstract val extFun: @ExtensionFunctionType Function2<Int, Int, Unit>
+    abstract val listExtStarFun: List<@ExtensionFunctionType Function1<*, *>>
+    abstract val funTypeWithStarAndNonStar: Function1<*, Int>
+
+    abstract fun functionTypeWithNamedArgs(fType: (first: String, second: Any?) -> Int)
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))))
+        (null_literal))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)))
+              (type_projection
+                (user_type
+                  (type_identifier)))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (nullable_type
+                    (user_type
+                      (type_identifier))))
+                (type_projection
+                  (nullable_type
+                    (user_type
+                      (type_identifier)))))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (type_projection_modifiers
+                  (variance_modifier))
+                (user_type
+                  (type_identifier)))
+              (type_projection
+                (type_projection_modifiers
+                  (variance_modifier))
+                (user_type
+                  (type_identifier)))))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            (function_type_parameters)
+            (user_type
+              (type_identifier))))
+        (lambda_literal))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            (function_type_parameters
+              (user_type
+                (type_identifier))
+              (user_type
+                (type_identifier)))
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            receiver: (receiver_type
+              (user_type
+                (type_identifier)))
+            (function_type_parameters)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            receiver: (receiver_type
+              (user_type
+                (type_identifier)))
+            (function_type_parameters
+              (user_type
+                (type_identifier))
+              (user_type
+                (type_identifier)))
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            receiver: (receiver_type
+              (user_type
+                (type_identifier)))
+            (function_type_parameters
+              (nullable_type
+                (user_type
+                  (type_identifier)))
+              (nullable_type
+                (user_type
+                  (type_identifier))))
+            (nullable_type
+              (user_type
+                (type_identifier)
+                (type_arguments
+                  (type_projection
+                    (nullable_type
+                      (user_type
+                        (type_identifier))))))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            receiver: (receiver_type
+              (user_type
+                (type_identifier)))
+            (function_type_parameters
+              (function_type
+                (function_type_parameters
+                  (user_type
+                    (type_identifier)))
+                (user_type
+                  (type_identifier)))
+              (nullable_type
+                (user_type
+                  (type_identifier))))
+            (nullable_type
+              (user_type
+                (type_identifier)
+                (type_arguments
+                  (type_projection
+                    (nullable_type
+                      (user_type
+                        (type_identifier))))))))))
+      (function_declaration
+        (modifiers
+          (visibility_modifier))
+        (type_parameters
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier)))
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)))
+              (type_projection
+                (user_type
+                  (type_identifier)))
+              (type_projection
+                (user_type
+                  (type_identifier)))
+              (type_projection
+                (user_type
+                  (type_identifier))))))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection)))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection)
+              (type_projection)))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (type_modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)))
+              (type_projection
+                (user_type
+                  (type_identifier)))
+              (type_projection
+                (user_type
+                  (type_identifier)))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (type_modifiers
+                  (annotation
+                    (user_type
+                      (type_identifier))))
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection)
+                    (type_projection))))))))
+      (property_declaration
+        (modifiers
+          (inheritance_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection)
+              (type_projection
+                (user_type
+                  (type_identifier)))))))
+      (function_declaration
+        (modifiers
+          (inheritance_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters
+                (parameter
+                  (simple_identifier)
+                  (user_type
+                    (type_identifier)))
+                (parameter
+                  (simple_identifier)
+                  (nullable_type
+                    (user_type
+                      (type_identifier)))))
+              (user_type
+                (type_identifier)))))))))
+
