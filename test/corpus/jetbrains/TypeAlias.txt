@@ -1,0 +1,110 @@
+==================
+TypeAlias
+==================
+
+// COMPILATION_ERRORS
+
+package foo.bar.goo
+
+typealias foo = bar
+typealias foo<T> = bar
+typealias foo<T : foo> = bar
+typealias foo<A, B> = bar
+typealias foo<A, B : A> = bar
+
+typealias foo = bar ;
+typealias foo<T> = bar ;
+
+typealias foo<T : foo> = bar ;
+typealias foo<A, B> = bar ;
+typealias foo<A, B : A> = bar ;
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier))))

@@ -1,0 +1,68 @@
+==================
+funInterfaceDeclaration
+==================
+
+package test
+
+class FunInterfaceDeclaration {
+    @Suppress("UNSUPPORTED_FEATURE")
+    fun interface KRunnable {
+        fun invoke()
+    }
+
+    @Suppress("UNSUPPORTED_FEATURE")
+    fun interface GenericKRunnable<T, R> {
+        fun invoke(t: T): R
+    }
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (class_declaration
+        (modifiers
+          (annotation
+            (constructor_invocation
+              (user_type
+                (type_identifier))
+              (value_arguments
+                (value_argument
+                  (string_literal
+                    (string_content)))))))
+        (type_identifier)
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters))))
+      (class_declaration
+        (modifiers
+          (annotation
+            (constructor_invocation
+              (user_type
+                (type_identifier))
+              (value_arguments
+                (value_argument
+                  (string_literal
+                    (string_content)))))))
+        (type_identifier)
+        (type_parameters
+          (type_parameter
+            (type_identifier))
+          (type_parameter
+            (type_identifier)))
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters
+              (parameter
+                (simple_identifier)
+                (user_type
+                  (type_identifier))))
+            (user_type
+              (type_identifier))))))))

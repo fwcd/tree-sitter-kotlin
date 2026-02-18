@@ -1,0 +1,37 @@
+==================
+EnumShortCommas
+==================
+
+enum class Color(val rgb : Int) {
+    RED(0xFF000),
+    GREEN(0x00FF00),
+    BLUE(0x0000FF),
+    ;
+}
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (enum_class_body
+      (enum_entry
+        (simple_identifier)
+        (value_arguments
+          (value_argument
+            (hex_literal))))
+      (enum_entry
+        (simple_identifier)
+        (value_arguments
+          (value_argument
+            (hex_literal))))
+      (enum_entry
+        (simple_identifier)
+        (value_arguments
+          (value_argument
+            (hex_literal)))))))

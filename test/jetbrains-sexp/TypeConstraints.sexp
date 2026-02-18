@@ -1,0 +1,13 @@
+(source_file [0, 0] - [4, 1]
+  (line_comment [0, 0] - [0, 21])
+  (class_declaration [2, 0] - [4, 1]
+    (type_identifier [2, 6] - [2, 9])
+    (type_parameters [2, 9] - [2, 12]
+      (type_parameter [2, 10] - [2, 11]
+        (type_identifier [2, 10] - [2, 11])))
+    (type_constraints [2, 13] - [2, 24]
+      (type_constraint [2, 19] - [2, 24]
+        (type_identifier [2, 19] - [2, 20])
+        (user_type [2, 23] - [2, 24]
+          (type_identifier [2, 23] - [2, 24]))))
+    (class_body [2, 25] - [4, 1])))

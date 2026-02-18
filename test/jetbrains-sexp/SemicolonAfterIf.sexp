@@ -1,0 +1,35 @@
+(source_file [0, 0] - [1, 0]
+  (function_declaration [0, 0] - [0, 83]
+    (simple_identifier [0, 4] - [0, 7])
+    (function_value_parameters [0, 7] - [0, 15]
+      (parameter [0, 8] - [0, 14]
+        (simple_identifier [0, 8] - [0, 9])
+        (user_type [0, 11] - [0, 14]
+          (type_identifier [0, 11] - [0, 14]))))
+    (user_type [0, 17] - [0, 20]
+      (type_identifier [0, 17] - [0, 20]))
+    (function_body [0, 21] - [0, 83]
+      (statements [0, 23] - [0, 81]
+        (property_declaration [0, 23] - [0, 32]
+          (binding_pattern_kind [0, 23] - [0, 26])
+          (variable_declaration [0, 27] - [0, 28]
+            (simple_identifier [0, 27] - [0, 28]))
+          (simple_identifier [0, 31] - [0, 32]))
+        (property_declaration [0, 34] - [0, 45]
+          (binding_pattern_kind [0, 34] - [0, 37])
+          (variable_declaration [0, 38] - [0, 39]
+            (simple_identifier [0, 38] - [0, 39]))
+          (postfix_expression [0, 42] - [0, 45]
+            (simple_identifier [0, 42] - [0, 43])))
+        (if_expression [0, 47] - [0, 70]
+          condition: (equality_expression [0, 51] - [0, 59]
+            (additive_expression [0, 51] - [0, 54]
+              (simple_identifier [0, 51] - [0, 52])
+              (integer_literal [0, 53] - [0, 54]))
+            (simple_identifier [0, 58] - [0, 59]))
+          consequence: (control_structure_body [0, 61] - [0, 70]
+            (jump_expression [0, 61] - [0, 70]
+              (prefix_expression [0, 68] - [0, 70]
+                (integer_literal [0, 69] - [0, 70])))))
+        (jump_expression [0, 72] - [0, 80]
+          (simple_identifier [0, 79] - [0, 80]))))))

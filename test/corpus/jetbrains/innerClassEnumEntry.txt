@@ -1,0 +1,22 @@
+==================
+innerClassEnumEntry
+==================
+
+enum class InnerClassEnumEntry {
+    ENTRY {
+        inner class InnerClass
+    }
+}
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier)
+        (class_body
+          (class_declaration
+            (modifiers
+              (class_modifier))
+            (type_identifier)))))))

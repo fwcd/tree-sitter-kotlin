@@ -1,0 +1,246 @@
+==================
+annotationsOnParenthesizedTypes
+==================
+
+public class AnnotationsOnParenthesizedTypes {
+    fun B<(@A C)>.receiverArgument() {}
+
+    fun parameter(a: (@A C)) {}
+
+    fun parameterArgument(a: B<(@A C)>) {}
+
+    fun returnValue(): (@A C) = null!!
+
+    fun <T> returnTypeParameterValue(): (@A T) = null!!
+
+    fun returnArgument(): B<(@A C)> = null!!
+
+    val lambdaType: (@A() (() -> C)) = null!!
+
+    val lambdaParameter: ((@A C)) -> C = null!!
+
+    val lambdaReturnValue: () -> (@A C) = null!!
+
+    val lambdaReceiver: (@A C).() -> C = null!!
+
+    val lambdaTypeWithNullableReceiver: (@A C)?.() -> C = null!!
+}
+
+@Target(AnnotationTarget.TYPE, AnnotationTarget.TYPE_PARAMETER)
+annotation class A
+
+interface B<T>
+interface C
+---
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (class_body
+      (function_declaration
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)
+            (type_arguments
+              (type_projection
+                (parenthesized_type
+                  (type_modifiers
+                    (annotation
+                      (user_type
+                        (type_identifier))))
+                  (user_type
+                    (type_identifier)))))))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (parenthesized_type
+              (type_modifiers
+                (annotation
+                  (user_type
+                    (type_identifier))))
+              (user_type
+                (type_identifier)))))
+        (function_body))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (parenthesized_type
+                    (type_modifiers
+                      (annotation
+                        (user_type
+                          (type_identifier))))
+                    (user_type
+                      (type_identifier))))))))
+        (function_body))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (parenthesized_type
+          (type_modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (user_type
+            (type_identifier)))
+        (function_body
+          (postfix_expression
+            (null_literal))))
+      (function_declaration
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        (simple_identifier)
+        (function_value_parameters)
+        (parenthesized_type
+          (type_modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (user_type
+            (type_identifier)))
+        (function_body
+          (postfix_expression
+            (null_literal))))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (parenthesized_type
+                (type_modifiers
+                  (annotation
+                    (user_type
+                      (type_identifier))))
+                (user_type
+                  (type_identifier))))))
+        (function_body
+          (postfix_expression
+            (null_literal))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (parenthesized_type
+            (type_modifiers
+              (annotation
+                (constructor_invocation
+                  (user_type
+                    (type_identifier))
+                  (value_arguments))))
+            (parenthesized_type
+              (function_type
+                (function_type_parameters)
+                (user_type
+                  (type_identifier))))))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            (function_type_parameters
+              (parenthesized_type
+                (type_modifiers
+                  (annotation
+                    (user_type
+                      (type_identifier))))
+                (user_type
+                  (type_identifier))))
+            (user_type
+              (type_identifier))))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            (function_type_parameters)
+            (parenthesized_type
+              (type_modifiers
+                (annotation
+                  (user_type
+                    (type_identifier))))
+              (user_type
+                (type_identifier)))))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            receiver: (receiver_type
+              (parenthesized_type
+                (type_modifiers
+                  (annotation
+                    (user_type
+                      (type_identifier))))
+                (user_type
+                  (type_identifier))))
+            (function_type_parameters)
+            (user_type
+              (type_identifier))))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (function_type
+            receiver: (receiver_type
+              (nullable_type
+                (parenthesized_type
+                  (type_modifiers
+                    (annotation
+                      (user_type
+                        (type_identifier))))
+                  (user_type
+                    (type_identifier)))))
+            (function_type_parameters)
+            (user_type
+              (type_identifier))))
+        (postfix_expression
+          (null_literal)))))
+  (class_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier))))
+            (value_argument
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))))))
+      (class_modifier))
+    (type_identifier))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))))
+  (class_declaration
+    (type_identifier)))

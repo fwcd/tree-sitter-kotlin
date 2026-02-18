@@ -1,0 +1,180 @@
+==================
+UnderscoredTypeArgumentsOfType
+==================
+
+// COMPILATION_ERRORS
+
+fun main() {
+    val x = foo<Foo<_>>()
+    val x = foo<Foo<_>, _>()
+    val x = foo<Foo<_>, Int>()
+    val x = foo<Foo<Int, _>>()
+    val x = foo<Foo<Int, Foo<_>, Float>, Float>()
+
+    val y: Foo<_> = 1
+    val y: Foo<_, _> = 1
+}
+
+interface A : Foo<_>
+
+typealias Foo<K> = Foo<_, K>
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier)))))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier))))))
+                (type_projection
+                  (user_type
+                    (type_identifier))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier))))))
+                (type_projection
+                  (user_type
+                    (type_identifier))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier)))
+                      (type_projection
+                        (user_type
+                          (type_identifier)))))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier)))
+                      (type_projection
+                        (user_type
+                          (type_identifier)
+                          (type_arguments
+                            (type_projection
+                              (user_type
+                                (type_identifier))))))
+                      (type_projection
+                        (user_type
+                          (type_identifier))))))
+                (type_projection
+                  (user_type
+                    (type_identifier))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (integer_literal))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (integer_literal)))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier)))))))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier)))
+        (type_projection
+          (user_type
+            (type_identifier)))))))

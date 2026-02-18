@@ -1,0 +1,15 @@
+(source_file [0, 0] - [4, 1]
+  (package_header [0, 0] - [0, 12]
+    (identifier [0, 8] - [0, 12]
+      (simple_identifier [0, 8] - [0, 12])))
+  (object_declaration [2, 0] - [4, 1]
+    (type_identifier [2, 7] - [2, 12])
+    (class_body [2, 13] - [4, 1]
+      (property_declaration [3, 4] - [3, 34]
+        (modifiers [3, 4] - [3, 17]
+          (property_modifier [3, 4] - [3, 9])
+          (visibility_modifier [3, 10] - [3, 17]))
+        (binding_pattern_kind [3, 18] - [3, 21])
+        (variable_declaration [3, 22] - [3, 30]
+          (simple_identifier [3, 22] - [3, 30]))
+        (integer_literal [3, 33] - [3, 34])))))

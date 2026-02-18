@@ -1,0 +1,65 @@
+==================
+typeBoundsAndDelegationSpecifiers
+==================
+
+package test
+
+open class A
+interface T
+
+class TypeBoundsAndDelegationSpecifiers<H : Any?, G : Any, C: T>() : A(), T where H : List<String>, G : CharSequence, C: Any?
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (inheritance_modifier))
+    (type_identifier))
+  (class_declaration
+    (type_identifier))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (primary_constructor)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier))))))
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_constraint
+        (type_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier)))))))

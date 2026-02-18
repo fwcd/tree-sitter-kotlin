@@ -1,0 +1,65 @@
+==================
+EOLsInComments
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+  a
+  + b
+  a
+  /** */+ b
+  a
+  /* */+ b
+  a /*
+  */  + b
+  a
+  /*
+  */  + b
+  a /**
+  */  + b
+  a //
+  + b
+  a //
++ b
+}
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (additive_expression
+          (simple_identifier)
+          (simple_identifier))
+        (additive_expression
+          (simple_identifier)
+          (multiline_comment)
+          (simple_identifier))
+        (additive_expression
+          (simple_identifier)
+          (multiline_comment)
+          (simple_identifier))
+        (additive_expression
+          (simple_identifier)
+          (multiline_comment)
+          (simple_identifier))
+        (additive_expression
+          (simple_identifier)
+          (multiline_comment)
+          (simple_identifier))
+        (additive_expression
+          (simple_identifier)
+          (multiline_comment)
+          (simple_identifier))
+        (additive_expression
+          (simple_identifier)
+          (line_comment)
+          (simple_identifier))
+        (additive_expression
+          (simple_identifier)
+          (line_comment)
+          (simple_identifier))))))

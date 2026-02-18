@@ -1,0 +1,32 @@
+==================
+TraitConstructor
+==================
+
+// COMPILATION_ERRORS
+
+interface TestTrait(val a: Int, var b: String, c: Double)
+interface TestTrait()
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))))
+  (class_declaration
+    (type_identifier)
+    (primary_constructor)))

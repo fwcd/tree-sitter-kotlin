@@ -1,0 +1,59 @@
+==================
+Super
+==================
+
+// COMPILATION_ERRORS
+
+// KT-156 Fix the this<Super> syntax
+fun foo() {
+    super.foo();
+    super<Int>.foo();
+    super<>.foo();
+    super<Int>@label.foo();
+}
+---
+
+(source_file
+  (line_comment)
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (super_expression)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (navigation_expression
+            (super_expression
+              (user_type
+                (type_identifier)))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (navigation_expression
+            (super_expression
+              (user_type
+                (type_identifier
+                  (MISSING _alpha_identifier))))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (navigation_expression
+            (super_expression
+              (user_type
+                (type_identifier))
+              (type_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))

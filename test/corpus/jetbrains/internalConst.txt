@@ -1,0 +1,28 @@
+==================
+internalConst
+==================
+
+private const val FOO2 = 3.14
+internal const val FOO = 3.14 + FOO2
+
+---
+
+(source_file
+  (property_declaration
+    (modifiers
+      (visibility_modifier)
+      (property_modifier))
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (real_literal))
+  (property_declaration
+    (modifiers
+      (visibility_modifier)
+      (property_modifier))
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (additive_expression
+      (real_literal)
+      (simple_identifier))))

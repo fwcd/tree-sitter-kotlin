@@ -1,0 +1,21 @@
+(source_file [0, 0] - [21, 0]
+  (line_comment [0, 0] - [0, 21])
+  (function_declaration [2, 0] - [20, 1]
+    (simple_identifier [2, 4] - [2, 7])
+    (function_value_parameters [2, 7] - [2, 9])
+    (function_body [2, 10] - [20, 1]
+      (multiline_comment [3, 0] - [4, 5])
+      (statements [5, 0] - [19, 1]
+        (simple_identifier [5, 0] - [5, 1])
+        (multiline_comment [6, 0] - [6, 4])
+        (simple_identifier [7, 0] - [7, 1])
+        (multiline_comment [8, 0] - [8, 5])
+        (simple_identifier [9, 0] - [9, 1])
+        (multiline_comment [10, 0] - [10, 8])
+        (simple_identifier [11, 0] - [11, 1])
+        (multiline_comment [12, 0] - [12, 5])
+        (simple_identifier [13, 0] - [13, 1])
+        (multiline_comment [14, 0] - [14, 11])
+        (simple_identifier [15, 0] - [15, 1])
+        (multiline_comment [16, 0] - [18, 6])
+        (simple_identifier [19, 0] - [19, 1])))))

@@ -1,0 +1,9 @@
+(source_file [0, 0] - [6, 9]
+  (line_comment [0, 0] - [0, 21])
+  (file_annotation [2, 0] - [5, 3]
+    (user_type [2, 7] - [2, 15]
+      (type_identifier [2, 7] - [2, 15]))
+    (multiline_comment [3, 0] - [5, 3]))
+  (class_declaration [6, 0] - [6, 9]
+    (type_identifier [6, 6] - [6, 7])
+    (class_body [6, 7] - [6, 9])))

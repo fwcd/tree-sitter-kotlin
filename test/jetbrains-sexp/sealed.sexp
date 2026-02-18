@@ -1,0 +1,23 @@
+(source_file [0, 0] - [6, 0]
+  (package_header [0, 0] - [0, 12]
+    (identifier [0, 8] - [0, 12]
+      (simple_identifier [0, 8] - [0, 12])))
+  (class_declaration [2, 0] - [5, 1]
+    (modifiers [2, 0] - [2, 6]
+      (class_modifier [2, 0] - [2, 6]))
+    (type_identifier [2, 13] - [2, 19])
+    (class_body [2, 20] - [5, 1]
+      (class_declaration [3, 4] - [3, 26]
+        (type_identifier [3, 10] - [3, 16])
+        (delegation_specifier [3, 18] - [3, 26]
+          (constructor_invocation [3, 18] - [3, 26]
+            (user_type [3, 18] - [3, 24]
+              (type_identifier [3, 18] - [3, 24]))
+            (value_arguments [3, 24] - [3, 26]))))
+      (object_declaration [4, 4] - [4, 24]
+        (type_identifier [4, 11] - [4, 14])
+        (delegation_specifier [4, 16] - [4, 24]
+          (constructor_invocation [4, 16] - [4, 24]
+            (user_type [4, 16] - [4, 22]
+              (type_identifier [4, 16] - [4, 22]))
+            (value_arguments [4, 22] - [4, 24])))))))

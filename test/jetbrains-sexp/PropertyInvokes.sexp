@@ -1,0 +1,27 @@
+(source_file [0, 0] - [8, 1]
+  (line_comment [0, 0] - [0, 21])
+  (function_declaration [2, 0] - [8, 1]
+    (simple_identifier [2, 4] - [2, 7])
+    (function_value_parameters [2, 7] - [2, 9])
+    (function_body [2, 10] - [8, 1]
+      (statements [3, 4] - [7, 13]
+        (navigation_expression [3, 4] - [3, 11]
+          (integer_literal [3, 4] - [3, 5])
+          (navigation_suffix [3, 5] - [3, 11]
+            (simple_identifier [3, 6] - [3, 11])))
+        (navigation_expression [4, 4] - [4, 12]
+          (integer_literal [4, 4] - [4, 5])
+          (navigation_suffix [4, 5] - [4, 12]
+            (simple_identifier [4, 6] - [4, 12])))
+        (navigation_expression [5, 4] - [5, 13]
+          (integer_literal [5, 4] - [5, 7])
+          (navigation_suffix [5, 7] - [5, 13]
+            (simple_identifier [5, 8] - [5, 13])))
+        (navigation_expression [6, 4] - [6, 12]
+          (integer_literal [6, 4] - [6, 5])
+          (navigation_suffix [6, 5] - [6, 12]
+            (simple_identifier [6, 6] - [6, 12])))
+        (navigation_expression [7, 4] - [7, 13]
+          (integer_literal [7, 4] - [7, 5])
+          (navigation_suffix [7, 5] - [7, 13]
+            (simple_identifier [7, 6] - [7, 13])))))))

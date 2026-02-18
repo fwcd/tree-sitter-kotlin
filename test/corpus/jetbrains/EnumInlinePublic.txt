@@ -1,0 +1,33 @@
+==================
+EnumInlinePublic
+==================
+
+// COMPILATION_ERRORS
+
+enum class My {
+    inline public,
+    inner private;
+
+    companion object {}   
+}
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (modifiers
+          (function_modifier)
+          (visibility_modifier))
+        (simple_identifier
+          (MISSING _alpha_identifier)))
+      (enum_entry
+        (modifiers
+          (class_modifier)
+          (visibility_modifier))
+        (simple_identifier
+          (MISSING _alpha_identifier)))
+      (companion_object
+        (class_body)))))

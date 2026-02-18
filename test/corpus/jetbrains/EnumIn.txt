@@ -1,0 +1,15 @@
+==================
+EnumIn
+==================
+
+enum class Foo {
+    `in`
+}
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier)))))

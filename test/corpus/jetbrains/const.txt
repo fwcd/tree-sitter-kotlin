@@ -1,0 +1,26 @@
+==================
+const
+==================
+
+package test
+
+object Const {
+    const private val inObject = 1
+}
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (object_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (modifiers
+          (property_modifier)
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal)))))

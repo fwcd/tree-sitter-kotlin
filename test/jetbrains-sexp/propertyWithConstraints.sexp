@@ -1,0 +1,33 @@
+(source_file [0, 0] - [7, 0]
+  (line_comment [0, 0] - [0, 14])
+  (class_declaration [1, 0] - [1, 12]
+    (type_identifier [1, 10] - [1, 12]))
+  (line_comment [2, 0] - [2, 14])
+  (class_declaration [3, 0] - [3, 12]
+    (type_identifier [3, 10] - [3, 12]))
+  (line_comment [5, 0] - [5, 15])
+  (property_declaration [6, 0] - [6, 56]
+    (binding_pattern_kind [6, 0] - [6, 3])
+    (type_parameters [6, 4] - [6, 7]
+      (type_parameter [6, 5] - [6, 6]
+        (type_identifier [6, 5] - [6, 6])))
+    receiver: (receiver_type [6, 8] - [6, 9]
+      (user_type [6, 8] - [6, 9]
+        (type_identifier [6, 8] - [6, 9])))
+    (variable_declaration [6, 10] - [6, 22]
+      (simple_identifier [6, 10] - [6, 13])
+      (nullable_type [6, 15] - [6, 22]
+        (user_type [6, 15] - [6, 21]
+          (type_identifier [6, 15] - [6, 21]))))
+    (type_constraints [6, 23] - [6, 43]
+      (type_constraint [6, 29] - [6, 35]
+        (type_identifier [6, 29] - [6, 30])
+        (user_type [6, 33] - [6, 35]
+          (type_identifier [6, 33] - [6, 35])))
+      (type_constraint [6, 37] - [6, 43]
+        (type_identifier [6, 37] - [6, 38])
+        (user_type [6, 41] - [6, 43]
+          (type_identifier [6, 41] - [6, 43]))))
+    (getter [6, 44] - [6, 56]
+      (function_body [6, 50] - [6, 56]
+        (null_literal [6, 52] - [6, 56])))))

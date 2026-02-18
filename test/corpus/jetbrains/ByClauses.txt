@@ -1,0 +1,182 @@
+==================
+ByClauses
+==================
+
+// COMPILATION_ERRORS
+
+class A : b by a {
+  companion object {}
+}
+class A : b by a + b() * 5 {
+  companion object {}
+}
+class A : b by (a) {
+  companion object {}
+}
+class A : b by (a {}) {
+  companion object {}
+}
+class A : b by a[a {}] {
+  companion object {}
+}
+class A : b by a(a {}) {
+  companion object {}
+}
+class A : b by object {
+  fun f() = a {}
+} {
+  companion object {}
+}
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (additive_expression
+          (simple_identifier)
+          (multiplicative_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))
+            (call_expression
+              (integer_literal)
+              (call_suffix
+                (annotated_lambda
+                  (lambda_literal
+                    (statements
+                      (infix_expression
+                        (simple_identifier)
+                        (simple_identifier)
+                        (lambda_literal))))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (parenthesized_expression
+            (simple_identifier))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (parenthesized_expression
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (annotated_lambda
+                  (lambda_literal)))))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (indexing_expression
+            (simple_identifier)
+            (indexing_suffix
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (annotated_lambda
+                    (lambda_literal))))))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (annotated_lambda
+                      (lambda_literal))))))
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal))))))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (object_literal
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters)
+                (function_body
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (annotated_lambda
+                        (lambda_literal))))))))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (infix_expression
+                    (simple_identifier)
+                    (simple_identifier)
+                    (lambda_literal)))))))))))

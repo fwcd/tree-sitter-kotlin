@@ -1,0 +1,33 @@
+(source_file [0, 0] - [11, 0]
+  (package_header [0, 0] - [0, 12]
+    (identifier [0, 8] - [0, 12]
+      (simple_identifier [0, 8] - [0, 12])))
+  (class_declaration [2, 0] - [4, 1]
+    (type_identifier [2, 10] - [2, 19])
+    (class_body [2, 20] - [4, 1]
+      (property_declaration [3, 4] - [3, 20]
+        (binding_pattern_kind [3, 4] - [3, 7])
+        (variable_declaration [3, 8] - [3, 20]
+          (simple_identifier [3, 8] - [3, 12])
+          (user_type [3, 14] - [3, 20]
+            (type_identifier [3, 14] - [3, 20]))))))
+  (class_declaration [6, 0] - [10, 1]
+    (type_identifier [6, 6] - [6, 38])
+    (class_body [6, 39] - [10, 1]
+      (function_declaration [7, 4] - [9, 5]
+        (simple_identifier [7, 8] - [7, 13])
+        (function_value_parameters [7, 13] - [7, 56]
+          (parameter_modifiers [7, 14] - [7, 20]
+            (parameter_modifier [7, 14] - [7, 20]))
+          (parameter [7, 21] - [7, 55]
+            (simple_identifier [7, 21] - [7, 30])
+            (function_type [7, 32] - [7, 55]
+              receiver: (receiver_type [7, 32] - [7, 41]
+                (user_type [7, 32] - [7, 41]
+                  (type_identifier [7, 32] - [7, 41])))
+              (function_type_parameters [7, 42] - [7, 47]
+                (user_type [7, 43] - [7, 46]
+                  (type_identifier [7, 43] - [7, 46])))
+              (user_type [7, 51] - [7, 55]
+                (type_identifier [7, 51] - [7, 55])))))
+        (function_body [7, 57] - [9, 5])))))

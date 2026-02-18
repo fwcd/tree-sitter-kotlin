@@ -1,0 +1,58 @@
+==================
+CommentsBindingInStatementBlock
+==================
+
+fun test() {
+    if (true) {/*start-end*/}
+
+    if (true) {
+        /*start-end*/
+    }
+
+    if (true) {
+        /*start*/
+        /*end*/
+    }
+
+    if (true) {
+        /*start*/
+
+        /** doc */
+        val a = 12
+
+        /*end*/
+    }
+}
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (boolean_literal)
+          consequence: (control_structure_body
+            (multiline_comment)))
+        (if_expression
+          condition: (boolean_literal)
+          consequence: (control_structure_body
+            (multiline_comment)))
+        (if_expression
+          condition: (boolean_literal)
+          consequence: (control_structure_body
+            (multiline_comment)
+            (multiline_comment)))
+        (if_expression
+          condition: (boolean_literal)
+          consequence: (control_structure_body
+            (multiline_comment)
+            (multiline_comment)
+            (statements
+              (property_declaration
+                (binding_pattern_kind)
+                (variable_declaration
+                  (simple_identifier))
+                (integer_literal))
+              (multiline_comment))))))))

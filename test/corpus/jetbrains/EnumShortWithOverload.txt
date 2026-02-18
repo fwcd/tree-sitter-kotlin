@@ -1,0 +1,87 @@
+==================
+EnumShortWithOverload
+==================
+
+enum class Color(val rgb : Int) {
+    RED(0xFF000) {
+        override fun foo(): Int { return 1 }
+    },
+    GREEN(0x00FF00) {
+        override fun foo(): Int { return 2 }
+    },
+    BLUE(0x0000FF) {
+        override fun foo(): Int { return 3 }
+    };
+    
+    abstract fun foo(): Int
+}
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (enum_class_body
+      (enum_entry
+        (simple_identifier)
+        (value_arguments
+          (value_argument
+            (hex_literal)))
+        (class_body
+          (function_declaration
+            (modifiers
+              (member_modifier))
+            (simple_identifier)
+            (function_value_parameters)
+            (user_type
+              (type_identifier))
+            (function_body
+              (statements
+                (jump_expression
+                  (integer_literal)))))))
+      (enum_entry
+        (simple_identifier)
+        (value_arguments
+          (value_argument
+            (hex_literal)))
+        (class_body
+          (function_declaration
+            (modifiers
+              (member_modifier))
+            (simple_identifier)
+            (function_value_parameters)
+            (user_type
+              (type_identifier))
+            (function_body
+              (statements
+                (jump_expression
+                  (integer_literal)))))))
+      (enum_entry
+        (simple_identifier)
+        (value_arguments
+          (value_argument
+            (hex_literal)))
+        (class_body
+          (function_declaration
+            (modifiers
+              (member_modifier))
+            (simple_identifier)
+            (function_value_parameters)
+            (user_type
+              (type_identifier))
+            (function_body
+              (statements
+                (jump_expression
+                  (integer_literal)))))))
+      (function_declaration
+        (modifiers
+          (inheritance_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (user_type
+          (type_identifier))))))

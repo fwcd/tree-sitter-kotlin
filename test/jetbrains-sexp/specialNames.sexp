@@ -1,0 +1,9 @@
+(source_file [0, 0] - [2, 1]
+  (object_declaration [0, 0] - [2, 1]
+    (type_identifier [0, 7] - [0, 19])
+    (class_body [0, 20] - [2, 1]
+      (property_declaration [1, 4] - [1, 16]
+        (binding_pattern_kind [1, 4] - [1, 7])
+        (variable_declaration [1, 8] - [1, 12]
+          (simple_identifier [1, 8] - [1, 12]))
+        (integer_literal [1, 15] - [1, 16])))))

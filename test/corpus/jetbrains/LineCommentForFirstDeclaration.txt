@@ -1,0 +1,14 @@
+==================
+LineCommentForFirstDeclaration
+==================
+
+// This is foo
+fun foo() {}
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))

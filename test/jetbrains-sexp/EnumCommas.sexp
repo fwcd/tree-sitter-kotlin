@@ -1,0 +1,12 @@
+(source_file [0, 0] - [6, 1]
+  (class_declaration [0, 0] - [6, 1]
+    (type_identifier [0, 11] - [0, 16])
+    (enum_class_body [0, 17] - [6, 1]
+      (enum_entry [1, 4] - [1, 9]
+        (simple_identifier [1, 4] - [1, 9]))
+      (enum_entry [2, 4] - [2, 9]
+        (simple_identifier [2, 4] - [2, 9]))
+      (enum_entry [3, 4] - [3, 8]
+        (simple_identifier [3, 4] - [3, 8]))
+      (enum_entry [4, 4] - [4, 8]
+        (simple_identifier [4, 4] - [4, 8])))))

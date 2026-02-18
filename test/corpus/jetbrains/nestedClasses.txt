@@ -1,0 +1,181 @@
+==================
+nestedClasses
+==================
+
+package test
+
+class NestedClasses<TOuter> {
+    fun f() {
+    }
+
+    val c: Int = 0
+
+    private class Nested<TN> {
+        fun f(p1: TN) {
+        }
+
+        val c = 1
+
+        public class NN<TNN> {
+            fun f(p1: TNN) {
+            }
+
+            val c = 1
+        }
+
+        inner class NI<TNI : TN> {
+            fun f(p1: TN, p2: TNI) {
+            }
+        }
+    }
+
+    public inner class Inner<TI : TOuter> {
+        fun f(p1: TI) {
+        }
+
+        private inner class II<TII> {
+            fun f(p1: TII, p2: II<NestedClasses<TOuter>>, p3: TOuter) {
+            }
+        }
+    }
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (integer_literal))
+      (class_declaration
+        (modifiers
+          (visibility_modifier))
+        (type_identifier)
+        (type_parameters
+          (type_parameter
+            (type_identifier)))
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters
+              (parameter
+                (simple_identifier)
+                (user_type
+                  (type_identifier))))
+            (function_body))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (class_declaration
+            (modifiers
+              (visibility_modifier))
+            (type_identifier)
+            (type_parameters
+              (type_parameter
+                (type_identifier)))
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (function_body))
+              (property_declaration
+                (binding_pattern_kind)
+                (variable_declaration
+                  (simple_identifier))
+                (integer_literal))))
+          (class_declaration
+            (modifiers
+              (class_modifier))
+            (type_identifier)
+            (type_parameters
+              (type_parameter
+                (type_identifier)
+                (user_type
+                  (type_identifier))))
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier)))
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (function_body))))))
+      (class_declaration
+        (modifiers
+          (visibility_modifier)
+          (class_modifier))
+        (type_identifier)
+        (type_parameters
+          (type_parameter
+            (type_identifier)
+            (user_type
+              (type_identifier))))
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters
+              (parameter
+                (simple_identifier)
+                (user_type
+                  (type_identifier))))
+            (function_body))
+          (class_declaration
+            (modifiers
+              (visibility_modifier)
+              (class_modifier))
+            (type_identifier)
+            (type_parameters
+              (type_parameter
+                (type_identifier)))
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier)))
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier)
+                      (type_arguments
+                        (type_projection
+                          (user_type
+                            (type_identifier)
+                            (type_arguments
+                              (type_projection
+                                (user_type
+                                  (type_identifier)))))))))
+                  (parameter
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (function_body)))))))))

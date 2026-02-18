@@ -1,0 +1,125 @@
+==================
+dependencyOnNestedClasses
+==================
+
+// FILE: DependencyOnNestedClasses.kt
+package test
+
+import dependency.*
+
+public class DependencyOnNestedClasses : D.Nested() {
+    fun f(nc: D.Companion.NestedInClassObject, i: D.Inner, ii: D.Inner.Inner, nn: D.Nested.Nested): D.Nested {
+        return D.Nested()
+    }
+}
+
+// FILE: dependency.kt
+package dependency
+
+class D {
+    inner class Inner {
+        inner class Inner
+    }
+    open class Nested {
+        class Nested
+    }
+
+    companion object {
+        class NestedInClassObject
+    }
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier))
+      (wildcard_import)))
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier)
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_identifier))))
+        (user_type
+          (type_identifier)
+          (type_identifier))
+        (function_body
+          (statements
+            (jump_expression
+              (call_expression
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))
+                (call_suffix
+                  (value_arguments)))))))))
+  (line_comment)
+  (infix_expression
+    (infix_expression
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier))
+    (simple_identifier)
+    (lambda_literal
+      (statements
+        (class_declaration
+          (modifiers
+            (class_modifier))
+          (type_identifier)
+          (class_body
+            (class_declaration
+              (modifiers
+                (class_modifier))
+              (type_identifier))))
+        (class_declaration
+          (modifiers
+            (inheritance_modifier))
+          (type_identifier)
+          (class_body
+            (class_declaration
+              (type_identifier))))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (lambda_literal
+            (statements
+              (class_declaration
+                (type_identifier)))))))))

@@ -1,0 +1,18 @@
+==================
+DocCommentOnPackageDirectiveLine
+==================
+
+package p1.p2;/** some */
+fun foo(){}
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)))
+  (multiline_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))

@@ -1,0 +1,21 @@
+==================
+BlockCommentAtBeginningOfFile4
+==================
+
+// COMPILATION_ERRORS
+
+/*
+
+/*foo*/
+
+asdfas
+---
+
+(source_file
+  (line_comment)
+  (multiplicative_expression
+    (simple_identifier
+      (MISSING _alpha_identifier))
+    (spread_expression
+      (multiline_comment)
+      (simple_identifier))))

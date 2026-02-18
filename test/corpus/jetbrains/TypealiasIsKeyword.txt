@@ -1,0 +1,16 @@
+==================
+TypealiasIsKeyword
+==================
+
+// COMPILATION_ERRORS
+
+val typealias = 0
+---
+
+(source_file
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))

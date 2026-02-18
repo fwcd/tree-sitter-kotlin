@@ -1,0 +1,23 @@
+(source_file [0, 0] - [10, 0]
+  (line_comment [0, 0] - [0, 21])
+  (function_declaration [2, 0] - [4, 1]
+    (modifiers [2, 0] - [2, 9]
+      (annotation [2, 0] - [2, 9]
+        (user_type [2, 1] - [2, 9]
+          (type_identifier [2, 1] - [2, 9]))))
+    (simple_identifier [2, 14] - [2, 23])
+    (function_value_parameters [2, 23] - [2, 25])
+    (function_body [2, 26] - [4, 1]
+      (statements [3, 2] - [3, 11]
+        (call_expression [3, 2] - [3, 11]
+          (simple_identifier [3, 2] - [3, 9])
+          (call_suffix [3, 9] - [3, 11]
+            (value_arguments [3, 9] - [3, 11]))))))
+  (class_declaration [6, 0] - [6, 9]
+    (type_identifier [6, 6] - [6, 9]))
+  (class_declaration [7, 0] - [7, 10]
+    (type_identifier [7, 6] - [7, 10]))
+  (class_declaration [8, 0] - [8, 9]
+    (type_identifier [8, 6] - [8, 9]))
+  (class_declaration [9, 0] - [9, 9]
+    (type_identifier [9, 6] - [9, 9])))

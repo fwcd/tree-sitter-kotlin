@@ -1,0 +1,27 @@
+(source_file [0, 0] - [7, 1]
+  (line_comment [0, 0] - [0, 21])
+  (line_comment [2, 0] - [2, 29])
+  (class_declaration [3, 0] - [7, 1]
+    (type_identifier [3, 10] - [3, 10])
+    (primary_constructor [3, 10] - [3, 25]
+      (class_parameter [3, 11] - [3, 24]
+        (binding_pattern_kind [3, 11] - [3, 14])
+        (simple_identifier [3, 15] - [3, 18])
+        (user_type [3, 21] - [3, 24]
+          (type_identifier [3, 21] - [3, 24]))))
+    (enum_class_body [3, 26] - [7, 1]
+      (enum_entry [4, 4] - [4, 16]
+        (simple_identifier [4, 4] - [4, 7])
+        (value_arguments [4, 7] - [4, 16]
+          (value_argument [4, 8] - [4, 15]
+            (hex_literal [4, 8] - [4, 15]))))
+      (enum_entry [5, 4] - [5, 19]
+        (simple_identifier [5, 4] - [5, 9])
+        (value_arguments [5, 9] - [5, 19]
+          (value_argument [5, 10] - [5, 18]
+            (hex_literal [5, 10] - [5, 18]))))
+      (enum_entry [6, 4] - [6, 18]
+        (simple_identifier [6, 4] - [6, 8])
+        (value_arguments [6, 8] - [6, 18]
+          (value_argument [6, 9] - [6, 17]
+            (hex_literal [6, 9] - [6, 17])))))))

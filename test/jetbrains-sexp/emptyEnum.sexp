@@ -1,0 +1,9 @@
+(source_file [0, 0] - [4, 0]
+  (class_declaration [0, 0] - [3, 1]
+    (type_identifier [0, 11] - [0, 20])
+    (enum_class_body [0, 21] - [3, 1]
+      (function_declaration [2, 4] - [2, 17]
+        (simple_identifier [2, 8] - [2, 11])
+        (function_value_parameters [2, 11] - [2, 13])
+        (function_body [2, 14] - [2, 17]
+          (integer_literal [2, 16] - [2, 17]))))))

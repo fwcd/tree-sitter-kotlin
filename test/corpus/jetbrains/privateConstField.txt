@@ -1,0 +1,86 @@
+==================
+privateConstField
+==================
+
+package test
+
+@Retention(AnnotationRetention.RUNTIME)
+annotation class A
+
+class PrivateConstField {
+    private companion object {
+        const val CONST: Int = 10
+        @A
+        const val CONST_WITH_ANNOTATION: Int = 10
+
+        val field: Int = 10
+        @A
+        val fieldWithAnnotation: Int = 10
+    }
+}
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))))))
+      (class_modifier))
+    (type_identifier))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_object
+        (modifiers
+          (visibility_modifier))
+        (class_body
+          (property_declaration
+            (modifiers
+              (property_modifier))
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)
+              (user_type
+                (type_identifier)))
+            (integer_literal))
+          (property_declaration
+            (modifiers
+              (annotation
+                (user_type
+                  (type_identifier)))
+              (property_modifier))
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)
+              (user_type
+                (type_identifier)))
+            (integer_literal))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)
+              (user_type
+                (type_identifier)))
+            (integer_literal))
+          (property_declaration
+            (modifiers
+              (annotation
+                (user_type
+                  (type_identifier))))
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)
+              (user_type
+                (type_identifier)))
+            (integer_literal)))))))

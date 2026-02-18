@@ -1,0 +1,32 @@
+==================
+Reserved
+==================
+
+// COMPILATION_ERRORS
+
+fun yield() {}
+fun typeof() {}
+
+fun test() {
+    yield
+    typeof
+}
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (simple_identifier)
+        (simple_identifier)))))

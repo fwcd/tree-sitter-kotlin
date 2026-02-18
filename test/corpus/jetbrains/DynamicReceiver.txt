@@ -1,0 +1,79 @@
+==================
+DynamicReceiver
+==================
+
+// COMPILATION_ERRORS
+
+fun dynamic.foo()
+fun dynamic?.foo()
+val dynamic.foo: Int
+val dynamic?.foo: Int
+
+val foo: dynamic.() -> Unit
+
+// testing look-ahead with comments and whitespace
+
+fun dynamic . foo()
+fun dynamic
+        .foo()
+fun dynamic// line-comment
+        .foo()
+fun dynamic/*
+*/.foo()
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    receiver: (receiver_type)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type
+      (nullable_type))
+    (simple_identifier)
+    (function_value_parameters))
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (nullable_type))
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (function_type
+        receiver: (receiver_type)
+        (function_type_parameters)
+        (user_type
+          (type_identifier)))))
+  (line_comment)
+  (function_declaration
+    receiver: (receiver_type)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type)
+    (line_comment)
+    (simple_identifier)
+    (function_value_parameters))
+  (function_declaration
+    receiver: (receiver_type)
+    (multiline_comment)
+    (simple_identifier)
+    (function_value_parameters)))

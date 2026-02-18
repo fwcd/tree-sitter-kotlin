@@ -1,0 +1,14 @@
+==================
+LongPackageName
+==================
+
+package foo.bar.baz.buzz
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier))))

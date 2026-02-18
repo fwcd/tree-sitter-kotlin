@@ -1,0 +1,26 @@
+==================
+DuplicateAccessor
+==================
+
+// COMPILATION_ERRORS
+
+val a : Int
+    get() = 0
+    get() = 0
+
+---
+
+(source_file
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (getter
+    (function_body
+      (integer_literal)))
+  (getter
+    (function_body
+      (integer_literal))))

@@ -1,0 +1,53 @@
+==================
+defaultImplsInInterface
+==================
+
+// JVM_DEFAULT: no-compatibility
+
+package a
+
+interface DefaultImplsInInterface {
+    val isVisible: Boolean
+    val isPersistent: Boolean
+    suspend fun show(mutatePriority: Int)
+    fun dismiss()
+    fun onDispose()
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (function_declaration
+        (modifiers
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))

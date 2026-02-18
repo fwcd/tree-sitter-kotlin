@@ -1,0 +1,11 @@
+(source_file [0, 0] - [2, 44]
+  (line_comment [0, 0] - [0, 21])
+  (import_list [2, 0] - [2, 44]
+    (import_header [2, 0] - [2, 44]
+      (identifier [2, 7] - [2, 34]
+        (simple_identifier [2, 7] - [2, 13])
+        (simple_identifier [2, 14] - [2, 20])
+        (simple_identifier [2, 21] - [2, 27])
+        (simple_identifier [2, 28] - [2, 34]))
+      (import_alias [2, 35] - [2, 44]
+        (type_identifier [2, 38] - [2, 44])))))

@@ -1,0 +1,23 @@
+(source_file [0, 0] - [2, 72]
+  (package_header [0, 0] - [0, 14]
+    (identifier [0, 8] - [0, 14]
+      (simple_identifier [0, 8] - [0, 12])
+      (simple_identifier [0, 13] - [0, 14])))
+  (class_declaration [2, 0] - [2, 72]
+    (modifiers [2, 0] - [2, 17]
+      (visibility_modifier [2, 0] - [2, 6])
+      (class_modifier [2, 7] - [2, 17]))
+    (type_identifier [2, 24] - [2, 39])
+    (primary_constructor [2, 39] - [2, 72]
+      (class_parameter [2, 40] - [2, 50]
+        (binding_pattern_kind [2, 40] - [2, 43])
+        (simple_identifier [2, 44] - [2, 45])
+        (user_type [2, 47] - [2, 50]
+          (type_identifier [2, 47] - [2, 50])))
+      (class_parameter [2, 52] - [2, 71]
+        (binding_pattern_kind [2, 52] - [2, 55])
+        (simple_identifier [2, 56] - [2, 57])
+        (user_type [2, 59] - [2, 65]
+          (type_identifier [2, 59] - [2, 65]))
+        (string_literal [2, 68] - [2, 71]
+          (string_content [2, 69] - [2, 70]))))))
