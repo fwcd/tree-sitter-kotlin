@@ -16,7 +16,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -63,7 +63,7 @@ function loadExcluded() {
  */
 function treeSitterParse(filePath) {
   try {
-    const output = execSync(`npx tree-sitter parse "${filePath}"`, {
+    const output = execFileSync('npx', ['tree-sitter', 'parse', filePath], {
       cwd: REPO_ROOT,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],

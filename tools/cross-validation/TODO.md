@@ -4,7 +4,7 @@ Structural mismatches between tree-sitter-kotlin and JetBrains PSI reference par
 categorized by root cause and difficulty. Each issue represents a grammar.js fix needed
 to match JetBrains' expected AST structure.
 
-**Current state:** 78/121 clean parses match structurally (64.5%)
+**Current state:** 74/121 clean parses match structurally (61.2%)
 
 Fix these issues iteratively — after each grammar fix, re-run the cross-validation
 and move fixed files from `excluded.txt` to the vendored corpus.
@@ -13,10 +13,10 @@ and move fixed files from `excluded.txt` to the vendored corpus.
 
 1. Pick an issue category below (start with EASY)
 2. Fix the grammar in `grammar.js`
-3. Run `npm run build && npm test` to verify existing tests still pass
-4. Run `python3 tools/cross-validation/main.py` to check if affected files now match
+3. Run `npm run generate && npm test` to verify existing tests still pass
+4. Run `npm run cross-validate` to check if affected files now match
 5. Remove fixed files from `excluded.txt`
-6. Re-run `./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/` to update corpus
+6. Re-run `npm run vendor-jetbrains` to update corpus
 7. Commit
 
 ---

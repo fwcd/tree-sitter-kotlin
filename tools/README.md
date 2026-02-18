@@ -67,8 +67,8 @@ Generates tree-sitter corpus tests from vendored JetBrains fixtures.
 # Uses default fixtures path (tools/cross-validation/fixtures/)
 npm run vendor-jetbrains
 
-# Pass custom fixtures path via environment variable
-FIXTURES_PATH=/path/to/fixtures npm run vendor-jetbrains
+# Pass custom fixtures path as argument
+npm run vendor-jetbrains -- /path/to/fixtures
 ```
 
 **Requires:** `tree-sitter` CLI (installed via `npm install`)

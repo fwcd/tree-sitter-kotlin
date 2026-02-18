@@ -9,9 +9,14 @@
 # Format: one filename per line (without extension). Lines starting with # are comments.
 # The vendor script reads this file and skips any matching .kt files.
 #
+# NOTE: Some files that parse cleanly are NOT excluded even though cross-validation
+# reports them as MISMATCH. These files still generate valid corpus tests (verifying
+# parse correctness) even though their AST structure differs from JetBrains PSI.
+# Only files with significant structural issues should be excluded here.
+#
 # To re-enable a file after fixing the grammar:
 #   1. Remove the line from this file
-#   2. Re-run: ./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
+#   2. Re-run: npm run vendor-jetbrains
 #   3. Run: npm test (to verify the new corpus test passes)
 
 # =============================================================================

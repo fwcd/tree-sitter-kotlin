@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const { parseTreeSitter } = require('./parser-ts');
 const { parsePsi } = require('./parser-psi');
 const { normalizeTs, normalizePsi } = require('./normalizer');
@@ -59,8 +59,7 @@ class FileResult {
 function _runTreeSitterParse(filePath) {
   try {
     // Use npx to invoke tree-sitter parse.
-    // On Windows, execSync with shell:true handles .cmd resolution.
-    const output = execSync(`npx tree-sitter parse "${filePath}"`, {
+    const output = execFileSync('npx', ['tree-sitter', 'parse', filePath], {
       cwd: REPO_ROOT,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
