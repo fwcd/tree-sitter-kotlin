@@ -246,6 +246,28 @@ constructor(x: T) {
     (class_body)))
 
 ================================================================================
+Class with private constructor on new line
+================================================================================
+
+class Foo
+private constructor (x: Int) {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
 Inheritance
 ================================================================================
 
