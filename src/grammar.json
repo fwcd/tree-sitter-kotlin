@@ -416,6 +416,18 @@
                 "members": [
                   {
                     "type": "SYMBOL",
+                    "name": "_primary_constructor_context"
+                  },
+                  {
+                    "type": "BLANK"
+                  }
+                ]
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
                     "name": "primary_constructor"
                   },
                   {
@@ -508,6 +520,18 @@
                   {
                     "type": "SYMBOL",
                     "name": "type_parameters"
+                  },
+                  {
+                    "type": "BLANK"
+                  }
+                ]
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_primary_constructor_context"
                   },
                   {
                     "type": "BLANK"
@@ -6850,6 +6874,10 @@
     {
       "type": "SYMBOL",
       "name": "string_content"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_primary_constructor_context"
     }
   ],
   "inline": [],

@@ -157,6 +157,7 @@ module.exports = grammar({
     $._string_start,
     $._string_end,
     $.string_content,
+    $._primary_constructor_context,
   ],
 
   extras: $ => [
@@ -252,6 +253,7 @@ module.exports = grammar({
         choice("class", seq(optional("fun"), "interface")),
         alias($.simple_identifier, $.type_identifier),
         optional($.type_parameters),
+        optional($._primary_constructor_context),
         optional($.primary_constructor),
         optional(seq(":", $._delegation_specifiers)),
         optional($.type_constraints),
@@ -262,6 +264,7 @@ module.exports = grammar({
         "enum", "class",
         alias($.simple_identifier, $.type_identifier),
         optional($.type_parameters),
+        optional($._primary_constructor_context),
         optional($.primary_constructor),
         optional(seq(":", $._delegation_specifiers)),
         optional($.type_constraints),

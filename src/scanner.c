@@ -14,6 +14,7 @@ enum TokenType {
   STRING_START,
   STRING_END,
   STRING_CONTENT,
+  PRIMARY_CONSTRUCTOR_CONTEXT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -256,7 +257,7 @@ static bool scan_for_word(TSLexer *lexer, const char* word, unsigned len) {
     return true;
 }
 
-static bool scan_automatic_semicolon(TSLexer *lexer) {
+static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
   lexer->mark_end(lexer);
 
@@ -370,6 +371,19 @@ static bool scan_automatic_semicolon(TSLexer *lexer) {
       skip(lexer);
       return !scan_for_word(lexer, "stanceof", 8);
 
+    // Don't insert a semicolon before `constructor` when the parser is in
+    // a class declaration context (primary constructor expected). The
+    // sentinel token PRIMARY_CONSTRUCTOR_CONTEXT is valid only in
+    // class_declaration, not in class bodies. Guard against error recovery
+    // mode (where all symbols are valid) by checking STRING_CONTENT.
+    case 'c':
+      if (valid_symbols[PRIMARY_CONSTRUCTOR_CONTEXT] &&
+          !valid_symbols[STRING_CONTENT] &&
+          scan_for_word(lexer, "onstructor", 10)) {
+        return false;
+      }
+      return true;
+
     case ';':
       advance(lexer);
       lexer->mark_end(lexer);
@@ -478,7 +492,7 @@ static bool scan_import_list_delimiter(TSLexer *lexer) {
 
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
-    bool ret = scan_automatic_semicolon(lexer);
+    bool ret = scan_automatic_semicolon(lexer, valid_symbols);
     if (!ret && valid_symbols[SAFE_NAV] && lexer->lookahead == '?') {
       return scan_safe_nav(lexer);
     }
