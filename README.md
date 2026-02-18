@@ -18,8 +18,8 @@ The grammar is based on the [official language grammar](https://kotlinlang.org/d
 | grammar-reference.js | A direct translation of the Kotlin language grammar that is, however, ambiguous to Tree-sitter |
 | src | The generated parser |
 | tools/ | Vendoring and cross-validation tooling |
-| tools/vendor-fixtures.sh | Fetch JetBrains PSI test fixtures at a pinned commit |
-| tools/vendor-jetbrains-tests.sh | Generate tree-sitter corpus tests from vendored fixtures |
+| tools/vendor-fixtures.js | Fetch JetBrains PSI test fixtures at a pinned commit |
+| tools/vendor-jetbrains-tests.js | Generate tree-sitter corpus tests from vendored fixtures |
 | tools/cross-validation/ | Structural comparison against JetBrains PSI reference parser |
 | tools/cross-validation/.fixtures-version | Pinned JetBrains/kotlin commit hash for reproducible vendoring |
 | tools/cross-validation/excluded.txt | Files excluded from corpus due to known grammar issues |
@@ -56,7 +56,7 @@ It is also helpful to run the parser on a real Kotlin project's source files.
 
 The project includes tooling to validate tree-sitter-kotlin's parse trees against the [JetBrains Kotlin compiler's PSI reference parser](https://github.com/JetBrains/kotlin/tree/master/compiler/testData/psi). This measures how closely tree-sitter-kotlin reproduces the official parser's AST structure.
 
-**Current results:** 78/121 (64.5%) structural match among clean parses.
+**Current results:** 74/121 (61.2%) structural match among clean parses.
 
 ### Quick Start
 
@@ -139,9 +139,9 @@ The commit hash is stored in `tools/cross-validation/.fixtures-version` for repr
 
 ### Requirements
 
-- Python 3.8+ (for cross-validation tools)
+- Node.js 18+ (for cross-validation and vendoring tools)
 - `tree-sitter-cli` (installed via `npm install`)
-- `pytest` (for cross-validation unit tests): `pip install pytest`
+- `git` (used by vendor-fixtures to fetch JetBrains test data)
 
 ## WebAssembly
 

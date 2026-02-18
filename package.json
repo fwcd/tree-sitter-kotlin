@@ -14,11 +14,11 @@
     "prestart": "npm run build-wasm",
     "start": "npm run playground",
     "prebuildify": "prebuildify --napi --strip",
-    "vendor-fixtures": "./tools/vendor-fixtures.sh",
-    "vendor-jetbrains": "./tools/vendor-jetbrains-tests.sh",
-    "cross-validate": "cd tools/cross-validation && python3 main.py",
-    "cross-validate:debug": "cd tools/cross-validation && python3 main.py --debug",
-    "cross-validate:test": "cd tools/cross-validation && python3 -m pytest -v"
+    "vendor-fixtures": "node tools/vendor-fixtures.js",
+    "vendor-jetbrains": "node tools/vendor-jetbrains-tests.js",
+    "cross-validate": "node tools/cross-validation/main.js",
+    "cross-validate:debug": "node tools/cross-validation/main.js --debug",
+    "cross-validate:test": "npx vitest run"
   },
   "repository": {
     "type": "git",
@@ -59,7 +59,8 @@
   },
   "devDependencies": {
     "tree-sitter-cli": "^0.24.4",
-    "prebuildify": "^6.0.0"
+    "prebuildify": "^6.0.0",
+    "vitest": "^3.0.0"
   },
   "tree-sitter": [
     {

@@ -34,5 +34,5 @@ target
 .build
 __pycache__/
 
-# Vendored JetBrains fixtures (fetched on demand via tools/vendor-fixtures.sh)
+# Vendored JetBrains fixtures (fetched on demand via npm run vendor-fixtures)
 tools/cross-validation/fixtures/

@@ -1,22 +1,30 @@
 # Tools
 
+All tools are written in Node.js — no Python, bash, or platform-specific dependencies. Works on Windows, macOS, and Linux.
+
 ## Quick Start
 
 ```bash
+# Install dependencies (includes vitest for unit tests)
+npm install
+
 # Fetch JetBrains fixtures (one-time setup)
 npm run vendor-fixtures
 
 # Generate corpus tests from fixtures
 npm run vendor-jetbrains
 
-# Run all tests
+# Run all tree-sitter tests (includes JetBrains corpus)
 npm test
 
 # Run structural cross-validation
 npm run cross-validate
+
+# Run cross-validation unit tests
+npm run cross-validate:test
 ```
 
-## vendor-fixtures.sh
+## vendor-fixtures.js
 
 Fetches JetBrains Kotlin PSI test fixtures at a pinned commit hash via sparse checkout.
 
@@ -31,21 +39,21 @@ Fetches JetBrains Kotlin PSI test fixtures at a pinned commit hash via sparse ch
 
 ```bash
 # Fetch at pinned commit (from .fixtures-version)
-./tools/vendor-fixtures.sh
+npm run vendor-fixtures
 
 # Fetch at a specific commit (updates .fixtures-version)
-./tools/vendor-fixtures.sh <commit-hash>
+npm run vendor-fixtures -- <commit-hash>
 ```
 
 Fixtures are **not checked into git** — they're fetched on demand. The `.fixtures-version` file is tracked so builds are reproducible.
 
-## vendor-jetbrains-tests.sh
+## vendor-jetbrains-tests.js
 
 Generates tree-sitter corpus tests from vendored JetBrains fixtures.
 
 **What it does:**
 
-1. Reads every `.kt` file in `cross-validation/fixtures/` (or a provided path)
+1. Reads every `.kt` file in `cross-validation/fixtures/`
 2. Skips `*_ERR.kt` files (intentional parse errors)
 3. Skips files listed in `cross-validation/excluded.txt`
 4. Parses each file with `tree-sitter parse`
@@ -57,17 +65,17 @@ Generates tree-sitter corpus tests from vendored JetBrains fixtures.
 
 ```bash
 # Uses default fixtures path (tools/cross-validation/fixtures/)
-./tools/vendor-jetbrains-tests.sh
+npm run vendor-jetbrains
 
-# Or provide a custom path
-./tools/vendor-jetbrains-tests.sh /path/to/fixtures/
+# Pass custom fixtures path via environment variable
+FIXTURES_PATH=/path/to/fixtures npm run vendor-jetbrains
 ```
 
 **Requires:** `tree-sitter` CLI (installed via `npm install`)
 
 ## Cross-Validation
 
-The `cross-validation/` directory contains a Python tool that structurally compares tree-sitter-kotlin parse trees against JetBrains PSI reference trees.
+The `cross-validation/` directory contains a Node.js tool that structurally compares tree-sitter-kotlin parse trees against JetBrains PSI reference trees.
 
 **What it does:**
 
@@ -77,7 +85,7 @@ The `cross-validation/` directory contains a Python tool that structurally compa
 4. Compares the normalized trees structurally and records differences
 5. Generates a Markdown report with per-file results and mismatch analysis
 
-**Current results:** 78/121 (64.5%) structural match among clean parses.
+**Current results:** 74/121 (61.2%) structural match among clean parses.
 
 **Usage:**
 
@@ -88,11 +96,9 @@ npm run cross-validate
 # Debug a single fixture
 npm run cross-validate:debug -- BabySteps
 
-# Run unit tests
+# Run unit tests (vitest)
 npm run cross-validate:test
 ```
-
-**Requires:** Python 3.8+, `pytest` (for unit tests)
 
 ### Key Files
 
@@ -102,8 +108,13 @@ npm run cross-validate:test
 | `excluded.txt` | Files excluded from corpus (grammar issues or wrong AST) |
 | `TODO.md` | Categorized grammar issues ranked by difficulty |
 | `report.md` | Latest cross-validation report |
-| `main.py` | Entry point |
-| `normalizer.py` | Tree normalization (node type mapping, noise removal) |
-| `comparator.py` | Structural tree comparison |
-| `parser_ts.py` | tree-sitter output parser |
-| `parser_psi.py` | JetBrains PSI output parser |
+| `main.js` | CLI entry point |
+| `normalizer.js` | Tree normalization (node type mapping, noise removal) |
+| `comparator.js` | Structural tree comparison |
+| `parser-ts.js` | tree-sitter S-expression parser |
+| `parser-psi.js` | JetBrains PSI indented tree parser |
+| `mapping.js` | 110+ node type mappings (tree-sitter → JetBrains PSI) |
+| `models.js` | Shared tree node model |
+| `runner.js` | Test runner orchestration |
+| `report.js` | Markdown report generator |
+| `vitest.config.js` | Test configuration (at project root) |

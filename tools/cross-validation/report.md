@@ -10,11 +10,11 @@ JetBrains PSI reference trees for all 228 JetBrains fixture files.
 | Total fixture files | 228 |
 | Tree-sitter clean parses | 121 |
 | Tree-sitter parse errors | 107 |
-| **Structural matches** | **78** |
-| Structural mismatches | 43 |
+| **Structural matches** | **74** |
+| Structural mismatches | 47 |
 | PSI parse errors | 0 |
 
-**Match rate (among clean parses): 78/121 (64.5%)**
+**Match rate (among clean parses): 74/121 (61.2%)**
 
 ## Mapping Methodology
 
@@ -33,311 +33,206 @@ The comparison pipeline works as follows:
 3. **Compare** the two normalized trees recursively, recording structural
    differences (name mismatches, extra children, missing children).
 
-### Key Mapping Decisions
-
-**Identifier handling** -- PSI wraps every identifier in a `REFERENCE_EXPRESSION`
-node that has no children after normalization, while tree-sitter uses
-`simple_identifier`, `type_identifier`, and `identifier` as leaf nodes. Both
-sides skip these nodes entirely so that comparison operates on the semantic
-structure above the identifier level.
-
-**BLOCK / function_body / control_structure_body** -- Tree-sitter emits
-`function_body` for function bodies and `control_structure_body` for
-`if`/`when`/`for`/`while` bodies. PSI uses `BLOCK` for brace-delimited bodies
-and has no wrapper for expression bodies (`= expr`). The normalizer detects
-expression bodies (single child that is not a `statements` node) and makes
-the wrapper transparent, while block bodies map to `BLOCK`.
-
-**DOT_QUALIFIED_EXPRESSION chains** -- After removing `REFERENCE_EXPRESSION`,
-package/import name chains like `a.b.c` leave behind nested
-`DOT_QUALIFIED_EXPRESSION` nodes with no non-DQE children. Both normalizers
-collapse these empty chain links to avoid phantom depth mismatches.
-
-**VALUE_PARAMETER_LIST injection** -- PSI wraps constructor and accessor
-parameters in `VALUE_PARAMETER_LIST`, but tree-sitter places `VALUE_PARAMETER`
-nodes directly under `PRIMARY_CONSTRUCTOR` or `PROPERTY_ACCESSOR`. The
-tree-sitter normalizer injects a synthetic `VALUE_PARAMETER_LIST` wrapper when
-these parameter nodes appear as direct children.
-
-**PROPERTY_ACCESSOR nesting** -- Tree-sitter places getter/setter nodes as
-siblings of `PROPERTY`, while PSI nests them inside `PROPERTY`. A post-processing
-step in the tree-sitter normalizer moves `PROPERTY_ACCESSOR` nodes into the
-preceding `PROPERTY` node's children.
-
-**FUNCTION_TYPE_RECEIVER unwrapping** -- Tree-sitter maps `receiver_type` to
-`FUNCTION_TYPE_RECEIVER` everywhere, but PSI only uses `FUNCTION_TYPE_RECEIVER`
-inside function type declarations. For extension functions and properties, PSI
-places the receiver type (e.g., `USER_TYPE`) directly under `FUN`/`PROPERTY`.
-The normalizer unwraps `FUNCTION_TYPE_RECEIVER` when it appears under `FUN` or
-`PROPERTY`, promoting its children to the parent level.
-
-**CALL_EXPRESSION flattening** -- Tree-sitter nests trailing lambda calls as
-cascading `CALL_EXPRESSION` wrappers (e.g., `f() {} {} {}` becomes three nested
-`CALL_EXPRESSION` nodes), while PSI flattens all trailing lambda arguments as
-siblings under a single `CALL_EXPRESSION`. The normalizer recursively flattens
-these chains.
-
-**FUNCTION_LITERAL > BLOCK injection** -- PSI always emits a `BLOCK` child inside
-`FUNCTION_LITERAL` even for empty lambdas `{}`, but tree-sitter's `lambda_literal`
-produces no children when the body is empty. The normalizer injects an empty
-`BLOCK` node to match PSI structure.
-
-**CLASS_INITIALIZER > BLOCK wrapping** -- PSI has `CLASS_INITIALIZER > BLOCK >
-[children]`, but tree-sitter's `anonymous_initializer` promotes `statements`
-children directly. The normalizer wraps these children in a `BLOCK` node.
-
-**OBJECT_LITERAL > OBJECT_DECLARATION injection** -- PSI wraps `OBJECT_LITERAL`
-contents in an `OBJECT_DECLARATION` node, but tree-sitter places children
-directly under `OBJECT_LITERAL`. The normalizer injects this wrapper.
-
-**VALUE_PARAMETER wrapping in function types** -- In function type parameter
-lists (`function_type_parameters`), tree-sitter places type nodes directly as
-children, but PSI wraps each in `VALUE_PARAMETER`. The normalizer wraps bare
-type children in `VALUE_PARAMETER` when they appear in `VALUE_PARAMETER_LIST`
-without existing `VALUE_PARAMETER` nodes.
-
-**Empty structural nodes** -- PSI always emits `PACKAGE_DIRECTIVE`, `IMPORT_LIST`,
-and `MODIFIER_LIST` even when they are empty. The PSI normalizer strips these
-when they contain no children after normalization.
-
-**RETURN / THROW / BREAK / CONTINUE** -- Tree-sitter wraps these in a generic
-`jump_expression` node that loses the keyword distinction. Both sides skip these
-nodes so that the comparison focuses on the expression's payload rather than
-the keyword wrapper.
-
-### What Was Not Fixable
-
-Some structural differences are inherent to how the two parsers model Kotlin
-syntax and cannot be reconciled with simple node-level transformations:
-
-- **Method call nesting order** -- PSI nests as
-  `CALL_EXPRESSION > DOT_QUALIFIED_EXPRESSION`, while tree-sitter nests as
-  `call_expression > navigation_expression`. The child ordering is inverted.
-- **`!is` / `!in` expressions** -- PSI uses `BINARY_WITH_TYPE > OPERATION_REFERENCE(NOT_IS)`,
-  while tree-sitter produces a different nesting with prefix negation.
-- **Delegation specifiers** -- PSI uses `SUPER_TYPE_LIST > SUPER_TYPE_CALL_ENTRY`
-  with constructor arguments; tree-sitter uses `delegation_specifier` with a
-  different child structure.
-- **Annotation use-site targets** -- PSI wraps these in `ANNOTATION_ENTRY` with
-  a `TARGET` child; tree-sitter produces a flat structure.
-
-### Progression
-
-| Round | Match Rate | Key Fix |
-|-------|-----------|---------|
-| Baseline | 1/118 (0.8%) | Only `const.kt` matched |
-| Round 1 | 8/118 (6.8%) | Empty PACKAGE_DIRECTIVE / IMPORT_LIST removal |
-| Round 2 | 14/118 (11.9%) | REFERENCE_EXPRESSION skip, identifier skip |
-| Round 3 | 21/118 (17.8%) | DOT_QUALIFIED_EXPRESSION chain collapsing |
-| Round 4 | 29/118 (24.6%) | MODIFIER_LIST handling, function_body mapping |
-| Round 5 | 38/118 (32.2%) | control_structure_body, statements transparency |
-| Round 6 | 48/118 (40.7%) | VALUE_PARAMETER_LIST injection |
-| Round 7 | 57/118 (48.3%) | PROPERTY_ACCESSOR nesting |
-| Round 8 | 66/118 (55.9%) | RETURN/THROW/BREAK/CONTINUE skip, edge cases |
-| Round 9 | 68/118 (57.6%) | FUNCTION_TYPE_RECEIVER unwrap for extension fns/properties |
-| Round 10 | 73/118 (61.9%) | CALL_EXPRESSION flattening, FUNCTION_LITERAL > BLOCK, CLASS_INITIALIZER > BLOCK, OBJECT_LITERAL > OBJECT_DECLARATION |
-| Round 11 | 75/118 (63.6%) | VALUE_PARAMETER wrapping in function_type_parameters |
-
 ## Per-File Results
 
 | # | File | Status | Details |
 |---|------|--------|---------|
-| 1 | AbsentInnerType | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 2 | AnnotatedIntersections | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 1 | AbsentInnerType | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 2 | AnnotatedIntersections | TS_PARSE_ERROR | tree-sitter parse error |
 | 3 | AnonymousInitializer | MATCH | Structurally identical |
-| 4 | AssertNotNull | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 4 | AssertNotNull | TS_PARSE_ERROR | tree-sitter parse error |
 | 5 | BabySteps | MATCH | Structurally identical |
-| 6 | BabySteps_ERR | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 7 | BackslashInString | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 8 | BlockCommentAtBeginningOfFile1 | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 9 | BlockCommentAtBeginningOfFile2 | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 6 | BabySteps_ERR | TS_PARSE_ERROR | tree-sitter parse error |
+| 7 | BackslashInString | TS_PARSE_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 8 | BlockCommentAtBeginningOfFile1 | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 9 | BlockCommentAtBeginningOfFile2 | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 10 | BlockCommentAtBeginningOfFile3 | MISMATCH | 2 difference(s) |
 | 11 | BlockCommentAtBeginningOfFile4 | MISMATCH | 2 difference(s) |
-| 12 | BlockCommentUnmatchedClosing_ERR | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 13 | ByClauses | MISMATCH | 6 difference(s) |
+| 12 | BlockCommentUnmatchedClosing_ERR | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 13 | ByClauses | MISMATCH | 4 difference(s) |
 | 14 | CallWithManyClosures | MATCH | Structurally identical |
-| 15 | CallsInWhen | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 16 | CollectionLiterals | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 17 | CollectionLiterals_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 18 | CommentsBinding | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 19 | CommentsBindingInLambda | MISMATCH | 17 difference(s) |
-| 20 | CommentsBindingInStatementBlock | MATCH | Structurally identical |
-| 21 | Constructors | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 22 | ControlStructures | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 23 | DefaultKeyword | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 24 | DefinitelyNotNullType | TS_ERROR | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 15 | CallsInWhen | TS_PARSE_ERROR | tree-sitter parse error |
+| 16 | CollectionLiterals | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 17 | CollectionLiterals_ERR | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 18 | CommentsBinding | TS_PARSE_ERROR | tree-sitter parse error |
+| 19 | CommentsBindingInLambda | MISMATCH | 7 difference(s) |
+| 20 | CommentsBindingInStatementBlock | MISMATCH | 6 difference(s) |
+| 21 | Constructors | TS_PARSE_ERROR | tree-sitter parse error |
+| 22 | ControlStructures | TS_PARSE_ERROR | tree-sitter parse error |
+| 23 | DefaultKeyword | TS_PARSE_ERROR | tree-sitter parse error |
+| 24 | DefinitelyNotNullType | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 25 | DocCommentAfterFileAnnotations | MISMATCH | 3 difference(s) |
 | 26 | DocCommentForFirstDeclaration | MATCH | Structurally identical |
 | 27 | DocCommentOnPackageDirectiveLine | MATCH | Structurally identical |
 | 28 | DocCommentsBinding | MATCH | Structurally identical |
-| 29 | DoubleColon | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 30 | DoubleColonWhitespaces | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 31 | DoubleColon_ERR | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 29 | DoubleColon | TS_PARSE_ERROR | tree-sitter parse error |
+| 30 | DoubleColonWhitespaces | TS_PARSE_ERROR | tree-sitter parse error |
+| 31 | DoubleColon_ERR | TS_PARSE_ERROR | tree-sitter parse error |
 | 32 | DuplicateAccessor | MISMATCH | 2 difference(s) |
 | 33 | DynamicReceiver | MATCH | Structurally identical |
-| 34 | DynamicSoftKeyword | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 35 | DynamicTypes | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 34 | DynamicSoftKeyword | TS_PARSE_ERROR | tree-sitter parse error |
+| 35 | DynamicTypes | TS_PARSE_ERROR | tree-sitter parse error |
 | 36 | EOLsInComments | MISMATCH | 3 difference(s) |
 | 37 | EOLsOnRollback | MATCH | Structurally identical |
 | 38 | EmptyFile | MATCH | Structurally identical |
-| 39 | EmptyName | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 39 | EmptyName | TS_PARSE_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
 | 40 | EnumCommas | MATCH | Structurally identical |
-| 41 | EnumEntryCommaAnnotatedMember | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 42 | EnumEntryCommaInlineMember | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 43 | EnumEntryCommaMember | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 44 | EnumEntryCommaPublicMember | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 41 | EnumEntryCommaAnnotatedMember | TS_PARSE_ERROR | tree-sitter parse error |
+| 42 | EnumEntryCommaInlineMember | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 43 | EnumEntryCommaMember | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 44 | EnumEntryCommaPublicMember | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 45 | EnumEntrySemicolonInlineMember | MATCH | Structurally identical |
 | 46 | EnumEntrySemicolonMember | MATCH | Structurally identical |
-| 47 | EnumEntrySpaceInlineMember | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 48 | EnumEntrySpaceMember | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 49 | EnumEntryTwoCommas | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 47 | EnumEntrySpaceInlineMember | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 48 | EnumEntrySpaceMember | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 49 | EnumEntryTwoCommas | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 50 | EnumIn | MATCH | Structurally identical |
-| 51 | EnumInline | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 52 | EnumInlinePublic | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 53 | EnumMissingName | MISMATCH | 15 difference(s) |
-| 54 | EnumOldConstructorSyntax | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 55 | EnumShortCommas | MISMATCH | 15 difference(s) |
-| 56 | EnumShortWithOverload | MISMATCH | 30 difference(s) |
-| 57 | EnumWithAnnotationKeyword | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 58 | Enums | MISMATCH | 15 difference(s) |
-| 59 | Expressions_ERR | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 60 | ExtensionsWithQNReceiver | MISMATCH | 12 difference(s) |
-| 61 | FileStart_ERR | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 51 | EnumInline | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 52 | EnumInlinePublic | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 53 | EnumMissingName | MISMATCH | 9 difference(s) |
+| 54 | EnumOldConstructorSyntax | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 55 | EnumShortCommas | MISMATCH | 9 difference(s) |
+| 56 | EnumShortWithOverload | MISMATCH | 12 difference(s) |
+| 57 | EnumWithAnnotationKeyword | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 58 | Enums | MISMATCH | 9 difference(s) |
+| 59 | Expressions_ERR | TS_PARSE_ERROR | tree-sitter parse error |
+| 60 | ExtensionsWithQNReceiver | MISMATCH | 6 difference(s) |
+| 61 | FileStart_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 62 | FloatingPointLiteral | MATCH | Structurally identical |
-| 63 | ForWithMultiDecl | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 64 | FunctionCalls | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 65 | FunctionExpressions | TS_ERROR | 58 ERROR/MISSING node(s) in tree-sitter output |
-| 66 | FunctionExpressions_ERR | TS_ERROR | 29 ERROR/MISSING node(s) in tree-sitter output |
-| 67 | FunctionLiterals | MISMATCH | 20 difference(s) |
-| 68 | FunctionLiterals_ERR | TS_ERROR | 46 ERROR/MISSING node(s) in tree-sitter output |
-| 69 | FunctionNoParameterList | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 70 | FunctionTypes | TS_ERROR | 28 ERROR/MISSING node(s) in tree-sitter output |
-| 71 | Functions | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 72 | FunctionsWithoutName | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 73 | FunctionsWithoutName_ERR | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 74 | Functions_ERR | TS_ERROR | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 63 | ForWithMultiDecl | TS_PARSE_ERROR | tree-sitter parse error |
+| 64 | FunctionCalls | TS_PARSE_ERROR | tree-sitter parse error |
+| 65 | FunctionExpressions | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 66 | FunctionExpressions_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 67 | FunctionLiterals | MISMATCH | 9 difference(s) |
+| 68 | FunctionLiterals_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 69 | FunctionNoParameterList | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 70 | FunctionTypes | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 71 | Functions | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 72 | FunctionsWithoutName | TS_PARSE_ERROR | tree-sitter parse error |
+| 73 | FunctionsWithoutName_ERR | TS_PARSE_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 74 | Functions_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 75 | HangOnLonelyModifier | MATCH | Structurally identical |
 | 76 | IfWithPropery | MATCH | Structurally identical |
 | 77 | ImportSoftKW | MATCH | Structurally identical |
-| 78 | Imports | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 79 | Imports_ERR | TS_ERROR | 20 ERROR/MISSING node(s) in tree-sitter output |
-| 80 | IncompleteFunctionLiteral | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 78 | Imports | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 79 | Imports_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 80 | IncompleteFunctionLiteral | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 81 | Inner | MATCH | Structurally identical |
-| 82 | IntegerLiteral | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
+| 82 | IntegerLiteral | TS_PARSE_ERROR | tree-sitter parse error |
 | 83 | Interface | MATCH | Structurally identical |
-| 84 | InterfaceWithEnumKeyword | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 85 | Labels | TS_ERROR | 11 ERROR/MISSING node(s) in tree-sitter output |
+| 84 | InterfaceWithEnumKeyword | TS_PARSE_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 85 | Labels | TS_PARSE_ERROR | tree-sitter parse error |
 | 86 | LineCommentAfterFileAnnotations | MISMATCH | 3 difference(s) |
 | 87 | LineCommentForFirstDeclaration | MATCH | Structurally identical |
 | 88 | LineCommentsInBlock | MATCH | Structurally identical |
-| 89 | LocalDeclarations | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 89 | LocalDeclarations | TS_PARSE_ERROR | tree-sitter parse error |
 | 90 | LongPackageName | MATCH | Structurally identical |
 | 91 | ModifierAsSelector | MATCH | Structurally identical |
-| 92 | MultiVariableDeclarations | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 92 | MultiVariableDeclarations | TS_PARSE_ERROR | tree-sitter parse error |
 | 93 | NamedClassObject | MATCH | Structurally identical |
 | 94 | NestedComments | MATCH | Structurally identical |
-| 95 | NewLinesValidOperations | MISMATCH | 11 difference(s) |
-| 96 | NewlinesInParentheses | MISMATCH | 49 difference(s) |
+| 95 | NewLinesValidOperations | MISMATCH | 7 difference(s) |
+| 96 | NewlinesInParentheses | MISMATCH | 12 difference(s) |
 | 97 | NonTypeBeforeDotInBaseClass | MISMATCH | 6 difference(s) |
 | 98 | NotIsAndNotIn | MATCH | Structurally identical |
-| 99 | ObjectLiteralAsStatement | MISMATCH | 12 difference(s) |
-| 100 | ParameterNameMising | TS_ERROR | 9 ERROR/MISSING node(s) in tree-sitter output |
-| 101 | ParameterType | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 102 | ParameterType_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 103 | Precedence | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 104 | PrimaryConstructorModifiers_ERR | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 105 | Properties | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 106 | PropertiesFollowedByInitializers | TS_ERROR | 13 ERROR/MISSING node(s) in tree-sitter output |
-| 107 | Properties_ERR | TS_ERROR | 9 ERROR/MISSING node(s) in tree-sitter output |
+| 99 | ObjectLiteralAsStatement | MISMATCH | 2 difference(s) |
+| 100 | ParameterNameMising | TS_PARSE_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 101 | ParameterType | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 102 | ParameterType_ERR | TS_PARSE_ERROR | tree-sitter parse error |
+| 103 | Precedence | TS_PARSE_ERROR | tree-sitter parse error |
+| 104 | PrimaryConstructorModifiers_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 105 | Properties | TS_PARSE_ERROR | tree-sitter parse error |
+| 106 | PropertiesFollowedByInitializers | TS_PARSE_ERROR | tree-sitter parse error |
+| 107 | Properties_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 108 | PropertyInvokes | MATCH | Structurally identical |
 | 109 | QuotedIdentifiers | MATCH | Structurally identical |
 | 110 | Reserved | MATCH | Structurally identical |
 | 111 | SemicolonAfterIf | MATCH | Structurally identical |
 | 112 | SimpleClassMembers | MATCH | Structurally identical |
-| 113 | SimpleClassMembers_ERR | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 114 | SimpleExpressions | MISMATCH | 136 difference(s) |
-| 115 | SimpleIntersections | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 116 | SimpleModifiers | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 117 | SoftKeywords | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 118 | SoftKeywordsInTypeArguments | TS_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
-| 119 | StringTemplates | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 120 | Super | MISMATCH | 32 difference(s) |
+| 113 | SimpleClassMembers_ERR | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 114 | SimpleExpressions | MISMATCH | 83 difference(s) |
+| 115 | SimpleIntersections | TS_PARSE_ERROR | tree-sitter parse error |
+| 116 | SimpleModifiers | TS_PARSE_ERROR | tree-sitter parse error |
+| 117 | SoftKeywords | TS_PARSE_ERROR | tree-sitter parse error |
+| 118 | SoftKeywordsInTypeArguments | TS_PARSE_ERROR | tree-sitter parse error |
+| 119 | StringTemplates | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 120 | Super | MISMATCH | 4 difference(s) |
 | 121 | TraitConstructor | MATCH | Structurally identical |
-| 122 | TripleDot | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 123 | TryRecovery | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 122 | TripleDot | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 123 | TryRecovery | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 124 | TypeAlias | MATCH | Structurally identical |
-| 125 | TypeAlias_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
+| 125 | TypeAlias_ERR | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 126 | TypeConstraints | MATCH | Structurally identical |
-| 127 | TypeExpressionAmbiguities_ERR | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 128 | TypeModifiers | MISMATCH | 86 difference(s) |
-| 129 | TypeModifiersParenthesized | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 130 | TypeModifiers_ERR | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 131 | TypeParametersBeforeName | MISMATCH | 9 difference(s) |
+| 127 | TypeExpressionAmbiguities_ERR | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 128 | TypeModifiers | MISMATCH | 30 difference(s) |
+| 129 | TypeModifiersParenthesized | TS_PARSE_ERROR | tree-sitter parse error |
+| 130 | TypeModifiers_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 131 | TypeParametersBeforeName | MISMATCH | 6 difference(s) |
 | 132 | TypealiasIsKeyword | MISMATCH | 4 difference(s) |
 | 133 | UnderscoredTypeArgumentsOfCall | MATCH | Structurally identical |
 | 134 | UnderscoredTypeArgumentsOfCallIllegal | MATCH | Structurally identical |
 | 135 | UnderscoredTypeArgumentsOfType | MATCH | Structurally identical |
 | 136 | UnderscoredTypeParameters | MATCH | Structurally identical |
-| 137 | UnsignedLiteral | TS_ERROR | 11 ERROR/MISSING node(s) in tree-sitter output |
-| 138 | When | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 139 | WhenWithSubjectVariable | TS_ERROR | 26 ERROR/MISSING node(s) in tree-sitter output |
-| 140 | WhenWithSubjectVariable_ERR | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 137 | UnsignedLiteral | TS_PARSE_ERROR | tree-sitter parse error |
+| 138 | When | TS_PARSE_ERROR | tree-sitter parse error |
+| 139 | WhenWithSubjectVariable | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 140 | WhenWithSubjectVariable_ERR | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 141 | WhenWithSubjectVariable_SoftModifierName | MATCH | Structurally identical |
-| 142 | When_ERR | TS_ERROR | 9 ERROR/MISSING node(s) in tree-sitter output |
-| 143 | annotatedFlexibleTypes | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 144 | annotatedParameterInEnumConstructor | MISMATCH | 6 difference(s) |
+| 142 | When_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 143 | annotatedFlexibleTypes | TS_PARSE_ERROR | tree-sitter parse error |
+| 144 | annotatedParameterInEnumConstructor | MISMATCH | 3 difference(s) |
 | 145 | annotatedParameterInInnerClassConstructor | MATCH | Structurally identical |
 | 146 | annotationClass | MATCH | Structurally identical |
-| 147 | annotationValues | MISMATCH | 11 difference(s) |
-| 148 | annotations | MISMATCH | 66 difference(s) |
-| 149 | annotationsOnNullableTypes | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 150 | annotationsOnParenthesizedTypes | MISMATCH | 63 difference(s) |
-| 151 | anonymousReturnWithGenericType | MATCH | Structurally identical |
+| 147 | annotationValues | MISMATCH | 5 difference(s) |
+| 148 | annotations | MISMATCH | 20 difference(s) |
+| 149 | annotationsOnNullableTypes | TS_PARSE_ERROR | tree-sitter parse error |
+| 150 | annotationsOnParenthesizedTypes | MISMATCH | 36 difference(s) |
+| 151 | anonymousReturnWithGenericType | MISMATCH | 12 difference(s) |
 | 152 | classMembers | MATCH | Structurally identical |
 | 153 | classObject | MATCH | Structurally identical |
-| 154 | complicateLTGT | MISMATCH | 15 difference(s) |
-| 155 | complicateLTGTE | MATCH | Structurally identical |
+| 154 | complicateLTGT | MISMATCH | 5 difference(s) |
+| 155 | complicateLTGTE | MISMATCH | 2 difference(s) |
 | 156 | const | MATCH | Structurally identical |
-| 157 | contextParametersAndAnnotations | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 157 | contextParametersAndAnnotations | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 158 | dataClass | MATCH | Structurally identical |
 | 159 | dataObject | MATCH | Structurally identical |
 | 160 | defaultImplsInInterface | MATCH | Structurally identical |
-| 161 | definitelyNotNullTypes | MISMATCH | 8 difference(s) |
+| 161 | definitelyNotNullTypes | MISMATCH | 5 difference(s) |
 | 162 | delegatedWithInitializer | MATCH | Structurally identical |
 | 163 | delegation | MATCH | Structurally identical |
-| 164 | dependencyOnNestedClasses | MISMATCH | 24 difference(s) |
-| 165 | destructuringInLambdas | MISMATCH | 70 difference(s) |
-| 166 | destructuringInLambdas_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 167 | diagnosticTags_ERR | TS_ERROR | 71 ERROR/MISSING node(s) in tree-sitter output |
-| 168 | emptyArguments | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 169 | emptyArgumentsInAnnotations | TS_ERROR | 22 ERROR/MISSING node(s) in tree-sitter output |
-| 170 | emptyArgumentsInArrayAccesses | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 171 | emptyContextParameters | TS_ERROR | 64 ERROR/MISSING node(s) in tree-sitter output |
+| 164 | dependencyOnNestedClasses | MISMATCH | 14 difference(s) |
+| 165 | destructuringInLambdas | MISMATCH | 7 difference(s) |
+| 166 | destructuringInLambdas_ERR | TS_PARSE_ERROR | tree-sitter parse error |
+| 167 | diagnosticTags_ERR | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 168 | emptyArguments | TS_PARSE_ERROR | tree-sitter parse error |
+| 169 | emptyArgumentsInAnnotations | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 170 | emptyArgumentsInArrayAccesses | TS_PARSE_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 171 | emptyContextParameters | TS_PARSE_ERROR | tree-sitter parse error |
 | 172 | emptyEnum | MATCH | Structurally identical |
-| 173 | emptyParameters | TS_ERROR | 51 ERROR/MISSING node(s) in tree-sitter output |
-| 174 | emptyParametersInFunctionalTypes | TS_ERROR | 86 ERROR/MISSING node(s) in tree-sitter output |
+| 173 | emptyParameters | TS_PARSE_ERROR | tree-sitter parse error |
+| 174 | emptyParametersInFunctionalTypes | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 175 | enum | MATCH | Structurally identical |
-| 176 | enumEntryContent | MATCH | Structurally identical |
-| 177 | escapedNames | TS_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
-| 178 | flexibleDnnType | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 176 | enumEntryContent | MISMATCH | 1 difference(s) |
+| 177 | escapedNames | TS_PARSE_ERROR | tree-sitter parse error |
+| 178 | flexibleDnnType | TS_PARSE_ERROR | tree-sitter parse error |
 | 179 | funInterfaceDeclaration | MATCH | Structurally identical |
-| 180 | incorrectLTGTFallback | MISMATCH | 214 difference(s) |
+| 180 | incorrectLTGTFallback | MISMATCH | 16 difference(s) |
 | 181 | inheritingClasses | MATCH | Structurally identical |
 | 182 | innerClassEnumEntry | MATCH | Structurally identical |
-| 183 | innerTypes | MISMATCH | 34 difference(s) |
+| 183 | innerTypes | MISMATCH | 7 difference(s) |
 | 184 | internalConst | MATCH | Structurally identical |
-| 185 | kotlinFunInterface_ERR | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 186 | localClass | MISMATCH | 6 difference(s) |
-| 187 | modifiers | MISMATCH | 7 difference(s) |
-| 188 | multifileClass | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 189 | multifileClass2 | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 185 | kotlinFunInterface_ERR | TS_PARSE_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 186 | localClass | MISMATCH | 7 difference(s) |
+| 187 | modifiers | MISMATCH | 1 difference(s) |
+| 188 | multifileClass | TS_PARSE_ERROR | tree-sitter parse error |
+| 189 | multifileClass2 | TS_PARSE_ERROR | tree-sitter parse error |
 | 190 | mustUseReturnValueAndOverrides | MATCH | Structurally identical |
-| 191 | mustUseReturnValueFullEnabled | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 192 | mustUseReturnValueHalfEnabled | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 191 | mustUseReturnValueFullEnabled | TS_PARSE_ERROR | tree-sitter parse error |
+| 192 | mustUseReturnValueHalfEnabled | TS_PARSE_ERROR | tree-sitter parse error |
 | 193 | namedCompanionObject | MATCH | Structurally identical |
-| 194 | namelessObjectAsEnumMember | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 194 | namelessObjectAsEnumMember | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 195 | nestedClasses | MATCH | Structurally identical |
-| 196 | noCommaBetweenArguments | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
+| 196 | noCommaBetweenArguments | TS_PARSE_ERROR | tree-sitter parse error |
 | 197 | objects | MATCH | Structurally identical |
 | 198 | parameterizedSuspendFunctionType | MATCH | Structurally identical |
 | 199 | parameterizedSuspendFunctionTypeComplex | MATCH | Structurally identical |
@@ -349,1942 +244,1650 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 205 | repeatableAnnotationClass | MATCH | Structurally identical |
 | 206 | sealed | MATCH | Structurally identical |
 | 207 | sealedInterface | MATCH | Structurally identical |
-| 208 | semicolonBetweenDeclarations | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 208 | semicolonBetweenDeclarations | TS_PARSE_ERROR | tree-sitter parse error |
 | 209 | specialNames | MATCH | Structurally identical |
-| 210 | suggestGuardSyntax | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 211 | suspendLambda | MISMATCH | 102 difference(s) |
-| 212 | topJvmPackageName | MISMATCH | 35 difference(s) |
-| 213 | topJvmPackageNameMultifile | MISMATCH | 36 difference(s) |
+| 210 | suggestGuardSyntax | TS_PARSE_ERROR | tree-sitter parse error |
+| 211 | suspendLambda | MISMATCH | 17 difference(s) |
+| 212 | topJvmPackageName | MISMATCH | 8 difference(s) |
+| 213 | topJvmPackageNameMultifile | MISMATCH | 10 difference(s) |
 | 214 | topLevelMembers | MISMATCH | 6 difference(s) |
-| 215 | topLevelMembersAnnotated | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 216 | trailingCommaAllowed | TS_ERROR | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 217 | trailingCommaForbidden | TS_ERROR | 28 ERROR/MISSING node(s) in tree-sitter output |
-| 218 | typeAliasExpansion | MISMATCH | 26 difference(s) |
-| 219 | typeAliasWithConstraints | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 220 | typeAliases | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 215 | topLevelMembersAnnotated | TS_PARSE_ERROR | tree-sitter parse error |
+| 216 | trailingCommaAllowed | TS_PARSE_ERROR | tree-sitter parse error |
+| 217 | trailingCommaForbidden | TS_PARSE_ERROR | tree-sitter parse error |
+| 218 | typeAliasExpansion | MISMATCH | 10 difference(s) |
+| 219 | typeAliasWithConstraints | TS_PARSE_ERROR | tree-sitter parse error |
+| 220 | typeAliases | TS_PARSE_ERROR | tree-sitter parse error |
 | 221 | typeBoundsAndDelegationSpecifiers | MATCH | Structurally identical |
-| 222 | typeModifiers2 | MISMATCH | 4 difference(s) |
-| 223 | typeParams | MISMATCH | 3 difference(s) |
-| 224 | types | MISMATCH | 8 difference(s) |
+| 222 | typeModifiers2 | MISMATCH | 1 difference(s) |
+| 223 | typeParams | MISMATCH | 1 difference(s) |
+| 224 | types | MISMATCH | 2 difference(s) |
 | 225 | underscoreParameterName | MATCH | Structurally identical |
 | 226 | validKotlinFunInterface | MATCH | Structurally identical |
-| 227 | valueClass | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 227 | valueClass | TS_PARSE_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 228 | varargArgumentWithFunctionalType | MATCH | Structurally identical |
 
 ## Detailed Mismatches
 
-Showing structural differences for 43 mismatching file(s).
-
 ### BlockCommentAtBeginningOfFile3
 
-- **[child_count_mismatch]** at `KtFile`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > [child 0]`
-  - expected: `(absent)`
-  - actual: `BINARY_EXPRESSION`
+- **child_count_mismatch** at `KtFile`
+  - Expected: `0`
+  - Actual: `1`
+- **extra_child** at `KtFile`
+  - Expected: `(none)`
+  - Actual: `BINARY_EXPRESSION`
 
 ### BlockCommentAtBeginningOfFile4
 
-- **[child_count_mismatch]** at `KtFile`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > [child 0]`
-  - expected: `(absent)`
-  - actual: `BINARY_EXPRESSION`
+- **child_count_mismatch** at `KtFile`
+  - Expected: `0`
+  - Actual: `1`
+- **extra_child** at `KtFile`
+  - Expected: `(none)`
+  - Actual: `BINARY_EXPRESSION`
 
 ### ByClauses
 
-- **[child_count_mismatch]** at `KtFile > CLASS`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > BINARY_EXPRESSION > BINARY_EXPRESSION > INTEGER_CONSTANT`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `CALL_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > BINARY_EXPRESSION > BINARY_EXPRESSION > INTEGER_CONSTANT`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > BINARY_EXPRESSION > BINARY_EXPRESSION > INTEGER_CONSTANT > [child 0]`
-  - expected: `(absent)`
-  - actual: `INTEGER_CONSTANT`
-- **[extra_child]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > BINARY_EXPRESSION > BINARY_EXPRESSION > INTEGER_CONSTANT > [child 1]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[missing_child]** at `KtFile > CLASS > [child 1]`
-  - expected: `CLASS_BODY`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > CLASS`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS`
+  - Expected: `CLASS_BODY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > BINARY_EXPRESSION > BINARY_EXPRESSION > CALL_EXPRESSION`
+  - Expected: `INTEGER_CONSTANT`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `CLASS_BODY`
 
 ### CommentsBindingInLambda
 
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK`
-  - expected: `BLOCK`
-  - actual: `CALL_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK > [child 1]`
-  - expected: `CALL_EXPRESSION`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > PROPERTY > FUNCTION_LITERAL > [child 1]`
-  - expected: `(absent)`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK`
-  - expected: `BLOCK`
-  - actual: `PROPERTY`
-- **[name_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK > PROPERTY`
-  - expected: `PROPERTY`
-  - actual: `INTEGER_CONSTANT`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK > PROPERTY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK > PROPERTY > [child 0]`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `BLOCK`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > PROPERTY > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > PROPERTY > FUNCTION_LITERAL > [child 1]`
-  - expected: `BLOCK`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > PROPERTY > FUNCTION_LITERAL > CALL_EXPRESSION`
+  - Expected: `BLOCK`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > PROPERTY > FUNCTION_LITERAL > PROPERTY`
+  - Expected: `BLOCK`
+  - Actual: `PROPERTY`
+- **child_count_mismatch** at `KtFile > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > PROPERTY > FUNCTION_LITERAL > BLOCK`
+  - Expected: `VALUE_PARAMETER_LIST`
+  - Actual: `BLOCK`
+
+### CommentsBindingInStatementBlock
+
+- **child_count_mismatch** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
 
 ### DocCommentAfterFileAnnotations
 
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_TARGET`
-  - expected: `ANNOTATION_TARGET`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > [child 1]`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST > USER_TYPE`
+  - Expected: `ANNOTATION_TARGET`
+  - Actual: `USER_TYPE`
 
 ### DuplicateAccessor
 
-- **[child_count_mismatch]** at `KtFile > PROPERTY`
-  - expected: `2`
-  - actual: `3`
-- **[extra_child]** at `KtFile > PROPERTY > [child 2]`
-  - expected: `(absent)`
-  - actual: `PROPERTY_ACCESSOR`
+- **child_count_mismatch** at `KtFile > PROPERTY`
+  - Expected: `2`
+  - Actual: `3`
+- **extra_child** at `KtFile > PROPERTY`
+  - Expected: `(none)`
+  - Actual: `PROPERTY_ACCESSOR`
 
 ### EOLsInComments
 
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `PREFIX_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `PREFIX_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `PREFIX_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
 
 ### EnumMissingName
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
 
 ### EnumShortCommas
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
 
 ### EnumShortWithOverload
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `3`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `CLASS_BODY`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `VALUE_ARGUMENT`
-  - actual: `FUN`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > INTEGER_CONSTANT`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `USER_TYPE`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > [child 1]`
-  - expected: `(absent)`
-  - actual: `BLOCK`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 2]`
-  - expected: `CLASS_BODY`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `3`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `CLASS_BODY`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `VALUE_ARGUMENT`
-  - actual: `FUN`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > INTEGER_CONSTANT`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `USER_TYPE`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > [child 1]`
-  - expected: `(absent)`
-  - actual: `BLOCK`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 2]`
-  - expected: `CLASS_BODY`
-  - actual: `(absent)`
-
-*... and 10 more difference(s)*
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `CLASS_BODY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > CLASS_BODY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `CLASS_BODY`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `CLASS_BODY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > CLASS_BODY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `CLASS_BODY`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `CLASS_BODY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > CLASS_BODY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `CLASS_BODY`
 
 ### Enums
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
 
 ### ExtensionsWithQNReceiver
 
-- **[child_count_mismatch]** at `KtFile > PROPERTY > USER_TYPE`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > PROPERTY > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > USER_TYPE > USER_TYPE`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > PROPERTY > USER_TYPE > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_PROJECTION`
-- **[extra_child]** at `KtFile > PROPERTY > USER_TYPE > USER_TYPE > [child 1]`
-  - expected: `(absent)`
-  - actual: `TYPE_PROJECTION`
-- **[missing_child]** at `KtFile > PROPERTY > USER_TYPE > [child 1]`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > USER_TYPE`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > FUN > USER_TYPE > USER_TYPE`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > FUN > USER_TYPE > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_PROJECTION`
-- **[extra_child]** at `KtFile > FUN > USER_TYPE > USER_TYPE > [child 1]`
-  - expected: `(absent)`
-  - actual: `TYPE_PROJECTION`
-- **[missing_child]** at `KtFile > FUN > USER_TYPE > [child 1]`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > PROPERTY > USER_TYPE`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > PROPERTY > USER_TYPE`
+  - Expected: `TYPE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `TYPE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > FUN > USER_TYPE`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > USER_TYPE`
+  - Expected: `TYPE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `TYPE_ARGUMENT_LIST`
 
 ### FunctionLiterals
 
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK`
-  - expected: `8`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `CALL_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL`
-  - expected: `1`
-  - actual: `8`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > BLOCK`
-  - expected: `BLOCK`
-  - actual: `FUNCTION_LITERAL`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > BLOCK`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > BLOCK > [child 0]`
-  - expected: `(absent)`
-  - actual: `BLOCK`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > [child 1]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > [child 2]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > [child 3]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > [child 4]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > [child 5]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > [child 6]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > FUNCTION_LITERAL > [child 7]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 1]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 2]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 3]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 4]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 5]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 6]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 7]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK`
+  - Expected: `8`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `CALL_EXPRESSION`
 
 ### LineCommentAfterFileAnnotations
 
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_TARGET`
-  - expected: `ANNOTATION_TARGET`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > [child 1]`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST > USER_TYPE`
+  - Expected: `ANNOTATION_TARGET`
+  - Actual: `USER_TYPE`
 
 ### NewLinesValidOperations
 
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK`
-  - expected: `7`
-  - actual: `6`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > SAFE_ACCESS_EXPRESSION`
-  - expected: `SAFE_ACCESS_EXPRESSION`
-  - actual: `BINARY_WITH_TYPE`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > SAFE_ACCESS_EXPRESSION`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > SAFE_ACCESS_EXPRESSION > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > BINARY_WITH_TYPE`
-  - expected: `BINARY_WITH_TYPE`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > BINARY_WITH_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > BINARY_WITH_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION > [child 0]`
-  - expected: `(absent)`
-  - actual: `BOOLEAN_CONSTANT`
-- **[extra_child]** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION > [child 1]`
-  - expected: `(absent)`
-  - actual: `BOOLEAN_CONSTANT`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 6]`
-  - expected: `BINARY_EXPRESSION`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK`
+  - Expected: `7`
+  - Actual: `6`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `BINARY_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_WITH_TYPE`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `BINARY_WITH_TYPE`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `BINARY_WITH_TYPE`
+  - Actual: `BINARY_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `0`
+  - Actual: `2`
+- **extra_child** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `(none)`
+  - Actual: `BOOLEAN_CONSTANT`
+- **extra_child** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `(none)`
+  - Actual: `BOOLEAN_CONSTANT`
 
 ### NewlinesInParentheses
 
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK`
-  - expected: `12`
-  - actual: `11`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > PROPERTY > [child 0]`
-  - expected: `(absent)`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `PROPERTY`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION > [child 0]`
-  - expected: `(absent)`
-  - actual: `PARENTHESIZED`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION`
-  - expected: `BINARY_EXPRESSION`
-  - actual: `FUNCTION_LITERAL`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION > [child 0]`
-  - expected: `(absent)`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > FUNCTION_LITERAL`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > FUNCTION_LITERAL > BLOCK`
-  - expected: `BLOCK`
-  - actual: `FUNCTION_LITERAL`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > FUNCTION_LITERAL > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED`
-  - expected: `PARENTHESIZED`
-  - actual: `ARRAY_ACCESS_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION`
-  - expected: `BINARY_EXPRESSION`
-  - actual: `INDICES`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION > FUNCTION_LITERAL > [child 0]`
-  - expected: `BLOCK`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > ARRAY_ACCESS_EXPRESSION > INDICES > BINARY_EXPRESSION`
-  - expected: `BINARY_EXPRESSION`
-  - actual: `FUNCTION_LITERAL`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > PROPERTY > ARRAY_ACCESS_EXPRESSION > INDICES > BINARY_EXPRESSION`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > PROPERTY > ARRAY_ACCESS_EXPRESSION > INDICES > BINARY_EXPRESSION > [child 0]`
-  - expected: `(absent)`
-  - actual: `BINARY_EXPRESSION`
-
-*... and 29 more difference(s)*
+- **child_count_mismatch** at `KtFile > FUN > BLOCK`
+  - Expected: `12`
+  - Actual: `11`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `PROPERTY`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK > PROPERTY`
+  - Expected: `0`
+  - Actual: `1`
+- **extra_child** at `KtFile > FUN > BLOCK > PROPERTY`
+  - Expected: `(none)`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PROPERTY`
+  - Expected: `PREFIX_EXPRESSION`
+  - Actual: `PROPERTY`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > FUNCTION_LITERAL`
+  - Expected: `BINARY_EXPRESSION`
+  - Actual: `FUNCTION_LITERAL`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PROPERTY > PARENTHESIZED > BINARY_EXPRESSION`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PROPERTY > ARRAY_ACCESS_EXPRESSION`
+  - Expected: `PARENTHESIZED`
+  - Actual: `ARRAY_ACCESS_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PROPERTY > ARRAY_ACCESS_EXPRESSION > INDICES > FUNCTION_LITERAL`
+  - Expected: `BINARY_EXPRESSION`
+  - Actual: `FUNCTION_LITERAL`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PROPERTY > ARRAY_ACCESS_EXPRESSION > INDICES > BINARY_EXPRESSION`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > WHEN`
+  - Expected: `PROPERTY`
+  - Actual: `WHEN`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PROPERTY`
+  - Expected: `WHEN`
+  - Actual: `PROPERTY`
 
 ### NonTypeBeforeDotInBaseClass
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY`
-  - expected: `2`
-  - actual: `1`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS`
-  - expected: `0`
-  - actual: `3`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > [child 1]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > [child 2]`
-  - expected: `(absent)`
-  - actual: `CLASS_BODY`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > [child 1]`
-  - expected: `FUN`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY`
+  - Expected: `FUN`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS`
+  - Expected: `0`
+  - Actual: `3`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > CLASS`
+  - Expected: `(none)`
+  - Actual: `USER_TYPE`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > CLASS`
+  - Expected: `(none)`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > CLASS`
+  - Expected: `(none)`
+  - Actual: `CLASS_BODY`
 
 ### ObjectLiteralAsStatement
 
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL`
-  - expected: `OBJECT_LITERAL`
-  - actual: `DOT_QUALIFIED_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION`
-  - expected: `OBJECT_DECLARATION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `OBJECT_LITERAL`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `OBJECT_DECLARATION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
-  - expected: `CLASS_BODY`
-  - actual: `FUNCTION_LITERAL`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY > [child 0]`
-  - expected: `(absent)`
-  - actual: `BLOCK`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `CLASS_BODY`
 
 ### SimpleExpressions
 
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST`
-  - expected: `34`
-  - actual: `65`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `VALUE_PARAMETER`
-  - actual: `INTEGER_CONSTANT`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `CHARACTER_CONSTANT`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `VALUE_PARAMETER`
-  - actual: `INTEGER_CONSTANT`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `STRING_TEMPLATE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `STRING_TEMPLATE`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `VALUE_PARAMETER`
-  - actual: `CHARACTER_CONSTANT`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `FLOAT_CONSTANT`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-
-*... and 116 more difference(s)*
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `34`
+  - Actual: `65`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `OBJECT_LITERAL`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `INTEGER_CONSTANT`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `LABEL`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `LABEL`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `INTEGER_CONSTANT`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `INTEGER_CONSTANT`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `INTEGER_CONSTANT`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `INTEGER_CONSTANT`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `DOT_QUALIFIED_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `INTEGER_CONSTANT`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > INTEGER_CONSTANT`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `INTEGER_CONSTANT`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `CHARACTER_CONSTANT`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > INTEGER_CONSTANT`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `INTEGER_CONSTANT`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `STRING_TEMPLATE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > CHARACTER_CONSTANT`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `CHARACTER_CONSTANT`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > STRING_TEMPLATE`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `STRING_TEMPLATE`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > STRING_TEMPLATE`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `STRING_TEMPLATE`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `BOOLEAN_CONSTANT`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > FLOAT_CONSTANT`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `FLOAT_CONSTANT`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `NULL`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > DOT_QUALIFIED_EXPRESSION`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `DOT_QUALIFIED_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `SUPER_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > DOT_QUALIFIED_EXPRESSION`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `DOT_QUALIFIED_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > DOT_QUALIFIED_EXPRESSION`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `DOT_QUALIFIED_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > DOT_QUALIFIED_EXPRESSION`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `DOT_QUALIFIED_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > BOOLEAN_CONSTANT`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `BOOLEAN_CONSTANT`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > BOOLEAN_CONSTANT`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `BOOLEAN_CONSTANT`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > NULL`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `NULL`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > THIS_EXPRESSION`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `THIS_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `INTEGER_CONSTANT`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > SUPER_EXPRESSION`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `SUPER_EXPRESSION`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `INTEGER_CONSTANT`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > PARENTHESIZED`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK`
+  - Expected: `6`
+  - Actual: `4`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `LABEL`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `LABEL`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
+  - Expected: `LABEL`
+  - Actual: `PREFIX_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
+  - Expected: `LABEL`
+  - Actual: `PREFIX_EXPRESSION`
 
 ### Super
 
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION`
-  - expected: `SUPER_EXPRESSION`
-  - actual: `DOT_QUALIFIED_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION > [child 0]`
-  - expected: `(absent)`
-  - actual: `SUPER_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION`
-  - expected: `SUPER_EXPRESSION`
-  - actual: `DOT_QUALIFIED_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `SUPER_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION`
-  - expected: `SUPER_EXPRESSION`
-  - actual: `DOT_QUALIFIED_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > SUPER_EXPRESSION > [child 0]`
-  - expected: `(absent)`
-  - actual: `SUPER_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-
-*... and 12 more difference(s)*
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
 
 ### TypeModifiers
 
-- **[name_mismatch]** at `KtFile > PROPERTY > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[name_mismatch]** at `KtFile > PROPERTY > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > PROPERTY > MODIFIER_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > MODIFIER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > MODIFIER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[name_mismatch]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `2`
-  - actual: `3`
-- **[name_mismatch]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-
-*... and 66 more difference(s)*
+- **name_mismatch** at `KtFile > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > PARENTHESIZED`
+  - Expected: `USER_TYPE`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `2`
+  - Actual: `3`
+- **extra_child** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `(none)`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > ANNOTATION_ENTRY`
+  - Expected: `USER_TYPE`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `2`
+  - Actual: `3`
+- **extra_child** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `(none)`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > ANNOTATION_ENTRY`
+  - Expected: `USER_TYPE`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > PROPERTY`
+  - Expected: `2`
+  - Actual: `3`
+- **extra_child** at `KtFile > PROPERTY`
+  - Expected: `(none)`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `USER_TYPE`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > PROPERTY`
+  - Expected: `2`
+  - Actual: `3`
+- **extra_child** at `KtFile > PROPERTY`
+  - Expected: `(none)`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `USER_TYPE`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > PROPERTY > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > FUN > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > FUN`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > FUN`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `BLOCK`
 
 ### TypeParametersBeforeName
 
-- **[child_count_mismatch]** at `KtFile > FUN`
-  - expected: `1`
-  - actual: `3`
-- **[child_count_mismatch]** at `KtFile > FUN > TYPE_PARAMETER_LIST`
-  - expected: `3`
-  - actual: `2`
-- **[missing_child]** at `KtFile > FUN > TYPE_PARAMETER_LIST > [child 2]`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > FUN > [child 1]`
-  - expected: `(absent)`
-  - actual: `ANNOTATION_ENTRY`
-- **[extra_child]** at `KtFile > FUN > [child 2]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[name_mismatch]** at `KtFile > FUN > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[name_mismatch]** at `KtFile > FUN > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > FUN > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > MODIFIER_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > FUN`
+  - Expected: `1`
+  - Actual: `3`
+- **extra_child** at `KtFile > FUN`
+  - Expected: `(none)`
+  - Actual: `ANNOTATION_ENTRY`
+- **extra_child** at `KtFile > FUN`
+  - Expected: `(none)`
+  - Actual: `USER_TYPE`
+- **child_count_mismatch** at `KtFile > FUN > TYPE_PARAMETER_LIST`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > FUN > TYPE_PARAMETER_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
 
 ### TypealiasIsKeyword
 
-- **[child_count_mismatch]** at `KtFile`
-  - expected: `2`
-  - actual: `1`
-- **[child_count_mismatch]** at `KtFile > PROPERTY`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > PROPERTY > [child 0]`
-  - expected: `(absent)`
-  - actual: `INTEGER_CONSTANT`
-- **[missing_child]** at `KtFile > [child 1]`
-  - expected: `TYPEALIAS`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile`
+  - Expected: `TYPEALIAS`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > PROPERTY`
+  - Expected: `0`
+  - Actual: `1`
+- **extra_child** at `KtFile > PROPERTY`
+  - Expected: `(none)`
+  - Actual: `INTEGER_CONSTANT`
 
 ### annotatedParameterInEnumConstructor
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > USER_TYPE > [child 1]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY`
+  - Expected: `VALUE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > VALUE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `VALUE_ARGUMENT_LIST`
 
 ### annotationValues
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `DOT_QUALIFIED_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT > [child 0]`
-  - expected: `(absent)`
-  - actual: `INTEGER_CONSTANT`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > [child 0]`
-  - expected: `(absent)`
-  - actual: `CALLABLE_REFERENCE_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > [child 0]`
-  - expected: `(absent)`
-  - actual: `CALLABLE_REFERENCE_EXPRESSION`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
+  - Expected: `0`
+  - Actual: `1`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
+  - Expected: `(none)`
+  - Actual: `CALLABLE_REFERENCE_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
+  - Expected: `0`
+  - Actual: `1`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > CLASS > MODIFIER_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
+  - Expected: `(none)`
+  - Actual: `CALLABLE_REFERENCE_EXPRESSION`
 
 ### annotations
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > MODIFIER_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `VALUE_PARAMETER`
-  - actual: `ANNOTATION_ENTRY`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > MODIFIER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > MODIFIER_LIST > [child 0]`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `VALUE_PARAMETER`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `VALUE_PARAMETER`
-  - actual: `ANNOTATION_ENTRY`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `USER_TYPE`
-
-*... and 46 more difference(s)*
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > TYPE_PARAMETER_LIST > TYPE_PARAMETER > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > ANNOTATION_ENTRY`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > ANNOTATION_ENTRY`
+  - Expected: `VALUE_PARAMETER`
+  - Actual: `ANNOTATION_ENTRY`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `4`
+  - Actual: `5`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `(none)`
+  - Actual: `BLOCK`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `3`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `(none)`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > ANNOTATION_ENTRY`
+  - Expected: `USER_TYPE`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > ANNOTATION_ENTRY`
+  - Expected: `USER_TYPE`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE`
+  - Expected: `BLOCK`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > PROPERTY_DELEGATE > CALL_EXPRESSION > FUNCTION_LITERAL > INTEGER_CONSTANT`
+  - Expected: `BLOCK`
+  - Actual: `INTEGER_CONSTANT`
 
 ### annotationsOnParenthesizedTypes
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > MODIFIER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > MODIFIER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN`
-  - expected: `3`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `POSTFIX_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `POSTFIX_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > POSTFIX_EXPRESSION`
+  - Expected: `USER_TYPE`
+  - Actual: `POSTFIX_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `4`
+  - Actual: `3`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `POSTFIX_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > POSTFIX_EXPRESSION`
+  - Expected: `USER_TYPE`
+  - Actual: `POSTFIX_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY`
+  - Expected: `POSTFIX_EXPRESSION`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > POSTFIX_EXPRESSION`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `POSTFIX_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > NULLABLE_TYPE`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > NULLABLE_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > NULLABLE_TYPE > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
 
-*... and 43 more difference(s)*
+### anonymousReturnWithGenericType
+
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `(none)`
+  - Actual: `CLASS_BODY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `USER_TYPE`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `(none)`
+  - Actual: `CLASS_BODY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `USER_TYPE`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `(none)`
+  - Actual: `CLASS_BODY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `USER_TYPE`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `(none)`
+  - Actual: `CLASS_BODY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `USER_TYPE`
 
 ### complicateLTGT
 
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `PARENTHESIZED`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `TYPE_PROJECTION`
-  - actual: `IF`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `1`
-  - actual: `3`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > FUNCTION_TYPE`
-  - expected: `FUNCTION_TYPE`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > FUNCTION_TYPE`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > FUNCTION_TYPE > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `INTEGER_CONSTANT`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > FUNCTION_TYPE > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > FUNCTION_TYPE > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > FUNCTION_TYPE > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > [child 1]`
-  - expected: `(absent)`
-  - actual: `INTEGER_CONSTANT`
-- **[extra_child]** at `KtFile > FUN > BLOCK > IF > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > [child 2]`
-  - expected: `(absent)`
-  - actual: `INTEGER_CONSTANT`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > IF > INTEGER_CONSTANT`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `BLOCK`
-- **[missing_child]** at `KtFile > FUN > BLOCK > [child 1]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > BLOCK`
+  - Expected: `FUNCTION_LITERAL`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `INTEGER_CONSTANT`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FUN > BLOCK > IF > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+
+### complicateLTGTE
+
+- **child_count_mismatch** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > BLOCK > IF`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
 
 ### definitelyNotNullTypes
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `VALUE_PARAMETER`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `VALUE_PARAMETER`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
 
 ### dependencyOnNestedClasses
 
-- **[child_count_mismatch]** at `KtFile > CLASS > USER_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > USER_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > CLASS`
-  - expected: `CLASS`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY`
-  - expected: `CLASS_BODY`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY`
-  - expected: `3`
-  - actual: `0`
-
-*... and 4 more difference(s)*
+- **child_count_mismatch** at `KtFile > CLASS > USER_TYPE`
+  - Expected: `1`
+  - Actual: `0`
+- **missing_child** at `KtFile > CLASS > USER_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `1`
+  - Actual: `0`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `1`
+  - Actual: `0`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `1`
+  - Actual: `0`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `1`
+  - Actual: `0`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE`
+  - Expected: `1`
+  - Actual: `0`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN > USER_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > BINARY_EXPRESSION`
+  - Expected: `CLASS`
+  - Actual: `BINARY_EXPRESSION`
 
 ### destructuringInLambdas
 
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `FUNCTION_LITERAL`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `VALUE_PARAMETER_LIST`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `DESTRUCTURING_DECLARATION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
-  - expected: `BLOCK`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `FUNCTION_LITERAL`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `VALUE_PARAMETER_LIST`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `DESTRUCTURING_DECLARATION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
-  - expected: `BLOCK`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `FUNCTION_LITERAL`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `VALUE_PARAMETER_LIST`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
 
-*... and 50 more difference(s)*
+### enumEntryContent
+
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > ENUM_ENTRY > CLASS_BODY > CLASS_INITIALIZER > BLOCK > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `CLASS_BODY`
 
 ### incorrectLTGTFallback
 
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
-  - expected: `3`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > [child 0]`
-  - expected: `TYPE_PROJECTION`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
-  - expected: `LABEL`
-  - actual: `PREFIX_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 0]`
-  - expected: `(absent)`
-  - actual: `LABEL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 1]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > [child 2]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
-  - expected: `3`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `BINARY_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > [child 0]`
-  - expected: `TYPE_PROJECTION`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
-  - expected: `LABEL`
-  - actual: `PREFIX_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 0]`
-  - expected: `(absent)`
-  - actual: `LABEL`
-- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 1]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > [child 2]`
-  - expected: `FUNCTION_LITERAL`
-  - actual: `(absent)`
-
-*... and 194 more difference(s)*
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
+- **name_mismatch** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - Expected: `CALL_EXPRESSION`
+  - Actual: `BINARY_EXPRESSION`
 
 ### innerTypes
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `TYPE_PROJECTION`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `TYPE_PROJECTION`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > [child 1]`
-  - expected: `TYPE_PROJECTION`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > [child 1]`
-  - expected: `(absent)`
-  - actual: `TYPE_PROJECTION`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
-  - expected: `2`
-  - actual: `3`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_ARGUMENT_LIST`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_PROJECTION`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST`
-  - expected: `2`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > [child 0]`
-  - expected: `TYPE_PROJECTION`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > [child 1]`
-  - expected: `TYPE_PROJECTION`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `TYPE_PROJECTION`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `TYPE_PROJECTION`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION`
-  - expected: `1`
-  - actual: `0`
-
-*... and 14 more difference(s)*
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `TYPE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `2`
+  - Actual: `3`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
+  - Expected: `(none)`
+  - Actual: `TYPE_ARGUMENT_LIST`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `TYPE_ARGUMENT_LIST`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `(none)`
+  - Actual: `TYPE_PROJECTION`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `TYPE_ARGUMENT_LIST`
 
 ### localClass
 
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL > BLOCK`
-  - expected: `BLOCK`
-  - actual: `CLASS`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL > BLOCK`
-  - expected: `2`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL > BLOCK > [child 0]`
-  - expected: `CLASS`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL > BLOCK > [child 1]`
-  - expected: `CALL_EXPRESSION`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
-  - expected: `(absent)`
-  - actual: `CALL_EXPRESSION`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - Expected: `(none)`
+  - Actual: `CALL_EXPRESSION`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL > CLASS`
+  - Expected: `BLOCK`
+  - Actual: `CLASS`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `CLASS_BODY`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION`
+  - Expected: `(none)`
+  - Actual: `CLASS_BODY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
+  - Expected: `OBJECT_DECLARATION`
+  - Actual: `USER_TYPE`
 
 ### modifiers
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION`
-  - expected: `DOT_QUALIFIED_EXPRESSION`
-  - actual: `CALL_EXPRESSION`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `DOT_QUALIFIED_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT > [child 0]`
-  - expected: `(absent)`
-  - actual: `INTEGER_CONSTANT`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > CALL_EXPRESSION`
+  - Expected: `DOT_QUALIFIED_EXPRESSION`
+  - Actual: `CALL_EXPRESSION`
 
 ### suspendLambda
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE`
-  - expected: `FUNCTION_TYPE`
-  - actual: `PARENTHESIZED`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `FUNCTION_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE`
-  - expected: `FUNCTION_TYPE`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER`
-  - expected: `FUNCTION_TYPE_RECEIVER`
-  - actual: `FUNCTION_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `FUNCTION_TYPE_RECEIVER`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > FUNCTION_TYPE > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN`
-  - expected: `4`
-  - actual: `3`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `PARENTHESIZED`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `FUNCTION_TYPE`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET`
-  - expected: `ANNOTATION_TARGET`
-  - actual: `FUNCTION_TYPE_RECEIVER`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET > [child 0]`
-  - expected: `(absent)`
-  - actual: `ANNOTATION_ENTRY`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > MODIFIER_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-
-*... and 82 more difference(s)*
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `4`
+  - Actual: `3`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > FUN`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `BLOCK`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > NULLABLE_TYPE > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > NULLABLE_TYPE > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > NULLABLE_TYPE > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > NULLABLE_TYPE > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > NULLABLE_TYPE`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > NULLABLE_TYPE`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > NULLABLE_TYPE > PARENTHESIZED`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
 
 ### topJvmPackageName
 
-- **[child_count_mismatch]** at `KtFile`
-  - expected: `3`
-  - actual: `5`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST`
-  - expected: `3`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `3`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `ANNOTATION_TARGET`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > [child 2]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `3`
-  - actual: `4`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET`
-  - expected: `ANNOTATION_TARGET`
-  - actual: `VALUE_ARGUMENT`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET > [child 0]`
-  - expected: `(absent)`
-  - actual: `STRING_TEMPLATE`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `STRING_TEMPLATE`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `VALUE_ARGUMENT`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `VALUE_ARGUMENT`
-  - actual: `STRING_TEMPLATE`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > STRING_TEMPLATE`
-  - expected: `STRING_TEMPLATE`
-  - actual: `LITERAL_STRING_TEMPLATE_ENTRY`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > STRING_TEMPLATE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > STRING_TEMPLATE > [child 0]`
-  - expected: `LITERAL_STRING_TEMPLATE_ENTRY`
-  - actual: `(absent)`
-
-*... and 15 more difference(s)*
+- **child_count_mismatch** at `KtFile`
+  - Expected: `2`
+  - Actual: `4`
+- **extra_child** at `KtFile`
+  - Expected: `(none)`
+  - Actual: `FILE_ANNOTATION_LIST`
+- **extra_child** at `KtFile`
+  - Expected: `(none)`
+  - Actual: `FUN`
+- **child_count_mismatch** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `3`
+  - Actual: `2`
+- **missing_child** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST > USER_TYPE`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST > VALUE_ARGUMENT_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `FUN`
+  - Actual: `FILE_ANNOTATION_LIST`
 
 ### topJvmPackageNameMultifile
 
-- **[child_count_mismatch]** at `KtFile`
-  - expected: `3`
-  - actual: `6`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST`
-  - expected: `4`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `3`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `ANNOTATION_TARGET`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > [child 2]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY`
-  - expected: `3`
-  - actual: `4`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET`
-  - expected: `ANNOTATION_TARGET`
-  - actual: `VALUE_ARGUMENT`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > ANNOTATION_TARGET > [child 0]`
-  - expected: `(absent)`
-  - actual: `STRING_TEMPLATE`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_ARGUMENT`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `STRING_TEMPLATE`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `VALUE_ARGUMENT`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT`
-  - expected: `VALUE_ARGUMENT`
-  - actual: `STRING_TEMPLATE`
-- **[name_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > STRING_TEMPLATE`
-  - expected: `STRING_TEMPLATE`
-  - actual: `LITERAL_STRING_TEMPLATE_ENTRY`
-- **[child_count_mismatch]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > STRING_TEMPLATE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FILE_ANNOTATION_LIST > ANNOTATION_ENTRY > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT > STRING_TEMPLATE > [child 0]`
-  - expected: `LITERAL_STRING_TEMPLATE_ENTRY`
-  - actual: `(absent)`
-
-*... and 16 more difference(s)*
+- **child_count_mismatch** at `KtFile`
+  - Expected: `2`
+  - Actual: `5`
+- **extra_child** at `KtFile`
+  - Expected: `(none)`
+  - Actual: `FILE_ANNOTATION_LIST`
+- **extra_child** at `KtFile`
+  - Expected: `(none)`
+  - Actual: `FILE_ANNOTATION_LIST`
+- **extra_child** at `KtFile`
+  - Expected: `(none)`
+  - Actual: `FUN`
+- **child_count_mismatch** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `4`
+  - Actual: `2`
+- **missing_child** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `(none)`
+- **missing_child** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST > USER_TYPE`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST > VALUE_ARGUMENT_LIST`
+  - Expected: `ANNOTATION_ENTRY`
+  - Actual: `VALUE_ARGUMENT_LIST`
+- **name_mismatch** at `KtFile > FILE_ANNOTATION_LIST`
+  - Expected: `FUN`
+  - Actual: `FILE_ANNOTATION_LIST`
 
 ### topLevelMembers
 
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[child_count_mismatch]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `2`
-  - actual: `1`
-- **[missing_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > [child 1]`
-  - expected: `INTEGER_CONSTANT`
-  - actual: `(absent)`
-- **[extra_child]** at `KtFile > FUN > VALUE_PARAMETER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `INTEGER_CONSTANT`
-- **[child_count_mismatch]** at `KtFile > PROPERTY > USER_TYPE`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > PROPERTY > USER_TYPE > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `1`
+  - Actual: `2`
+- **extra_child** at `KtFile > FUN > VALUE_PARAMETER_LIST`
+  - Expected: `(none)`
+  - Actual: `INTEGER_CONSTANT`
+- **child_count_mismatch** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
+  - Expected: `INTEGER_CONSTANT`
+  - Actual: `(none)`
+- **child_count_mismatch** at `KtFile > PROPERTY > USER_TYPE`
+  - Expected: `1`
+  - Actual: `0`
+- **missing_child** at `KtFile > PROPERTY > USER_TYPE`
+  - Expected: `USER_TYPE`
+  - Actual: `(none)`
 
 ### typeAliasExpansion
 
-- **[child_count_mismatch]** at `KtFile > TYPEALIAS > USER_TYPE`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > TYPEALIAS > USER_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `TYPE_ARGUMENT_LIST`
-- **[child_count_mismatch]** at `KtFile > TYPEALIAS > USER_TYPE > USER_TYPE`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > TYPEALIAS > USER_TYPE > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `TYPE_PROJECTION`
-- **[extra_child]** at `KtFile > TYPEALIAS > USER_TYPE > USER_TYPE > [child 1]`
-  - expected: `(absent)`
-  - actual: `TYPE_PROJECTION`
-- **[missing_child]** at `KtFile > TYPEALIAS > USER_TYPE > [child 1]`
-  - expected: `TYPE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE`
-  - expected: `FUNCTION_TYPE`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `FUNCTION_TYPE`
-- **[child_count_mismatch]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER`
-  - expected: `VALUE_PARAMETER`
-  - actual: `VALUE_PARAMETER_LIST`
-- **[name_mismatch]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `VALUE_PARAMETER`
-- **[child_count_mismatch]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > VALUE_PARAMETER_LIST > VALUE_PARAMETER > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[extra_child]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > VALUE_PARAMETER_LIST > [child 1]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[missing_child]** at `KtFile > TYPEALIAS > NULLABLE_TYPE > FUNCTION_TYPE > [child 1]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `BLOCK`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
-  - actual: `(absent)`
-
-*... and 6 more difference(s)*
+- **child_count_mismatch** at `KtFile > TYPEALIAS > USER_TYPE`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > TYPEALIAS > USER_TYPE`
+  - Expected: `TYPE_ARGUMENT_LIST`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > TYPEALIAS > USER_TYPE > TYPE_ARGUMENT_LIST`
+  - Expected: `USER_TYPE`
+  - Actual: `TYPE_ARGUMENT_LIST`
+- **name_mismatch** at `KtFile > TYPEALIAS > NULLABLE_TYPE > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL > BLOCK`
+  - Expected: `VALUE_PARAMETER_LIST`
+  - Actual: `BLOCK`
+- **child_count_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `2`
+  - Actual: `1`
+- **missing_child** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL`
+  - Expected: `BLOCK`
+  - Actual: `(none)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_LITERAL > BLOCK`
+  - Expected: `VALUE_PARAMETER_LIST`
+  - Actual: `BLOCK`
 
 ### typeModifiers2
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > FUNCTION_TYPE`
-  - expected: `FUNCTION_TYPE`
-  - actual: `PARENTHESIZED`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > FUNCTION_TYPE > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `FUNCTION_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > FUNCTION_TYPE > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > FUNCTION_TYPE > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > PARENTHESIZED`
+  - Expected: `FUNCTION_TYPE`
+  - Actual: `PARENTHESIZED`
 
 ### typeParams
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE`
-  - expected: `USER_TYPE`
-  - actual: `PARENTHESIZED`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE`
-  - expected: `0`
-  - actual: `1`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > USER_TYPE > [child 0]`
-  - expected: `(absent)`
-  - actual: `USER_TYPE`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > FUN > VALUE_PARAMETER_LIST > VALUE_PARAMETER > FUNCTION_TYPE > FUNCTION_TYPE_RECEIVER > PARENTHESIZED`
+  - Expected: `USER_TYPE`
+  - Actual: `PARENTHESIZED`
 
 ### types
 
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > MODIFIER_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST`
-  - expected: `MODIFIER_LIST`
-  - actual: `ANNOTATION_ENTRY`
-- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `ANNOTATION_ENTRY`
-  - actual: `USER_TYPE`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > ANNOTATION_ENTRY`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > MODIFIER_LIST > ANNOTATION_ENTRY > [child 0]`
-  - expected: `USER_TYPE`
-  - actual: `(absent)`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
+- **name_mismatch** at `KtFile > CLASS > CLASS_BODY > PROPERTY > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION > ANNOTATION_ENTRY`
+  - Expected: `MODIFIER_LIST`
+  - Actual: `ANNOTATION_ENTRY`
 
 ## Common Mismatch Patterns
 
-### By Difference Kind
+| Diff Kind | Count |
+|-----------|-------|
+| name_mismatch | 175 |
+| child_count_mismatch | 108 |
+| missing_child | 84 |
+| extra_child | 69 |
 
-| Kind | Total occurrences |
-|------|-------------------|
-| name_mismatch | 378 |
-| child_count_mismatch | 364 |
-| missing_child | 266 |
-| extra_child | 226 |
+### Most Common Name Mismatches
 
-### Most Common Specific Patterns
-
-Patterns that appear in multiple files, grouped by (kind, expected, actual):
-
-| Pattern | Files affected | Example files |
-|---------|---------------|---------------|
-| [child_count_mismatch] expected=`2` actual=`1` | 24 | ByClauses, CommentsBindingInLambda, DocCommentAfterFileAnnotations (+21 more) |
-| [child_count_mismatch] expected=`0` actual=`1` | 22 | BlockCommentAtBeginningOfFile3, BlockCommentAtBeginningOfFile4, EnumMissingName (+19 more) |
-| [child_count_mismatch] expected=`1` actual=`0` | 22 | CommentsBindingInLambda, NewLinesValidOperations, NewlinesInParentheses (+19 more) |
-| [missing_child] expected=`USER_TYPE` actual=`(absent)` | 17 | NewLinesValidOperations, NewlinesInParentheses, SimpleExpressions (+14 more) |
-| [child_count_mismatch] expected=`1` actual=`2` | 15 | CommentsBindingInLambda, EnumShortWithOverload, ExtensionsWithQNReceiver (+12 more) |
-| [missing_child] expected=`VALUE_ARGUMENT_LIST` actual=`(absent)` | 14 | CommentsBindingInLambda, EnumMissingName, EnumShortCommas (+11 more) |
-| [extra_child] expected=`(absent)` actual=`USER_TYPE` | 14 | NewLinesValidOperations, NonTypeBeforeDotInBaseClass, Super (+11 more) |
-| [child_count_mismatch] expected=`0` actual=`2` | 10 | ByClauses, NewLinesValidOperations, SimpleExpressions (+7 more) |
-| [missing_child] expected=`ANNOTATION_ENTRY` actual=`(absent)` | 8 | DocCommentAfterFileAnnotations, LineCommentAfterFileAnnotations, TypeModifiers (+5 more) |
-| [extra_child] expected=`(absent)` actual=`INTEGER_CONSTANT` | 7 | ByClauses, SimpleExpressions, TypealiasIsKeyword (+4 more) |
-| [name_mismatch] expected=`CALL_EXPRESSION` actual=`VALUE_ARGUMENT_LIST` | 7 | CommentsBindingInLambda, ObjectLiteralAsStatement, Super (+4 more) |
-| [missing_child] expected=`BLOCK` actual=`(absent)` | 7 | CommentsBindingInLambda, NewlinesInParentheses, TypeModifiers (+4 more) |
-| [extra_child] expected=`(absent)` actual=`VALUE_ARGUMENT` | 7 | EnumMissingName, EnumShortCommas, EnumShortWithOverload (+4 more) |
-| [name_mismatch] expected=`DOT_QUALIFIED_EXPRESSION` actual=`CALL_EXPRESSION` | 7 | ObjectLiteralAsStatement, Super, annotationValues (+4 more) |
-| [name_mismatch] expected=`ANNOTATION_ENTRY` actual=`USER_TYPE` | 7 | TypeModifiers, TypeParametersBeforeName, annotations (+4 more) |
-| [child_count_mismatch] expected=`3` actual=`2` | 6 | EnumShortWithOverload, TypeModifiers, TypeParametersBeforeName (+3 more) |
-| [child_count_mismatch] expected=`2` actual=`0` | 6 | SimpleExpressions, annotations, destructuringInLambdas (+3 more) |
-| [name_mismatch] expected=`USER_TYPE` actual=`VALUE_ARGUMENT_LIST` | 5 | EnumMissingName, EnumShortCommas, EnumShortWithOverload (+2 more) |
-| [extra_child] expected=`(absent)` actual=`VALUE_ARGUMENT_LIST` | 5 | NonTypeBeforeDotInBaseClass, annotations, incorrectLTGTFallback (+2 more) |
-| [name_mismatch] expected=`MODIFIER_LIST` actual=`ANNOTATION_ENTRY` | 5 | TypeModifiers, TypeParametersBeforeName, annotations (+2 more) |
-| [child_count_mismatch] expected=`3` actual=`0` | 5 | TypeModifiers, dependencyOnNestedClasses, destructuringInLambdas (+2 more) |
-| [extra_child] expected=`(absent)` actual=`FUNCTION_LITERAL` | 4 | ByClauses, FunctionLiterals, dependencyOnNestedClasses (+1 more) |
-| [extra_child] expected=`(absent)` actual=`CALL_EXPRESSION` | 4 | CommentsBindingInLambda, SimpleExpressions, destructuringInLambdas (+1 more) |
-| [missing_child] expected=`INTEGER_CONSTANT` actual=`(absent)` | 4 | CommentsBindingInLambda, SimpleExpressions, annotations (+1 more) |
-| [missing_child] expected=`VALUE_PARAMETER` actual=`(absent)` | 4 | CommentsBindingInLambda, complicateLTGT, destructuringInLambdas (+1 more) |
-| [child_count_mismatch] expected=`2` actual=`3` | 4 | DuplicateAccessor, TypeModifiers, annotations (+1 more) |
-| [extra_child] expected=`(absent)` actual=`BLOCK` | 4 | EnumShortWithOverload, FunctionLiterals, ObjectLiteralAsStatement (+1 more) |
-| [name_mismatch] expected=`USER_TYPE` actual=`TYPE_ARGUMENT_LIST` | 4 | ExtensionsWithQNReceiver, NewlinesInParentheses, innerTypes (+1 more) |
-| [extra_child] expected=`(absent)` actual=`VALUE_PARAMETER` | 4 | SimpleExpressions, annotations, definitelyNotNullTypes (+1 more) |
-| [name_mismatch] expected=`FUNCTION_TYPE` actual=`PARENTHESIZED` | 4 | TypeModifiers, suspendLambda, typeAliasExpansion (+1 more) |
+| Actual (TS) → Expected (PSI) | Count |
+|------------------------------|-------|
+| ANNOTATION_ENTRY → MODIFIER_LIST | 20 |
+| BINARY_EXPRESSION → CALL_EXPRESSION | 17 |
+| CALL_EXPRESSION → DOT_QUALIFIED_EXPRESSION | 16 |
+| PARENTHESIZED → MODIFIER_LIST | 15 |
+| VALUE_ARGUMENT_LIST → USER_TYPE | 13 |
+| PARENTHESIZED → FUNCTION_TYPE | 11 |
+| TYPE_ARGUMENT_LIST → USER_TYPE | 6 |
+| ANNOTATION_ENTRY → USER_TYPE | 6 |
+| USER_TYPE → OBJECT_DECLARATION | 5 |
+| CLASS_BODY → OBJECT_DECLARATION | 4 |
+| DOT_QUALIFIED_EXPRESSION → VALUE_PARAMETER | 4 |
+| BLOCK → VALUE_PARAMETER_LIST | 3 |
+| BINARY_EXPRESSION → PREFIX_EXPRESSION | 3 |
+| CLASS_BODY → VALUE_ARGUMENT_LIST | 3 |
+| USER_TYPE → ANNOTATION_TARGET | 2 |
+| FUNCTION_LITERAL → BINARY_EXPRESSION | 2 |
+| BINARY_EXPRESSION → FUNCTION_LITERAL | 2 |
+| INTEGER_CONSTANT → VALUE_PARAMETER | 2 |
+| STRING_TEMPLATE → VALUE_PARAMETER | 2 |
+| BOOLEAN_CONSTANT → VALUE_PARAMETER | 2 |
+| PREFIX_EXPRESSION → LABEL | 2 |
+| PARENTHESIZED → USER_TYPE | 2 |
+| BLOCK → FUNCTION_TYPE | 2 |
+| ANNOTATION_ENTRY → VALUE_PARAMETER | 2 |
+| POSTFIX_EXPRESSION → USER_TYPE | 2 |
+| USER_TYPE → ANNOTATION_ENTRY | 2 |
+| VALUE_ARGUMENT_LIST → ANNOTATION_ENTRY | 2 |
+| FILE_ANNOTATION_LIST → FUN | 2 |
+| CALL_EXPRESSION → INTEGER_CONSTANT | 1 |
+| CALL_EXPRESSION → BLOCK | 1 |
+| PROPERTY → BLOCK | 1 |
+| CALL_EXPRESSION → FUNCTION_LITERAL | 1 |
+| BINARY_WITH_TYPE → DOT_QUALIFIED_EXPRESSION | 1 |
+| BINARY_EXPRESSION → BINARY_WITH_TYPE | 1 |
+| PROPERTY → PREFIX_EXPRESSION | 1 |
+| ARRAY_ACCESS_EXPRESSION → PARENTHESIZED | 1 |
+| WHEN → PROPERTY | 1 |
+| PROPERTY → WHEN | 1 |
+| CHARACTER_CONSTANT → VALUE_PARAMETER | 1 |
+| FLOAT_CONSTANT → VALUE_PARAMETER | 1 |
+| NULL → VALUE_PARAMETER | 1 |
+| THIS_EXPRESSION → VALUE_PARAMETER | 1 |
+| SUPER_EXPRESSION → VALUE_PARAMETER | 1 |
+| PARENTHESIZED → VALUE_PARAMETER | 1 |
+| USER_TYPE → BLOCK | 1 |
+| INTEGER_CONSTANT → BLOCK | 1 |
+| POSTFIX_EXPRESSION → FUNCTION_TYPE | 1 |
+| BINARY_EXPRESSION → CLASS | 1 |
+| CLASS → BLOCK | 1 |
 
 ## Tree-Sitter Parse Errors
 
-107 file(s) had ERROR/MISSING nodes in tree-sitter output:
+107 file(s) failed to parse cleanly with tree-sitter.
 
-| # | File | Detail |
-|---|------|--------|
-| 1 | AbsentInnerType | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 2 | AnnotatedIntersections | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 3 | AssertNotNull | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 4 | BabySteps_ERR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 5 | BackslashInString | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 6 | BlockCommentAtBeginningOfFile1 | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 7 | BlockCommentAtBeginningOfFile2 | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 8 | BlockCommentUnmatchedClosing_ERR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 9 | CallsInWhen | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 10 | CollectionLiterals | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 11 | CollectionLiterals_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 12 | CommentsBinding | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 13 | Constructors | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 14 | ControlStructures | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 15 | DefaultKeyword | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 16 | DefinitelyNotNullType | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 17 | DoubleColon | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 18 | DoubleColonWhitespaces | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 19 | DoubleColon_ERR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 20 | DynamicSoftKeyword | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 21 | DynamicTypes | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 22 | EmptyName | 10 ERROR/MISSING node(s) in tree-sitter output |
-| 23 | EnumEntryCommaAnnotatedMember | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 24 | EnumEntryCommaInlineMember | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 25 | EnumEntryCommaMember | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 26 | EnumEntryCommaPublicMember | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 27 | EnumEntrySpaceInlineMember | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 28 | EnumEntrySpaceMember | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 29 | EnumEntryTwoCommas | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 30 | EnumInline | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 31 | EnumInlinePublic | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 32 | EnumOldConstructorSyntax | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 33 | EnumWithAnnotationKeyword | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 34 | Expressions_ERR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 35 | FileStart_ERR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 36 | ForWithMultiDecl | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 37 | FunctionCalls | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 38 | FunctionExpressions | 58 ERROR/MISSING node(s) in tree-sitter output |
-| 39 | FunctionExpressions_ERR | 29 ERROR/MISSING node(s) in tree-sitter output |
-| 40 | FunctionLiterals_ERR | 46 ERROR/MISSING node(s) in tree-sitter output |
-| 41 | FunctionNoParameterList | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 42 | FunctionTypes | 28 ERROR/MISSING node(s) in tree-sitter output |
-| 43 | Functions | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 44 | FunctionsWithoutName | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 45 | FunctionsWithoutName_ERR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 46 | Functions_ERR | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 47 | Imports | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 48 | Imports_ERR | 20 ERROR/MISSING node(s) in tree-sitter output |
-| 49 | IncompleteFunctionLiteral | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 50 | IntegerLiteral | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 51 | InterfaceWithEnumKeyword | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 52 | Labels | 11 ERROR/MISSING node(s) in tree-sitter output |
-| 53 | LocalDeclarations | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 54 | MultiVariableDeclarations | 10 ERROR/MISSING node(s) in tree-sitter output |
-| 55 | ParameterNameMising | 9 ERROR/MISSING node(s) in tree-sitter output |
-| 56 | ParameterType | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 57 | ParameterType_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 58 | Precedence | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 59 | PrimaryConstructorModifiers_ERR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 60 | Properties | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 61 | PropertiesFollowedByInitializers | 13 ERROR/MISSING node(s) in tree-sitter output |
-| 62 | Properties_ERR | 9 ERROR/MISSING node(s) in tree-sitter output |
-| 63 | SimpleClassMembers_ERR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 64 | SimpleIntersections | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 65 | SimpleModifiers | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 66 | SoftKeywords | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 67 | SoftKeywordsInTypeArguments | 1 ERROR/MISSING node(s) in tree-sitter output |
-| 68 | StringTemplates | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 69 | TripleDot | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 70 | TryRecovery | 10 ERROR/MISSING node(s) in tree-sitter output |
-| 71 | TypeAlias_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 72 | TypeExpressionAmbiguities_ERR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 73 | TypeModifiersParenthesized | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 74 | TypeModifiers_ERR | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 75 | UnsignedLiteral | 11 ERROR/MISSING node(s) in tree-sitter output |
-| 76 | When | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 77 | WhenWithSubjectVariable | 26 ERROR/MISSING node(s) in tree-sitter output |
-| 78 | WhenWithSubjectVariable_ERR | 10 ERROR/MISSING node(s) in tree-sitter output |
-| 79 | When_ERR | 9 ERROR/MISSING node(s) in tree-sitter output |
-| 80 | annotatedFlexibleTypes | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 81 | annotationsOnNullableTypes | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 82 | contextParametersAndAnnotations | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 83 | destructuringInLambdas_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 84 | diagnosticTags_ERR | 71 ERROR/MISSING node(s) in tree-sitter output |
-| 85 | emptyArguments | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 86 | emptyArgumentsInAnnotations | 22 ERROR/MISSING node(s) in tree-sitter output |
-| 87 | emptyArgumentsInArrayAccesses | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 88 | emptyContextParameters | 64 ERROR/MISSING node(s) in tree-sitter output |
-| 89 | emptyParameters | 51 ERROR/MISSING node(s) in tree-sitter output |
-| 90 | emptyParametersInFunctionalTypes | 86 ERROR/MISSING node(s) in tree-sitter output |
-| 91 | escapedNames | 1 ERROR/MISSING node(s) in tree-sitter output |
-| 92 | flexibleDnnType | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 93 | kotlinFunInterface_ERR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 94 | multifileClass | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 95 | multifileClass2 | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 96 | mustUseReturnValueFullEnabled | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 97 | mustUseReturnValueHalfEnabled | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 98 | namelessObjectAsEnumMember | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 99 | noCommaBetweenArguments | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 100 | semicolonBetweenDeclarations | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 101 | suggestGuardSyntax | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 102 | topLevelMembersAnnotated | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 103 | trailingCommaAllowed | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 104 | trailingCommaForbidden | 28 ERROR/MISSING node(s) in tree-sitter output |
-| 105 | typeAliasWithConstraints | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 106 | typeAliases | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 107 | valueClass | 2 ERROR/MISSING node(s) in tree-sitter output |
+- **AbsentInnerType**
+- **AnnotatedIntersections**
+- **AssertNotNull**
+- **BabySteps_ERR**
+- **BackslashInString**
+- **BlockCommentAtBeginningOfFile1**
+- **BlockCommentAtBeginningOfFile2**
+- **BlockCommentUnmatchedClosing_ERR**
+- **CallsInWhen**
+- **CollectionLiterals**
+- **CollectionLiterals_ERR**
+- **CommentsBinding**
+- **Constructors**
+- **ControlStructures**
+- **DefaultKeyword**
+- **DefinitelyNotNullType**
+- **DoubleColon**
+- **DoubleColonWhitespaces**
+- **DoubleColon_ERR**
+- **DynamicSoftKeyword**
+- **DynamicTypes**
+- **EmptyName**
+- **EnumEntryCommaAnnotatedMember**
+- **EnumEntryCommaInlineMember**
+- **EnumEntryCommaMember**
+- **EnumEntryCommaPublicMember**
+- **EnumEntrySpaceInlineMember**
+- **EnumEntrySpaceMember**
+- **EnumEntryTwoCommas**
+- **EnumInline**
+- **EnumInlinePublic**
+- **EnumOldConstructorSyntax**
+- **EnumWithAnnotationKeyword**
+- **Expressions_ERR**
+- **FileStart_ERR**
+- **ForWithMultiDecl**
+- **FunctionCalls**
+- **FunctionExpressions**
+- **FunctionExpressions_ERR**
+- **FunctionLiterals_ERR**
+- **FunctionNoParameterList**
+- **FunctionTypes**
+- **Functions**
+- **FunctionsWithoutName**
+- **FunctionsWithoutName_ERR**
+- **Functions_ERR**
+- **Imports**
+- **Imports_ERR**
+- **IncompleteFunctionLiteral**
+- **IntegerLiteral**
+- **InterfaceWithEnumKeyword**
+- **Labels**
+- **LocalDeclarations**
+- **MultiVariableDeclarations**
+- **ParameterNameMising**
+- **ParameterType**
+- **ParameterType_ERR**
+- **Precedence**
+- **PrimaryConstructorModifiers_ERR**
+- **Properties**
+- **PropertiesFollowedByInitializers**
+- **Properties_ERR**
+- **SimpleClassMembers_ERR**
+- **SimpleIntersections**
+- **SimpleModifiers**
+- **SoftKeywords**
+- **SoftKeywordsInTypeArguments**
+- **StringTemplates**
+- **TripleDot**
+- **TryRecovery**
+- **TypeAlias_ERR**
+- **TypeExpressionAmbiguities_ERR**
+- **TypeModifiersParenthesized**
+- **TypeModifiers_ERR**
+- **UnsignedLiteral**
+- **When**
+- **WhenWithSubjectVariable**
+- **WhenWithSubjectVariable_ERR**
+- **When_ERR**
+- **annotatedFlexibleTypes**
+- **annotationsOnNullableTypes**
+- **contextParametersAndAnnotations**
+- **destructuringInLambdas_ERR**
+- **diagnosticTags_ERR**
+- **emptyArguments**
+- **emptyArgumentsInAnnotations**
+- **emptyArgumentsInArrayAccesses**
+- **emptyContextParameters**
+- **emptyParameters**
+- **emptyParametersInFunctionalTypes**
+- **escapedNames**
+- **flexibleDnnType**
+- **kotlinFunInterface_ERR**
+- **multifileClass**
+- **multifileClass2**
+- **mustUseReturnValueFullEnabled**
+- **mustUseReturnValueHalfEnabled**
+- **namelessObjectAsEnumMember**
+- **noCommaBetweenArguments**
+- **semicolonBetweenDeclarations**
+- **suggestGuardSyntax**
+- **topLevelMembersAnnotated**
+- **trailingCommaAllowed**
+- **trailingCommaForbidden**
+- **typeAliasWithConstraints**
+- **typeAliases**
+- **valueClass**
