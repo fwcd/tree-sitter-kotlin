@@ -15,6 +15,7 @@ enum TokenType {
   STRING_END,
   STRING_CONTENT,
   PRIMARY_CONSTRUCTOR_KEYWORD,
+  IMPORT_DOT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -555,6 +556,43 @@ static bool scan_import_list_delimiter(TSLexer *lexer) {
   }
 }
 
+// Scan a dot in import identifiers. Matches '.' normally, but when the dot
+// is followed by a newline and then the 'import' keyword, produces an
+// AUTOMATIC_SEMICOLON (zero-width, before the dot) instead. This cleanly
+// terminates the current import_header, preventing malformed imports
+// (e.g. trailing dots) from bleeding into subsequent valid imports.
+static bool scan_import_dot(TSLexer *lexer) {
+  if (lexer->lookahead != '.') return false;
+
+  // Mark end BEFORE consuming the dot — this is where ASI would go
+  lexer->mark_end(lexer);
+
+  advance(lexer);
+
+  // Peek ahead: skip horizontal whitespace, check for newline
+  bool found_newline = false;
+  while (iswspace(lexer->lookahead)) {
+    if (lexer->lookahead == '\n' || lexer->lookahead == '\r') {
+      found_newline = true;
+    }
+    skip(lexer);
+  }
+
+  if (found_newline && lexer->lookahead == 'i' &&
+      scan_for_word(lexer, "mport", 5)) {
+    // Trailing dot followed by 'import' on next line — produce ASI
+    // instead of the dot. mark_end was set before the dot, so the
+    // semicolon is zero-width at that position.
+    lexer->result_symbol = AUTOMATIC_SEMICOLON;
+    return true;
+  }
+
+  // Normal dot — include it in the token
+  lexer->result_symbol = IMPORT_DOT;
+  lexer->mark_end(lexer);
+  return true;
+}
+
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
     bool ret = scan_automatic_semicolon(lexer, valid_symbols);
@@ -565,6 +603,12 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
     // if we fail to find an automatic semicolon, it's still possible that we may
     // want to lex a string or comment later
     if (ret) return ret;
+  }
+
+  // Match dots in import identifiers, refusing dots that would cause
+  // malformed imports to bleed into subsequent import statements.
+  if (valid_symbols[IMPORT_DOT]) {
+    if (scan_import_dot(lexer)) return true;
   }
 
   // Match 'constructor' keyword for primary constructors when on the same line

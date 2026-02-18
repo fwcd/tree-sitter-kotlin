@@ -158,6 +158,7 @@ module.exports = grammar({
     $._string_end,
     $.string_content,
     $._primary_constructor_keyword,
+    $._import_dot,
   ],
 
   extras: $ => [
@@ -207,7 +208,7 @@ module.exports = grammar({
     import_header: $ => seq(
       "import",
       alias($._import_identifier, $.identifier),
-      optional(choice(seq(".", $.wildcard_import), $.import_alias)),
+      optional(choice(seq($._import_dot, $.wildcard_import), $.import_alias)),
       $._semi
     ),
 
@@ -1207,7 +1208,7 @@ module.exports = grammar({
     // wildcard_import node while being compatible with identifier
     _import_identifier: $ => choice(
       $.simple_identifier,
-      seq($._import_identifier, ".", $.simple_identifier),
+      seq($._import_identifier, $._import_dot, $.simple_identifier),
     ),
 
     // ====================
