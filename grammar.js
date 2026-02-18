@@ -570,10 +570,10 @@ module.exports = grammar({
 
     nullable_type: $ => seq(
       choice($._type_reference, $.parenthesized_type),
-      repeat1($._quest)
+      repeat1($.quest)
     ),
 
-    _quest: $ => "?",
+    quest: $ => "?",
 
     // TODO: Figure out a better solution than right associativity
     //       to prevent nested types from being recognized as

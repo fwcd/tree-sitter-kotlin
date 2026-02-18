@@ -582,7 +582,8 @@ val baz =
                   (type_arguments
                     (type_projection
                       (user_type
-                        (type_identifier))))))))))
+                        (type_identifier)))))
+                (quest))))))
       (statements
         (parenthesized_expression
           (elvis_expression
@@ -765,7 +766,8 @@ fun <T> copyWhenGreater(list: List<T>, threshold: T): List<String>
                   (simple_identifier)))))
           (nullable_type
             (user_type
-              (type_identifier))))))
+              (type_identifier))
+            (quest)))))
     (when_entry
       (control_structure_body
         (null_literal))))

@@ -436,7 +436,8 @@ class Something {
           (simple_identifier)
           (nullable_type
             (user_type
-              (type_identifier)))))
+              (type_identifier))
+            (quest))))
       (property_declaration
         (binding_pattern_kind)
         (variable_declaration
@@ -690,10 +691,12 @@ interface Foo<A, B> : ((T, A?) -> B?)
             (type_identifier))
           (nullable_type
             (user_type
-              (type_identifier))))
+              (type_identifier))
+            (quest)))
         (nullable_type
           (user_type
-            (type_identifier))))))
+            (type_identifier))
+          (quest)))))
   (class_declaration
     (type_identifier)
     (type_parameters
@@ -708,7 +711,9 @@ interface Foo<A, B> : ((T, A?) -> B?)
             (type_identifier))
           (nullable_type
             (user_type
-              (type_identifier))))
+              (type_identifier))
+            (quest)))
         (nullable_type
           (user_type
-            (type_identifier)))))))
+            (type_identifier))
+          (quest))))))

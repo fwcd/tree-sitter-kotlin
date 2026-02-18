@@ -5804,11 +5804,15 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
-      "required": false,
+      "multiple": true,
+      "required": true,
       "types": [
         {
           "type": "parenthesized_type",
+          "named": true
+        },
+        {
+          "type": "quest",
           "named": true
         },
         {
@@ -9484,10 +9488,6 @@
     "named": false
   },
   {
-    "type": "?",
-    "named": false
-  },
-  {
     "type": "?.",
     "named": false
   },
@@ -9758,6 +9758,10 @@
   {
     "type": "public",
     "named": false
+  },
+  {
+    "type": "quest",
+    "named": true
   },
   {
     "type": "real_literal",
