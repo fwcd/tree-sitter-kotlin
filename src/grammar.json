@@ -2491,12 +2491,12 @@
           "type": "REPEAT1",
           "content": {
             "type": "SYMBOL",
-            "name": "_quest"
+            "name": "quest"
           }
         }
       ]
     },
-    "_quest": {
+    "quest": {
       "type": "STRING",
       "value": "?"
     },
