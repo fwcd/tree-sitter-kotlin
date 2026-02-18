@@ -2,6 +2,7 @@
 DynamicReceiver
 ==================
 
+
 // COMPILATION_ERRORS
 
 fun dynamic.foo()
@@ -20,7 +21,6 @@ fun dynamic// line-comment
         .foo()
 fun dynamic/*
 */.foo()
-
 ---
 
 (source_file

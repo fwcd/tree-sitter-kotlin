@@ -210,3 +210,4 @@ valueClass
 # destructuringInLambdas_ERR
 # diagnosticTags_ERR
 # kotlinFunInterface_ERR
+EnumInlinePublic.kt # TS_ERROR: MISSING nodes - intentional compilation error file

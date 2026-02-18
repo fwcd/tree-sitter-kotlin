@@ -2,6 +2,7 @@
 LineCommentsInBlock
 ==================
 
+
 fun test() {
     // start
     foo()
@@ -14,7 +15,6 @@ fun test() {
 }
 
 fun foo() {}
-
 ---
 
 (source_file
