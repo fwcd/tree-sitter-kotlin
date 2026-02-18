@@ -2,7 +2,7 @@
 
 Usage::
 
-    cd ~/.nanobot/ts-kotlin-validator
+    cd tools/cross-validation
     python main.py                     # full validation
     python main.py --debug BabySteps   # debug a single file
 """

@@ -37,9 +37,11 @@ from parser_ts import parse_tree_sitter
 # Paths
 # ---------------------------------------------------------------------------
 
-NODE_TYPES_JSON = Path.home() / ".nanobot" / "tree-sitter-kotlin" / "src" / "node-types.json"
-JETBRAINS_FIXTURES = Path.home() / ".nanobot" / "kotlin-rs" / "tests" / "fixtures" / "jetbrains"
-TREE_SITTER_KOTLIN_DIR = Path.home() / ".nanobot" / "tree-sitter-kotlin"
+_THIS_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _THIS_DIR.parent.parent
+NODE_TYPES_JSON = _REPO_ROOT / "src" / "node-types.json"
+JETBRAINS_FIXTURES = _THIS_DIR / "fixtures"
+TREE_SITTER_KOTLIN_DIR = _REPO_ROOT
 
 # 5 sample fixture files for structural comparison
 SAMPLE_FILES = [

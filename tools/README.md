@@ -4,7 +4,7 @@
 
 The `test/corpus/jetbrains/` directory contains tree-sitter corpus tests derived from the JetBrains Kotlin parser test fixtures. These fixtures exercise a wide range of Kotlin syntax and serve as a compatibility benchmark.
 
-**Source:** The original `.kt` fixtures come from the [JetBrains Kotlin compiler test suite](https://github.com/ArcticLampyrid/kotlin-rs), typically found at a local checkout such as `~/.nanobot/kotlin-rs/tests/fixtures/jetbrains/`.
+**Source:** The original `.kt` fixtures come from the [JetBrains Kotlin compiler test suite](https://github.com/JetBrains/kotlin/tree/master/compiler/testData/psi). The `.kt` and `.txt` (PSI expected output) pairs are vendored in `tools/cross-validation/fixtures/`.
 
 ### vendor-jetbrains-tests.sh
 
@@ -26,10 +26,10 @@ This script regenerates all JetBrains corpus tests from source fixtures.
 ./tools/vendor-jetbrains-tests.sh <path-to-jetbrains-fixtures-dir>
 ```
 
-**Example:**
+**Example (using vendored fixtures):**
 
 ```bash
-./tools/vendor-jetbrains-tests.sh ~/.nanobot/kotlin-rs/tests/fixtures/jetbrains/
+./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
 ```
 
 **Verify tests pass:**
@@ -40,13 +40,14 @@ tree-sitter test
 
 ### Updating when new JetBrains fixtures are available
 
-1. Obtain the updated fixtures directory (e.g., pull the latest `kotlin-rs` repo)
-2. Run the vendor script pointing at the new fixtures:
+1. Obtain the updated fixture `.kt` and `.txt` files from the JetBrains Kotlin repo
+2. Copy them into `tools/cross-validation/fixtures/`
+3. Re-run the vendor script:
    ```bash
-   ./tools/vendor-jetbrains-tests.sh /path/to/updated/fixtures/jetbrains/
+   ./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
    ```
-3. Run `tree-sitter test` to verify all tests pass
-4. Commit the regenerated test files
+4. Run `tree-sitter test` to verify all tests pass
+5. Commit the regenerated test files
 
 ## Cross-Validation (tree-sitter vs JetBrains PSI)
 
@@ -64,16 +65,20 @@ The `tools/cross-validation/` directory contains a Python tool that structurally
 
 See the full report: [tools/cross-validation/report.md](cross-validation/report.md)
 
+**Fixtures:** The `.kt` source files and `.txt` PSI expected output files are vendored in `tools/cross-validation/fixtures/`. These are self-contained — no external repos needed.
+
 **Usage:**
 
 ```bash
-python tools/cross-validation/main.py <jetbrains-fixtures-dir>
+cd tools/cross-validation
+python main.py
 ```
 
 **Debug a single file:**
 
 ```bash
-python tools/cross-validation/main.py --debug BabySteps
+cd tools/cross-validation
+python main.py --debug BabySteps
 ```
 
 **Run cross-validation tests:**

@@ -20,7 +20,8 @@ from runner import FileResult
 # Constants
 # ---------------------------------------------------------------------------
 
-REPORT_PATH = Path("/home/vmakaev/.nanobot/workspace/research/ts-kotlin-cross-validation.md")
+_THIS_DIR = Path(__file__).resolve().parent
+REPORT_PATH = _THIS_DIR / "report.md"
 
 
 # ---------------------------------------------------------------------------

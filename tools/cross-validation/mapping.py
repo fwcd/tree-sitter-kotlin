@@ -4,8 +4,8 @@ This module defines the correspondence between tree-sitter-kotlin node names
 (snake_case) and JetBrains PSI composite node names (UPPER_CASE).
 
 The mapping is derived from:
-- tree-sitter: ~/.nanobot/tree-sitter-kotlin/src/node-types.json (136 named nodes)
-- JetBrains: ~/.nanobot/kotlin-rs/tests/fixtures/jetbrains/*.txt (112 composite nodes)
+- tree-sitter: src/node-types.json (136 named nodes)
+- JetBrains: tools/cross-validation/fixtures/*.txt (112 composite nodes)
 """
 
 from __future__ import annotations

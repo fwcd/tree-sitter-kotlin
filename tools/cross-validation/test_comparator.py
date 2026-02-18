@@ -27,8 +27,9 @@ from parser_ts import parse_tree_sitter
 # Paths for real-file tests
 # ---------------------------------------------------------------------------
 
-JETBRAINS_FIXTURES = Path.home() / ".nanobot" / "kotlin-rs" / "tests" / "fixtures" / "jetbrains"
-TREE_SITTER_KOTLIN_DIR = Path.home() / ".nanobot" / "tree-sitter-kotlin"
+_THIS_DIR = Path(__file__).resolve().parent
+JETBRAINS_FIXTURES = _THIS_DIR / "fixtures"
+TREE_SITTER_KOTLIN_DIR = _THIS_DIR.parent.parent  # repo root
 
 
 # ---------------------------------------------------------------------------

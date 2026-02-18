@@ -6,7 +6,7 @@
 #   ./tools/vendor-jetbrains-tests.sh <path-to-jetbrains-fixtures-dir>
 #
 # Example:
-#   ./tools/vendor-jetbrains-tests.sh ~/.nanobot/kotlin-rs/tests/fixtures/jetbrains/
+#   ./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
 #
 # The script:
 #   1. Reads every *.kt file in the source directory (skipping *_ERR.kt files)
@@ -33,7 +33,7 @@ if [[ $# -lt 1 ]]; then
   echo "Usage: $0 <path-to-jetbrains-fixtures-dir>"
   echo ""
   echo "Example:"
-  echo "  $0 ~/.nanobot/kotlin-rs/tests/fixtures/jetbrains/"
+  echo "  $0 tools/cross-validation/fixtures/"
   exit 1
 fi
 
