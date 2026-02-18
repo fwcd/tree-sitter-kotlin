@@ -92,6 +92,8 @@ module.exports = grammar({
     [$._statement, $.prefix_expression],
     [$.prefix_expression, $.when_subject],
     [$.prefix_expression, $.value_argument],
+    // ambiguity between prefix unary operators and other expression types
+    [$.call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
 
     // ambiguity between multiple user types and class property/function declarations
     [$.user_type],
@@ -719,7 +721,10 @@ module.exports = grammar({
 
     navigation_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.navigation_suffix)),
 
-    prefix_expression: $ => prec.right(seq(choice($.annotation, $.label, $._prefix_unary_operator), $._expression)),
+    prefix_expression: $ => choice(
+      prec.right(PREC.PREFIX, seq($._prefix_unary_operator, $._expression)),
+      prec.right(seq(choice($.annotation, $.label), $._expression)),
+    ),
 
     as_expression: $ => prec.left(PREC.AS, seq($._expression, $._as_operator, $._type)),
 
