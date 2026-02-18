@@ -13,7 +13,11 @@
     "playground": "tree-sitter playground",
     "prestart": "npm run build-wasm",
     "start": "npm run playground",
-    "prebuildify": "prebuildify --napi --strip"
+    "prebuildify": "prebuildify --napi --strip",
+    "vendor-jetbrains": "./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/",
+    "cross-validate": "cd tools/cross-validation && python3 main.py",
+    "cross-validate:debug": "cd tools/cross-validation && python3 main.py --debug",
+    "cross-validate:test": "cd tools/cross-validation && python3 -m pytest -v"
   },
   "repository": {
     "type": "git",

@@ -17,6 +17,12 @@ The grammar is based on the [official language grammar](https://kotlinlang.org/d
 | grammar.js | The Tree-sitter grammar |
 | grammar-reference.js | A direct translation of the Kotlin language grammar that is, however, ambiguous to Tree-sitter |
 | src | The generated parser |
+| tools/ | Vendoring and cross-validation tooling |
+| tools/cross-validation/ | Structural comparison against JetBrains PSI reference parser |
+| tools/cross-validation/fixtures/ | Vendored JetBrains Kotlin test fixtures (.kt + .txt pairs) |
+| tools/cross-validation/excluded.txt | Files excluded from corpus due to known grammar issues |
+| tools/cross-validation/TODO.md | Categorized grammar issues with fix instructions |
+| test/corpus/jetbrains/ | Auto-generated corpus tests from JetBrains fixtures |
 
 ## Setup
 
@@ -43,6 +49,77 @@ It is also helpful to run the parser on a real Kotlin project's source files.
 ```shell
 ./node_modules/.bin/tree-sitter parse "/path/to/some/project/**/*.kt"  --quiet --stat
 ```
+
+## JetBrains Cross-Validation
+
+The project includes tooling to validate tree-sitter-kotlin's parse trees against the [JetBrains Kotlin compiler's PSI reference parser](https://github.com/JetBrains/kotlin/tree/master/compiler/testData/psi). This measures how closely tree-sitter-kotlin reproduces the official parser's AST structure.
+
+**Current results:** 75/118 (63.6%) structural match among clean parses.
+
+### How It Works
+
+1. 228 JetBrains test fixtures (`.kt` source + `.txt` expected PSI tree) are vendored in `tools/cross-validation/fixtures/`
+2. The vendor script parses each `.kt` file with tree-sitter — files that parse cleanly become corpus tests
+3. The cross-validation tool structurally compares tree-sitter's output against JetBrains' expected PSI tree
+4. Files that parse but produce wrong ASTs are tracked in `tools/cross-validation/excluded.txt` with categorized issues in `tools/cross-validation/TODO.md`
+
+### NPM Scripts
+
+| Command | Description |
+| ------- | ----------- |
+| `npm run vendor-jetbrains` | Regenerate corpus tests from vendored JetBrains fixtures |
+| `npm run cross-validate` | Run full cross-validation (tree-sitter vs JetBrains PSI) |
+| `npm run cross-validate:debug -- <Name>` | Debug a single fixture by name |
+| `npm run cross-validate:test` | Run cross-validation unit tests |
+
+### Iterative Grammar Improvement Workflow
+
+The cross-validation tooling establishes a step-by-step process for improving the grammar:
+
+1. **Pick an issue** from [`tools/cross-validation/TODO.md`](tools/cross-validation/TODO.md) (start with EASY)
+2. **Fix the grammar** in `grammar.js`
+3. **Regenerate and test:**
+   ```bash
+   npm run generate
+   npm test
+   ```
+4. **Cross-validate** to check if affected files now match:
+   ```bash
+   npm run cross-validate
+   ```
+5. **Remove fixed files** from `tools/cross-validation/excluded.txt`
+6. **Re-vendor** to add the newly passing files as corpus tests:
+   ```bash
+   npm run vendor-jetbrains
+   ```
+7. **Verify** the new corpus tests pass:
+   ```bash
+   npm test
+   ```
+8. **Commit** the grammar fix, updated corpus tests, and updated excluded.txt
+
+### Updating JetBrains Fixtures
+
+When new fixtures are available from the JetBrains Kotlin repo:
+
+1. Download updated `.kt` and `.txt` files from [JetBrains/kotlin](https://github.com/JetBrains/kotlin/tree/master/compiler/testData/psi)
+2. Copy them into `tools/cross-validation/fixtures/`
+3. Re-vendor and test:
+   ```bash
+   npm run vendor-jetbrains
+   npm test
+   ```
+4. Run cross-validation to assess new files:
+   ```bash
+   npm run cross-validate
+   ```
+5. Add any new mismatches to `excluded.txt` and `TODO.md`
+
+### Requirements
+
+- Python 3.8+ (for cross-validation tools)
+- `tree-sitter-cli` (installed via `npm install`)
+- `pytest` (for cross-validation unit tests): `pip install pytest`
 
 ## WebAssembly
 
