@@ -233,7 +233,7 @@ static bool scan_multiline_comment(TSLexer *lexer) {
 
 static bool scan_whitespace_and_comments(TSLexer *lexer) {
   while (iswspace(lexer->lookahead)) skip(lexer);
-  return lexer->lookahead != '/';
+  return true;
 }
 
 // Test for any identifier character other than the first character.
@@ -327,7 +327,13 @@ static bool scan_automatic_semicolon(TSLexer *lexer) {
     case '?':
     case '|':
     case '&':
+      return false;
+
+    // Don't insert a semicolon before `/` (division), but do insert one before
+    // `//` (line comment) and `/*` (block comment).
     case '/':
+      skip(lexer);
+      if (lexer->lookahead == '/' || lexer->lookahead == '*') return true;
       return false;
 
     // Insert a semicolon before `--` and `++`, but not before binary `+` or `-`.
@@ -467,8 +473,6 @@ static bool scan_import_list_delimiter(TSLexer *lexer) {
       default:
         return true;
     }
-
-    return false;
   }
 }
 
