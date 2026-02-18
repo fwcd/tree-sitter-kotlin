@@ -9,11 +9,13 @@
 #   ./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
 #
 # The script:
-#   1. Reads every *.kt file in the source directory (skipping *_ERR.kt files)
-#   2. Parses each with `tree-sitter parse`
-#   3. If the parse is clean (no ERROR nodes), generates a corpus test file
-#   4. Output goes to test/corpus/jetbrains/<OriginalName>.txt (one test per file)
-#   5. Prints a summary when done
+#   1. Reads every *.kt file in the source directory
+#   2. Skips *_ERR.kt files (intentional parse error tests)
+#   3. Skips files listed in tools/cross-validation/excluded.txt
+#   4. Parses each with `tree-sitter parse`
+#   5. If the parse is clean (no ERROR nodes), generates a corpus test file
+#   6. Output goes to test/corpus/jetbrains/<OriginalName>.txt (one test per file)
+#   7. Prints a summary when done
 #
 # Zero-length named nodes in tree-sitter parse output indicate MISSING tokens.
 # These are transformed into the (MISSING _alpha_identifier) syntax that
@@ -27,6 +29,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 OUTPUT_DIR="$REPO_ROOT/test/corpus/jetbrains"
+EXCLUDED_FILE="$SCRIPT_DIR/cross-validation/excluded.txt"
 
 # --- Argument handling -------------------------------------------------------
 if [[ $# -lt 1 ]]; then
@@ -44,11 +47,27 @@ if [[ ! -d "$SOURCE_DIR" ]]; then
   exit 1
 fi
 
+# --- Load excluded list ------------------------------------------------------
+declare -A EXCLUDED
+if [[ -f "$EXCLUDED_FILE" ]]; then
+  while IFS= read -r line; do
+    # Skip empty lines and comments
+    line="${line%%#*}"          # strip inline comments
+    line="$(echo "$line" | xargs)"  # trim whitespace
+    [[ -z "$line" ]] && continue
+    EXCLUDED["$line"]=1
+  done < "$EXCLUDED_FILE"
+  echo "Loaded ${#EXCLUDED[@]} excluded files from: $EXCLUDED_FILE"
+else
+  echo "Warning: no excluded.txt found at $EXCLUDED_FILE — processing all files"
+fi
+
 # --- Counters ----------------------------------------------------------------
 total=0
 generated=0
 skipped_err=0
 skipped_parse=0
+skipped_excluded=0
 
 # --- Clean output directory --------------------------------------------------
 echo "Cleaning output directory: $OUTPUT_DIR"
@@ -62,9 +81,7 @@ transform_sexp() {
   local raw="$1"
 
   # First pass: find zero-length child nodes and mark them for MISSING injection.
-  # A zero-length node looks like: (node_name [R, C] - [R, C]) where start == end.
-  # We need to replace the closing ) with \n<indent>(MISSING _alpha_identifier))
-  # This is done with a Perl one-liner for reliable multi-line processing.
+  # A zero-length node looks like: (name [R, C] - [R, C]) where start == end.
   local transformed
   transformed="$(echo "$raw" | perl -pe '
     # Match indented zero-length named nodes: "  (name [R, C] - [R, C])"
@@ -91,6 +108,12 @@ for kt_file in "$SOURCE_DIR"/*.kt; do
   # Skip *_ERR files
   if [[ "$name" == *_ERR ]]; then
     skipped_err=$((skipped_err + 1))
+    continue
+  fi
+
+  # Skip excluded files
+  if [[ -n "${EXCLUDED[$name]+x}" ]]; then
+    skipped_excluded=$((skipped_excluded + 1))
     continue
   fi
 
@@ -131,5 +154,6 @@ echo ""
 echo "Done."
 echo "  Files processed:          $total"
 echo "  Tests generated:          $generated"
+echo "  Skipped (excluded.txt):   $skipped_excluded"
 echo "  Skipped (parse errors):   $skipped_parse"
 echo "  Skipped (_ERR files):     $skipped_err"

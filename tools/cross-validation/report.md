@@ -10,11 +10,11 @@ JetBrains PSI reference trees for all 228 JetBrains fixture files.
 | Total fixture files | 228 |
 | Tree-sitter clean parses | 118 |
 | Tree-sitter parse errors | 110 |
-| **Structural matches** | **75** |
-| Structural mismatches | 43 |
+| **Structural matches** | **76** |
+| Structural mismatches | 42 |
 | PSI parse errors | 0 |
 
-**Match rate (among clean parses): 75/118 (63.6%)**
+**Match rate (among clean parses): 76/118 (64.4%)**
 
 ## Mapping Methodology
 
@@ -239,7 +239,7 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 95 | NewLinesValidOperations | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 96 | NewlinesInParentheses | MISMATCH | 51 difference(s) |
 | 97 | NonTypeBeforeDotInBaseClass | MISMATCH | 6 difference(s) |
-| 98 | NotIsAndNotIn | MISMATCH | 1 difference(s) |
+| 98 | NotIsAndNotIn | MATCH | Structurally identical |
 | 99 | ObjectLiteralAsStatement | MISMATCH | 14 difference(s) |
 | 100 | ParameterNameMising | TS_ERROR | 9 ERROR/MISSING node(s) in tree-sitter output |
 | 101 | ParameterType | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
@@ -373,7 +373,7 @@ syntax and cannot be reconciled with simple node-level transformations:
 
 ## Detailed Mismatches
 
-Showing structural differences for 43 mismatching file(s).
+Showing structural differences for 42 mismatching file(s).
 
 ### BlockCommentAtBeginningOfFile3
 
@@ -962,12 +962,6 @@ Showing structural differences for 43 mismatching file(s).
 - **[missing_child]** at `KtFile > CLASS > CLASS_BODY > [child 1]`
   - expected: `FUN`
   - actual: `(absent)`
-
-### NotIsAndNotIn
-
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
-  - expected: `BINARY_EXPRESSION`
-  - actual: `IS_EXPRESSION`
 
 ### ObjectLiteralAsStatement
 
@@ -2116,7 +2110,7 @@ Showing structural differences for 43 mismatching file(s).
 | Kind | Total occurrences |
 |------|-------------------|
 | child_count_mismatch | 337 |
-| name_mismatch | 310 |
+| name_mismatch | 309 |
 | missing_child | 240 |
 | extra_child | 193 |
 

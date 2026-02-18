@@ -1,0 +1,212 @@
+# Excluded JetBrains fixture files
+#
+# These files are excluded from the vendored tree-sitter corpus because they
+# either fail to parse (TS_ERROR) or produce structurally incorrect ASTs
+# (MISMATCH) due to known grammar issues in tree-sitter-kotlin.
+#
+# See TODO.md for categorized grammar issues and fix instructions.
+#
+# Format: one filename per line (without extension). Lines starting with # are comments.
+# The vendor script reads this file and skips any matching .kt files.
+#
+# To re-enable a file after fixing the grammar:
+#   1. Remove the line from this file
+#   2. Re-run: ./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
+#   3. Run: npm test (to verify the new corpus test passes)
+
+# =============================================================================
+# MISMATCH: Grammar produces wrong AST structure (43 files)
+# =============================================================================
+
+# --- block_comment_file_start (EASY) ---
+BlockCommentAtBeginningOfFile3
+BlockCommentAtBeginningOfFile4
+
+# --- duplicate_accessor (EASY) ---
+DuplicateAccessor
+
+# --- object_literal (EASY) ---
+ObjectLiteralAsStatement
+
+# --- typealias_keyword (EASY) ---
+TypealiasIsKeyword
+
+# --- enum_entry_constructor (MEDIUM) ---
+EnumMissingName
+EnumShortCommas
+EnumShortWithOverload
+Enums
+
+# --- file_annotations (MEDIUM) ---
+DocCommentAfterFileAnnotations
+LineCommentAfterFileAnnotations
+topJvmPackageName
+topJvmPackageNameMultifile
+
+# --- by_delegation (MEDIUM) ---
+ByClauses
+delegation
+SimpleClassMembers
+
+# --- class_body_nesting (MEDIUM) ---
+NonTypeBeforeDotInBaseClass
+dependencyOnNestedClasses
+innerTypes
+
+# --- super_expression (MEDIUM) ---
+Super
+
+# --- value_parameter_defaults (MEDIUM) ---
+SimpleExpressions
+topLevelMembers
+
+# --- prefix_vs_binary (HARD) ---
+EOLsInComments
+NewlinesInParentheses
+
+# --- lambda_nesting (HARD) ---
+CommentsBindingInLambda
+FunctionLiterals
+localClass
+
+# --- type_argument_placement (HARD) ---
+ExtensionsWithQNReceiver
+complicateLTGT
+incorrectLTGTFallback
+definitelyNotNullTypes
+types
+typeParams
+typeAliasExpansion
+
+# --- type_modifiers (HARD) ---
+TypeModifiers
+typeModifiers2
+suspendLambda
+
+# --- annotation_structure (HARD) ---
+annotations
+annotationsOnParenthesizedTypes
+annotationValues
+annotatedParameterInEnumConstructor
+TypeParametersBeforeName
+
+# =============================================================================
+# TS_ERROR: Tree-sitter fails to parse these files (110 files)
+# =============================================================================
+
+TypeModifiersParenthesized
+multifileClass
+multifileClass2
+namelessObjectAsEnumMember
+topLevelMembersAnnotated
+AbsentInnerType
+AnnotatedIntersections
+AssertNotNull
+BackslashInString
+BlockCommentAtBeginningOfFile1
+BlockCommentAtBeginningOfFile2
+CallsInWhen
+CollectionLiterals
+CommentsBinding
+Constructors
+ControlStructures
+DefaultKeyword
+DefinitelyNotNullType
+DoubleColon
+DoubleColonWhitespaces
+DynamicSoftKeyword
+DynamicTypes
+EmptyName
+EnumEntryCommaAnnotatedMember
+EnumEntryCommaInlineMember
+EnumEntryCommaMember
+EnumEntryCommaPublicMember
+EnumEntrySpaceInlineMember
+EnumEntrySpaceMember
+EnumEntryTwoCommas
+EnumInline
+EnumOldConstructorSyntax
+EnumWithAnnotationKeyword
+ForWithMultiDecl
+FunctionCalls
+FunctionExpressions
+FunctionNoParameterList
+FunctionTypes
+Functions
+FunctionsWithoutName
+Imports
+IncompleteFunctionLiteral
+IntegerLiteral
+InterfaceWithEnumKeyword
+Labels
+LocalDeclarations
+MultiVariableDeclarations
+NewLinesValidOperations
+ParameterNameMising
+ParameterType
+Precedence
+Properties
+PropertiesFollowedByInitializers
+SimpleIntersections
+SimpleModifiers
+SoftKeywords
+SoftKeywordsInTypeArguments
+StringTemplates
+TripleDot
+TryRecovery
+UnsignedLiteral
+When
+WhenWithSubjectVariable
+annotatedFlexibleTypes
+annotationsOnNullableTypes
+contextParametersAndAnnotations
+destructuringInLambdas
+emptyArguments
+emptyArgumentsInAnnotations
+emptyArgumentsInArrayAccesses
+emptyContextParameters
+emptyParameters
+emptyParametersInFunctionalTypes
+escapedNames
+flexibleDnnType
+inheritingClasses
+modifiers
+mustUseReturnValueFullEnabled
+mustUseReturnValueHalfEnabled
+noCommaBetweenArguments
+semicolonBetweenDeclarations
+suggestGuardSyntax
+trailingCommaAllowed
+trailingCommaForbidden
+typeAliasWithConstraints
+typeAliases
+valueClass
+
+# =============================================================================
+# _ERR files: Intentional parse error tests from JetBrains (skipped by default)
+# =============================================================================
+# These are handled separately — the vendor script already skips *_ERR files.
+# Listed here for completeness:
+#
+# BabySteps_ERR
+# BlockCommentUnmatchedClosing_ERR
+# CollectionLiterals_ERR
+# DoubleColon_ERR
+# Expressions_ERR
+# FileStart_ERR
+# FunctionExpressions_ERR
+# FunctionLiterals_ERR
+# Functions_ERR
+# FunctionsWithoutName_ERR
+# Imports_ERR
+# PrimaryConstructorModifiers_ERR
+# Properties_ERR
+# SimpleClassMembers_ERR
+# TypeAlias_ERR
+# TypeExpressionAmbiguities_ERR
+# TypeModifiers_ERR
+# WhenWithSubjectVariable_ERR
+# When_ERR
+# destructuringInLambdas_ERR
+# diagnosticTags_ERR
+# kotlinFunInterface_ERR

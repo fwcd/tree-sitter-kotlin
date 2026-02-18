@@ -150,6 +150,16 @@ def _normalize_ts_node(node: Node) -> Node | None:
             return Node(name=node.name, children=normalized_children)
         return None
 
+    # Handle check_expression: PSI uses IS_EXPRESSION for `is`/`!is` (type check)
+    # but BINARY_EXPRESSION for `in`/`!in` (containment check). Tree-sitter uses
+    # check_expression for both. Distinguish by checking if any child is a type
+    # node (user_type, nullable_type, etc.) — if so, it's IS_EXPRESSION.
+    if node.name == "check_expression":
+        type_children = {"user_type", "nullable_type", "parenthesized_type",
+                         "function_type", "type_identifier"}
+        has_type_child = any(c.name in type_children for c in node.children)
+        mapped_name = "IS_EXPRESSION" if has_type_child else "BINARY_EXPRESSION"
+
     # Handle control_structure_body: maps to BLOCK only for actual blocks (with
     # statements or empty {}). For single-expression bodies like `if (x) expr`,
     # the body is transparent — the expression is promoted directly.
