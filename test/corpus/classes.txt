@@ -201,6 +201,73 @@ data class Vector2D(
           (type_identifier))))))
 
 ================================================================================
+Class with constructor on new line
+================================================================================
+
+public class Foo
+constructor (x: Int) {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Generic class with constructor on new line
+================================================================================
+
+class Foo<T>
+constructor(x: T) {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Class with private constructor on new line
+================================================================================
+
+class Foo
+private constructor (x: Int) {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
 Inheritance
 ================================================================================
 

@@ -598,8 +598,8 @@
                   ]
                 },
                 {
-                  "type": "STRING",
-                  "value": "constructor"
+                  "type": "SYMBOL",
+                  "name": "_primary_constructor_keyword"
                 }
               ]
             },
@@ -6850,6 +6850,10 @@
     {
       "type": "SYMBOL",
       "name": "string_content"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_primary_constructor_keyword"
     }
   ],
   "inline": [],
