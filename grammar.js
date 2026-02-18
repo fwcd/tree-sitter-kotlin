@@ -157,6 +157,7 @@ module.exports = grammar({
     $._string_start,
     $._string_end,
     $.string_content,
+    $._primary_constructor_keyword,
   ],
 
   extras: $ => [
@@ -270,7 +271,7 @@ module.exports = grammar({
     )),
 
     primary_constructor: $ => seq(
-      optional(seq(optional($.modifiers), "constructor")),
+      optional(seq(optional($.modifiers), $._primary_constructor_keyword)),
       $._class_parameters
     ),
 
