@@ -9697,13 +9697,11 @@
   },
   {
     "type": "line_comment",
-    "named": true,
-    "extra": true
+    "named": true
   },
   {
     "type": "multiline_comment",
-    "named": true,
-    "extra": true
+    "named": true
   },
   {
     "type": "noinline",

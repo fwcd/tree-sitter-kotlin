@@ -127,6 +127,31 @@ day in 1..7
       (integer_literal))))
 
 ================================================================================
+Range-until expression
+================================================================================
+
+for (i in 0..<10) {}
+val r = 1..<n
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    (variable_declaration
+      (simple_identifier))
+    (range_expression
+      (integer_literal)
+      (integer_literal))
+    (control_structure_body))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (range_expression
+      (integer_literal)
+      (simple_identifier))))
+
+================================================================================
 When expression
 ================================================================================
 
