@@ -4,7 +4,7 @@ Structural mismatches between tree-sitter-kotlin and JetBrains PSI reference par
 categorized by root cause and difficulty. Each issue represents a grammar.js fix needed
 to match JetBrains' expected AST structure.
 
-**Current state:** 75/118 clean parses match structurally (63.6%)
+**Current state:** 78/121 clean parses match structurally (64.5%)
 
 Fix these issues iteratively — after each grammar fix, re-run the cross-validation
 and move fixed files from `excluded.txt` to the vendored corpus.
@@ -256,18 +256,4 @@ annotations on type parameters all have structural differences.
 **Likely fix:** Annotation rules need comprehensive restructuring to match PSI's
 three-level nesting: `ANNOTATION_ENTRY` > `ANNOTATION_TARGET` + `CONSTRUCTOR_CALLEE`.
 
----
 
-## NORMALIZER (not grammar — cross-validation tool fix)
-
-### is_in_expression_mapping (1 file)
-
-**Problem:** `IS_EXPRESSION` and `IN_EXPRESSION` mapped as `BINARY_EXPRESSION` in
-the normalizer. This is a cross-validation tool issue, not a grammar issue.
-
-**Files:**
-- `NotIsAndNotIn`
-
-**Fix:** Update `tools/cross-validation/mapping.py` to map tree-sitter's
-`is_expression` / `in_expression` → PSI's `IS_EXPRESSION` / `BINARY_EXPRESSION`
-(PSI uses `BINARY_EXPRESSION` for `in` but `IS_EXPRESSION` for `is`).
