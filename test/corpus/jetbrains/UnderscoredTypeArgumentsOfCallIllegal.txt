@@ -1,0 +1,75 @@
+==================
+UnderscoredTypeArgumentsOfCallIllegal
+==================
+
+// COMPILATION_ERRORS
+
+fun main() {
+    val y: Foo<__> = 1
+    val y: Foo<_, __> = 1
+    val y: Foo<Int, __> = 1
+    val y: Foo<_____, Float> = 1
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (integer_literal))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (integer_literal))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (integer_literal))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (integer_literal))))))

@@ -1,0 +1,85 @@
+==================
+UnderscoredTypeArgumentsOfCall
+==================
+
+// COMPILATION_ERRORS
+
+fun main() {
+    val x = foo<Int, _>()
+    val x = foo<_, _, _>()
+    val x = foo<_, _, Int>()
+    val x = foo<_>()
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier))))
+              (value_arguments))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))
+              (value_arguments))))))))

@@ -1,0 +1,61 @@
+==================
+UnderscoredTypeParameters
+==================
+
+// COMPILATION_ERRORS
+
+class A<_> {}
+
+typealias Foo<K, _> = Foo<K>
+
+fun <K : T, _, T> foo() {}
+
+fun <K, _: K> foo() {}
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (user_type
+      (type_identifier)
+      (type_arguments
+        (type_projection
+          (user_type
+            (type_identifier))))))
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))

@@ -1,0 +1,34 @@
+==================
+AnonymousInitializer
+==================
+
+// COMPILATION_ERRORS
+
+class Foo {
+
+  init {
+    foo()
+    val c = f
+  }
+
+}
+
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (anonymous_initializer
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments)))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (simple_identifier)))))))

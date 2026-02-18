@@ -1,0 +1,18 @@
+==================
+specialNames
+==================
+
+object SpecialNames {
+    val `1M` = 1
+}
+---
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal)))))

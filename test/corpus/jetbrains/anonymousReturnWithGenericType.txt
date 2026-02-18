@@ -1,0 +1,83 @@
+==================
+anonymousReturnWithGenericType
+==================
+
+interface Foo<T>
+
+class AnonymousReturnWithGenericType<T> {
+    val v1 = object : Foo<T> {}
+    fun f1() = object : Foo<T> {}
+
+    private val v2 = object : Foo<T> {}
+    private fun f2() = object : Foo<T> {}
+}
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (object_literal
+          (delegation_specifier
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (class_body)))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (object_literal
+            (delegation_specifier
+              (user_type
+                (type_identifier)
+                (type_arguments
+                  (type_projection
+                    (user_type
+                      (type_identifier))))))
+            (class_body))))
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (object_literal
+          (delegation_specifier
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier))))))
+          (class_body)))
+      (function_declaration
+        (modifiers
+          (visibility_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (object_literal
+            (delegation_specifier
+              (user_type
+                (type_identifier)
+                (type_arguments
+                  (type_projection
+                    (user_type
+                      (type_identifier))))))
+            (class_body)))))))

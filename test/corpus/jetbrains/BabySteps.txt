@@ -1,0 +1,49 @@
+==================
+BabySteps
+==================
+
+// COMPILATION_ERRORS
+
+package foo
+
+class Runnable<a,a>(a : doo = 0) : foo(d=0), bar by x, bar {
+
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier))
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))
+        (integer_literal)))
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments
+          (value_argument
+            (simple_identifier)
+            (integer_literal)))))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))

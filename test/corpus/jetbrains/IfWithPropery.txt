@@ -1,0 +1,50 @@
+==================
+IfWithPropery
+==================
+
+// COMPILATION_ERRORS
+
+val a = if(1) {var f = a;a} else {null}
+val a = if(1) {
+  var f = a;
+  a
+} else {null}
+
+---
+
+(source_file
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (if_expression
+      condition: (integer_literal)
+      consequence: (control_structure_body
+        (statements
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (simple_identifier))
+          (simple_identifier)))
+      alternative: (control_structure_body
+        (statements
+          (null_literal)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (if_expression
+      condition: (integer_literal)
+      consequence: (control_structure_body
+        (statements
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (simple_identifier))
+          (simple_identifier)))
+      alternative: (control_structure_body
+        (statements
+          (null_literal))))))

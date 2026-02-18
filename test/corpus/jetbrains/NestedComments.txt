@@ -1,0 +1,49 @@
+==================
+NestedComments
+==================
+
+// COMPILATION_ERRORS
+
+fun doo() {
+/*/b
+// */
+b
+/**/
+b
+/* */
+b
+/*/**/*/
+b
+/***/
+b
+/** /***/*/
+b
+/** /**
+
+*/***/
+b
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (multiline_comment)
+      (statements
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)))))

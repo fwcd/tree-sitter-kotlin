@@ -1,0 +1,34 @@
+==================
+ModifierAsSelector
+==================
+
+// LIBRARY_PLATFORMS: JVM
+// JET-1
+
+val z = System.out
+
+fun foo() { throw Exception(); }
+
+---
+
+(source_file
+  (line_comment)
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (simple_identifier))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (jump_expression
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))

@@ -1,0 +1,21 @@
+==================
+EnumEntrySemicolonMember
+==================
+
+enum class My {
+    FIRST;
+
+    fun foo() {}
+}
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))

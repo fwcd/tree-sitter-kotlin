@@ -17,6 +17,14 @@ The grammar is based on the [official language grammar](https://kotlinlang.org/d
 | grammar.js | The Tree-sitter grammar |
 | grammar-reference.js | A direct translation of the Kotlin language grammar that is, however, ambiguous to Tree-sitter |
 | src | The generated parser |
+| tools/ | Vendoring and cross-validation tooling |
+| tools/vendor-fixtures.js | Fetch JetBrains PSI test fixtures at a pinned commit |
+| tools/vendor-jetbrains-tests.js | Generate tree-sitter corpus tests from vendored fixtures |
+| tools/cross-validation/ | Structural comparison against JetBrains PSI reference parser |
+| tools/cross-validation/.fixtures-version | Pinned JetBrains/kotlin commit hash for reproducible vendoring |
+| tools/cross-validation/excluded.txt | Files excluded from corpus due to known grammar issues |
+| tools/cross-validation/TODO.md | Categorized grammar issues with fix instructions |
+| test/corpus/jetbrains/ | Auto-generated corpus tests from JetBrains fixtures |
 
 ## Setup
 
@@ -43,6 +51,97 @@ It is also helpful to run the parser on a real Kotlin project's source files.
 ```shell
 ./node_modules/.bin/tree-sitter parse "/path/to/some/project/**/*.kt"  --quiet --stat
 ```
+
+## JetBrains Cross-Validation
+
+The project includes tooling to validate tree-sitter-kotlin's parse trees against the [JetBrains Kotlin compiler's PSI reference parser](https://github.com/JetBrains/kotlin/tree/master/compiler/testData/psi). This measures how closely tree-sitter-kotlin reproduces the official parser's AST structure.
+
+**Current results:** 74/121 (61.2%) structural match among clean parses.
+
+### Quick Start
+
+```bash
+# Fetch JetBrains fixtures (one-time, or when updating)
+npm run vendor-fixtures
+
+# Generate corpus tests from fixtures
+npm run vendor-jetbrains
+
+# Run tree-sitter tests (includes JetBrains corpus)
+npm test
+
+# Run structural cross-validation
+npm run cross-validate
+```
+
+### How It Works
+
+1. `vendor-fixtures` fetches JetBrains PSI test fixtures (`.kt` source + `.txt` expected PSI tree) from the [JetBrains/kotlin](https://github.com/JetBrains/kotlin) repo at a pinned commit hash (stored in `tools/cross-validation/.fixtures-version`)
+2. `vendor-jetbrains` parses each `.kt` file with tree-sitter — files that parse cleanly and aren't in `excluded.txt` become corpus tests
+3. `cross-validate` structurally compares tree-sitter's output against JetBrains' expected PSI tree using 110+ node type mappings
+4. Files that parse but produce wrong ASTs are tracked in `tools/cross-validation/excluded.txt` with categorized issues in `tools/cross-validation/TODO.md`
+
+### NPM Scripts
+
+| Command | Description |
+| ------- | ----------- |
+| `npm run vendor-fixtures` | Fetch JetBrains fixtures at pinned commit (or pass a commit hash) |
+| `npm run vendor-jetbrains` | Regenerate corpus tests from vendored fixtures |
+| `npm run cross-validate` | Run full cross-validation (tree-sitter vs JetBrains PSI) |
+| `npm run cross-validate:debug -- <Name>` | Debug a single fixture by name |
+| `npm run cross-validate:test` | Run cross-validation unit tests |
+
+### Iterative Grammar Improvement Workflow
+
+The cross-validation tooling establishes a step-by-step process for improving the grammar:
+
+1. **Pick an issue** from [`tools/cross-validation/TODO.md`](tools/cross-validation/TODO.md) (start with EASY)
+2. **Fix the grammar** in `grammar.js`
+3. **Regenerate and test:**
+   ```bash
+   npm run generate
+   npm test
+   ```
+4. **Cross-validate** to check if affected files now match:
+   ```bash
+   npm run cross-validate
+   ```
+5. **Remove fixed files** from `tools/cross-validation/excluded.txt`
+6. **Re-vendor** to add the newly passing files as corpus tests:
+   ```bash
+   npm run vendor-jetbrains
+   ```
+7. **Verify** the new corpus tests pass:
+   ```bash
+   npm test
+   ```
+8. **Commit** the grammar fix, updated corpus tests, and updated excluded.txt
+
+### Updating JetBrains Fixtures
+
+To update to a newer version of the JetBrains test fixtures:
+
+```bash
+# Update to a specific commit
+npm run vendor-fixtures -- <new-commit-hash>
+
+# Regenerate corpus tests
+npm run vendor-jetbrains
+
+# Run tests
+npm test
+
+# Check for new matches or regressions
+npm run cross-validate
+```
+
+The commit hash is stored in `tools/cross-validation/.fixtures-version` for reproducibility. Commit this file when updating fixtures.
+
+### Requirements
+
+- Node.js 18+ (for cross-validation and vendoring tools)
+- `tree-sitter-cli` (installed via `npm install`)
+- `git` (used by vendor-fixtures to fetch JetBrains test data)
 
 ## WebAssembly
 

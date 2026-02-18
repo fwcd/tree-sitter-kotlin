@@ -32,3 +32,10 @@ target
 
 # Swift
 .build
+__pycache__/
+
+# Vendored JetBrains fixtures (fetched on demand via npm run vendor-fixtures)
+tools/cross-validation/fixtures/
+
+# Generated cross-validation report (regenerated via npm run cross-validate)
+tools/cross-validation/report.md

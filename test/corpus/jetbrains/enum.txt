@@ -1,0 +1,78 @@
+==================
+enum
+==================
+
+package a.b.c.test.enum
+
+enum class Enum {
+    A, B, C, D, E, F {
+        override fun f() = 4
+    };
+
+    open fun f() = 3
+
+    companion object {
+        @Ann
+        val c: Int = 1
+    }
+}
+
+annotation class Ann
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier)
+        (class_body
+          (function_declaration
+            (modifiers
+              (member_modifier))
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body
+              (integer_literal)))))
+      (function_declaration
+        (modifiers
+          (inheritance_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (integer_literal)))
+      (companion_object
+        (class_body
+          (property_declaration
+            (modifiers
+              (annotation
+                (user_type
+                  (type_identifier))))
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)
+              (user_type
+                (type_identifier)))
+            (integer_literal))))))
+  (class_declaration
+    (modifiers
+      (class_modifier))
+    (type_identifier)))

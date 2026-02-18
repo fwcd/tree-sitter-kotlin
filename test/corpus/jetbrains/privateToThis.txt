@@ -1,0 +1,93 @@
+==================
+privateToThis
+==================
+
+package p
+
+class PrivateToThis<in I> {
+    private val foo: I = null!!
+    private var bar: I = null!!
+
+    private val val_with_accessors: I
+        get() = null!!
+
+    private var var_with_accessors: I
+        get() = null!!
+        set(value: I) {}
+
+    private fun bas(): I = null!!
+}
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier)))
+    (class_body
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (postfix_expression
+          (null_literal)))
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (getter
+        (function_body
+          (postfix_expression
+            (null_literal))))
+      (property_declaration
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (getter
+        (function_body
+          (postfix_expression
+            (null_literal))))
+      (setter
+        (parameter_with_optional_type
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (function_body))
+      (function_declaration
+        (modifiers
+          (visibility_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (user_type
+          (type_identifier))
+        (function_body
+          (postfix_expression
+            (null_literal)))))))

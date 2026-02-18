@@ -1,0 +1,34 @@
+==================
+sealedInterface
+==================
+
+// FIR_IDENTICAL
+package test
+
+sealed interface SealedInterface {
+    class Nested : SealedInterface
+    object Top : SealedInterface
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (class_modifier))
+    (type_identifier)
+    (class_body
+      (class_declaration
+        (type_identifier)
+        (delegation_specifier
+          (user_type
+            (type_identifier))))
+      (object_declaration
+        (type_identifier)
+        (delegation_specifier
+          (user_type
+            (type_identifier)))))))

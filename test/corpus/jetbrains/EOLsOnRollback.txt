@@ -1,0 +1,61 @@
+==================
+EOLsOnRollback
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+    class foo
+    fun foo()
+    class foo
+
+    typealias x = t
+    var r
+
+    @a var foo = 4
+
+    1
+    @a val f
+}
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters))
+        (class_declaration
+          (type_identifier))
+        (type_alias
+          (type_identifier)
+          (user_type
+            (type_identifier)))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)))
+        (property_declaration
+          (modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (integer_literal)
+        (property_declaration
+          (modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)))))))

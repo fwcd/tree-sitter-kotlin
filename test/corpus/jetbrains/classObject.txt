@@ -1,0 +1,126 @@
+==================
+classObject
+==================
+
+package test.class_object
+
+class ClassObject {
+    fun f() {
+    }
+
+    val c = 1
+
+    public companion object {
+        val j = 0
+        fun z() = 0
+
+        class A {
+            class B {
+                val i: Int = 0
+                fun f() = 0
+            }
+        }
+    }
+
+
+    class B {
+        companion object {
+            class C {
+                companion object {
+                    class D {
+                        companion object {
+                            val i = 3
+                            fun f() {
+                            }
+
+                            enum class En
+
+                            annotation class Anno
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal))
+      (companion_object
+        (modifiers
+          (visibility_modifier))
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body
+              (integer_literal)))
+          (class_declaration
+            (type_identifier)
+            (class_body
+              (class_declaration
+                (type_identifier)
+                (class_body
+                  (property_declaration
+                    (binding_pattern_kind)
+                    (variable_declaration
+                      (simple_identifier)
+                      (user_type
+                        (type_identifier)))
+                    (integer_literal))
+                  (function_declaration
+                    (simple_identifier)
+                    (function_value_parameters)
+                    (function_body
+                      (integer_literal)))))))))
+      (class_declaration
+        (type_identifier)
+        (class_body
+          (companion_object
+            (class_body
+              (class_declaration
+                (type_identifier)
+                (class_body
+                  (companion_object
+                    (class_body
+                      (class_declaration
+                        (type_identifier)
+                        (class_body
+                          (companion_object
+                            (class_body
+                              (property_declaration
+                                (binding_pattern_kind)
+                                (variable_declaration
+                                  (simple_identifier))
+                                (integer_literal))
+                              (function_declaration
+                                (simple_identifier)
+                                (function_value_parameters)
+                                (function_body))
+                              (class_declaration
+                                (type_identifier))
+                              (class_declaration
+                                (modifiers
+                                  (class_modifier))
+                                (type_identifier)))))))))))))))))

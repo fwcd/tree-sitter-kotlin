@@ -1,0 +1,75 @@
+==================
+parameterizedSuspendFunctionType
+==================
+
+package test
+
+typealias MySuspendAlias <T> = suspend () -> T
+
+val explicitInt: MySuspendAlias<Int>
+    get() = null!!
+
+val explicitAny: MySuspendAlias<Any?>
+    get() = null!!
+
+val explicitStar: MySuspendAlias<*>
+    get() = null!!
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (type_alias
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (type_modifiers)
+    (function_type
+      (function_type_parameters)
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier)))))))
+  (getter
+    (function_body
+      (postfix_expression
+        (null_literal))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (nullable_type
+              (user_type
+                (type_identifier))
+              (quest)))))))
+  (getter
+    (function_body
+      (postfix_expression
+        (null_literal))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection)))))
+  (getter
+    (function_body
+      (postfix_expression
+        (null_literal)))))

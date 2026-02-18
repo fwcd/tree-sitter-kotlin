@@ -1,0 +1,36 @@
+==================
+sealed
+==================
+
+package test
+
+sealed class Sealed {
+    class Nested: Sealed()
+    object Top: Sealed()
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (class_modifier))
+    (type_identifier)
+    (class_body
+      (class_declaration
+        (type_identifier)
+        (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments))))
+      (object_declaration
+        (type_identifier)
+        (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments)))))))

@@ -1,0 +1,94 @@
+==================
+DocCommentsBinding
+==================
+
+/**
+ * Doc comment for A
+ */
+// some comment
+class A(
+        /**
+         * Doc comment for val-parameter
+         */
+        /*var*/val p: Int
+) {
+    /**
+     * Doc comment for function
+     */
+    fun foo() {
+        /**
+         * Doc comment for local function
+         */
+        fun localFoo() { }
+        /**
+         * Doc comment for local class
+         */
+        class LocalClass
+    }
+
+    /**
+     * Doc comment for property
+     */
+    var property: Int
+      /** Doc comment for getter */
+      get() = 1
+      /** Doc comment for setter */
+      set(value) {}
+}
+
+/**
+ * Doc comment for B
+ */
+class B {
+
+}
+---
+
+(source_file
+  (multiline_comment)
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (multiline_comment)
+      (multiline_comment)
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (multiline_comment)
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (multiline_comment)
+          (statements
+            (function_declaration
+              (simple_identifier)
+              (function_value_parameters)
+              (function_body))
+            (multiline_comment)
+            (class_declaration
+              (type_identifier)))))
+      (multiline_comment)
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (multiline_comment)
+      (getter
+        (function_body
+          (integer_literal)))
+      (multiline_comment)
+      (setter
+        (parameter_with_optional_type
+          (simple_identifier))
+        (function_body))))
+  (multiline_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body)))

@@ -1,0 +1,32 @@
+==================
+annotationClass
+==================
+
+package test.a
+
+public annotation class AnnotationClass(val i: Int, val j: String = "a")
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (class_modifier))
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))
+        (string_literal
+          (string_content))))))

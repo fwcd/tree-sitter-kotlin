@@ -1,0 +1,51 @@
+==================
+varargArgumentWithFunctionalType
+==================
+
+package test
+
+interface MyBuilder {
+    val name: String
+}
+
+class VarargArgumentWithFunctionalType {
+    fun myDsl(vararg arguments: MyBuilder.(Int) -> Unit) {
+
+    }
+}
+
+---
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter_modifiers
+            (parameter_modifier))
+          (parameter
+            (simple_identifier)
+            (function_type
+              receiver: (receiver_type
+                (user_type
+                  (type_identifier)))
+              (function_type_parameters
+                (user_type
+                  (type_identifier)))
+              (user_type
+                (type_identifier)))))
+        (function_body)))))

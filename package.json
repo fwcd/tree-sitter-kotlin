@@ -13,7 +13,12 @@
     "playground": "tree-sitter playground",
     "prestart": "npm run build-wasm",
     "start": "npm run playground",
-    "prebuildify": "prebuildify --napi --strip"
+    "prebuildify": "prebuildify --napi --strip",
+    "vendor-fixtures": "node tools/vendor-fixtures.js",
+    "vendor-jetbrains": "node tools/vendor-jetbrains-tests.js",
+    "cross-validate": "node tools/cross-validation/main.js",
+    "cross-validate:debug": "node tools/cross-validation/main.js --debug",
+    "cross-validate:test": "npx vitest run"
   },
   "repository": {
     "type": "git",
@@ -54,7 +59,8 @@
   },
   "devDependencies": {
     "tree-sitter-cli": "^0.24.4",
-    "prebuildify": "^6.0.0"
+    "prebuildify": "^6.0.0",
+    "vitest": "^3.0.0"
   },
   "tree-sitter": [
     {
