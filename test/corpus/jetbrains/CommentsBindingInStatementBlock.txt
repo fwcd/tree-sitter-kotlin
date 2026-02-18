@@ -55,5 +55,5 @@ fun test() {
                 (binding_pattern_kind)
                 (variable_declaration
                   (simple_identifier))
-                (integer_literal))
-              (multiline_comment))))))))
+                (integer_literal)))
+            (multiline_comment)))))))

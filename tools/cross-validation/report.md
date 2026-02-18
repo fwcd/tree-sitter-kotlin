@@ -8,13 +8,13 @@ JetBrains PSI reference trees for all 228 JetBrains fixture files.
 | Metric | Count |
 |--------|-------|
 | Total fixture files | 228 |
-| Tree-sitter clean parses | 118 |
-| Tree-sitter parse errors | 110 |
-| **Structural matches** | **76** |
-| Structural mismatches | 42 |
+| Tree-sitter clean parses | 121 |
+| Tree-sitter parse errors | 107 |
+| **Structural matches** | **78** |
+| Structural mismatches | 43 |
 | PSI parse errors | 0 |
 
-**Match rate (among clean parses): 76/118 (64.4%)**
+**Match rate (among clean parses): 78/121 (64.5%)**
 
 ## Mapping Methodology
 
@@ -154,9 +154,9 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 10 | BlockCommentAtBeginningOfFile3 | MISMATCH | 2 difference(s) |
 | 11 | BlockCommentAtBeginningOfFile4 | MISMATCH | 2 difference(s) |
 | 12 | BlockCommentUnmatchedClosing_ERR | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 13 | ByClauses | MISMATCH | 54 difference(s) |
+| 13 | ByClauses | MISMATCH | 6 difference(s) |
 | 14 | CallWithManyClosures | MATCH | Structurally identical |
-| 15 | CallsInWhen | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 15 | CallsInWhen | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 16 | CollectionLiterals | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 17 | CollectionLiterals_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
 | 18 | CommentsBinding | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
@@ -165,19 +165,19 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 21 | Constructors | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 22 | ControlStructures | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
 | 23 | DefaultKeyword | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 24 | DefinitelyNotNullType | TS_ERROR | 14 ERROR/MISSING node(s) in tree-sitter output |
+| 24 | DefinitelyNotNullType | TS_ERROR | 12 ERROR/MISSING node(s) in tree-sitter output |
 | 25 | DocCommentAfterFileAnnotations | MISMATCH | 3 difference(s) |
 | 26 | DocCommentForFirstDeclaration | MATCH | Structurally identical |
 | 27 | DocCommentOnPackageDirectiveLine | MATCH | Structurally identical |
 | 28 | DocCommentsBinding | MATCH | Structurally identical |
-| 29 | DoubleColon | TS_ERROR | 11 ERROR/MISSING node(s) in tree-sitter output |
+| 29 | DoubleColon | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
 | 30 | DoubleColonWhitespaces | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 31 | DoubleColon_ERR | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 31 | DoubleColon_ERR | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
 | 32 | DuplicateAccessor | MISMATCH | 2 difference(s) |
 | 33 | DynamicReceiver | MATCH | Structurally identical |
-| 34 | DynamicSoftKeyword | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 34 | DynamicSoftKeyword | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 35 | DynamicTypes | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 36 | EOLsInComments | MISMATCH | 6 difference(s) |
+| 36 | EOLsInComments | MISMATCH | 3 difference(s) |
 | 37 | EOLsOnRollback | MATCH | Structurally identical |
 | 38 | EmptyFile | MATCH | Structurally identical |
 | 39 | EmptyName | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
@@ -193,7 +193,7 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 49 | EnumEntryTwoCommas | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 50 | EnumIn | MATCH | Structurally identical |
 | 51 | EnumInline | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 52 | EnumInlinePublic | MATCH | Structurally identical |
+| 52 | EnumInlinePublic | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 53 | EnumMissingName | MISMATCH | 15 difference(s) |
 | 54 | EnumOldConstructorSyntax | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 55 | EnumShortCommas | MISMATCH | 15 difference(s) |
@@ -206,12 +206,12 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 62 | FloatingPointLiteral | MATCH | Structurally identical |
 | 63 | ForWithMultiDecl | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
 | 64 | FunctionCalls | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 65 | FunctionExpressions | TS_ERROR | 60 ERROR/MISSING node(s) in tree-sitter output |
+| 65 | FunctionExpressions | TS_ERROR | 58 ERROR/MISSING node(s) in tree-sitter output |
 | 66 | FunctionExpressions_ERR | TS_ERROR | 29 ERROR/MISSING node(s) in tree-sitter output |
 | 67 | FunctionLiterals | MISMATCH | 20 difference(s) |
-| 68 | FunctionLiterals_ERR | TS_ERROR | 50 ERROR/MISSING node(s) in tree-sitter output |
+| 68 | FunctionLiterals_ERR | TS_ERROR | 46 ERROR/MISSING node(s) in tree-sitter output |
 | 69 | FunctionNoParameterList | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 70 | FunctionTypes | TS_ERROR | 31 ERROR/MISSING node(s) in tree-sitter output |
+| 70 | FunctionTypes | TS_ERROR | 28 ERROR/MISSING node(s) in tree-sitter output |
 | 71 | Functions | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
 | 72 | FunctionsWithoutName | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
 | 73 | FunctionsWithoutName_ERR | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
@@ -220,13 +220,13 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 76 | IfWithPropery | MATCH | Structurally identical |
 | 77 | ImportSoftKW | MATCH | Structurally identical |
 | 78 | Imports | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 79 | Imports_ERR | TS_ERROR | 22 ERROR/MISSING node(s) in tree-sitter output |
+| 79 | Imports_ERR | TS_ERROR | 20 ERROR/MISSING node(s) in tree-sitter output |
 | 80 | IncompleteFunctionLiteral | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 81 | Inner | MATCH | Structurally identical |
-| 82 | IntegerLiteral | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 82 | IntegerLiteral | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
 | 83 | Interface | MATCH | Structurally identical |
 | 84 | InterfaceWithEnumKeyword | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 85 | Labels | TS_ERROR | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 85 | Labels | TS_ERROR | 11 ERROR/MISSING node(s) in tree-sitter output |
 | 86 | LineCommentAfterFileAnnotations | MISMATCH | 3 difference(s) |
 | 87 | LineCommentForFirstDeclaration | MATCH | Structurally identical |
 | 88 | LineCommentsInBlock | MATCH | Structurally identical |
@@ -236,11 +236,11 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 92 | MultiVariableDeclarations | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
 | 93 | NamedClassObject | MATCH | Structurally identical |
 | 94 | NestedComments | MATCH | Structurally identical |
-| 95 | NewLinesValidOperations | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 96 | NewlinesInParentheses | MISMATCH | 51 difference(s) |
+| 95 | NewLinesValidOperations | MISMATCH | 11 difference(s) |
+| 96 | NewlinesInParentheses | MISMATCH | 49 difference(s) |
 | 97 | NonTypeBeforeDotInBaseClass | MISMATCH | 6 difference(s) |
 | 98 | NotIsAndNotIn | MATCH | Structurally identical |
-| 99 | ObjectLiteralAsStatement | MISMATCH | 14 difference(s) |
+| 99 | ObjectLiteralAsStatement | MISMATCH | 12 difference(s) |
 | 100 | ParameterNameMising | TS_ERROR | 9 ERROR/MISSING node(s) in tree-sitter output |
 | 101 | ParameterType | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
 | 102 | ParameterType_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
@@ -253,8 +253,8 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 109 | QuotedIdentifiers | MATCH | Structurally identical |
 | 110 | Reserved | MATCH | Structurally identical |
 | 111 | SemicolonAfterIf | MATCH | Structurally identical |
-| 112 | SimpleClassMembers | MISMATCH | 8 difference(s) |
-| 113 | SimpleClassMembers_ERR | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 112 | SimpleClassMembers | MATCH | Structurally identical |
+| 113 | SimpleClassMembers_ERR | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 114 | SimpleExpressions | MISMATCH | 136 difference(s) |
 | 115 | SimpleIntersections | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
 | 116 | SimpleModifiers | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
@@ -268,22 +268,22 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 124 | TypeAlias | MATCH | Structurally identical |
 | 125 | TypeAlias_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
 | 126 | TypeConstraints | MATCH | Structurally identical |
-| 127 | TypeExpressionAmbiguities_ERR | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
+| 127 | TypeExpressionAmbiguities_ERR | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
 | 128 | TypeModifiers | MISMATCH | 86 difference(s) |
 | 129 | TypeModifiersParenthesized | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 130 | TypeModifiers_ERR | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 130 | TypeModifiers_ERR | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
 | 131 | TypeParametersBeforeName | MISMATCH | 9 difference(s) |
 | 132 | TypealiasIsKeyword | MISMATCH | 4 difference(s) |
 | 133 | UnderscoredTypeArgumentsOfCall | MATCH | Structurally identical |
 | 134 | UnderscoredTypeArgumentsOfCallIllegal | MATCH | Structurally identical |
 | 135 | UnderscoredTypeArgumentsOfType | MATCH | Structurally identical |
 | 136 | UnderscoredTypeParameters | MATCH | Structurally identical |
-| 137 | UnsignedLiteral | TS_ERROR | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 137 | UnsignedLiteral | TS_ERROR | 11 ERROR/MISSING node(s) in tree-sitter output |
 | 138 | When | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 139 | WhenWithSubjectVariable | TS_ERROR | 26 ERROR/MISSING node(s) in tree-sitter output |
-| 140 | WhenWithSubjectVariable_ERR | TS_ERROR | 11 ERROR/MISSING node(s) in tree-sitter output |
+| 140 | WhenWithSubjectVariable_ERR | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
 | 141 | WhenWithSubjectVariable_SoftModifierName | MATCH | Structurally identical |
-| 142 | When_ERR | TS_ERROR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 142 | When_ERR | TS_ERROR | 9 ERROR/MISSING node(s) in tree-sitter output |
 | 143 | annotatedFlexibleTypes | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
 | 144 | annotatedParameterInEnumConstructor | MISMATCH | 6 difference(s) |
 | 145 | annotatedParameterInInnerClassConstructor | MATCH | Structurally identical |
@@ -304,31 +304,31 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 160 | defaultImplsInInterface | MATCH | Structurally identical |
 | 161 | definitelyNotNullTypes | MISMATCH | 8 difference(s) |
 | 162 | delegatedWithInitializer | MATCH | Structurally identical |
-| 163 | delegation | MISMATCH | 4 difference(s) |
+| 163 | delegation | MATCH | Structurally identical |
 | 164 | dependencyOnNestedClasses | MISMATCH | 24 difference(s) |
-| 165 | destructuringInLambdas | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 166 | destructuringInLambdas_ERR | TS_ERROR | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 167 | diagnosticTags_ERR | TS_ERROR | 41 ERROR/MISSING node(s) in tree-sitter output |
+| 165 | destructuringInLambdas | MISMATCH | 70 difference(s) |
+| 166 | destructuringInLambdas_ERR | TS_ERROR | 6 ERROR/MISSING node(s) in tree-sitter output |
+| 167 | diagnosticTags_ERR | TS_ERROR | 71 ERROR/MISSING node(s) in tree-sitter output |
 | 168 | emptyArguments | TS_ERROR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 169 | emptyArgumentsInAnnotations | TS_ERROR | 25 ERROR/MISSING node(s) in tree-sitter output |
+| 169 | emptyArgumentsInAnnotations | TS_ERROR | 22 ERROR/MISSING node(s) in tree-sitter output |
 | 170 | emptyArgumentsInArrayAccesses | TS_ERROR | 8 ERROR/MISSING node(s) in tree-sitter output |
 | 171 | emptyContextParameters | TS_ERROR | 64 ERROR/MISSING node(s) in tree-sitter output |
 | 172 | emptyEnum | MATCH | Structurally identical |
 | 173 | emptyParameters | TS_ERROR | 51 ERROR/MISSING node(s) in tree-sitter output |
-| 174 | emptyParametersInFunctionalTypes | TS_ERROR | 87 ERROR/MISSING node(s) in tree-sitter output |
+| 174 | emptyParametersInFunctionalTypes | TS_ERROR | 86 ERROR/MISSING node(s) in tree-sitter output |
 | 175 | enum | MATCH | Structurally identical |
 | 176 | enumEntryContent | MATCH | Structurally identical |
 | 177 | escapedNames | TS_ERROR | 1 ERROR/MISSING node(s) in tree-sitter output |
 | 178 | flexibleDnnType | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 179 | funInterfaceDeclaration | MATCH | Structurally identical |
-| 180 | incorrectLTGTFallback | MISMATCH | 80 difference(s) |
-| 181 | inheritingClasses | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 180 | incorrectLTGTFallback | MISMATCH | 214 difference(s) |
+| 181 | inheritingClasses | MATCH | Structurally identical |
 | 182 | innerClassEnumEntry | MATCH | Structurally identical |
 | 183 | innerTypes | MISMATCH | 34 difference(s) |
 | 184 | internalConst | MATCH | Structurally identical |
 | 185 | kotlinFunInterface_ERR | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 186 | localClass | MISMATCH | 6 difference(s) |
-| 187 | modifiers | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 187 | modifiers | MISMATCH | 7 difference(s) |
 | 188 | multifileClass | TS_ERROR | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 189 | multifileClass2 | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
 | 190 | mustUseReturnValueAndOverrides | MATCH | Structurally identical |
@@ -349,7 +349,7 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 205 | repeatableAnnotationClass | MATCH | Structurally identical |
 | 206 | sealed | MATCH | Structurally identical |
 | 207 | sealedInterface | MATCH | Structurally identical |
-| 208 | semicolonBetweenDeclarations | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 208 | semicolonBetweenDeclarations | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 209 | specialNames | MATCH | Structurally identical |
 | 210 | suggestGuardSyntax | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 211 | suspendLambda | MISMATCH | 102 difference(s) |
@@ -358,7 +358,7 @@ syntax and cannot be reconciled with simple node-level transformations:
 | 214 | topLevelMembers | MISMATCH | 6 difference(s) |
 | 215 | topLevelMembersAnnotated | TS_ERROR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 216 | trailingCommaAllowed | TS_ERROR | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 217 | trailingCommaForbidden | TS_ERROR | 31 ERROR/MISSING node(s) in tree-sitter output |
+| 217 | trailingCommaForbidden | TS_ERROR | 28 ERROR/MISSING node(s) in tree-sitter output |
 | 218 | typeAliasExpansion | MISMATCH | 26 difference(s) |
 | 219 | typeAliasWithConstraints | TS_ERROR | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 220 | typeAliases | TS_ERROR | 5 ERROR/MISSING node(s) in tree-sitter output |
@@ -373,7 +373,7 @@ syntax and cannot be reconciled with simple node-level transformations:
 
 ## Detailed Mismatches
 
-Showing structural differences for 42 mismatching file(s).
+Showing structural differences for 43 mismatching file(s).
 
 ### BlockCommentAtBeginningOfFile3
 
@@ -398,18 +398,6 @@ Showing structural differences for 42 mismatching file(s).
 - **[child_count_mismatch]** at `KtFile > CLASS`
   - expected: `2`
   - actual: `1`
-- **[child_count_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > [child 1]`
-  - expected: `(absent)`
-  - actual: `CALL_EXPRESSION`
-- **[missing_child]** at `KtFile > CLASS > [child 1]`
-  - expected: `CLASS_BODY`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS`
-  - expected: `2`
-  - actual: `1`
 - **[name_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > BINARY_EXPRESSION > BINARY_EXPRESSION > INTEGER_CONSTANT`
   - expected: `INTEGER_CONSTANT`
   - actual: `CALL_EXPRESSION`
@@ -425,38 +413,6 @@ Showing structural differences for 42 mismatching file(s).
 - **[missing_child]** at `KtFile > CLASS > [child 1]`
   - expected: `CLASS_BODY`
   - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > PARENTHESIZED`
-  - expected: `PARENTHESIZED`
-  - actual: `CALL_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > PARENTHESIZED`
-  - expected: `0`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > PARENTHESIZED > [child 0]`
-  - expected: `(absent)`
-  - actual: `PARENTHESIZED`
-- **[extra_child]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > PARENTHESIZED > [child 1]`
-  - expected: `(absent)`
-  - actual: `FUNCTION_LITERAL`
-- **[missing_child]** at `KtFile > CLASS > [child 1]`
-  - expected: `CLASS_BODY`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > PARENTHESIZED`
-  - expected: `PARENTHESIZED`
-  - actual: `CALL_EXPRESSION`
-- **[child_count_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > PARENTHESIZED`
-  - expected: `1`
-  - actual: `2`
-- **[name_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > PARENTHESIZED > CALL_EXPRESSION`
-  - expected: `CALL_EXPRESSION`
-  - actual: `PARENTHESIZED`
-
-*... and 34 more difference(s)*
 
 ### CommentsBindingInLambda
 
@@ -535,15 +491,6 @@ Showing structural differences for 42 mismatching file(s).
 
 ### EOLsInComments
 
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
-  - expected: `PREFIX_EXPRESSION`
-  - actual: `BINARY_EXPRESSION`
 - **[name_mismatch]** at `KtFile > FUN > BLOCK > PREFIX_EXPRESSION`
   - expected: `PREFIX_EXPRESSION`
   - actual: `BINARY_EXPRESSION`
@@ -877,6 +824,42 @@ Showing structural differences for 42 mismatching file(s).
   - expected: `ANNOTATION_ENTRY`
   - actual: `(absent)`
 
+### NewLinesValidOperations
+
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK`
+  - expected: `7`
+  - actual: `6`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > SAFE_ACCESS_EXPRESSION`
+  - expected: `SAFE_ACCESS_EXPRESSION`
+  - actual: `BINARY_WITH_TYPE`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > SAFE_ACCESS_EXPRESSION`
+  - expected: `0`
+  - actual: `1`
+- **[extra_child]** at `KtFile > FUN > BLOCK > SAFE_ACCESS_EXPRESSION > [child 0]`
+  - expected: `(absent)`
+  - actual: `USER_TYPE`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > BINARY_WITH_TYPE`
+  - expected: `BINARY_WITH_TYPE`
+  - actual: `BINARY_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > BINARY_WITH_TYPE`
+  - expected: `1`
+  - actual: `0`
+- **[missing_child]** at `KtFile > FUN > BLOCK > BINARY_WITH_TYPE > [child 0]`
+  - expected: `USER_TYPE`
+  - actual: `(absent)`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION`
+  - expected: `0`
+  - actual: `2`
+- **[extra_child]** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION > [child 0]`
+  - expected: `(absent)`
+  - actual: `BOOLEAN_CONSTANT`
+- **[extra_child]** at `KtFile > FUN > BLOCK > BINARY_EXPRESSION > [child 1]`
+  - expected: `(absent)`
+  - actual: `BOOLEAN_CONSTANT`
+- **[missing_child]** at `KtFile > FUN > BLOCK > [child 6]`
+  - expected: `BINARY_EXPRESSION`
+  - actual: `(absent)`
+
 ### NewlinesInParentheses
 
 - **[child_count_mismatch]** at `KtFile > FUN > BLOCK`
@@ -940,7 +923,7 @@ Showing structural differences for 42 mismatching file(s).
   - expected: `(absent)`
   - actual: `BINARY_EXPRESSION`
 
-*... and 31 more difference(s)*
+*... and 29 more difference(s)*
 
 ### NonTypeBeforeDotInBaseClass
 
@@ -973,31 +956,25 @@ Showing structural differences for 42 mismatching file(s).
   - actual: `DOT_QUALIFIED_EXPRESSION`
 - **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION`
   - expected: `OBJECT_DECLARATION`
-  - actual: `OBJECT_LITERAL`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION`
-  - expected: `3`
-  - actual: `1`
+  - actual: `CALL_EXPRESSION`
 - **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
   - expected: `USER_TYPE`
-  - actual: `OBJECT_DECLARATION`
+  - actual: `OBJECT_LITERAL`
 - **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE`
   - expected: `0`
-  - actual: `3`
+  - actual: `1`
 - **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE > [child 0]`
   - expected: `(absent)`
-  - actual: `USER_TYPE`
-- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE > [child 1]`
-  - expected: `(absent)`
-  - actual: `VALUE_ARGUMENT_LIST`
-- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > USER_TYPE > [child 2]`
-  - expected: `(absent)`
-  - actual: `CLASS_BODY`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > [child 1]`
-  - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > [child 2]`
+  - actual: `OBJECT_DECLARATION`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
   - expected: `CLASS_BODY`
-  - actual: `(absent)`
+  - actual: `FUNCTION_LITERAL`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY`
+  - expected: `0`
+  - actual: `1`
+- **[extra_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > OBJECT_LITERAL > OBJECT_DECLARATION > CLASS_BODY > [child 0]`
+  - expected: `(absent)`
+  - actual: `BLOCK`
 - **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
   - expected: `CALL_EXPRESSION`
   - actual: `VALUE_ARGUMENT_LIST`
@@ -1006,33 +983,6 @@ Showing structural differences for 42 mismatching file(s).
   - actual: `0`
 - **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
   - expected: `VALUE_ARGUMENT_LIST`
-  - actual: `(absent)`
-
-### SimpleClassMembers
-
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > OBJECT_DECLARATION > CLASS_BODY > OBJECT_DECLARATION`
-  - expected: `3`
-  - actual: `2`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > OBJECT_DECLARATION > CLASS_BODY > OBJECT_DECLARATION > DELEGATED_SUPER_TYPE_ENTRY`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > OBJECT_DECLARATION > CLASS_BODY > OBJECT_DECLARATION > DELEGATED_SUPER_TYPE_ENTRY > [child 1]`
-  - expected: `(absent)`
-  - actual: `CALL_EXPRESSION`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > CLASS > CLASS_BODY > OBJECT_DECLARATION > CLASS_BODY > OBJECT_DECLARATION > [child 2]`
-  - expected: `CLASS_BODY`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > OBJECT_DECLARATION`
-  - expected: `3`
-  - actual: `2`
-- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > OBJECT_DECLARATION > DELEGATED_SUPER_TYPE_ENTRY`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > OBJECT_DECLARATION > DELEGATED_SUPER_TYPE_ENTRY > [child 1]`
-  - expected: `(absent)`
-  - actual: `CALL_EXPRESSION`
-- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > OBJECT_DECLARATION > [child 2]`
-  - expected: `CLASS_BODY`
   - actual: `(absent)`
 
 ### SimpleExpressions
@@ -1537,21 +1487,6 @@ Showing structural differences for 42 mismatching file(s).
   - expected: `(absent)`
   - actual: `VALUE_PARAMETER`
 
-### delegation
-
-- **[child_count_mismatch]** at `KtFile > CLASS`
-  - expected: `3`
-  - actual: `2`
-- **[child_count_mismatch]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY`
-  - expected: `1`
-  - actual: `2`
-- **[extra_child]** at `KtFile > CLASS > DELEGATED_SUPER_TYPE_ENTRY > [child 1]`
-  - expected: `(absent)`
-  - actual: `CALL_EXPRESSION`
-- **[missing_child]** at `KtFile > CLASS > [child 2]`
-  - expected: `CLASS_BODY`
-  - actual: `(absent)`
-
 ### dependencyOnNestedClasses
 
 - **[child_count_mismatch]** at `KtFile > CLASS > USER_TYPE`
@@ -1617,70 +1552,135 @@ Showing structural differences for 42 mismatching file(s).
 
 *... and 4 more difference(s)*
 
+### destructuringInLambdas
+
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
+  - expected: `DOT_QUALIFIED_EXPRESSION`
+  - actual: `CALL_EXPRESSION`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
+  - expected: `CALL_EXPRESSION`
+  - actual: `FUNCTION_LITERAL`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - expected: `FUNCTION_LITERAL`
+  - actual: `VALUE_PARAMETER_LIST`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - expected: `2`
+  - actual: `1`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
+  - expected: `VALUE_PARAMETER_LIST`
+  - actual: `DESTRUCTURING_DECLARATION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
+  - expected: `1`
+  - actual: `0`
+- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
+  - expected: `VALUE_PARAMETER`
+  - actual: `(absent)`
+- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
+  - expected: `BLOCK`
+  - actual: `(absent)`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
+  - expected: `DOT_QUALIFIED_EXPRESSION`
+  - actual: `CALL_EXPRESSION`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
+  - expected: `CALL_EXPRESSION`
+  - actual: `FUNCTION_LITERAL`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - expected: `FUNCTION_LITERAL`
+  - actual: `VALUE_PARAMETER_LIST`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - expected: `2`
+  - actual: `1`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
+  - expected: `VALUE_PARAMETER_LIST`
+  - actual: `DESTRUCTURING_DECLARATION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
+  - expected: `1`
+  - actual: `0`
+- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
+  - expected: `VALUE_PARAMETER`
+  - actual: `(absent)`
+- **[missing_child]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
+  - expected: `BLOCK`
+  - actual: `(absent)`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION`
+  - expected: `DOT_QUALIFIED_EXPRESSION`
+  - actual: `CALL_EXPRESSION`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
+  - expected: `CALL_EXPRESSION`
+  - actual: `FUNCTION_LITERAL`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - expected: `FUNCTION_LITERAL`
+  - actual: `VALUE_PARAMETER_LIST`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > FUNCTION_LITERAL`
+  - expected: `2`
+  - actual: `1`
+
+*... and 50 more difference(s)*
+
 ### incorrectLTGTFallback
 
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `BLOCK`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - expected: `CALL_EXPRESSION`
+  - actual: `BINARY_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - expected: `3`
+  - actual: `2`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
+  - expected: `TYPE_ARGUMENT_LIST`
+  - actual: `BINARY_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
   - expected: `1`
   - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
+- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > [child 0]`
+  - expected: `TYPE_PROJECTION`
   - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
-  - expected: `BLOCK`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
+  - expected: `LABEL`
+  - actual: `PREFIX_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
+  - expected: `0`
+  - actual: `2`
+- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 0]`
+  - expected: `(absent)`
+  - actual: `LABEL`
+- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 1]`
+  - expected: `(absent)`
+  - actual: `FUNCTION_LITERAL`
+- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > [child 2]`
+  - expected: `FUNCTION_LITERAL`
   - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `BLOCK`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - expected: `CALL_EXPRESSION`
+  - actual: `BINARY_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION`
+  - expected: `3`
+  - actual: `2`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
+  - expected: `TYPE_ARGUMENT_LIST`
+  - actual: `BINARY_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST`
   - expected: `1`
   - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
+- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > TYPE_ARGUMENT_LIST > [child 0]`
+  - expected: `TYPE_PROJECTION`
   - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
-  - expected: `BLOCK`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `BLOCK`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
-  - expected: `BLOCK`
-  - actual: `(absent)`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL`
-  - expected: `2`
-  - actual: `1`
-- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `VALUE_PARAMETER_LIST`
-  - actual: `BLOCK`
-- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST`
-  - expected: `1`
-  - actual: `0`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > VALUE_PARAMETER_LIST > [child 0]`
-  - expected: `VALUE_PARAMETER`
-  - actual: `(absent)`
-- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
-  - expected: `BLOCK`
+- **[name_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
+  - expected: `LABEL`
+  - actual: `PREFIX_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL`
+  - expected: `0`
+  - actual: `2`
+- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 0]`
+  - expected: `(absent)`
+  - actual: `LABEL`
+- **[extra_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > LABEL > [child 1]`
+  - expected: `(absent)`
+  - actual: `FUNCTION_LITERAL`
+- **[missing_child]** at `KtFile > FUN > BLOCK > CALL_EXPRESSION > [child 2]`
+  - expected: `FUNCTION_LITERAL`
   - actual: `(absent)`
 
-*... and 60 more difference(s)*
+*... and 194 more difference(s)*
 
 ### innerTypes
 
@@ -1767,6 +1767,30 @@ Showing structural differences for 42 mismatching file(s).
 - **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > CALL_EXPRESSION > FUNCTION_LITERAL > [child 1]`
   - expected: `(absent)`
   - actual: `CALL_EXPRESSION`
+
+### modifiers
+
+- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION`
+  - expected: `DOT_QUALIFIED_EXPRESSION`
+  - actual: `CALL_EXPRESSION`
+- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT`
+  - expected: `INTEGER_CONSTANT`
+  - actual: `DOT_QUALIFIED_EXPRESSION`
+- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT`
+  - expected: `0`
+  - actual: `1`
+- **[extra_child]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > INTEGER_CONSTANT > [child 0]`
+  - expected: `(absent)`
+  - actual: `INTEGER_CONSTANT`
+- **[name_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
+  - expected: `CALL_EXPRESSION`
+  - actual: `VALUE_ARGUMENT_LIST`
+- **[child_count_mismatch]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION`
+  - expected: `1`
+  - actual: `0`
+- **[missing_child]** at `KtFile > CLASS > CLASS_BODY > FUN > BLOCK > IF > BINARY_EXPRESSION > DOT_QUALIFIED_EXPRESSION > CALL_EXPRESSION > [child 0]`
+  - expected: `VALUE_ARGUMENT_LIST`
+  - actual: `(absent)`
 
 ### suspendLambda
 
@@ -2109,10 +2133,10 @@ Showing structural differences for 42 mismatching file(s).
 
 | Kind | Total occurrences |
 |------|-------------------|
-| child_count_mismatch | 337 |
-| name_mismatch | 309 |
-| missing_child | 240 |
-| extra_child | 193 |
+| name_mismatch | 378 |
+| child_count_mismatch | 364 |
+| missing_child | 266 |
+| extra_child | 226 |
 
 ### Most Common Specific Patterns
 
@@ -2121,39 +2145,39 @@ Patterns that appear in multiple files, grouped by (kind, expected, actual):
 | Pattern | Files affected | Example files |
 |---------|---------------|---------------|
 | [child_count_mismatch] expected=`2` actual=`1` | 24 | ByClauses, CommentsBindingInLambda, DocCommentAfterFileAnnotations (+21 more) |
-| [child_count_mismatch] expected=`0` actual=`1` | 20 | BlockCommentAtBeginningOfFile3, BlockCommentAtBeginningOfFile4, ByClauses (+17 more) |
-| [child_count_mismatch] expected=`1` actual=`0` | 19 | CommentsBindingInLambda, NewlinesInParentheses, ObjectLiteralAsStatement (+16 more) |
-| [child_count_mismatch] expected=`1` actual=`2` | 17 | ByClauses, CommentsBindingInLambda, EnumShortWithOverload (+14 more) |
-| [missing_child] expected=`USER_TYPE` actual=`(absent)` | 16 | NewlinesInParentheses, SimpleExpressions, TypeModifiers (+13 more) |
-| [extra_child] expected=`(absent)` actual=`USER_TYPE` | 13 | NonTypeBeforeDotInBaseClass, ObjectLiteralAsStatement, Super (+10 more) |
-| [missing_child] expected=`VALUE_ARGUMENT_LIST` actual=`(absent)` | 12 | CommentsBindingInLambda, EnumMissingName, EnumShortCommas (+9 more) |
-| [child_count_mismatch] expected=`0` actual=`2` | 8 | ByClauses, SimpleExpressions, annotatedParameterInEnumConstructor (+5 more) |
+| [child_count_mismatch] expected=`0` actual=`1` | 22 | BlockCommentAtBeginningOfFile3, BlockCommentAtBeginningOfFile4, EnumMissingName (+19 more) |
+| [child_count_mismatch] expected=`1` actual=`0` | 22 | CommentsBindingInLambda, NewLinesValidOperations, NewlinesInParentheses (+19 more) |
+| [missing_child] expected=`USER_TYPE` actual=`(absent)` | 17 | NewLinesValidOperations, NewlinesInParentheses, SimpleExpressions (+14 more) |
+| [child_count_mismatch] expected=`1` actual=`2` | 15 | CommentsBindingInLambda, EnumShortWithOverload, ExtensionsWithQNReceiver (+12 more) |
+| [missing_child] expected=`VALUE_ARGUMENT_LIST` actual=`(absent)` | 14 | CommentsBindingInLambda, EnumMissingName, EnumShortCommas (+11 more) |
+| [extra_child] expected=`(absent)` actual=`USER_TYPE` | 14 | NewLinesValidOperations, NonTypeBeforeDotInBaseClass, Super (+11 more) |
+| [child_count_mismatch] expected=`0` actual=`2` | 10 | ByClauses, NewLinesValidOperations, SimpleExpressions (+7 more) |
+| [missing_child] expected=`ANNOTATION_ENTRY` actual=`(absent)` | 8 | DocCommentAfterFileAnnotations, LineCommentAfterFileAnnotations, TypeModifiers (+5 more) |
+| [extra_child] expected=`(absent)` actual=`INTEGER_CONSTANT` | 7 | ByClauses, SimpleExpressions, TypealiasIsKeyword (+4 more) |
+| [name_mismatch] expected=`CALL_EXPRESSION` actual=`VALUE_ARGUMENT_LIST` | 7 | CommentsBindingInLambda, ObjectLiteralAsStatement, Super (+4 more) |
 | [missing_child] expected=`BLOCK` actual=`(absent)` | 7 | CommentsBindingInLambda, NewlinesInParentheses, TypeModifiers (+4 more) |
-| [missing_child] expected=`ANNOTATION_ENTRY` actual=`(absent)` | 7 | DocCommentAfterFileAnnotations, LineCommentAfterFileAnnotations, TypeModifiers (+4 more) |
 | [extra_child] expected=`(absent)` actual=`VALUE_ARGUMENT` | 7 | EnumMissingName, EnumShortCommas, EnumShortWithOverload (+4 more) |
-| [child_count_mismatch] expected=`3` actual=`2` | 7 | EnumShortWithOverload, SimpleClassMembers, TypeModifiers (+4 more) |
+| [name_mismatch] expected=`DOT_QUALIFIED_EXPRESSION` actual=`CALL_EXPRESSION` | 7 | ObjectLiteralAsStatement, Super, annotationValues (+4 more) |
 | [name_mismatch] expected=`ANNOTATION_ENTRY` actual=`USER_TYPE` | 7 | TypeModifiers, TypeParametersBeforeName, annotations (+4 more) |
-| [extra_child] expected=`(absent)` actual=`CALL_EXPRESSION` | 6 | ByClauses, CommentsBindingInLambda, SimpleClassMembers (+3 more) |
-| [extra_child] expected=`(absent)` actual=`INTEGER_CONSTANT` | 6 | ByClauses, SimpleExpressions, TypealiasIsKeyword (+3 more) |
-| [name_mismatch] expected=`CALL_EXPRESSION` actual=`VALUE_ARGUMENT_LIST` | 6 | CommentsBindingInLambda, ObjectLiteralAsStatement, Super (+3 more) |
-| [missing_child] expected=`CLASS_BODY` actual=`(absent)` | 5 | ByClauses, EnumShortWithOverload, ObjectLiteralAsStatement (+2 more) |
+| [child_count_mismatch] expected=`3` actual=`2` | 6 | EnumShortWithOverload, TypeModifiers, TypeParametersBeforeName (+3 more) |
+| [child_count_mismatch] expected=`2` actual=`0` | 6 | SimpleExpressions, annotations, destructuringInLambdas (+3 more) |
 | [name_mismatch] expected=`USER_TYPE` actual=`VALUE_ARGUMENT_LIST` | 5 | EnumMissingName, EnumShortCommas, EnumShortWithOverload (+2 more) |
-| [extra_child] expected=`(absent)` actual=`VALUE_ARGUMENT_LIST` | 5 | NonTypeBeforeDotInBaseClass, ObjectLiteralAsStatement, annotations (+2 more) |
-| [name_mismatch] expected=`DOT_QUALIFIED_EXPRESSION` actual=`CALL_EXPRESSION` | 5 | ObjectLiteralAsStatement, Super, annotationValues (+2 more) |
-| [child_count_mismatch] expected=`2` actual=`0` | 5 | SimpleExpressions, annotations, innerTypes (+2 more) |
+| [extra_child] expected=`(absent)` actual=`VALUE_ARGUMENT_LIST` | 5 | NonTypeBeforeDotInBaseClass, annotations, incorrectLTGTFallback (+2 more) |
 | [name_mismatch] expected=`MODIFIER_LIST` actual=`ANNOTATION_ENTRY` | 5 | TypeModifiers, TypeParametersBeforeName, annotations (+2 more) |
-| [extra_child] expected=`(absent)` actual=`BLOCK` | 4 | ByClauses, EnumShortWithOverload, FunctionLiterals (+1 more) |
+| [child_count_mismatch] expected=`3` actual=`0` | 5 | TypeModifiers, dependencyOnNestedClasses, destructuringInLambdas (+2 more) |
+| [extra_child] expected=`(absent)` actual=`FUNCTION_LITERAL` | 4 | ByClauses, FunctionLiterals, dependencyOnNestedClasses (+1 more) |
+| [extra_child] expected=`(absent)` actual=`CALL_EXPRESSION` | 4 | CommentsBindingInLambda, SimpleExpressions, destructuringInLambdas (+1 more) |
 | [missing_child] expected=`INTEGER_CONSTANT` actual=`(absent)` | 4 | CommentsBindingInLambda, SimpleExpressions, annotations (+1 more) |
-| [missing_child] expected=`VALUE_PARAMETER` actual=`(absent)` | 4 | CommentsBindingInLambda, complicateLTGT, incorrectLTGTFallback (+1 more) |
+| [missing_child] expected=`VALUE_PARAMETER` actual=`(absent)` | 4 | CommentsBindingInLambda, complicateLTGT, destructuringInLambdas (+1 more) |
 | [child_count_mismatch] expected=`2` actual=`3` | 4 | DuplicateAccessor, TypeModifiers, annotations (+1 more) |
+| [extra_child] expected=`(absent)` actual=`BLOCK` | 4 | EnumShortWithOverload, FunctionLiterals, ObjectLiteralAsStatement (+1 more) |
 | [name_mismatch] expected=`USER_TYPE` actual=`TYPE_ARGUMENT_LIST` | 4 | ExtensionsWithQNReceiver, NewlinesInParentheses, innerTypes (+1 more) |
+| [extra_child] expected=`(absent)` actual=`VALUE_PARAMETER` | 4 | SimpleExpressions, annotations, definitelyNotNullTypes (+1 more) |
 | [name_mismatch] expected=`FUNCTION_TYPE` actual=`PARENTHESIZED` | 4 | TypeModifiers, suspendLambda, typeAliasExpansion (+1 more) |
-| [child_count_mismatch] expected=`3` actual=`0` | 4 | TypeModifiers, dependencyOnNestedClasses, topJvmPackageName (+1 more) |
-| [extra_child] expected=`(absent)` actual=`BINARY_EXPRESSION` | 3 | BlockCommentAtBeginningOfFile3, BlockCommentAtBeginningOfFile4, NewlinesInParentheses |
 
 ## Tree-Sitter Parse Errors
 
-110 file(s) had ERROR/MISSING nodes in tree-sitter output:
+107 file(s) had ERROR/MISSING nodes in tree-sitter output:
 
 | # | File | Detail |
 |---|------|--------|
@@ -2165,18 +2189,18 @@ Patterns that appear in multiple files, grouped by (kind, expected, actual):
 | 6 | BlockCommentAtBeginningOfFile1 | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 7 | BlockCommentAtBeginningOfFile2 | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 8 | BlockCommentUnmatchedClosing_ERR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 9 | CallsInWhen | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 9 | CallsInWhen | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 10 | CollectionLiterals | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 11 | CollectionLiterals_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
 | 12 | CommentsBinding | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 13 | Constructors | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 14 | ControlStructures | 8 ERROR/MISSING node(s) in tree-sitter output |
 | 15 | DefaultKeyword | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 16 | DefinitelyNotNullType | 14 ERROR/MISSING node(s) in tree-sitter output |
-| 17 | DoubleColon | 11 ERROR/MISSING node(s) in tree-sitter output |
+| 16 | DefinitelyNotNullType | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 17 | DoubleColon | 6 ERROR/MISSING node(s) in tree-sitter output |
 | 18 | DoubleColonWhitespaces | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 19 | DoubleColon_ERR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 20 | DynamicSoftKeyword | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 19 | DoubleColon_ERR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 20 | DynamicSoftKeyword | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 21 | DynamicTypes | 3 ERROR/MISSING node(s) in tree-sitter output |
 | 22 | EmptyName | 10 ERROR/MISSING node(s) in tree-sitter output |
 | 23 | EnumEntryCommaAnnotatedMember | 2 ERROR/MISSING node(s) in tree-sitter output |
@@ -2187,30 +2211,30 @@ Patterns that appear in multiple files, grouped by (kind, expected, actual):
 | 28 | EnumEntrySpaceMember | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 29 | EnumEntryTwoCommas | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 30 | EnumInline | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 31 | EnumOldConstructorSyntax | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 32 | EnumWithAnnotationKeyword | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 33 | Expressions_ERR | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 34 | FileStart_ERR | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 35 | ForWithMultiDecl | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 36 | FunctionCalls | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 37 | FunctionExpressions | 60 ERROR/MISSING node(s) in tree-sitter output |
-| 38 | FunctionExpressions_ERR | 29 ERROR/MISSING node(s) in tree-sitter output |
-| 39 | FunctionLiterals_ERR | 50 ERROR/MISSING node(s) in tree-sitter output |
-| 40 | FunctionNoParameterList | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 41 | FunctionTypes | 31 ERROR/MISSING node(s) in tree-sitter output |
-| 42 | Functions | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 43 | FunctionsWithoutName | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 44 | FunctionsWithoutName_ERR | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 45 | Functions_ERR | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 46 | Imports | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 47 | Imports_ERR | 22 ERROR/MISSING node(s) in tree-sitter output |
-| 48 | IncompleteFunctionLiteral | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 49 | IntegerLiteral | 10 ERROR/MISSING node(s) in tree-sitter output |
-| 50 | InterfaceWithEnumKeyword | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 51 | Labels | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 52 | LocalDeclarations | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 53 | MultiVariableDeclarations | 10 ERROR/MISSING node(s) in tree-sitter output |
-| 54 | NewLinesValidOperations | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 31 | EnumInlinePublic | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 32 | EnumOldConstructorSyntax | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 33 | EnumWithAnnotationKeyword | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 34 | Expressions_ERR | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 35 | FileStart_ERR | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 36 | ForWithMultiDecl | 18 ERROR/MISSING node(s) in tree-sitter output |
+| 37 | FunctionCalls | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 38 | FunctionExpressions | 58 ERROR/MISSING node(s) in tree-sitter output |
+| 39 | FunctionExpressions_ERR | 29 ERROR/MISSING node(s) in tree-sitter output |
+| 40 | FunctionLiterals_ERR | 46 ERROR/MISSING node(s) in tree-sitter output |
+| 41 | FunctionNoParameterList | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 42 | FunctionTypes | 28 ERROR/MISSING node(s) in tree-sitter output |
+| 43 | Functions | 8 ERROR/MISSING node(s) in tree-sitter output |
+| 44 | FunctionsWithoutName | 18 ERROR/MISSING node(s) in tree-sitter output |
+| 45 | FunctionsWithoutName_ERR | 18 ERROR/MISSING node(s) in tree-sitter output |
+| 46 | Functions_ERR | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 47 | Imports | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 48 | Imports_ERR | 20 ERROR/MISSING node(s) in tree-sitter output |
+| 49 | IncompleteFunctionLiteral | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 50 | IntegerLiteral | 8 ERROR/MISSING node(s) in tree-sitter output |
+| 51 | InterfaceWithEnumKeyword | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 52 | Labels | 11 ERROR/MISSING node(s) in tree-sitter output |
+| 53 | LocalDeclarations | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 54 | MultiVariableDeclarations | 10 ERROR/MISSING node(s) in tree-sitter output |
 | 55 | ParameterNameMising | 9 ERROR/MISSING node(s) in tree-sitter output |
 | 56 | ParameterType | 7 ERROR/MISSING node(s) in tree-sitter output |
 | 57 | ParameterType_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
@@ -2219,7 +2243,7 @@ Patterns that appear in multiple files, grouped by (kind, expected, actual):
 | 60 | Properties | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 61 | PropertiesFollowedByInitializers | 13 ERROR/MISSING node(s) in tree-sitter output |
 | 62 | Properties_ERR | 9 ERROR/MISSING node(s) in tree-sitter output |
-| 63 | SimpleClassMembers_ERR | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 63 | SimpleClassMembers_ERR | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 64 | SimpleIntersections | 6 ERROR/MISSING node(s) in tree-sitter output |
 | 65 | SimpleModifiers | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 66 | SoftKeywords | 7 ERROR/MISSING node(s) in tree-sitter output |
@@ -2228,42 +2252,39 @@ Patterns that appear in multiple files, grouped by (kind, expected, actual):
 | 69 | TripleDot | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 70 | TryRecovery | 10 ERROR/MISSING node(s) in tree-sitter output |
 | 71 | TypeAlias_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 72 | TypeExpressionAmbiguities_ERR | 7 ERROR/MISSING node(s) in tree-sitter output |
+| 72 | TypeExpressionAmbiguities_ERR | 5 ERROR/MISSING node(s) in tree-sitter output |
 | 73 | TypeModifiersParenthesized | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 74 | TypeModifiers_ERR | 10 ERROR/MISSING node(s) in tree-sitter output |
-| 75 | UnsignedLiteral | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 74 | TypeModifiers_ERR | 7 ERROR/MISSING node(s) in tree-sitter output |
+| 75 | UnsignedLiteral | 11 ERROR/MISSING node(s) in tree-sitter output |
 | 76 | When | 4 ERROR/MISSING node(s) in tree-sitter output |
 | 77 | WhenWithSubjectVariable | 26 ERROR/MISSING node(s) in tree-sitter output |
-| 78 | WhenWithSubjectVariable_ERR | 11 ERROR/MISSING node(s) in tree-sitter output |
-| 79 | When_ERR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 78 | WhenWithSubjectVariable_ERR | 10 ERROR/MISSING node(s) in tree-sitter output |
+| 79 | When_ERR | 9 ERROR/MISSING node(s) in tree-sitter output |
 | 80 | annotatedFlexibleTypes | 8 ERROR/MISSING node(s) in tree-sitter output |
 | 81 | annotationsOnNullableTypes | 2 ERROR/MISSING node(s) in tree-sitter output |
 | 82 | contextParametersAndAnnotations | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 83 | destructuringInLambdas | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 84 | destructuringInLambdas_ERR | 7 ERROR/MISSING node(s) in tree-sitter output |
-| 85 | diagnosticTags_ERR | 41 ERROR/MISSING node(s) in tree-sitter output |
-| 86 | emptyArguments | 18 ERROR/MISSING node(s) in tree-sitter output |
-| 87 | emptyArgumentsInAnnotations | 25 ERROR/MISSING node(s) in tree-sitter output |
-| 88 | emptyArgumentsInArrayAccesses | 8 ERROR/MISSING node(s) in tree-sitter output |
-| 89 | emptyContextParameters | 64 ERROR/MISSING node(s) in tree-sitter output |
-| 90 | emptyParameters | 51 ERROR/MISSING node(s) in tree-sitter output |
-| 91 | emptyParametersInFunctionalTypes | 87 ERROR/MISSING node(s) in tree-sitter output |
-| 92 | escapedNames | 1 ERROR/MISSING node(s) in tree-sitter output |
-| 93 | flexibleDnnType | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 94 | inheritingClasses | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 95 | kotlinFunInterface_ERR | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 96 | modifiers | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 97 | multifileClass | 3 ERROR/MISSING node(s) in tree-sitter output |
-| 98 | multifileClass2 | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 99 | mustUseReturnValueFullEnabled | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 100 | mustUseReturnValueHalfEnabled | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 101 | namelessObjectAsEnumMember | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 102 | noCommaBetweenArguments | 6 ERROR/MISSING node(s) in tree-sitter output |
-| 103 | semicolonBetweenDeclarations | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 104 | suggestGuardSyntax | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 105 | topLevelMembersAnnotated | 4 ERROR/MISSING node(s) in tree-sitter output |
-| 106 | trailingCommaAllowed | 12 ERROR/MISSING node(s) in tree-sitter output |
-| 107 | trailingCommaForbidden | 31 ERROR/MISSING node(s) in tree-sitter output |
-| 108 | typeAliasWithConstraints | 2 ERROR/MISSING node(s) in tree-sitter output |
-| 109 | typeAliases | 5 ERROR/MISSING node(s) in tree-sitter output |
-| 110 | valueClass | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 83 | destructuringInLambdas_ERR | 6 ERROR/MISSING node(s) in tree-sitter output |
+| 84 | diagnosticTags_ERR | 71 ERROR/MISSING node(s) in tree-sitter output |
+| 85 | emptyArguments | 18 ERROR/MISSING node(s) in tree-sitter output |
+| 86 | emptyArgumentsInAnnotations | 22 ERROR/MISSING node(s) in tree-sitter output |
+| 87 | emptyArgumentsInArrayAccesses | 8 ERROR/MISSING node(s) in tree-sitter output |
+| 88 | emptyContextParameters | 64 ERROR/MISSING node(s) in tree-sitter output |
+| 89 | emptyParameters | 51 ERROR/MISSING node(s) in tree-sitter output |
+| 90 | emptyParametersInFunctionalTypes | 86 ERROR/MISSING node(s) in tree-sitter output |
+| 91 | escapedNames | 1 ERROR/MISSING node(s) in tree-sitter output |
+| 92 | flexibleDnnType | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 93 | kotlinFunInterface_ERR | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 94 | multifileClass | 3 ERROR/MISSING node(s) in tree-sitter output |
+| 95 | multifileClass2 | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 96 | mustUseReturnValueFullEnabled | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 97 | mustUseReturnValueHalfEnabled | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 98 | namelessObjectAsEnumMember | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 99 | noCommaBetweenArguments | 6 ERROR/MISSING node(s) in tree-sitter output |
+| 100 | semicolonBetweenDeclarations | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 101 | suggestGuardSyntax | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 102 | topLevelMembersAnnotated | 4 ERROR/MISSING node(s) in tree-sitter output |
+| 103 | trailingCommaAllowed | 12 ERROR/MISSING node(s) in tree-sitter output |
+| 104 | trailingCommaForbidden | 28 ERROR/MISSING node(s) in tree-sitter output |
+| 105 | typeAliasWithConstraints | 2 ERROR/MISSING node(s) in tree-sitter output |
+| 106 | typeAliases | 5 ERROR/MISSING node(s) in tree-sitter output |
+| 107 | valueClass | 2 ERROR/MISSING node(s) in tree-sitter output |

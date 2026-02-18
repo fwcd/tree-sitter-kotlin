@@ -25,7 +25,8 @@ class UnderscoreParameterName {
           (simple_identifier)
           (nullable_type
             (user_type
-              (type_identifier)))))
+              (type_identifier))
+            (quest))))
       (getter
         (function_body
           (null_literal)))

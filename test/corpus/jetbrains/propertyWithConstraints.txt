@@ -32,7 +32,8 @@ val <T> T.foo: String? where T : I1, T : I2 get() = null
       (simple_identifier)
       (nullable_type
         (user_type
-          (type_identifier))))
+          (type_identifier))
+        (quest)))
     (type_constraints
       (type_constraint
         (type_identifier)

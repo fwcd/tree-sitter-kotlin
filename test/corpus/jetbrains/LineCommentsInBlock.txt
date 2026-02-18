@@ -32,8 +32,8 @@ fun foo() {}
         (call_expression
           (simple_identifier)
           (call_suffix
-            (value_arguments)))
-        (line_comment))))
+            (value_arguments))))
+      (line_comment)))
   (function_declaration
     (simple_identifier)
     (function_value_parameters)

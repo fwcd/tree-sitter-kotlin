@@ -31,7 +31,8 @@ fun dynamic/*
     (function_value_parameters))
   (function_declaration
     receiver: (receiver_type
-      (nullable_type))
+      (nullable_type
+        (quest)))
     (simple_identifier)
     (function_value_parameters))
   (property_declaration
@@ -44,7 +45,8 @@ fun dynamic/*
   (property_declaration
     (binding_pattern_kind)
     receiver: (receiver_type
-      (nullable_type))
+      (nullable_type
+        (quest)))
     (variable_declaration
       (simple_identifier)
       (user_type

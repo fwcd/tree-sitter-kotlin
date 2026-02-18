@@ -28,7 +28,8 @@ class TypeBoundsAndDelegationSpecifiers<H : Any?, G : Any, C: T>() : A(), T wher
         (type_identifier)
         (nullable_type
           (user_type
-            (type_identifier))))
+            (type_identifier))
+          (quest)))
       (type_parameter
         (type_identifier)
         (user_type
@@ -63,4 +64,5 @@ class TypeBoundsAndDelegationSpecifiers<H : Any?, G : Any, C: T>() : A(), T wher
         (type_identifier)
         (nullable_type
           (user_type
-            (type_identifier)))))))
+            (type_identifier))
+          (quest))))))
