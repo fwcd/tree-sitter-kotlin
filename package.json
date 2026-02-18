@@ -14,7 +14,8 @@
     "prestart": "npm run build-wasm",
     "start": "npm run playground",
     "prebuildify": "prebuildify --napi --strip",
-    "vendor-jetbrains": "./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/",
+    "vendor-fixtures": "./tools/vendor-fixtures.sh",
+    "vendor-jetbrains": "./tools/vendor-jetbrains-tests.sh",
     "cross-validate": "cd tools/cross-validation && python3 main.py",
     "cross-validate:debug": "cd tools/cross-validation && python3 main.py --debug",
     "cross-validate:test": "cd tools/cross-validation && python3 -m pytest -v"

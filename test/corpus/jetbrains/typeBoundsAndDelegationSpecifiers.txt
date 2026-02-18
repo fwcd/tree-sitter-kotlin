@@ -2,7 +2,6 @@
 typeBoundsAndDelegationSpecifiers
 ==================
 
-
 package test
 
 open class A

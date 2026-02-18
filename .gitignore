@@ -33,3 +33,6 @@ target
 # Swift
 .build
 __pycache__/
+
+# Vendored JetBrains fixtures (fetched on demand via tools/vendor-fixtures.sh)
+tools/cross-validation/fixtures/

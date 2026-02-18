@@ -32,18 +32,13 @@ OUTPUT_DIR="$REPO_ROOT/test/corpus/jetbrains"
 EXCLUDED_FILE="$SCRIPT_DIR/cross-validation/excluded.txt"
 
 # --- Argument handling -------------------------------------------------------
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <path-to-jetbrains-fixtures-dir>"
-  echo ""
-  echo "Example:"
-  echo "  $0 tools/cross-validation/fixtures/"
-  exit 1
-fi
-
-SOURCE_DIR="$1"
+SOURCE_DIR="${1:-$SCRIPT_DIR/cross-validation/fixtures}"
 
 if [[ ! -d "$SOURCE_DIR" ]]; then
-  echo "Error: source directory does not exist: $SOURCE_DIR"
+  echo "Error: fixtures directory does not exist: $SOURCE_DIR"
+  echo ""
+  echo "Run 'npm run vendor-fixtures' first to fetch JetBrains fixtures."
+  echo "Or provide a path:  $0 <path-to-jetbrains-fixtures-dir>"
   exit 1
 fi
 

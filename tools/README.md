@@ -1,88 +1,109 @@
 # Tools
 
-## JetBrains Corpus Tests
+## Quick Start
 
-The `test/corpus/jetbrains/` directory contains tree-sitter corpus tests derived from the JetBrains Kotlin parser test fixtures. These fixtures exercise a wide range of Kotlin syntax and serve as a compatibility benchmark.
+```bash
+# Fetch JetBrains fixtures (one-time setup)
+npm run vendor-fixtures
 
-**Source:** The original `.kt` fixtures come from the [JetBrains Kotlin compiler test suite](https://github.com/JetBrains/kotlin/tree/master/compiler/testData/psi). The `.kt` and `.txt` (PSI expected output) pairs are vendored in `tools/cross-validation/fixtures/`.
+# Generate corpus tests from fixtures
+npm run vendor-jetbrains
 
-### vendor-jetbrains-tests.sh
+# Run all tests
+npm test
 
-This script regenerates all JetBrains corpus tests from source fixtures.
+# Run structural cross-validation
+npm run cross-validate
+```
+
+## vendor-fixtures.sh
+
+Fetches JetBrains Kotlin PSI test fixtures at a pinned commit hash via sparse checkout.
 
 **What it does:**
 
-1. Reads every `.kt` file in the given source directory
-2. Skips `*_ERR.kt` files (intentional parse errors)
-3. Parses each file with `tree-sitter parse`
-4. Skips files that produce ERROR nodes or MISSING keyword tokens
-5. Converts zero-length named nodes into `(MISSING _alpha_identifier)` syntax
-6. Writes one corpus test file per fixture to `test/corpus/jetbrains/<Name>.txt`
-7. Cleans the output directory first (idempotent)
+1. Reads the pinned commit from `cross-validation/.fixtures-version`
+2. Sparse-clones `compiler/testData/psi/` from JetBrains/kotlin at that commit
+3. Copies `.kt` and `.txt` files into `cross-validation/fixtures/`
+4. Updates `.fixtures-version` if a new commit was provided
 
 **Usage:**
 
 ```bash
-./tools/vendor-jetbrains-tests.sh <path-to-jetbrains-fixtures-dir>
+# Fetch at pinned commit (from .fixtures-version)
+./tools/vendor-fixtures.sh
+
+# Fetch at a specific commit (updates .fixtures-version)
+./tools/vendor-fixtures.sh <commit-hash>
 ```
 
-**Example (using vendored fixtures):**
+Fixtures are **not checked into git** — they're fetched on demand. The `.fixtures-version` file is tracked so builds are reproducible.
+
+## vendor-jetbrains-tests.sh
+
+Generates tree-sitter corpus tests from vendored JetBrains fixtures.
+
+**What it does:**
+
+1. Reads every `.kt` file in `cross-validation/fixtures/` (or a provided path)
+2. Skips `*_ERR.kt` files (intentional parse errors)
+3. Skips files listed in `cross-validation/excluded.txt`
+4. Parses each file with `tree-sitter parse`
+5. Skips files that produce ERROR nodes or MISSING keyword tokens
+6. Converts zero-length named nodes into `(MISSING _alpha_identifier)` syntax
+7. Writes one corpus test file per fixture to `test/corpus/jetbrains/<Name>.txt`
+
+**Usage:**
 
 ```bash
-./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
+# Uses default fixtures path (tools/cross-validation/fixtures/)
+./tools/vendor-jetbrains-tests.sh
+
+# Or provide a custom path
+./tools/vendor-jetbrains-tests.sh /path/to/fixtures/
 ```
 
-**Verify tests pass:**
+**Requires:** `tree-sitter` CLI (installed via `npm install`)
 
-```bash
-tree-sitter test
-```
+## Cross-Validation
 
-### Updating when new JetBrains fixtures are available
-
-1. Obtain the updated fixture `.kt` and `.txt` files from the JetBrains Kotlin repo
-2. Copy them into `tools/cross-validation/fixtures/`
-3. Re-run the vendor script:
-   ```bash
-   ./tools/vendor-jetbrains-tests.sh tools/cross-validation/fixtures/
-   ```
-4. Run `tree-sitter test` to verify all tests pass
-5. Commit the regenerated test files
-
-## Cross-Validation (tree-sitter vs JetBrains PSI)
-
-The `tools/cross-validation/` directory contains a Python tool that structurally compares tree-sitter-kotlin parse trees against JetBrains PSI reference trees. This measures how closely tree-sitter-kotlin reproduces the official Kotlin parser's AST structure.
+The `cross-validation/` directory contains a Python tool that structurally compares tree-sitter-kotlin parse trees against JetBrains PSI reference trees.
 
 **What it does:**
 
 1. Parses each JetBrains `.kt` fixture with `tree-sitter parse`
 2. Parses the corresponding `.txt` PSI fixture (indented tree format)
-3. Normalizes both trees (renames nodes, skips noise, collapses wrappers)
+3. Normalizes both trees (110+ node type mappings, noise skipping, wrapper collapsing)
 4. Compares the normalized trees structurally and records differences
 5. Generates a Markdown report with per-file results and mismatch analysis
 
-**Current results:** 75/118 (63.6%) structural match among clean parses.
-
-See the full report: [tools/cross-validation/report.md](cross-validation/report.md)
-
-**Fixtures:** The `.kt` source files and `.txt` PSI expected output files are vendored in `tools/cross-validation/fixtures/`. These are self-contained — no external repos needed.
+**Current results:** 78/121 (64.5%) structural match among clean parses.
 
 **Usage:**
 
 ```bash
-cd tools/cross-validation
-python main.py
+# Full validation
+npm run cross-validate
+
+# Debug a single fixture
+npm run cross-validate:debug -- BabySteps
+
+# Run unit tests
+npm run cross-validate:test
 ```
 
-**Debug a single file:**
+**Requires:** Python 3.8+, `pytest` (for unit tests)
 
-```bash
-cd tools/cross-validation
-python main.py --debug BabySteps
-```
+### Key Files
 
-**Run cross-validation tests:**
-
-```bash
-cd tools/cross-validation && python -m pytest
-```
+| File | Description |
+| ---- | ----------- |
+| `.fixtures-version` | Pinned JetBrains/kotlin commit hash |
+| `excluded.txt` | Files excluded from corpus (grammar issues or wrong AST) |
+| `TODO.md` | Categorized grammar issues ranked by difficulty |
+| `report.md` | Latest cross-validation report |
+| `main.py` | Entry point |
+| `normalizer.py` | Tree normalization (node type mapping, noise removal) |
+| `comparator.py` | Structural tree comparison |
+| `parser_ts.py` | tree-sitter output parser |
+| `parser_psi.py` | JetBrains PSI output parser |

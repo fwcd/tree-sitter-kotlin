@@ -2,7 +2,6 @@
 CommentsBindingInStatementBlock
 ==================
 
-
 fun test() {
     if (true) {/*start-end*/}
 
