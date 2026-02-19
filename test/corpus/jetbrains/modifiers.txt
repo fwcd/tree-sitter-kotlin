@@ -1,0 +1,186 @@
+==================
+modifiers
+==================
+
+// LIBRARY_PLATFORMS: JVM, Common
+package test
+import kotlin.coroutines.*
+
+data class Modifiers(val x: Int) {
+    external fun extFun()
+
+    var extVar: Int = 1
+        external get
+        external set
+
+    tailrec fun sum(x: Long, sum: Long): Long {
+        if (x == 0.toLong()) return sum
+        return sum(x - 1, sum + x)
+    }
+
+    inline fun inlined(crossinline arg1: ()->Unit, noinline arg2: ()->Unit): Unit {}
+
+    override operator fun equals(other: Any?) = false
+
+    annotation class Ann
+
+    suspend fun suspend(x: Continuation<Int>) {}
+
+    fun builder(c: suspend Any.() -> Unit) {}
+}
+
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))
+      (wildcard_import)))
+  (class_declaration
+    (modifiers
+      (class_modifier))
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (modifiers
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (integer_literal))
+      (getter
+        (modifiers
+          (function_modifier)))
+      (setter
+        (modifiers
+          (function_modifier)))
+      (function_declaration
+        (modifiers
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (user_type
+          (type_identifier))
+        (function_body
+          (statements
+            (if_expression
+              condition: (equality_expression
+                (simple_identifier)
+                (call_expression
+                  (navigation_expression
+                    (integer_literal)
+                    (navigation_suffix
+                      (simple_identifier)))
+                  (call_suffix
+                    (value_arguments))))
+              consequence: (control_structure_body
+                (jump_expression
+                  (simple_identifier))))
+            (jump_expression
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments
+                    (value_argument
+                      (additive_expression
+                        (simple_identifier)
+                        (integer_literal)))
+                    (value_argument
+                      (additive_expression
+                        (simple_identifier)
+                        (simple_identifier))))))))))
+      (function_declaration
+        (modifiers
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter_modifiers
+            (parameter_modifier))
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters)
+              (user_type
+                (type_identifier))))
+          (parameter_modifiers
+            (parameter_modifier))
+          (parameter
+            (simple_identifier)
+            (function_type
+              (function_type_parameters)
+              (user_type
+                (type_identifier)))))
+        (user_type
+          (type_identifier))
+        (function_body))
+      (function_declaration
+        (modifiers
+          (member_modifier)
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (nullable_type
+              (user_type
+                (type_identifier))
+              (quest))))
+        (function_body
+          (boolean_literal)))
+      (class_declaration
+        (modifiers
+          (class_modifier))
+        (type_identifier))
+      (function_declaration
+        (modifiers
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))))))
+        (function_body))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (type_modifiers)
+            (function_type
+              receiver: (receiver_type
+                (user_type
+                  (type_identifier)))
+              (function_type_parameters)
+              (user_type
+                (type_identifier)))))
+        (function_body)))))
