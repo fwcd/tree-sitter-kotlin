@@ -56,6 +56,20 @@ jobs:
           rm -rf gh-pages/assets/tree-sitter-kotlin*
           mkdir -p "gh-pages/assets/tree-sitter-kotlin-$tag"
           cp tree-sitter-kotlin.wasm "gh-pages/assets/tree-sitter-kotlin-$tag"
+
+          echo "==> Updating web-tree-sitter runtime..."
+          TS_VERSION=$(node -p "require('./node_modules/tree-sitter-cli/package.json').version")
+          echo "tree-sitter-cli version: $TS_VERSION"
+          cd /tmp
+          npm pack "web-tree-sitter@$TS_VERSION"
+          mkdir -p wts && tar xzf web-tree-sitter-*.tgz -C wts
+          cd "$GITHUB_WORKSPACE"
+          rm -rf gh-pages/assets/web-tree-sitter-*
+          mkdir -p "gh-pages/assets/web-tree-sitter-$TS_VERSION"
+          cp /tmp/wts/package/tree-sitter.js "gh-pages/assets/web-tree-sitter-$TS_VERSION/"
+          cp /tmp/wts/package/tree-sitter.wasm "gh-pages/assets/web-tree-sitter-$TS_VERSION/"
+          sed -i "s|web-tree-sitter-[^/]*/tree-sitter\.js|web-tree-sitter-$TS_VERSION/tree-sitter.js|g" gh-pages/index.html
+
           tree gh-pages/assets
 
           echo "==> Updating version on website..."
