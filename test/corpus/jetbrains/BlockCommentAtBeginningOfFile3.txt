@@ -1,0 +1,14 @@
+==================
+BlockCommentAtBeginningOfFile3
+==================
+
+// COMPILATION_ERRORS
+
+/*
+
+fooo
+---
+
+(source_file
+  (line_comment)
+  (multiline_comment))
