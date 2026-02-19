@@ -1,0 +1,20 @@
+==================
+LineCommentAfterFileAnnotations
+==================
+
+// COMPILATION_ERRORS
+
+@file:[Volatile]
+// class C
+class C{}
+---
+
+(source_file
+  (line_comment)
+  (file_annotation
+    (user_type
+      (type_identifier)))
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body)))

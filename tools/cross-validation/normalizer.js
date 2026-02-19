@@ -101,9 +101,22 @@ function _normalizeTsMulti(node) {
     return [];
   }
 
-  // CALL_EXPRESSION → flatten nested chains
+  // CALL_EXPRESSION → flatten nested chains, then reorder DOT_QUALIFIED
   if (psiName === 'CALL_EXPRESSION') {
     children = _flattenCallExpression(children);
+    const reordered = _reorderDotQualifiedCall(children);
+    if (reordered.length === 1 && reordered[0].name === 'DOT_QUALIFIED_EXPRESSION') {
+      return reordered; // Already restructured, don't wrap in CALL_EXPRESSION
+    }
+    children = reordered;
+
+    // If the original node was a dot-qualified call (navigation_expression child),
+    // but the DQE was dropped because identifiers are transparent, still wrap in DQE
+    if (node.children.some(c => c.name === 'navigation_expression') &&
+        children.length > 0 && children[0].name !== 'DOT_QUALIFIED_EXPRESSION') {
+      const innerCall = new Node('CALL_EXPRESSION', children);
+      return [new Node('DOT_QUALIFIED_EXPRESSION', [innerCall])];
+    }
   }
 
   // function_body — expression body detection
@@ -134,9 +147,9 @@ function _normalizeTsMulti(node) {
     children = _unwrapFunctionTypeReceiver(children);
   }
 
-  // Empty FUNCTION_LITERAL → inject BLOCK child
-  if (psiName === 'FUNCTION_LITERAL' && children.length === 0) {
-    children = [new Node('BLOCK')];
+  // FUNCTION_LITERAL → wrap body in BLOCK
+  if (psiName === 'FUNCTION_LITERAL') {
+    children = _wrapLambdaBodyInBlock(children);
   }
 
   // CLASS_INITIALIZER → wrap children in BLOCK
@@ -149,9 +162,18 @@ function _normalizeTsMulti(node) {
     children = [new Node('OBJECT_DECLARATION', children)];
   }
 
-  // VALUE_PARAMETER_LIST → wrap bare types in VALUE_PARAMETER
+  // VALUE_PARAMETER_LIST → absorb annotations/defaults, wrap bare types
   if (psiName === 'VALUE_PARAMETER_LIST') {
+    children = _absorbIntoValueParameters(children);
     children = _wrapBareTypesInValueParameter(children);
+  }
+
+  // PARENTHESIZED → unwrap in type contexts (contains only type/annotation children)
+  if (psiName === 'PARENTHESIZED') {
+    const TYPE_NAMES = new Set(['USER_TYPE', 'FUNCTION_TYPE', 'NULLABLE_TYPE', 'ANNOTATION_ENTRY']);
+    if (children.length > 0 && children.every(c => TYPE_NAMES.has(c.name))) {
+      return children;
+    }
   }
 
   // Drop empty IMPORT_LIST and PACKAGE_DIRECTIVE
@@ -159,14 +181,14 @@ function _normalizeTsMulti(node) {
     return [];
   }
 
-  // Drop empty MODIFIER_LIST — modifier keywords are leaves
-  if (psiName === 'MODIFIER_LIST' && children.length === 0) {
-    return [];
-  }
-
   // Drop empty VALUE_PARAMETER_LIST
   if (psiName === 'VALUE_PARAMETER_LIST' && children.length === 0) {
     return [];
+  }
+
+  // KtFile → merge consecutive FILE_ANNOTATION_LISTs
+  if (psiName === 'KtFile') {
+    children = _mergeFileAnnotationLists(children);
   }
 
   return [new Node(psiName, children)];
@@ -240,11 +262,6 @@ function _normalizePsiMulti(node) {
     return [];
   }
 
-  // Empty MODIFIER_LIST → drop
-  if (name === 'MODIFIER_LIST' && children.length === 0) {
-    return [];
-  }
-
   // Empty VALUE_PARAMETER_LIST → drop
   if (name === 'VALUE_PARAMETER_LIST' && children.length === 0) {
     return [];
@@ -286,9 +303,9 @@ function _normalizePsiMulti(node) {
     return [];
   }
 
-  // Empty FUNCTION_LITERAL → inject BLOCK child
-  if (name === 'FUNCTION_LITERAL' && children.length === 0) {
-    children = [new Node('BLOCK')];
+  // FUNCTION_LITERAL → wrap body in BLOCK (same as TS side)
+  if (name === 'FUNCTION_LITERAL') {
+    children = _wrapLambdaBodyInBlock(children);
   }
 
   // CLASS_INITIALIZER → wrap children in BLOCK (PSI side only if not already a BLOCK)
@@ -300,14 +317,32 @@ function _normalizePsiMulti(node) {
     }
   }
 
-  // OBJECT_LITERAL → inject OBJECT_DECLARATION wrapper
+  // OBJECT_LITERAL → inject OBJECT_DECLARATION wrapper (only if not already present)
   if (name === 'OBJECT_LITERAL') {
-    children = [new Node('OBJECT_DECLARATION', children)];
+    const hasObjDecl = children.some(c => c.name === 'OBJECT_DECLARATION');
+    if (!hasObjDecl) {
+      children = [new Node('OBJECT_DECLARATION', children)];
+    }
   }
 
   // VALUE_PARAMETER_LIST → wrap bare types in VALUE_PARAMETER
   if (name === 'VALUE_PARAMETER_LIST') {
     children = _wrapBareTypesInValueParameter(children);
+  }
+
+  // ENUM_ENTRY → strip USER_TYPE from ENUM_ENTRY_SUPERCLASS_REFERENCE_EXPRESSION
+  if (name === 'ENUM_ENTRY') {
+    children = _stripEnumEntryUserType(children);
+  }
+
+  // FILE_ANNOTATION_LIST → strip ANNOTATION_ENTRY and ANNOTATION_TARGET wrappers
+  if (name === 'FILE_ANNOTATION_LIST') {
+    children = _stripAnnotationWrappers(children);
+  }
+
+  // USER_TYPE → flatten nested chains (PSI nests, TS flattens)
+  if (name === 'USER_TYPE') {
+    children = _flattenUserType(children);
   }
 
   // SAFE_ACCESS_EXPRESSION → DOT_QUALIFIED_EXPRESSION
@@ -352,6 +387,39 @@ function _flattenCallExpression(children) {
   const rest = children.slice(1);
   const innerFlattened = _flattenCallExpression(inner.children);
   return innerFlattened.concat(rest);
+}
+
+/**
+ * Reorder DOT_QUALIFIED_EXPRESSION inside CALL_EXPRESSION to match PSI nesting.
+ * TS: CALL_EXPRESSION(DOT_QUALIFIED_EXPRESSION(recv, member), args...)
+ * PSI: DOT_QUALIFIED_EXPRESSION(recv, CALL_EXPRESSION(member, args...))
+ * @param {Node[]} children - Already-flattened children of a CALL_EXPRESSION
+ * @returns {Node[]} Possibly restructured as DOT_QUALIFIED_EXPRESSION wrapping CALL_EXPRESSION
+ */
+function _reorderDotQualifiedCall(children) {
+  if (children.length < 2 || children[0].name !== 'DOT_QUALIFIED_EXPRESSION') {
+    return children;
+  }
+  const dqe = children[0];
+  const callArgs = children.slice(1);
+
+  if (dqe.children.length === 0) return children;
+
+  if (dqe.children.length === 1) {
+    // DQE has only receiver (member name was transparent identifier, dropped)
+    // → DOT_QUALIFIED_EXPRESSION(receiver, CALL_EXPRESSION(args...))
+    const receiver = dqe.children[0];
+    const innerCall = new Node('CALL_EXPRESSION', callArgs);
+    return [new Node('DOT_QUALIFIED_EXPRESSION', [receiver, innerCall])];
+  }
+
+  // DQE has receiver + member: pull last child as call target
+  const dqeReceiver = dqe.children.slice(0, -1);
+  const callTarget = dqe.children[dqe.children.length - 1];
+  const innerCall = new Node('CALL_EXPRESSION', [callTarget, ...callArgs]);
+  const receiver = dqeReceiver.length === 1 ? dqeReceiver[0] :
+    new Node('DOT_QUALIFIED_EXPRESSION', dqeReceiver);
+  return [new Node('DOT_QUALIFIED_EXPRESSION', [receiver, innerCall])];
 }
 
 /**
@@ -452,6 +520,159 @@ function _nestPropertyAccessors(children) {
       }
     }
     result.push(child);
+  }
+  return result;
+}
+
+/**
+ * Wrap lambda body statements in BLOCK node.
+ * Separates VALUE_PARAMETER_LIST from body content and wraps body in BLOCK.
+ * @param {Node[]} children
+ * @returns {Node[]}
+ */
+function _wrapLambdaBodyInBlock(children) {
+  const params = children.filter(c => c.name === 'VALUE_PARAMETER_LIST');
+  const body = children.filter(c => c.name !== 'VALUE_PARAMETER_LIST');
+
+  if (body.length === 1 && body[0].name === 'BLOCK') {
+    // Already wrapped
+    return [...params, ...body];
+  }
+  if (body.length > 0) {
+    return [...params, new Node('BLOCK', body)];
+  }
+  // Empty body
+  return [...params, new Node('BLOCK')];
+}
+
+/**
+ * Merge consecutive FILE_ANNOTATION_LIST nodes into a single list.
+ * Does not add ANNOTATION_ENTRY/TARGET wrappers — both sides strip them.
+ * @param {Node[]} children
+ * @returns {Node[]}
+ */
+function _mergeFileAnnotationLists(children) {
+  if (!children.some(c => c.name === 'FILE_ANNOTATION_LIST')) {
+    return children;
+  }
+  const result = [];
+  let mergedContent = [];
+
+  for (const child of children) {
+    if (child.name === 'FILE_ANNOTATION_LIST') {
+      // Strip ANNOTATION_TARGET from TS children (comes from use_site_target)
+      const content = child.children.filter(c => c.name !== 'ANNOTATION_TARGET');
+      mergedContent.push(...content);
+    } else {
+      if (mergedContent.length > 0) {
+        result.push(new Node('FILE_ANNOTATION_LIST', mergedContent));
+        mergedContent = [];
+      }
+      result.push(child);
+    }
+  }
+  if (mergedContent.length > 0) {
+    result.push(new Node('FILE_ANNOTATION_LIST', mergedContent));
+  }
+  return result;
+}
+
+/**
+ * Absorb annotations and default value expressions into VALUE_PARAMETER nodes.
+ * Annotations before a VALUE_PARAMETER become its children (prepended).
+ * Expressions after a VALUE_PARAMETER become its children (appended as defaults).
+ * @param {Node[]} children
+ * @returns {Node[]}
+ */
+function _absorbIntoValueParameters(children) {
+  if (!children.some(c => c.name === 'VALUE_PARAMETER')) {
+    return children;
+  }
+  // Check if there are stray nodes that need absorption
+  const hasStray = children.some(c =>
+    c.name !== 'VALUE_PARAMETER' && c.name !== 'VALUE_PARAMETER_LIST'
+  );
+  if (!hasStray) return children;
+
+  const result = [];
+  let pending = []; // annotations waiting to be absorbed into next VP
+
+  for (const child of children) {
+    if (child.name === 'VALUE_PARAMETER') {
+      // Absorb any pending annotations into this parameter
+      if (pending.length > 0) {
+        result.push(new Node('VALUE_PARAMETER', [...pending, ...child.children]));
+        pending = [];
+      } else {
+        result.push(child);
+      }
+    } else if (child.name === 'ANNOTATION_ENTRY') {
+      // Queue annotations to be absorbed into the next VALUE_PARAMETER
+      pending.push(child);
+    } else if (result.length > 0 && result[result.length - 1].name === 'VALUE_PARAMETER') {
+      // Non-annotation, non-VP after VP → default value, absorb into preceding VP
+      const vp = result[result.length - 1];
+      result[result.length - 1] = new Node('VALUE_PARAMETER', vp.children.concat([child]));
+    } else {
+      result.push(child);
+    }
+  }
+  // If there are leftover pending annotations with no following VP, just add them
+  result.push(...pending);
+  return result;
+}
+
+/**
+ * Strip USER_TYPE from ENUM_ENTRY (comes from ENUM_ENTRY_SUPERCLASS_REFERENCE_EXPRESSION).
+ * tree-sitter doesn't produce this implicit superclass reference.
+ * @param {Node[]} children
+ * @returns {Node[]}
+ */
+function _stripEnumEntryUserType(children) {
+  // Only strip if there's also a VALUE_ARGUMENT_LIST (i.e., it's a constructor call)
+  const hasVAL = children.some(c => c.name === 'VALUE_ARGUMENT_LIST');
+  if (!hasVAL) return children;
+  return children.filter(c => c.name !== 'USER_TYPE');
+}
+
+/**
+ * Flatten nested USER_TYPE chains (PSI nests qualified types, TS flattens them).
+ * USER_TYPE(USER_TYPE(USER_TYPE, TAL), TAL) → USER_TYPE(TAL, TAL)
+ * @param {Node[]} children
+ * @returns {Node[]}
+ */
+function _flattenUserType(children) {
+  if (!children.some(c => c.name === 'USER_TYPE')) {
+    return children;
+  }
+  const result = [];
+  for (const child of children) {
+    if (child.name === 'USER_TYPE') {
+      result.push(..._flattenUserType(child.children));
+    } else {
+      result.push(child);
+    }
+  }
+  return result;
+}
+
+/**
+ * Strip ANNOTATION_ENTRY and ANNOTATION_TARGET wrappers inside FILE_ANNOTATION_LIST.
+ * Promotes ANNOTATION_ENTRY children; drops empty ANNOTATION_TARGET nodes.
+ * @param {Node[]} children
+ * @returns {Node[]}
+ */
+function _stripAnnotationWrappers(children) {
+  const result = [];
+  for (const child of children) {
+    if (child.name === 'ANNOTATION_ENTRY') {
+      // Promote children, recursively stripping nested wrappers
+      result.push(..._stripAnnotationWrappers(child.children));
+    } else if (child.name === 'ANNOTATION_TARGET') {
+      // Drop annotation targets (they contain no structural info after normalization)
+    } else {
+      result.push(child);
+    }
   }
   return result;
 }

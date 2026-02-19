@@ -76,8 +76,8 @@ const TS_TO_PSI = {
   simple_identifier: null,
   identifier: null,
 
-  // Modifiers
-  modifiers: 'MODIFIER_LIST',
+  // Modifiers (transparent — MODIFIER_LIST skipped on both sides)
+  modifiers: null,
   class_modifier: null,
   member_modifier: null,
   visibility_modifier: null,
@@ -285,6 +285,12 @@ const SKIP_PSI_NODES = new Set([
   // Enum-specific wrappers
   'ENUM_ENTRY_SUPERCLASS_REFERENCE_EXPRESSION',
   'INITIALIZER_LIST',
+
+  // MODIFIER_LIST — tree-sitter emits bare ANNOTATION_ENTRY without wrapper
+  'MODIFIER_LIST',
+
+  // WHEN_CONDITION_WITH_EXPRESSION — tree-sitter promotes condition expression directly
+  'WHEN_CONDITION_WITH_EXPRESSION',
 
   // LABELED_EXPRESSION — PSI wraps labeled expressions
   'LABELED_EXPRESSION',
