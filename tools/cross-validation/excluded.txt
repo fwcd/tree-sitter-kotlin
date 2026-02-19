@@ -20,80 +20,60 @@
 #   3. Run: npm test (to verify the new corpus test passes)
 
 # =============================================================================
-# MISMATCH: Grammar produces wrong AST structure (43 files)
+# MISMATCH: Grammar produces wrong AST structure (26 files)
 # =============================================================================
 
-# --- block_comment_file_start (EASY) ---
+# --- unterminated_block_comment (tree-sitter limitation) ---
 BlockCommentAtBeginningOfFile3
 BlockCommentAtBeginningOfFile4
 
-# --- duplicate_accessor (EASY) ---
+# --- duplicate_accessor (error recovery difference) ---
 DuplicateAccessor
 
-# --- object_literal (EASY) ---
-ObjectLiteralAsStatement
-
-# --- typealias_keyword (EASY) ---
+# --- typealias_keyword (soft vs hard keyword) ---
 TypealiasIsKeyword
 
-# --- enum_entry_constructor (MEDIUM) ---
-EnumMissingName
-EnumShortCommas
-EnumShortWithOverload
-Enums
-
-# --- file_annotations (MEDIUM) ---
-DocCommentAfterFileAnnotations
-LineCommentAfterFileAnnotations
-topJvmPackageName
-topJvmPackageNameMultifile
-
-# --- by_delegation (MEDIUM) ---
-ByClauses
-delegation
-SimpleClassMembers
-
-# --- class_body_nesting (MEDIUM) ---
-NonTypeBeforeDotInBaseClass
-dependencyOnNestedClasses
-innerTypes
-
-# --- super_expression (MEDIUM) ---
-Super
-
-# --- value_parameter_defaults (MEDIUM) ---
-SimpleExpressions
-topLevelMembers
-
-# --- prefix_vs_binary (HARD) ---
+# --- prefix_vs_binary (newline sensitivity — tree-sitter limitation) ---
 EOLsInComments
 NewlinesInParentheses
+NewLinesValidOperations
 
-# --- lambda_nesting (HARD) ---
-CommentsBindingInLambda
-FunctionLiterals
-localClass
-
-# --- type_argument_placement (HARD) ---
-ExtensionsWithQNReceiver
+# --- generic_vs_comparison (<> ambiguity — tree-sitter limitation) ---
 complicateLTGT
+complicateLTGTE
 incorrectLTGTFallback
-definitelyNotNullTypes
-types
-typeParams
+
+# --- consecutive_lambda_chaining ---
+FunctionLiterals
+
+# --- object_literal_class_body (grammar: {} parsed as trailing lambda) ---
+ObjectLiteralAsStatement
+ByClauses
+
+# --- super_expression (grammar: super<> and super@label structure) ---
+Super
+
+# --- lambda_parameter_loss (grammar: comments interfere with lambda params) ---
+CommentsBindingInLambda
+CommentsBindingInStatementBlock
+
+# --- dot_qualified_call_nesting (remaining structural differences) ---
+dependencyOnNestedClasses
+destructuringInLambdas
+
+# --- annotation_on_parenthesized_type (grammar: annotation + type in parens) ---
+annotationsOnParenthesizedTypes
+suspendLambda
+TypeParametersBeforeName
 typeAliasExpansion
 
-# --- type_modifiers (HARD) ---
-TypeModifiers
-typeModifiers2
-suspendLambda
+# --- error_recovery_differences ---
+NonTypeBeforeDotInBaseClass
+SimpleExpressions
 
-# --- annotation_structure (HARD) ---
-annotations
-annotationsOnParenthesizedTypes
+# --- annotation_value_structure ---
 annotationValues
-annotatedParameterInEnumConstructor
-TypeParametersBeforeName
+definitelyNotNullTypes
 
 # =============================================================================
 # TS_ERROR: Tree-sitter fails to parse these files (110 files)
@@ -146,7 +126,6 @@ InterfaceWithEnumKeyword
 Labels
 LocalDeclarations
 MultiVariableDeclarations
-NewLinesValidOperations
 ParameterNameMising
 ParameterType
 Precedence
@@ -165,7 +144,6 @@ WhenWithSubjectVariable
 annotatedFlexibleTypes
 annotationsOnNullableTypes
 contextParametersAndAnnotations
-destructuringInLambdas
 emptyArguments
 emptyArgumentsInAnnotations
 emptyArgumentsInArrayAccesses
@@ -175,7 +153,6 @@ emptyParametersInFunctionalTypes
 escapedNames
 flexibleDnnType
 inheritingClasses
-modifiers
 mustUseReturnValueFullEnabled
 mustUseReturnValueHalfEnabled
 noCommaBetweenArguments

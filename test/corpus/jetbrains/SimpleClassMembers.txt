@@ -1,0 +1,237 @@
+==================
+SimpleClassMembers
+==================
+
+// COMPILATION_ERRORS
+
+class foo {
+
+    class foo {
+        object foo {
+
+        }
+
+        class Bar {}
+
+        fun foo()
+
+        val x
+
+        var f
+
+        typealias foo = bar
+    }
+
+    class Bar {
+        object foo {
+            companion object {
+
+            }
+
+            private companion object {
+
+            }
+
+            private companion object : Fooo {
+
+            }
+
+            private companion object : Fooo, Bar by foo {
+
+            }
+
+            private companion object : Fooo, Bar by foo, Goo()
+        }
+
+        class Bar {}
+
+        fun foo()
+
+        val x
+
+        var f
+
+        typealias foo = bar
+    }
+
+    fun foo()
+
+    val x
+
+    var f
+
+    typealias foo = bar
+
+    companion object {
+
+    }
+
+    private companion object {
+
+    }
+
+    private companion object : Fooo {
+
+    }
+
+    private companion object : Fooo, Bar by foo {
+
+    }
+
+    private companion object : Fooo, Bar by foo, Goo()
+
+
+}
+
+---
+
+(source_file
+  (line_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (class_declaration
+        (type_identifier)
+        (class_body
+          (object_declaration
+            (type_identifier)
+            (class_body))
+          (class_declaration
+            (type_identifier)
+            (class_body))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)))
+          (type_alias
+            (type_identifier)
+            (user_type
+              (type_identifier)))))
+      (class_declaration
+        (type_identifier)
+        (class_body
+          (object_declaration
+            (type_identifier)
+            (class_body
+              (companion_object
+                (class_body))
+              (companion_object
+                (modifiers
+                  (visibility_modifier))
+                (class_body))
+              (companion_object
+                (modifiers
+                  (visibility_modifier))
+                (delegation_specifier
+                  (user_type
+                    (type_identifier)))
+                (class_body))
+              (companion_object
+                (modifiers
+                  (visibility_modifier))
+                (delegation_specifier
+                  (user_type
+                    (type_identifier)))
+                (delegation_specifier
+                  (explicit_delegation
+                    (user_type
+                      (type_identifier))
+                    (simple_identifier)))
+                (class_body))
+              (companion_object
+                (modifiers
+                  (visibility_modifier))
+                (delegation_specifier
+                  (user_type
+                    (type_identifier)))
+                (delegation_specifier
+                  (explicit_delegation
+                    (user_type
+                      (type_identifier))
+                    (simple_identifier)))
+                (delegation_specifier
+                  (constructor_invocation
+                    (user_type
+                      (type_identifier))
+                    (value_arguments))))))
+          (class_declaration
+            (type_identifier)
+            (class_body))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)))
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier)))
+          (type_alias
+            (type_identifier)
+            (user_type
+              (type_identifier)))))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)))
+      (type_alias
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (companion_object
+        (class_body))
+      (companion_object
+        (modifiers
+          (visibility_modifier))
+        (class_body))
+      (companion_object
+        (modifiers
+          (visibility_modifier))
+        (delegation_specifier
+          (user_type
+            (type_identifier)))
+        (class_body))
+      (companion_object
+        (modifiers
+          (visibility_modifier))
+        (delegation_specifier
+          (user_type
+            (type_identifier)))
+        (delegation_specifier
+          (explicit_delegation
+            (user_type
+              (type_identifier))
+            (simple_identifier)))
+        (class_body))
+      (companion_object
+        (modifiers
+          (visibility_modifier))
+        (delegation_specifier
+          (user_type
+            (type_identifier)))
+        (delegation_specifier
+          (explicit_delegation
+            (user_type
+              (type_identifier))
+            (simple_identifier)))
+        (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments)))))))

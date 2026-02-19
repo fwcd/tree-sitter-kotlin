@@ -1,0 +1,22 @@
+==================
+DocCommentAfterFileAnnotations
+==================
+
+// COMPILATION_ERRORS
+
+@file:[Volatile]
+/**
+ * Doc comment
+ */
+class C{}
+---
+
+(source_file
+  (line_comment)
+  (file_annotation
+    (user_type
+      (type_identifier)))
+  (multiline_comment)
+  (class_declaration
+    (type_identifier)
+    (class_body)))

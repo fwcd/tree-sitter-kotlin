@@ -4,7 +4,7 @@ Structural mismatches between tree-sitter-kotlin and JetBrains PSI reference par
 categorized by root cause and difficulty. Each issue represents a grammar.js fix needed
 to match JetBrains' expected AST structure.
 
-**Current state:** 74/121 clean parses match structurally (61.2%)
+**Current state:** 96/122 clean parses match structurally (78.7%)
 
 Fix these issues iteratively — after each grammar fix, re-run the cross-validation
 and move fixed files from `excluded.txt` to the vendored corpus.
