@@ -75,6 +75,17 @@ module.exports = grammar({
     [$.class_modifier, $.simple_identifier],
     // "override" as member modifier conflicts with override as an identifier
     [$.member_modifier, $.simple_identifier],
+    // visibility modifiers as identifiers
+    [$.visibility_modifier, $.simple_identifier],
+    // inheritance modifiers as identifiers
+    [$.inheritance_modifier, $.simple_identifier],
+    // property modifier as identifier
+    [$.property_modifier, $.simple_identifier],
+    // parameter modifiers as identifiers
+    [$.parameter_modifier, $.simple_identifier],
+    [$.parameter_modifiers],
+    [$.type_parameter_modifiers],
+    [$.try_expression],
 
     // "<x>.<y> = z assignment conflicts with <x>.<y>() function call"
     [$._postfix_unary_expression, $._expression],
@@ -108,8 +119,6 @@ module.exports = grammar({
     [$.anonymous_function, $.simple_identifier],
     [$.anonymous_function, $.function_modifier, $.simple_identifier],
 
-    // ambiguity between annotated_lambda with modifiers and modifiers from var declarations
-    [$.annotated_lambda, $.modifiers],
 
     // ambiguity between simple identifier 'set/get' with actual setter/getter functions.
     [$.setter, $.simple_identifier],
@@ -1198,8 +1207,50 @@ module.exports = grammar({
       "set",
       "get",
       "override",
-      "suspend"
-      // TODO: More soft keywords
+      "suspend",
+      // Batch 1: covered by existing conflict rules (class_modifier, member_modifier, function_modifier)
+      "annotation",
+      "sealed",
+      "lateinit",
+      "tailrec",
+      "operator",
+      "infix",
+      "inline",
+      "external",
+      // Batch 2: visibility modifiers
+      "public",
+      "private",
+      "internal",
+      "protected",
+      // Batch 3: inheritance modifiers
+      "abstract",
+      "final",
+      "open",
+      // Batch 4: property, parameter, reification modifiers
+      "const",
+      "vararg",
+      "noinline",
+      "crossinline",
+      "reified",
+      // Batch 5: annotation use-site targets (no conflict rules needed — disambiguated by ":")
+      "field",
+      "property",
+      "receiver",
+      "param",
+      "setparam",
+      "delegate",
+      // Batch 6: structural keywords used as identifiers
+      "companion",
+      "constructor",
+      "init",
+      "dynamic",
+      "where",
+      "catch",
+      "finally",
+      // Batch 7: enum
+      "enum",
+      // Batch 8: variance modifiers — skipped, causes new break on SoftKeywordsInTypeArguments.kt
+      // "out", "in" — too ambiguous in type parameter contexts
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),

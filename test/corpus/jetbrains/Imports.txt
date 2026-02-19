@@ -1,0 +1,50 @@
+==================
+Imports
+==================
+
+// COMPILATION_ERRORS
+
+package foo.bar.goo
+
+import foo
+import foo.bar
+import foo as bar
+import foo.bar as bar
+import foo.*
+import foo. *
+---
+
+(source_file
+  (line_comment)
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier))
+      (import_alias
+        (type_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))
+      (import_alias
+        (type_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier))
+      (wildcard_import))
+    (import_header
+      (identifier
+        (simple_identifier))
+      (wildcard_import))))

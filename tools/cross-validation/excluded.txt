@@ -109,7 +109,6 @@ EnumEntryCommaPublicMember
 EnumEntrySpaceInlineMember
 EnumEntrySpaceMember
 EnumEntryTwoCommas
-EnumInline
 EnumOldConstructorSyntax
 EnumWithAnnotationKeyword
 ForWithMultiDecl
@@ -119,7 +118,6 @@ FunctionNoParameterList
 FunctionTypes
 Functions
 FunctionsWithoutName
-Imports
 IncompleteFunctionLiteral
 IntegerLiteral
 InterfaceWithEnumKeyword

@@ -5850,6 +5850,142 @@
         {
           "type": "STRING",
           "value": "suspend"
+        },
+        {
+          "type": "STRING",
+          "value": "annotation"
+        },
+        {
+          "type": "STRING",
+          "value": "sealed"
+        },
+        {
+          "type": "STRING",
+          "value": "lateinit"
+        },
+        {
+          "type": "STRING",
+          "value": "tailrec"
+        },
+        {
+          "type": "STRING",
+          "value": "operator"
+        },
+        {
+          "type": "STRING",
+          "value": "infix"
+        },
+        {
+          "type": "STRING",
+          "value": "inline"
+        },
+        {
+          "type": "STRING",
+          "value": "external"
+        },
+        {
+          "type": "STRING",
+          "value": "public"
+        },
+        {
+          "type": "STRING",
+          "value": "private"
+        },
+        {
+          "type": "STRING",
+          "value": "internal"
+        },
+        {
+          "type": "STRING",
+          "value": "protected"
+        },
+        {
+          "type": "STRING",
+          "value": "abstract"
+        },
+        {
+          "type": "STRING",
+          "value": "final"
+        },
+        {
+          "type": "STRING",
+          "value": "open"
+        },
+        {
+          "type": "STRING",
+          "value": "const"
+        },
+        {
+          "type": "STRING",
+          "value": "vararg"
+        },
+        {
+          "type": "STRING",
+          "value": "noinline"
+        },
+        {
+          "type": "STRING",
+          "value": "crossinline"
+        },
+        {
+          "type": "STRING",
+          "value": "reified"
+        },
+        {
+          "type": "STRING",
+          "value": "field"
+        },
+        {
+          "type": "STRING",
+          "value": "property"
+        },
+        {
+          "type": "STRING",
+          "value": "receiver"
+        },
+        {
+          "type": "STRING",
+          "value": "param"
+        },
+        {
+          "type": "STRING",
+          "value": "setparam"
+        },
+        {
+          "type": "STRING",
+          "value": "delegate"
+        },
+        {
+          "type": "STRING",
+          "value": "companion"
+        },
+        {
+          "type": "STRING",
+          "value": "constructor"
+        },
+        {
+          "type": "STRING",
+          "value": "init"
+        },
+        {
+          "type": "STRING",
+          "value": "dynamic"
+        },
+        {
+          "type": "STRING",
+          "value": "where"
+        },
+        {
+          "type": "STRING",
+          "value": "catch"
+        },
+        {
+          "type": "STRING",
+          "value": "finally"
+        },
+        {
+          "type": "STRING",
+          "value": "enum"
         }
       ]
     },
@@ -6656,6 +6792,31 @@
       "simple_identifier"
     ],
     [
+      "visibility_modifier",
+      "simple_identifier"
+    ],
+    [
+      "inheritance_modifier",
+      "simple_identifier"
+    ],
+    [
+      "property_modifier",
+      "simple_identifier"
+    ],
+    [
+      "parameter_modifier",
+      "simple_identifier"
+    ],
+    [
+      "parameter_modifiers"
+    ],
+    [
+      "type_parameter_modifiers"
+    ],
+    [
+      "try_expression"
+    ],
+    [
       "_postfix_unary_expression",
       "_expression"
     ],
@@ -6749,10 +6910,6 @@
       "anonymous_function",
       "function_modifier",
       "simple_identifier"
-    ],
-    [
-      "annotated_lambda",
-      "modifiers"
     ],
     [
       "setter",

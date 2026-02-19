@@ -1,0 +1,16 @@
+==================
+EnumInline
+==================
+
+enum class My {
+    inline
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier)))))
