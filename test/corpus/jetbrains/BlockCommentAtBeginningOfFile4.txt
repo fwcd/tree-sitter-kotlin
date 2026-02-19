@@ -1,0 +1,16 @@
+==================
+BlockCommentAtBeginningOfFile4
+==================
+
+// COMPILATION_ERRORS
+
+/*
+
+/*foo*/
+
+asdfas
+---
+
+(source_file
+  (line_comment)
+  (multiline_comment))

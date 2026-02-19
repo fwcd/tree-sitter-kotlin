@@ -20,12 +20,8 @@
 #   3. Run: npm test (to verify the new corpus test passes)
 
 # =============================================================================
-# MISMATCH: Grammar produces wrong AST structure (26 files)
+# MISMATCH: Grammar produces wrong AST structure (24 files)
 # =============================================================================
-
-# --- unterminated_block_comment (tree-sitter limitation) ---
-BlockCommentAtBeginningOfFile3
-BlockCommentAtBeginningOfFile4
 
 # --- duplicate_accessor (error recovery difference) ---
 DuplicateAccessor
@@ -88,8 +84,6 @@ AbsentInnerType
 AnnotatedIntersections
 AssertNotNull
 BackslashInString
-BlockCommentAtBeginningOfFile1
-BlockCommentAtBeginningOfFile2
 CallsInWhen
 CollectionLiterals
 CommentsBinding

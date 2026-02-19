@@ -224,6 +224,16 @@ static bool scan_multiline_comment(TSLexer *lexer) {
         }
         break;
       case '\0':
+        // Accept unterminated block comments at EOF rather than rejecting them.
+        // This matches JetBrains PSI behavior which recognizes unclosed /* as a
+        // BLOCK_COMMENT token (plus an error element). Without this, the scanner
+        // returns false and tree-sitter tries to parse the comment delimiters
+        // as operators/expressions.
+        if (lexer->eof(lexer)) {
+          lexer->result_symbol = MULTILINE_COMMENT;
+          lexer->mark_end(lexer);
+          return true;
+        }
         return false;
       default:
         advance(lexer);
