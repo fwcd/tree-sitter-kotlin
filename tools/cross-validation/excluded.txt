@@ -20,7 +20,7 @@
 #   3. Run: npm test (to verify the new corpus test passes)
 
 # =============================================================================
-# MISMATCH: Grammar produces wrong AST structure (24 files)
+# MISMATCH: Grammar produces wrong AST structure (22 files)
 # =============================================================================
 
 # --- duplicate_accessor (error recovery difference) ---
@@ -30,8 +30,6 @@ DuplicateAccessor
 TypealiasIsKeyword
 
 # --- prefix_vs_binary (newline sensitivity — tree-sitter limitation) ---
-EOLsInComments
-NewlinesInParentheses
 NewLinesValidOperations
 
 # --- generic_vs_comparison (<> ambiguity — tree-sitter limitation) ---
