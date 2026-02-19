@@ -6978,6 +6978,11 @@
     }
   },
   {
+    "type": "property_modifier",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "range_expression",
     "named": true,
     "fields": {},
@@ -7345,6 +7350,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "reification_modifier",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "secondary_constructor",
@@ -9564,6 +9574,10 @@
     "named": false
   },
   {
+    "type": "const",
+    "named": false
+  },
+  {
     "type": "constructor",
     "named": false
   },
@@ -9748,10 +9762,6 @@
     "named": false
   },
   {
-    "type": "property_modifier",
-    "named": true
-  },
-  {
     "type": "protected",
     "named": false
   },
@@ -9772,8 +9782,8 @@
     "named": false
   },
   {
-    "type": "reification_modifier",
-    "named": true
+    "type": "reified",
+    "named": false
   },
   {
     "type": "return",
