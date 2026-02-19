@@ -383,17 +383,19 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       if (lexer->lookahead == '/' || lexer->lookahead == '*') return true;
       return false;
 
-    // Insert a semicolon before `--` and `++`, but not before binary `+` or `-`.
-    // Insert before +/-Float
+    // In Kotlin, `+` and `-` after a newline are always prefix operators,
+    // not binary continuation. If a binary operation is intended, the
+    // operator must be placed at the end of the previous line:
+    //   a +       // binary: a + b
+    //     b
+    //   a         // prefix: a; +b
+    //   + b
+    // The grammar ensures AUTOMATIC_SEMICOLON is only valid where a
+    // statement could end, so this won't fire inside () or [] where
+    // newlines don't terminate statements.
     case '+':
-      skip(lexer);
-      if (lexer->lookahead == '+') return true;
-      return iswdigit(lexer->lookahead);
-
     case '-':
-      skip(lexer);
-      if (lexer->lookahead == '-') return true;
-      return iswdigit(lexer->lookahead);
+      return true;
 
     // Don't insert a semicolon before `!=`, but do insert one before a unary `!`.
     case '!':
