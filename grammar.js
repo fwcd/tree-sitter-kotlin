@@ -91,12 +91,13 @@ module.exports = grammar({
     [$._postfix_unary_expression, $._expression],
 
     // ambiguity between generics and comparison operations (foo < b > c)
-    [$.call_expression, $.navigation_expression, $.range_expression, $.comparison_expression],
-    [$.call_expression, $.navigation_expression, $.elvis_expression, $.comparison_expression],
-    [$.call_expression, $.navigation_expression, $.check_expression, $.comparison_expression],
-    [$.call_expression, $.navigation_expression, $.additive_expression, $.comparison_expression],
-    [$.call_expression, $.navigation_expression, $.infix_expression, $.comparison_expression],
-    [$.call_expression, $.navigation_expression, $.multiplicative_expression, $.comparison_expression],
+    // _generic_call_expression is the prec.dynamic(1) variant with required type_arguments
+    [$.call_expression, $._generic_call_expression, $.navigation_expression, $.range_expression, $.comparison_expression],
+    [$.call_expression, $._generic_call_expression, $.navigation_expression, $.elvis_expression, $.comparison_expression],
+    [$.call_expression, $._generic_call_expression, $.navigation_expression, $.check_expression, $.comparison_expression],
+    [$.call_expression, $._generic_call_expression, $.navigation_expression, $.additive_expression, $.comparison_expression],
+    [$.call_expression, $._generic_call_expression, $.navigation_expression, $.infix_expression, $.comparison_expression],
+    [$.call_expression, $._generic_call_expression, $.navigation_expression, $.multiplicative_expression, $.comparison_expression],
     [$.type_arguments, $._comparison_operator],
 
     // ambiguity between prefix expressions and annotations before functions
@@ -104,7 +105,7 @@ module.exports = grammar({
     [$.prefix_expression, $.when_subject],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
-    [$.call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
+    [$.call_expression, $._generic_call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
 
     // ambiguity between multiple user types and class property/function declarations
     [$.user_type],
@@ -156,6 +157,10 @@ module.exports = grammar({
     // Three-way conflict: callable_reference (Foo::bar) starts with simple_identifier
     // which both primary_expression variants can match.
     [$._primary_expression, $._primary_expression_no_trailing_lambda, $.callable_reference],
+
+    // ambiguity between call_suffix and _generic_call_suffix (both can match type_arguments + args)
+    [$.call_suffix, $._generic_call_suffix],
+    [$._call_suffix_no_trailing_lambda, $._generic_call_suffix_no_trailing_lambda],
   ],
 
   externals: $ => [
@@ -355,6 +360,7 @@ module.exports = grammar({
       $.string_literal,
       $.callable_reference,
       alias($.call_expression_no_trailing_lambda, $.call_expression),
+      alias($._generic_call_expression_no_trailing_lambda, $.call_expression),
       $._function_literal,
       $.object_literal,
       $.collection_literal,
@@ -372,8 +378,19 @@ module.exports = grammar({
       alias($._call_suffix_no_trailing_lambda, $.call_suffix)
     )),
 
+    // Generic call (required type_arguments) without trailing lambda
+    _generic_call_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, prec.dynamic(1, seq(
+      $._expression_no_trailing_lambda,
+      alias($._generic_call_suffix_no_trailing_lambda, $.call_suffix)
+    ))),
+
     _call_suffix_no_trailing_lambda: $ => seq(
       optional($.type_arguments),
+      $.value_arguments
+    ),
+
+    _generic_call_suffix_no_trailing_lambda: $ => seq(
+      $.type_arguments,
       $.value_arguments
     ),
 
@@ -727,6 +744,16 @@ module.exports = grammar({
 
     call_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.call_suffix)),
 
+    // Generic call expression: call with REQUIRED type_arguments.
+    // prec.dynamic(1) tells GLR to prefer the generic-call interpretation
+    // (f<T>(x)) over the comparison interpretation (f < T > (x)).
+    // Separated from call_expression so the dynamic boost only applies
+    // when type_arguments are actually parsed, not for all calls.
+    _generic_call_expression: $ => prec.left(PREC.POSTFIX, prec.dynamic(1, seq(
+      $._expression,
+      alias($._generic_call_suffix, $.call_suffix)
+    ))),
+
     indexing_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.indexing_suffix)),
 
     navigation_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.navigation_suffix)),
@@ -801,6 +828,15 @@ module.exports = grammar({
       )
     )),
 
+    // Call suffix with REQUIRED type_arguments (used by _generic_call_expression)
+    _generic_call_suffix: $ => prec.left(seq(
+      $.type_arguments,
+      choice(
+        prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
+        $.value_arguments
+      )
+    )),
+
     annotated_lambda: $ => seq(
       repeat($.annotation),
       optional($.label),
@@ -834,6 +870,7 @@ module.exports = grammar({
       $.string_literal,
       $.callable_reference,
       $.call_expression,
+      alias($._generic_call_expression, $.call_expression),
       $._function_literal,
       $.object_literal,
       $.collection_literal,
