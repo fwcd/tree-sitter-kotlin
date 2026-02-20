@@ -961,6 +961,15 @@
           "value": "call_expression"
         },
         {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_generic_call_expression_no_trailing_lambda"
+          },
+          "named": true,
+          "value": "call_expression"
+        },
+        {
           "type": "SYMBOL",
           "name": "_function_literal"
         },
@@ -1020,6 +1029,32 @@
         ]
       }
     },
+    "_generic_call_expression_no_trailing_lambda": {
+      "type": "PREC_LEFT",
+      "value": 16,
+      "content": {
+        "type": "PREC_DYNAMIC",
+        "value": 1,
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_expression_no_trailing_lambda"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_generic_call_suffix_no_trailing_lambda"
+              },
+              "named": true,
+              "value": "call_suffix"
+            }
+          ]
+        }
+      }
+    },
     "_call_suffix_no_trailing_lambda": {
       "type": "SEQ",
       "members": [
@@ -1034,6 +1069,19 @@
               "type": "BLANK"
             }
           ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "value_arguments"
+        }
+      ]
+    },
+    "_generic_call_suffix_no_trailing_lambda": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "type_arguments"
         },
         {
           "type": "SYMBOL",
@@ -3201,6 +3249,32 @@
         ]
       }
     },
+    "_generic_call_expression": {
+      "type": "PREC_LEFT",
+      "value": 16,
+      "content": {
+        "type": "PREC_DYNAMIC",
+        "value": 1,
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_expression"
+            },
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_generic_call_suffix"
+              },
+              "named": true,
+              "value": "call_suffix"
+            }
+          ]
+        }
+      }
+    },
     "indexing_expression": {
       "type": "PREC_LEFT",
       "value": 16,
@@ -3763,6 +3837,53 @@
         ]
       }
     },
+    "_generic_call_suffix": {
+      "type": "PREC_LEFT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "type_arguments"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "PREC",
+                "value": 1,
+                "content": {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "CHOICE",
+                      "members": [
+                        {
+                          "type": "SYMBOL",
+                          "name": "value_arguments"
+                        },
+                        {
+                          "type": "BLANK"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "annotated_lambda"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "SYMBOL",
+                "name": "value_arguments"
+              }
+            ]
+          }
+        ]
+      }
+    },
     "annotated_lambda": {
       "type": "SEQ",
       "members": [
@@ -3984,6 +4105,15 @@
         {
           "type": "SYMBOL",
           "name": "call_expression"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_generic_call_expression"
+          },
+          "named": true,
+          "value": "call_expression"
         },
         {
           "type": "SYMBOL",
@@ -6848,36 +6978,42 @@
     ],
     [
       "call_expression",
+      "_generic_call_expression",
       "navigation_expression",
       "range_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "_generic_call_expression",
       "navigation_expression",
       "elvis_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "_generic_call_expression",
       "navigation_expression",
       "check_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "_generic_call_expression",
       "navigation_expression",
       "additive_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "_generic_call_expression",
       "navigation_expression",
       "infix_expression",
       "comparison_expression"
     ],
     [
       "call_expression",
+      "_generic_call_expression",
       "navigation_expression",
       "multiplicative_expression",
       "comparison_expression"
@@ -6900,6 +7036,7 @@
     ],
     [
       "call_expression",
+      "_generic_call_expression",
       "navigation_expression",
       "prefix_expression",
       "comparison_expression"
@@ -7002,6 +7139,14 @@
       "_primary_expression",
       "_primary_expression_no_trailing_lambda",
       "callable_reference"
+    ],
+    [
+      "call_suffix",
+      "_generic_call_suffix"
+    ],
+    [
+      "_call_suffix_no_trailing_lambda",
+      "_generic_call_suffix_no_trailing_lambda"
     ]
   ],
   "precedences": [],
