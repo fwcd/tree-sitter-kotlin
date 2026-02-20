@@ -310,6 +310,9 @@ const SKIP_PSI_NODES = new Set([
 
   // DYNAMIC_TYPE — Kotlin/JS specific
   'DYNAMIC_TYPE',
+
+  // DESTRUCTURING_DECLARATION_ENTRY — PSI wraps each entry, TS uses variable_declaration (transparent)
+  'DESTRUCTURING_DECLARATION_ENTRY',
 ]);
 
 // ---------------------------------------------------------------------------
