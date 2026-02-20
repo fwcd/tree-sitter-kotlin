@@ -472,11 +472,10 @@ module.exports = grammar({
         $.property_delegate
       )),
       optional(';'),
-      choice(
-        // TODO: Getter-setter combinations
-        optional($.getter),
-        optional($.setter)
-      )
+      optional(choice(
+        seq($.getter, optional($.setter)),
+        seq($.setter, optional($.getter)),
+      ))
     )),
 
     property_delegate: $ => seq("by", $._expression),
