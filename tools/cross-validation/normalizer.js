@@ -81,16 +81,30 @@ function _normalizeTsMulti(node) {
     return [new Node('IS_EXPRESSION', children)];
   }
 
+  // prefix_expression with label → transparent (matches PSI's LABELED_EXPRESSION)
+  if (tsName === 'prefix_expression') {
+    const hasLabel = node.children.some(c => c.name === 'label');
+    if (hasLabel) {
+      return children;
+    }
+  }
+
   // control_structure_body → BLOCK only for actual blocks, transparent otherwise
   if (tsName === 'control_structure_body') {
     const hasStatements = node.children.some(c => c.name === 'statements');
     const hasNonCommentChildren = node.children.some(c =>
       c.name !== 'statements' && c.name !== 'line_comment' && c.name !== 'multiline_comment'
     );
+    const hasOnlyComments = !hasStatements && !hasNonCommentChildren &&
+      node.children.some(c => c.name === 'line_comment' || c.name === 'multiline_comment');
     if (!hasStatements && hasNonCommentChildren) {
       // Single-expression body — transparent
       if (children.length === 1) return [children[0]];
       if (children.length === 0) return [];
+    }
+    // Comment-only body → produce empty BLOCK (PSI keeps BLOCK with comments)
+    if (hasOnlyComments && children.length === 0) {
+      return [new Node('BLOCK')];
     }
     if (children.length === 0) return [];
     return [new Node('BLOCK', children)];
@@ -166,6 +180,7 @@ function _normalizeTsMulti(node) {
   if (psiName === 'VALUE_PARAMETER_LIST') {
     children = _absorbIntoValueParameters(children);
     children = _wrapBareTypesInValueParameter(children);
+    children = _wrapDestructuringInValueParameter(children);
   }
 
   // PARENTHESIZED → unwrap in type contexts (contains only type/annotation children)
@@ -501,6 +516,7 @@ function _wrapBareTypesInValueParameter(children) {
 
 /**
  * Move PROPERTY_ACCESSOR nodes after PROPERTY into the preceding PROPERTY as children.
+ * Caps at 2 accessors per property (getter + setter) to match PSI error recovery.
  * @param {Node[]} children
  * @returns {Node[]}
  */
@@ -514,8 +530,13 @@ function _nestPropertyAccessors(children) {
     if (child.name === 'PROPERTY_ACCESSOR' && result.length > 0) {
       const last = result[result.length - 1];
       if (last.name === 'PROPERTY') {
-        // Create new node to avoid mutation
-        result[result.length - 1] = new Node('PROPERTY', last.children.concat([child]));
+        const accessorCount = last.children.filter(c => c.name === 'PROPERTY_ACCESSOR').length;
+        if (accessorCount < 2) {
+          // Create new node to avoid mutation
+          result[result.length - 1] = new Node('PROPERTY', last.children.concat([child]));
+          continue;
+        }
+        // More than 2 accessors: drop extra (PSI treats them as errors)
         continue;
       }
     }
@@ -675,6 +696,24 @@ function _stripAnnotationWrappers(children) {
     }
   }
   return result;
+}
+
+/**
+ * Wrap DESTRUCTURING_DECLARATION nodes in VALUE_PARAMETER inside VALUE_PARAMETER_LIST.
+ * PSI wraps each destructured lambda parameter as VALUE_PARAMETER > DESTRUCTURING_DECLARATION.
+ * @param {Node[]} children
+ * @returns {Node[]}
+ */
+function _wrapDestructuringInValueParameter(children) {
+  if (!children.some(c => c.name === 'DESTRUCTURING_DECLARATION')) {
+    return children;
+  }
+  return children.map(child => {
+    if (child.name === 'DESTRUCTURING_DECLARATION') {
+      return new Node('VALUE_PARAMETER', [child]);
+    }
+    return child;
+  });
 }
 
 module.exports = { normalizeTs, normalizePsi };
