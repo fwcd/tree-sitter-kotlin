@@ -1247,3 +1247,89 @@ val x = object : Interface by delegateHolder.delegate {
           (simple_identifier)
           (function_value_parameters)
           (function_body))))))
+
+================================================================================
+Object literal with constructor invocation and class body
+================================================================================
+
+val impl = object : WithDefault() {
+    override fun required(): String {
+        return "implemented"
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments)))
+      (class_body
+        (function_declaration
+          (modifiers
+            (member_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (user_type
+            (type_identifier))
+          (function_body
+            (statements
+              (jump_expression
+                (string_literal
+                  (string_content))))))))))
+
+================================================================================
+Object literal with user type and class body (no parens)
+================================================================================
+
+val x = object : Foo {
+    override fun bar() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (user_type
+          (type_identifier)))
+      (class_body
+        (function_declaration
+          (modifiers
+            (member_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
+
+================================================================================
+Bare object literal with class body (no supertype)
+================================================================================
+
+val x = object {
+    fun foo() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (class_body
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
