@@ -4637,13 +4637,8 @@
                 "type": "CHOICE",
                 "members": [
                   {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": "data"
-                      }
-                    ]
+                    "type": "STRING",
+                    "value": "data"
                   },
                   {
                     "type": "BLANK"
@@ -4689,13 +4684,8 @@
               "type": "CHOICE",
               "members": [
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": "data"
-                    }
-                  ]
+                  "type": "STRING",
+                  "value": "data"
                 },
                 {
                   "type": "BLANK"
@@ -5383,22 +5373,12 @@
       ]
     },
     "_in_operator": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "in"
-        }
-      ]
+      "type": "STRING",
+      "value": "in"
     },
     "_is_operator": {
-      "type": "CHOICE",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "is"
-        }
-      ]
+      "type": "STRING",
+      "value": "is"
     },
     "_additive_operator": {
       "type": "CHOICE",

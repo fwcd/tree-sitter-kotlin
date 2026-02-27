@@ -953,13 +953,13 @@ module.exports = grammar({
 
     object_literal: $ => choice(
       prec.dynamic(1, seq(
-        optional(seq("data")),
+        optional("data"),
         "object",
         optional(seq(":", $._delegation_specifiers)),
         $.class_body,
       )),
       seq(
-        optional(seq("data")),
+        optional("data"),
         "object",
         optional(seq(":", $._delegation_specifiers)),
       ),
@@ -1074,9 +1074,9 @@ module.exports = grammar({
 
     _comparison_operator: $ => choice("<", ">", "<=", ">="),
 
-    _in_operator: $ => choice("in"),
+    _in_operator: $ => "in",
 
-    _is_operator: $ => choice("is"),
+    _is_operator: $ => "is",
 
     _additive_operator: $ => choice("+", "-"),
 
