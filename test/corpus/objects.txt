@@ -1,0 +1,101 @@
+================================================================================
+Objects
+================================================================================
+
+object {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_literal
+    (class_body)))
+
+================================================================================
+Objects which extend base classes
+================================================================================
+
+object : Thread() {
+ override fun run() {
+   super.run()
+ }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_literal
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (statements
+            (call_expression
+              (navigation_expression
+                (super_expression)
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+Objects extending base classes with no members
+================================================================================
+
+object : Thread() {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_literal
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body)))
+
+================================================================================
+Objects extending interface
+================================================================================
+
+object : Thread {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_literal
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Objects extending interface as assignment
+================================================================================
+
+val obj = object : Thread {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (user_type
+          (type_identifier)))
+      (class_body))))

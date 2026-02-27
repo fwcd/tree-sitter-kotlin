@@ -316,7 +316,7 @@ module.exports = grammar({
       ","
     )),
 
-    delegation_specifier: $ => prec.left(choice(
+    delegation_specifier: $ => prec.right(choice(
       $.constructor_invocation,
       $.explicit_delegation,
       $.user_type,
@@ -951,11 +951,18 @@ module.exports = grammar({
       $.anonymous_function
     ),
 
-    object_literal: $ => seq(
-      optional(seq("data")),
-      "object",
-      optional(seq(":", $._delegation_specifiers)),
-      optional($.class_body),
+    object_literal: $ => choice(
+      prec.dynamic(1, seq(
+        optional(seq("data")),
+        "object",
+        optional(seq(":", $._delegation_specifiers)),
+        $.class_body,
+      )),
+      seq(
+        optional(seq("data")),
+        "object",
+        optional(seq(":", $._delegation_specifiers)),
+      ),
     ),
 
     this_expression: $ => choice(
