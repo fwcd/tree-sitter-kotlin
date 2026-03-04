@@ -835,3 +835,115 @@ fun foo() {
                 (integer_literal))
               (value_argument
                 (integer_literal)))))))))
+
+================================================================================
+Try-catch with second catch on new line
+================================================================================
+
+try { foo() }
+catch (e: Exception) { }
+catch (e: Error) { }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (try_expression
+    (statements
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (catch_block
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (catch_block
+      (simple_identifier)
+      (user_type
+        (type_identifier)))))
+
+================================================================================
+Try-catch-finally with finally on new line
+================================================================================
+
+try { foo() }
+catch (e: Exception) { }
+finally { close() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (try_expression
+    (statements
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (catch_block
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (finally_block
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Try-catch-finally with line comment before finally
+================================================================================
+
+try { foo() }
+catch (e: Exception) { }
+// comment
+finally { close() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (try_expression
+    (statements
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (catch_block
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (line_comment)
+    (finally_block
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Try-catch with line comment before second catch
+================================================================================
+
+try { foo() }
+catch (e: Exception) { }
+// comment
+catch (e: Error) { }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (try_expression
+    (statements
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (catch_block
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (line_comment)
+    (catch_block
+      (simple_identifier)
+      (user_type
+        (type_identifier)))))

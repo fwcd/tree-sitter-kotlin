@@ -85,7 +85,6 @@ module.exports = grammar({
     [$.parameter_modifier, $.simple_identifier],
     [$.parameter_modifiers],
     [$.type_parameter_modifiers],
-    [$.try_expression],
 
     // "<x>.<y> = z assignment conflicts with <x>.<y>() function call"
     [$._postfix_unary_expression, $._expression],
@@ -1031,14 +1030,14 @@ module.exports = grammar({
 
     type_test: $ => seq(optional("!"), $._is_operator, $._type),
 
-    try_expression: $ => seq(
+    try_expression: $ => prec.right(seq(
       "try",
       $._block,
       choice(
         seq(repeat1($.catch_block), optional($.finally_block)),
         $.finally_block
       )
-    ),
+    )),
 
     catch_block: $ => seq(
       "catch",

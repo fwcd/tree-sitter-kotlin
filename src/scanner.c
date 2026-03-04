@@ -446,6 +446,12 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             case 'w':
               if (scan_for_word(lexer, "here", 4)) return false;
               return true;
+            case 'c':
+              if (scan_for_word(lexer, "atch", 4)) return false;
+              return true;
+            case 'f':
+              if (scan_for_word(lexer, "inally", 6)) return false;
+              return true;
             default:
               return true;
           }
@@ -548,7 +554,6 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               }
               return true;
             default:
-              // Not a continuation — produce ASI. mark_end is still at
               // the original position (P0, before the comment), so the
               // ASI token is zero-width. The block comment will be
               // re-scanned as MULTILINE_COMMENT on the next parse step.
@@ -635,8 +640,16 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             lexer->mark_end(lexer);
             return true;
           }
+          // If constructor didn't match, we've advanced past some chars.
+          // Can't reliably check 'catch' now. Just insert ASI.
+          return true;
         }
-        return true;
+        // Not in constructor context — check for 'catch'
+        return !scan_for_word(lexer, "atch", 4);
+
+      // Don't insert a semicolon before finally (continues try_expression)
+      case 'f':
+        return !scan_for_word(lexer, "inally", 6);
 
       case ';':
         advance(lexer);
