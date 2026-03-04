@@ -374,19 +374,17 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '?':
       case '|':
       case '&':
+        return false;
+
       // Handle `/` — could be division, line comment, or block comment.
       // For division: no ASI (continuation operator).
       // For line comments (`//`): skip the comment(s) and check the next
       // real token. If continuation, suppress ASI (return false — tree-sitter
       // resets, parses line_comment internally, then re-checks ASI).
       // If non-continuation, insert ASI (return true at original mark_end).
-      // For block comments (`/*`): advance through the comment (to build
-      // MULTILINE_COMMENT content). Skip further comments with skip().
-      // If continuation follows, produce MULTILINE_COMMENT (mark_end at end
-      // of block comment). The parser handles the continuation after the
-      // comment. If non-continuation, produce AUTOMATIC_SEMICOLON at the
-      // original mark_end (before the comment). The zero-width ASI ends the
-      // statement and the comment is re-scanned as MULTILINE_COMMENT next.
+      // For block comments (`/*`): advance through the comment and produce
+      // MULTILINE_COMMENT. The parser then re-calls the scanner for the ASI
+      // decision on whatever token follows the comment.
       case '/': {
         advance(lexer);
         if (lexer->lookahead == '/') {
@@ -489,11 +487,6 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
                 break;
             }
           }
-          // Save the position right after the block comment. We'll use this
-          // as mark_end if we produce MULTILINE_COMMENT.
-          // We DON'T call mark_end here — if we produce ASI, mark_end
-          // must stay at the original position (before the comment).
-
           // Skip whitespace and any further comments to find the next
           // real token. Use skip() so these aren't included in any token.
           while (iswspace(lexer->lookahead)) skip(lexer);
@@ -524,51 +517,52 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             }
           }
           // Check the next real token to decide: MULTILINE_COMMENT or ASI?
+          //
+          // IMPORTANT: For keyword checks (else, as, where, !=), we must
+          // call mark_end BEFORE scan_for_word/skip, because those functions
+          // advance the cursor past the keyword. If mark_end were called
+          // after, the MULTILINE_COMMENT span would swallow the keyword
+          // and the parser would never see it.
           switch (lexer->lookahead) {
             case '.': case ',': case ':': case '%':
             case '>': case '<': case '=': case '{': case '[':
             case '(': case '?': case '|': case '&': case '/':
             case '*':
-              // Continuation — produce MULTILINE_COMMENT. Set mark_end
-              // at the current position (end of all advance()d content).
-              // Note: mark_end here is at the first skip()d character
-              // after the block comment, but advance() has consumed the
-              // block comment content. tree-sitter uses the advance()
-              // extent for the token, bounded by mark_end.
-              // Actually we need mark_end right after the block comment
-              // (before any skip()d whitespace). Since we can't go back,
-              // we mark_end here — but skip() chars are not part of the
-              // token. mark_end after skip() is at the advance() boundary.
+              // Continuation operator — produce MULTILINE_COMMENT.
               lexer->mark_end(lexer);
               lexer->result_symbol = MULTILINE_COMMENT;
               return true;
             case '!':
+              // mark_end before consuming '!' so it's not swallowed.
+              lexer->mark_end(lexer);
               skip(lexer);
               if (lexer->lookahead == '=') {
-                lexer->mark_end(lexer);
+                // != is continuation — produce MULTILINE_COMMENT.
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               }
               // Unary ! — not continuation. Produce ASI at original
-              // position (mark_end was never updated, stays at P0).
+              // position (mark_end was at P0 before, now at '!' position,
+              // but the token has no advance()d content past the comment,
+              // so tree-sitter will re-scan from here).
               return true;
             case 'e':
+              lexer->mark_end(lexer);
               if (scan_for_word(lexer, "lse", 3)) {
-                lexer->mark_end(lexer);
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               }
               return true;
             case 'a':
+              lexer->mark_end(lexer);
               if (scan_for_word(lexer, "s", 1)) {
-                lexer->mark_end(lexer);
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               }
               return true;
             case 'w':
+              lexer->mark_end(lexer);
               if (scan_for_word(lexer, "here", 4)) {
-                lexer->mark_end(lexer);
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               }

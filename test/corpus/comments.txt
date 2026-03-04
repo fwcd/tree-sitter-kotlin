@@ -378,3 +378,238 @@ fun main() {
         (line_comment)
         (prefix_expression
           (integer_literal))))))
+
+================================================================================
+Line comment before else
+================================================================================
+
+if (x) 1
+// comment
+else 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_expression
+    condition: (simple_identifier)
+    consequence: (control_structure_body
+      (integer_literal))
+    (line_comment)
+    alternative: (control_structure_body
+      (integer_literal))))
+
+================================================================================
+Block comment before else
+================================================================================
+
+if (x) 1
+/* comment */
+else 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (if_expression
+    condition: (simple_identifier)
+    consequence: (control_structure_body
+      (integer_literal))
+    (multiline_comment)
+    alternative: (control_structure_body
+      (integer_literal))))
+
+================================================================================
+Line comment before as
+================================================================================
+
+val x = obj
+// comment
+as String
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (as_expression
+      (simple_identifier)
+      (line_comment)
+      (user_type
+        (type_identifier)))))
+
+================================================================================
+Block comment before as
+================================================================================
+
+val x = obj
+/* comment */
+as String
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (as_expression
+      (simple_identifier)
+      (multiline_comment)
+      (user_type
+        (type_identifier)))))
+
+================================================================================
+Line comment before where
+================================================================================
+
+fun <T> foo()
+// comment
+where T : Bar {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (line_comment)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body)))
+
+================================================================================
+Block comment before where
+================================================================================
+
+fun <T> foo()
+/* comment */
+where T : Bar {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (multiline_comment)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body)))
+
+================================================================================
+Empty block comment in method chain
+================================================================================
+
+val x = listOf(1)
+/**/
+.reversed()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (navigation_expression
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (integer_literal)))))
+        (multiline_comment)
+        (navigation_suffix
+          (simple_identifier)))
+      (call_suffix
+        (value_arguments)))))
+
+================================================================================
+Multiline block comment in method chain
+================================================================================
+
+val x = listOf(1)
+/* multi
+   line
+   comment */
+.reversed()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (navigation_expression
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (integer_literal)))))
+        (multiline_comment)
+        (navigation_suffix
+          (simple_identifier)))
+      (call_suffix
+        (value_arguments)))))
+
+================================================================================
+Block comment between unrelated statements
+================================================================================
+
+val a = 1
+/* comment */
+val b = 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal))
+  (multiline_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Block comment before prefix plus
+================================================================================
+
+val a = 1
+/* comment */
++ 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal))
+  (multiline_comment)
+  (prefix_expression
+    (integer_literal)))
