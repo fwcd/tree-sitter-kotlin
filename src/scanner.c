@@ -420,8 +420,11 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               }
               while (iswspace(lexer->lookahead)) skip(lexer);
             } else {
-              // A lone '/' (division) after a comment — stop looking.
-              break;
+              // A lone '/' (division) after a comment — division is a
+              // continuation operator, suppress ASI. Tree-sitter resets
+              // to P0, internal lexer matches the line comment, then the
+              // scanner is called again and sees the bare '/' directly.
+              return false;
             }
           }
           // Now check the next real token.
@@ -487,35 +490,12 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
                 break;
             }
           }
-          // Skip whitespace and any further comments to find the next
-          // real token. Use skip() so these aren't included in any token.
+          // Skip whitespace after the block comment. Don't skip further
+          // comments — the continuation switch handles '/' and '*', so
+          // subsequent comments will be correctly treated as continuation.
+          // Skipping them here would swallow them (they'd never appear
+          // as separate tokens in the parse tree).
           while (iswspace(lexer->lookahead)) skip(lexer);
-          while (lexer->lookahead == '/') {
-            skip(lexer);
-            if (lexer->lookahead == '/') {
-              skip(lexer);
-              while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
-                     lexer->lookahead != 0 && !lexer->eof(lexer)) {
-                skip(lexer);
-              }
-              while (iswspace(lexer->lookahead)) skip(lexer);
-            } else if (lexer->lookahead == '*') {
-              skip(lexer);
-              unsigned depth = 1;
-              bool star = false;
-              while (depth > 0 && !lexer->eof(lexer)) {
-                if (lexer->lookahead == '*') { skip(lexer); star = true; }
-                else if (lexer->lookahead == '/') {
-                  skip(lexer);
-                  if (star) { star = false; depth--; }
-                  else { if (lexer->lookahead == '*') { depth++; skip(lexer); } star = false; }
-                } else { star = false; skip(lexer); }
-              }
-              while (iswspace(lexer->lookahead)) skip(lexer);
-            } else {
-              break;
-            }
-          }
           // Check the next real token to decide: MULTILINE_COMMENT or ASI?
           //
           // IMPORTANT: For keyword checks (else, as, where, !=), we must
