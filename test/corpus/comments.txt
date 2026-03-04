@@ -613,3 +613,225 @@ val a = 1
   (multiline_comment)
   (prefix_expression
     (integer_literal)))
+
+================================================================================
+Division after line comment
+================================================================================
+
+fun foo() {
+    val x = a
+        // comment
+        / b
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (multiplicative_expression
+            (simple_identifier)
+            (line_comment)
+            (simple_identifier)))))))
+
+================================================================================
+Division after block comment
+================================================================================
+
+fun foo() {
+    val x = a
+        /* comment */
+        / b
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (multiplicative_expression
+            (simple_identifier)
+            (multiline_comment)
+            (simple_identifier)))))))
+
+================================================================================
+Consecutive block comments in method chain
+================================================================================
+
+val x = a
+/* c1 */
+/* c2 */
+.foo()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (navigation_expression
+        (simple_identifier)
+        (multiline_comment)
+        (multiline_comment)
+        (navigation_suffix
+          (simple_identifier)))
+      (call_suffix
+        (value_arguments)))))
+
+================================================================================
+Block comment then line comment before dot
+================================================================================
+
+val x = a
+/* block */
+// line
+.foo()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (navigation_expression
+        (simple_identifier)
+        (multiline_comment)
+        (line_comment)
+        (navigation_suffix
+          (simple_identifier)))
+      (call_suffix
+        (value_arguments)))))
+
+================================================================================
+Builder pattern with mixed comments
+================================================================================
+
+val dialog = AlertDialog.Builder(context)
+    // set the title
+    .setTitle("Hello")
+    /* set the message */
+    .setMessage("World")
+    // show it
+    .show()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (navigation_expression
+        (call_expression
+          (navigation_expression
+            (call_expression
+              (navigation_expression
+                (call_expression
+                  (navigation_expression
+                    (simple_identifier)
+                    (navigation_suffix
+                      (simple_identifier)))
+                  (call_suffix
+                    (value_arguments
+                      (value_argument
+                        (simple_identifier)))))
+                (line_comment)
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (string_literal
+                      (string_content))))))
+            (multiline_comment)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content))))))
+        (line_comment)
+        (navigation_suffix
+          (simple_identifier)))
+      (call_suffix
+        (value_arguments)))))
+
+================================================================================
+Comment before lambda brace
+================================================================================
+
+fun foo() {
+    list.map
+        // comment
+        { it * 2 }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (line_comment)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (multiplicative_expression
+                    (simple_identifier)
+                    (integer_literal)))))))))))
+
+================================================================================
+Comment before call parentheses
+================================================================================
+
+fun foo() {
+    bar
+        // comment
+        (1, 2)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (line_comment)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (integer_literal))
+              (value_argument
+                (integer_literal)))))))))
