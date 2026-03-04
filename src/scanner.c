@@ -360,115 +360,317 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
   }
 
   switch (lexer->lookahead) {
-    case ',':
-    case '.':
-    case ':':
-    case '*':
-    case '%':
-    case '>':
-    case '<':
-    case '=':
-    case '{':
-    case '[':
-    case '(':
-    case '?':
-    case '|':
-    case '&':
-      return false;
-
-    // Don't insert a semicolon before `/` (division), but do insert one before
-    // `//` (line comment) and `/*` (block comment).
-    case '/':
-      skip(lexer);
-      if (lexer->lookahead == '/' || lexer->lookahead == '*') return true;
-      return false;
-
-    // In Kotlin, `+` and `-` after a newline are always prefix operators,
-    // not binary continuation. If a binary operation is intended, the
-    // operator must be placed at the end of the previous line:
-    //   a +       // binary: a + b
-    //     b
-    //   a         // prefix: a; +b
-    //   + b
-    // The grammar ensures AUTOMATIC_SEMICOLON is only valid where a
-    // statement could end, so this won't fire inside () or [] where
-    // newlines don't terminate statements.
-    case '+':
-    case '-':
-      return true;
-
-    // Don't insert a semicolon before `!=`, but do insert one before a unary `!`.
-    case '!':
-      skip(lexer);
-      return lexer->lookahead != '=';
-
-    // Don't insert a semicolon before an else
-    case 'e':
-      return !scan_for_word(lexer, "lse", 3);
-
-    // Don't insert a semicolon before an as
-    case 'a':
-      return !scan_for_word(lexer, "s", 1);
-
-    // Don't insert a semicolon before a where
-    case 'w':
-      return !scan_for_word(lexer, "here", 4);
-
-    // Don't insert a semicolon before `instanceof`, or before `internal`
-    // when followed by `constructor` in a class declaration context.
-    case 'i':
-      if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-          !valid_symbols[STRING_CONTENT] &&
-          check_modifier_then_constructor(lexer)) {
-        return false;
-      }
-      // Note: lexer has advanced past the word. For "instanceof", scan_for_word
-      // can no longer match. But since "instanceof" is not a Kotlin keyword
-      // (Kotlin uses "is"), this is acceptable — ASI is inserted, which is
-      // the correct behavior for any non-constructor identifier.
-      return true;
-
-    // Don't insert a semicolon before `public/private/protected constructor`
-    // in class declaration context.
-    case 'p':
-      if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-          !valid_symbols[STRING_CONTENT] &&
-          check_modifier_then_constructor(lexer)) {
-        return false;
-      }
-      return true;
-
-    // Don't insert a semicolon before `constructor` if the parser expects
-    // a primary constructor (class declaration context). In class body
-    // context, PRIMARY_CONSTRUCTOR_KEYWORD won't be valid, so ASI is
-    // inserted normally before secondary constructors.
-    // Guard against error recovery mode where all symbols are valid.
-    // Instead of suppressing ASI, we emit the constructor keyword directly
-    // since it's an external token and the internal lexer won't match it.
-    case 'c':
-      if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-          !valid_symbols[STRING_CONTENT]) {
-        const char *kw = "constructor";
-        bool matched = true;
-        for (unsigned i = 0; i < 11; i++) {
-          if (lexer->lookahead != kw[i]) { matched = false; break; }
+      case ',':
+      case '.':
+      case ':':
+      case '*':
+      case '%':
+      case '>':
+      case '<':
+      case '=':
+      case '{':
+      case '[':
+      case '(':
+      case '?':
+      case '|':
+      case '&':
+      // Handle `/` — could be division, line comment, or block comment.
+      // For division: no ASI (continuation operator).
+      // For line comments (`//`): skip the comment(s) and check the next
+      // real token. If continuation, suppress ASI (return false — tree-sitter
+      // resets, parses line_comment internally, then re-checks ASI).
+      // If non-continuation, insert ASI (return true at original mark_end).
+      // For block comments (`/*`): advance through the comment (to build
+      // MULTILINE_COMMENT content). Skip further comments with skip().
+      // If continuation follows, produce MULTILINE_COMMENT (mark_end at end
+      // of block comment). The parser handles the continuation after the
+      // comment. If non-continuation, produce AUTOMATIC_SEMICOLON at the
+      // original mark_end (before the comment). The zero-width ASI ends the
+      // statement and the comment is re-scanned as MULTILINE_COMMENT next.
+      case '/': {
+        advance(lexer);
+        if (lexer->lookahead == '/') {
+          // Line comment — skip to end of line using skip() since
+          // line_comment is an internal token (the grammar handles it).
+          skip(lexer);
+          while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
+                 lexer->lookahead != 0 && !lexer->eof(lexer)) {
+            skip(lexer);
+          }
+          // Skip any whitespace and further comments after this line comment.
+          while (iswspace(lexer->lookahead)) skip(lexer);
+          while (lexer->lookahead == '/') {
+            skip(lexer);
+            if (lexer->lookahead == '/') {
+              skip(lexer);
+              while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
+                     lexer->lookahead != 0 && !lexer->eof(lexer)) {
+                skip(lexer);
+              }
+              while (iswspace(lexer->lookahead)) skip(lexer);
+            } else if (lexer->lookahead == '*') {
+              skip(lexer);
+              unsigned depth = 1;
+              bool star = false;
+              while (depth > 0 && !lexer->eof(lexer)) {
+                if (lexer->lookahead == '*') { skip(lexer); star = true; }
+                else if (lexer->lookahead == '/') {
+                  skip(lexer);
+                  if (star) { star = false; depth--; }
+                  else { if (lexer->lookahead == '*') { depth++; skip(lexer); } star = false; }
+                } else { star = false; skip(lexer); }
+              }
+              while (iswspace(lexer->lookahead)) skip(lexer);
+            } else {
+              // A lone '/' (division) after a comment — stop looking.
+              break;
+            }
+          }
+          // Now check the next real token.
+          switch (lexer->lookahead) {
+            case '.': case ',': case ':': case '*': case '%':
+            case '>': case '<': case '=': case '{': case '[':
+            case '(': case '?': case '|': case '&': case '/':
+              return false;
+            case '!':
+              skip(lexer);
+              if (lexer->lookahead == '=') return false;
+              return true;
+            case 'e':
+              if (scan_for_word(lexer, "lse", 3)) return false;
+              return true;
+            case 'a':
+              if (scan_for_word(lexer, "s", 1)) return false;
+              return true;
+            case 'w':
+              if (scan_for_word(lexer, "here", 4)) return false;
+              return true;
+            default:
+              return true;
+          }
+        } else if (lexer->lookahead == '*') {
+          // Block comment after a newline. Use advance() to read through the
+          // comment so the content is available for MULTILINE_COMMENT if we
+          // decide to produce it. DON'T call mark_end yet — we defer that
+          // decision until we know what follows the comment.
           advance(lexer);
+          unsigned nesting_depth = 1;
+          bool after_star = false;
+          while (nesting_depth > 0 && !lexer->eof(lexer)) {
+            switch (lexer->lookahead) {
+              case '*':
+                advance(lexer);
+                after_star = true;
+                break;
+              case '/':
+                advance(lexer);
+                if (after_star) {
+                  after_star = false;
+                  nesting_depth--;
+                } else {
+                  if (lexer->lookahead == '*') {
+                    nesting_depth++;
+                    advance(lexer);
+                  }
+                  after_star = false;
+                }
+                break;
+              case '\0':
+                if (lexer->eof(lexer)) {
+                  // Unterminated block comment at EOF — produce it.
+                  lexer->result_symbol = MULTILINE_COMMENT;
+                  lexer->mark_end(lexer);
+                  return true;
+                }
+                // fallthrough
+              default:
+                advance(lexer);
+                after_star = false;
+                break;
+            }
+          }
+          // Save the position right after the block comment. We'll use this
+          // as mark_end if we produce MULTILINE_COMMENT.
+          // We DON'T call mark_end here — if we produce ASI, mark_end
+          // must stay at the original position (before the comment).
+
+          // Skip whitespace and any further comments to find the next
+          // real token. Use skip() so these aren't included in any token.
+          while (iswspace(lexer->lookahead)) skip(lexer);
+          while (lexer->lookahead == '/') {
+            skip(lexer);
+            if (lexer->lookahead == '/') {
+              skip(lexer);
+              while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
+                     lexer->lookahead != 0 && !lexer->eof(lexer)) {
+                skip(lexer);
+              }
+              while (iswspace(lexer->lookahead)) skip(lexer);
+            } else if (lexer->lookahead == '*') {
+              skip(lexer);
+              unsigned depth = 1;
+              bool star = false;
+              while (depth > 0 && !lexer->eof(lexer)) {
+                if (lexer->lookahead == '*') { skip(lexer); star = true; }
+                else if (lexer->lookahead == '/') {
+                  skip(lexer);
+                  if (star) { star = false; depth--; }
+                  else { if (lexer->lookahead == '*') { depth++; skip(lexer); } star = false; }
+                } else { star = false; skip(lexer); }
+              }
+              while (iswspace(lexer->lookahead)) skip(lexer);
+            } else {
+              break;
+            }
+          }
+          // Check the next real token to decide: MULTILINE_COMMENT or ASI?
+          switch (lexer->lookahead) {
+            case '.': case ',': case ':': case '%':
+            case '>': case '<': case '=': case '{': case '[':
+            case '(': case '?': case '|': case '&': case '/':
+            case '*':
+              // Continuation — produce MULTILINE_COMMENT. Set mark_end
+              // at the current position (end of all advance()d content).
+              // Note: mark_end here is at the first skip()d character
+              // after the block comment, but advance() has consumed the
+              // block comment content. tree-sitter uses the advance()
+              // extent for the token, bounded by mark_end.
+              // Actually we need mark_end right after the block comment
+              // (before any skip()d whitespace). Since we can't go back,
+              // we mark_end here — but skip() chars are not part of the
+              // token. mark_end after skip() is at the advance() boundary.
+              lexer->mark_end(lexer);
+              lexer->result_symbol = MULTILINE_COMMENT;
+              return true;
+            case '!':
+              skip(lexer);
+              if (lexer->lookahead == '=') {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = MULTILINE_COMMENT;
+                return true;
+              }
+              // Unary ! — not continuation. Produce ASI at original
+              // position (mark_end was never updated, stays at P0).
+              return true;
+            case 'e':
+              if (scan_for_word(lexer, "lse", 3)) {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = MULTILINE_COMMENT;
+                return true;
+              }
+              return true;
+            case 'a':
+              if (scan_for_word(lexer, "s", 1)) {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = MULTILINE_COMMENT;
+                return true;
+              }
+              return true;
+            case 'w':
+              if (scan_for_word(lexer, "here", 4)) {
+                lexer->mark_end(lexer);
+                lexer->result_symbol = MULTILINE_COMMENT;
+                return true;
+              }
+              return true;
+            default:
+              // Not a continuation — produce ASI. mark_end is still at
+              // the original position (P0, before the comment), so the
+              // ASI token is zero-width. The block comment will be
+              // re-scanned as MULTILINE_COMMENT on the next parse step.
+              return true;
+          }
         }
-        if (matched && !is_word_char(lexer->lookahead)) {
-          lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
-          lexer->mark_end(lexer);
-          return true;
-        }
+        // Bare `/` (not `//` or `/*`) — division. No ASI.
+        return false;
       }
-      return true;
 
-    case ';':
-      advance(lexer);
-      lexer->mark_end(lexer);
-      return true;
+      // In Kotlin, `+` and `-` after a newline are always prefix operators,
+      // not binary continuation. If a binary operation is intended, the
+      // operator must be placed at the end of the previous line:
+      //   a +       // binary: a + b
+      //     b
+      //   a         // prefix: a; +b
+      //   + b
+      // The grammar ensures AUTOMATIC_SEMICOLON is only valid where a
+      // statement could end, so this won't fire inside () or [] where
+      // newlines don't terminate statements.
+      case '+':
+      case '-':
+        return true;
 
-    default:
-      return true;
+      // Don't insert a semicolon before `!=`, but do insert one before a unary `!`.
+      case '!':
+        skip(lexer);
+        return lexer->lookahead != '=';
+
+      // Don't insert a semicolon before an else
+      case 'e':
+        return !scan_for_word(lexer, "lse", 3);
+
+      // Don't insert a semicolon before an as
+      case 'a':
+        return !scan_for_word(lexer, "s", 1);
+
+      // Don't insert a semicolon before a where
+      case 'w':
+        return !scan_for_word(lexer, "here", 4);
+
+      // Don't insert a semicolon before `instanceof`, or before `internal`
+      // when followed by `constructor` in a class declaration context.
+      case 'i':
+        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_modifier_then_constructor(lexer)) {
+          return false;
+        }
+        // Note: lexer has advanced past the word. For "instanceof", scan_for_word
+        // can no longer match. But since "instanceof" is not a Kotlin keyword
+        // (Kotlin uses "is"), this is acceptable — ASI is inserted, which is
+        // the correct behavior for any non-constructor identifier.
+        return true;
+
+      // Don't insert a semicolon before `public/private/protected constructor`
+      // in class declaration context.
+      case 'p':
+        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_modifier_then_constructor(lexer)) {
+          return false;
+        }
+        return true;
+
+      // Don't insert a semicolon before `constructor` if the parser expects
+      // a primary constructor (class declaration context). In class body
+      // context, PRIMARY_CONSTRUCTOR_KEYWORD won't be valid, so ASI is
+      // inserted normally before secondary constructors.
+      // Guard against error recovery mode where all symbols are valid.
+      // Instead of suppressing ASI, we emit the constructor keyword directly
+      // since it's an external token and the internal lexer won't match it.
+      case 'c':
+        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+            !valid_symbols[STRING_CONTENT]) {
+          const char *kw = "constructor";
+          bool matched = true;
+          for (unsigned i = 0; i < 11; i++) {
+            if (lexer->lookahead != kw[i]) { matched = false; break; }
+            advance(lexer);
+          }
+          if (matched && !is_word_char(lexer->lookahead)) {
+            lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
+            lexer->mark_end(lexer);
+            return true;
+          }
+        }
+        return true;
+
+      case ';':
+        advance(lexer);
+        lexer->mark_end(lexer);
+        return true;
+
+      default:
+        return true;
   }
 }
 
