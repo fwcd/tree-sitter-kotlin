@@ -303,23 +303,40 @@ static bool check_modifier_then_constructor(TSLexer *lexer) {
   return check_word(lexer, "constructor", 11);
 }
 
-// Look ahead past one or more annotations (e.g. @Bar, @Bar(x=1)) and
-// optional visibility modifier, then check for 'constructor'. All
-// characters are consumed with skip() so nothing affects token boundaries.
+// Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar,
+// @Bar(x=1)) and optional visibility modifier, then check for 'constructor'.
+// All characters are consumed with skip() so nothing affects token boundaries.
 static bool check_annotation_then_constructor(TSLexer *lexer) {
   // Skip one or more '@annotation' sequences
   while (lexer->lookahead == '@') {
     skip(lexer); // skip '@'
     if (!is_word_char(lexer->lookahead)) return false;
+    // Read annotation name, including dot-separated qualifiers
+    // (e.g. com.example.Inject)
     while (is_word_char(lexer->lookahead)) skip(lexer);
-    // Skip optional '(...)' argument list (handle nested parens)
+    while (lexer->lookahead == '.') {
+      skip(lexer); // skip '.'
+      if (!is_word_char(lexer->lookahead)) break;
+      while (is_word_char(lexer->lookahead)) skip(lexer);
+    }
+    // Skip optional '(...)' argument list (handle nested parens and strings)
     if (lexer->lookahead == '(') {
       unsigned depth = 1;
       skip(lexer);
       while (depth > 0 && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
-        if (lexer->lookahead == '(') depth++;
-        else if (lexer->lookahead == ')') depth--;
-        skip(lexer);
+        if (lexer->lookahead == '"') {
+          // Skip over string literal to avoid miscounting parens inside strings
+          skip(lexer);
+          while (lexer->lookahead != '"' && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
+            if (lexer->lookahead == '\\') skip(lexer); // skip escaped char
+            skip(lexer);
+          }
+          if (lexer->lookahead == '"') skip(lexer); // skip closing quote
+        } else {
+          if (lexer->lookahead == '(') depth++;
+          else if (lexer->lookahead == ')') depth--;
+          skip(lexer);
+        }
       }
     }
     // Skip whitespace and newlines between annotations or before constructor

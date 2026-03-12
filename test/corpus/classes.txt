@@ -250,6 +250,64 @@ constructor (x: Int) {
     (class_body)))
 
 ================================================================================
+Class with fully qualified annotation on constructor
+================================================================================
+
+class Foo
+@com.example.Inject
+constructor (x: Int) {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier)
+            (type_identifier)
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Class with annotation with parens in string arg on constructor
+================================================================================
+
+class Foo
+@Bar(name = "some ) text")
+constructor (x: Int) {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (simple_identifier)
+                (string_literal
+                  (string_content)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
 Generic class with constructor on new line
 ================================================================================
 
