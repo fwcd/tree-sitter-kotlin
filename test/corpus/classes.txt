@@ -223,6 +223,33 @@ constructor (x: Int) {
     (class_body)))
 
 ================================================================================
+Class with constructor and modifier on new line
+================================================================================
+
+public class Foo
+@Bar
+constructor (x: Int) {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
 Generic class with constructor on new line
 ================================================================================
 

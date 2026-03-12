@@ -303,6 +303,36 @@ static bool check_modifier_then_constructor(TSLexer *lexer) {
   return check_word(lexer, "constructor", 11);
 }
 
+// Look ahead past one or more annotations (e.g. @Bar, @Bar(x=1)) and
+// optional visibility modifier, then check for 'constructor'. All
+// characters are consumed with skip() so nothing affects token boundaries.
+static bool check_annotation_then_constructor(TSLexer *lexer) {
+  // Skip one or more '@annotation' sequences
+  while (lexer->lookahead == '@') {
+    skip(lexer); // skip '@'
+    if (!is_word_char(lexer->lookahead)) return false;
+    while (is_word_char(lexer->lookahead)) skip(lexer);
+    // Skip optional '(...)' argument list (handle nested parens)
+    if (lexer->lookahead == '(') {
+      unsigned depth = 1;
+      skip(lexer);
+      while (depth > 0 && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
+        if (lexer->lookahead == '(') depth++;
+        else if (lexer->lookahead == ')') depth--;
+        skip(lexer);
+      }
+    }
+    // Skip whitespace and newlines between annotations or before constructor
+    while (iswspace(lexer->lookahead)) skip(lexer);
+  }
+  // Allow an optional visibility modifier before 'constructor'
+  if (is_word_char(lexer->lookahead) && lexer->lookahead != 'c') {
+    return check_modifier_then_constructor(lexer);
+  }
+  // Check directly for 'constructor'
+  return check_word(lexer, "constructor", 11);
+}
+
 static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
   lexer->mark_end(lexer);
@@ -650,6 +680,16 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       // Don't insert a semicolon before finally (continues try_expression)
       case 'f':
         return !scan_for_word(lexer, "inally", 6);
+
+      // Don't insert a semicolon before an annotation that precedes 'constructor'
+      // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier
+      case '@':
+        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_annotation_then_constructor(lexer)) {
+          return false;
+        }
+        return true;
 
       case ';':
         advance(lexer);
