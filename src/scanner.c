@@ -130,6 +130,13 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack) {
           lexer->result_symbol = STRING_END;
           return true;
         }
+      } else if (is_triple && lexer->lookahead == end_char) {
+        // In triple-quoted strings, `\` is NOT an escape character. So `\"` is
+        // also literal backslash + quote, and the `"` might be the start of
+        // the closing `"""`. Don't advance past it (at the end of the while
+        // loop). Let the next iteration handle it.
+        has_content = true;
+        continue;
       }
     } else if (lexer->lookahead == end_char) {
       if (is_triple) {
