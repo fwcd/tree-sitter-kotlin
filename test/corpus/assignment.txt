@@ -97,3 +97,24 @@ fun main(){
             (navigation_suffix
               (simple_identifier)))
           (simple_identifier))))))
+
+================================================================================
+Name-base destructuring
+================================================================================
+
+(val mail = email, val name = username) = user
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (assignment
+    (named_multi_variable_declaration
+      (named_variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (simple_identifier))
+      (named_variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (simple_identifier)))
+    (simple_identifier)))

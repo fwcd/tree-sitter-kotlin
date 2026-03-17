@@ -586,6 +586,10 @@
           "named": true
         },
         {
+          "type": "named_multi_variable_declaration",
+          "named": true
+        },
+        {
           "type": "navigation_expression",
           "named": true
         },
@@ -5579,6 +5583,64 @@
     }
   },
   {
+    "type": "named_multi_variable_declaration",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "named_variable_declaration",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "named_variable_declaration",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "binding_pattern_kind",
+          "named": true
+        },
+        {
+          "type": "function_type",
+          "named": true
+        },
+        {
+          "type": "not_nullable_type",
+          "named": true
+        },
+        {
+          "type": "nullable_type",
+          "named": true
+        },
+        {
+          "type": "parenthesized_type",
+          "named": true
+        },
+        {
+          "type": "simple_identifier",
+          "named": true
+        },
+        {
+          "type": "type_modifiers",
+          "named": true
+        },
+        {
+          "type": "user_type",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "navigation_expression",
     "named": true,
     "fields": {},
@@ -9711,11 +9773,13 @@
   },
   {
     "type": "line_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "multiline_comment",
-    "named": true
+    "named": true,
+    "extra": true
   },
   {
     "type": "noinline",

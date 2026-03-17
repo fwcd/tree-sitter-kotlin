@@ -476,6 +476,14 @@ module.exports = grammar({
       optional(seq(":", $._type))
     )),
 
+    named_variable_declaration: $ => seq(
+      $.binding_pattern_kind,
+      $.simple_identifier,
+      optional(seq(":", $._type)),
+      "=",
+      $.simple_identifier
+    ),
+
     property_declaration: $ => prec.right(seq(
       optional($.modifiers),
       $.binding_pattern_kind,
@@ -715,6 +723,7 @@ module.exports = grammar({
     assignment: $ => choice(
       prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
       prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression)),
+      prec.left(PREC.ASSIGNMENT, seq($.named_multi_variable_declaration, "=", $._expression)),
       // TODO
     ),
 
@@ -926,6 +935,13 @@ module.exports = grammar({
     multi_variable_declaration: $ => seq(
       '(',
       sep1($.variable_declaration, ','),
+      ')'
+    ),
+
+    named_multi_variable_declaration: $ => seq(
+      '(',
+      sep1($.named_variable_declaration, ','),
+      optional(','),
       ')'
     ),
 
