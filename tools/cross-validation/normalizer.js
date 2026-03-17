@@ -59,6 +59,39 @@ function _normalizeTsMulti(node) {
     return kids;
   }
 
+  // lambda_parameters → preserve parameter count by generating VALUE_PARAMETER for each entry.
+  // Plain lambda params (variable_declaration > simple_identifier) become transparent and vanish,
+  // but PSI keeps them as empty VALUE_PARAMETER nodes. When destructuring is mixed with plain params,
+  // we need to reconstruct the right number of VALUE_PARAMETER nodes.
+  // Type annotations on destructuring params (from _lambda_parameter's optional type) appear as
+  // siblings after multi_variable_declaration and need to be absorbed into the VALUE_PARAMETER.
+  if (tsName === 'lambda_parameters') {
+    const hasDestructuring = node.children.some(c => c.name === 'multi_variable_declaration');
+    if (hasDestructuring) {
+      const result = [];
+      for (const child of node.children) {
+        if (child.name === 'variable_declaration') {
+          // Plain param → empty VALUE_PARAMETER (matches PSI)
+          result.push(new Node('VALUE_PARAMETER'));
+        } else if (child.name === 'multi_variable_declaration') {
+          // Destructuring param → VALUE_PARAMETER > DESTRUCTURING_DECLARATION
+          const normalized = _normalizeTsMulti(child);
+          result.push(new Node('VALUE_PARAMETER', normalized));
+        } else {
+          // Type annotation or other node — absorb into preceding VALUE_PARAMETER
+          const normalized = _normalizeTsMulti(child);
+          if (result.length > 0 && result[result.length - 1].name === 'VALUE_PARAMETER') {
+            const vp = result[result.length - 1];
+            result[result.length - 1] = new Node('VALUE_PARAMETER', vp.children.concat(normalized));
+          } else {
+            result.push(...normalized);
+          }
+        }
+      }
+      return [new Node('VALUE_PARAMETER_LIST', result)];
+    }
+  }
+
   // Normalize children (flattening transparent nodes)
   let children = [];
   for (const child of node.children) {

@@ -1,0 +1,156 @@
+==================
+destructuringInLambdas
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+    a1.filter { (x, y) -> }
+    a2.filter { (x) -> }
+    a3.filter { z, (x, y) -> }
+    a4.filter { (x, y), z -> }
+    a5.filter { q, (x, y), z -> }
+    a6.filter { (x, y), (z, w) -> }
+
+    a7.filter { (x, y): Type, (z: Type), (w, u: T) : V -> foo7() }
+}
+
+---
+
+(source_file
+  (line_comment)
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier))))))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))))))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (variable_declaration
+                    (simple_identifier))
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier))))))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier)))
+                  (variable_declaration
+                    (simple_identifier)))))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (variable_declaration
+                    (simple_identifier))
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier)))
+                  (variable_declaration
+                    (simple_identifier)))))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier)))
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier))))))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier)))
+                  (user_type
+                    (type_identifier))
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier)
+                      (user_type
+                        (type_identifier))))
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier)
+                      (user_type
+                        (type_identifier))))
+                  (user_type
+                    (type_identifier)))
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))))))
