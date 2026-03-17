@@ -245,6 +245,7 @@ module.exports = grammar({
       $.object_declaration,
       $.function_declaration,
       $.property_declaration,
+      $.destructuring_declaration,
       // TODO: it would be better to have getter/setter only in
       // property_declaration but it's difficult to get ASI
       // (Automatic Semicolon Insertion) working in the lexer for
@@ -476,6 +477,21 @@ module.exports = grammar({
       optional(seq(":", $._type))
     )),
 
+    // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming
+    _name_based_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      optional($.binding_pattern_kind),
+      $.simple_identifier,
+      optional(seq(":", $._type)),
+      optional(seq("=", $.simple_identifier))  // renaming: val localName = propertyName
+    )),
+
+    // Entry in positional (bracketed) destructuring — supports optional val/var, NO renaming
+    _positional_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      optional($.binding_pattern_kind),
+      $.simple_identifier,
+      optional(seq(":", $._type))
+    )),
+
     property_declaration: $ => prec.right(seq(
       optional($.modifiers),
       $.binding_pattern_kind,
@@ -495,6 +511,15 @@ module.exports = grammar({
     )),
 
     property_delegate: $ => seq("by", $._expression),
+
+    destructuring_declaration: $ => prec.right(seq(
+      optional($.modifiers),
+      $.multi_variable_declaration,
+      optional($.type_constraints),
+      "=",
+      $._expression,
+      optional(';'),
+    )),
 
     getter: $ => prec.right(seq(
       optional($.modifiers),
@@ -923,10 +948,19 @@ module.exports = grammar({
       "}"
     )),
 
-    multi_variable_declaration: $ => seq(
-      '(',
-      sep1($.variable_declaration, ','),
-      ')'
+    multi_variable_declaration: $ => choice(
+      seq(
+        '(',
+        sep1(alias($._name_based_destructuring_entry, $.variable_declaration), ','),
+        optional(','),
+        ')'
+      ),
+      seq(
+        '[',
+        sep1(alias($._positional_destructuring_entry, $.variable_declaration), ','),
+        optional(','),
+        ']'
+      ),
     ),
 
     lambda_parameters: $ => sep1($._lambda_parameter, ","),

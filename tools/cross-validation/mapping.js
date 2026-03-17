@@ -49,6 +49,7 @@ const TS_TO_PSI = {
 
   // Properties
   property_declaration: 'PROPERTY',
+  destructuring_declaration: 'PROPERTY',
   property_delegate: 'PROPERTY_DELEGATE',
 
   // Types
@@ -421,6 +422,7 @@ const ALL_TS_NAMED_NODES = new Set([
   'prefix_expression',
   'primary_constructor',
   'property_declaration',
+  'destructuring_declaration',
   'property_delegate',
   'property_modifier',
   'range_expression',
