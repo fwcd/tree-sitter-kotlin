@@ -53,7 +53,6 @@ CommentsBindingInStatementBlock
 
 # --- dot_qualified_call_nesting (remaining structural differences) ---
 dependencyOnNestedClasses
-destructuringInLambdas
 
 # --- annotation_on_parenthesized_type (grammar: annotation + type in parens) ---
 annotationsOnParenthesizedTypes

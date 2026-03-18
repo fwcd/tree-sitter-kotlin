@@ -1,0 +1,524 @@
+================================================================================
+Short name-based destructuring (existing)
+================================================================================
+
+val (a, b) = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Short name-based destructuring with types
+================================================================================
+
+val (a: Int, b: String) = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (variable_declaration
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (simple_identifier)))
+
+================================================================================
+Short name-based destructuring in for loop
+================================================================================
+
+for ((k, v) in map) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)
+    (control_structure_body)))
+
+================================================================================
+Short name-based destructuring in lambda
+================================================================================
+
+list.forEach { (k, v) -> println(k) }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (simple_identifier)))
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal
+          (lambda_parameters
+            (multi_variable_declaration
+              (variable_declaration
+                (simple_identifier))
+              (variable_declaration
+                (simple_identifier))))
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (simple_identifier)))))))))))
+
+================================================================================
+Full name-based destructuring with val
+================================================================================
+
+(val a, val b) = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Full name-based destructuring with mixed val/var
+================================================================================
+
+(val a, var b) = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Full name-based destructuring with types
+================================================================================
+
+(val a: Int, var b: String) = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (simple_identifier)))
+
+================================================================================
+Name-based destructuring with renaming (short form)
+================================================================================
+
+val (localA = propA, localB = propB) = obj
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier)
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Name-based destructuring with renaming (full form)
+================================================================================
+
+(val localA = propA, val localB = propB) = obj
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Name-based destructuring with mixed renaming
+================================================================================
+
+val (a = b, c) = obj
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier)
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Name-based destructuring with type and renaming
+================================================================================
+
+(val a: String = propA, val b) = obj
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Short positional destructuring
+================================================================================
+
+val [a, b] = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Short positional destructuring with types
+================================================================================
+
+val [a: Int, b: String] = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (variable_declaration
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (simple_identifier)))
+
+================================================================================
+Full positional destructuring with val
+================================================================================
+
+[val a, val b] = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Full positional destructuring with mixed val/var
+================================================================================
+
+[val a, var b] = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Full positional destructuring with types
+================================================================================
+
+[val a: Int, var b: String] = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (destructuring_declaration
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (simple_identifier)))
+
+================================================================================
+For loop with positional destructuring
+================================================================================
+
+for ([a, b] in listOfPairs) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)
+    (control_structure_body)))
+
+================================================================================
+For loop with full name-based destructuring
+================================================================================
+
+for ((val a, val b) in listOfPairs) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)))
+    (simple_identifier)
+    (control_structure_body)))
+
+================================================================================
+For loop with full positional destructuring
+================================================================================
+
+for ([val a, val b] in listOfPairs) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (for_statement
+    (multi_variable_declaration
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier))
+      (variable_declaration
+        (binding_pattern_kind)
+        (simple_identifier)))
+    (simple_identifier)
+    (control_structure_body)))
+
+================================================================================
+Lambda with positional destructuring
+================================================================================
+
+list.forEach { [a, b] -> println(a) }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (simple_identifier)))
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal
+          (lambda_parameters
+            (multi_variable_declaration
+              (variable_declaration
+                (simple_identifier))
+              (variable_declaration
+                (simple_identifier))))
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (simple_identifier)))))))))))
+
+================================================================================
+Lambda with full name-based destructuring
+================================================================================
+
+list.forEach { (val a, val b) -> println(a) }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (simple_identifier)))
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal
+          (lambda_parameters
+            (multi_variable_declaration
+              (variable_declaration
+                (binding_pattern_kind)
+                (simple_identifier))
+              (variable_declaration
+                (binding_pattern_kind)
+                (simple_identifier))))
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (simple_identifier)))))))))))
+
+================================================================================
+Trailing comma in name-based destructuring
+================================================================================
+
+val (a, b,) = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Trailing comma in positional destructuring
+================================================================================
+
+val [a, b,] = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Single entry destructuring with trailing comma
+================================================================================
+
+val (a,) = single
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)))
+
+================================================================================
+Underscore in destructuring
+================================================================================
+
+val (_, b) = pair
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (multi_variable_declaration
+      (variable_declaration
+        (simple_identifier))
+      (variable_declaration
+        (simple_identifier)))
+    (simple_identifier)))
