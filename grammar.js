@@ -830,7 +830,7 @@ module.exports = grammar({
 
     // Suffixes
 
-    indexing_suffix: $ => seq("[", sep1($._expression, ","), "]"),
+    indexing_suffix: $ => seq("[", sep1($._expression, ","), optional(','), "]"),
 
     navigation_suffix: $ => seq(
       // this introduces ambiguities with 'less than' for comparisons
