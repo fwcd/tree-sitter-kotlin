@@ -830,7 +830,7 @@ module.exports = grammar({
 
     // Suffixes
 
-    indexing_suffix: $ => seq("[", sep1($._expression, ","), "]"),
+    indexing_suffix: $ => seq("[", sep1($._expression, ","), optional(','), "]"),
 
     navigation_suffix: $ => seq(
       // this introduces ambiguities with 'less than' for comparisons
@@ -1122,14 +1122,6 @@ module.exports = grammar({
     _postfix_unary_operator: $ => choice("++", "--", "!!"),
 
     _member_access_operator: $ => choice(".", "::", alias($.safe_nav, '?.')),
-
-    _indexing_suffix: $ => seq(
-      '[',
-      $._expression,
-      repeat(seq(',', $._expression)),
-      optional(','),
-      ']'
-    ),
 
     _postfix_unary_suffix: $ => choice(
       $._postfix_unary_operator,

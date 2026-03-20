@@ -1333,3 +1333,32 @@ val x = object {
           (simple_identifier)
           (function_value_parameters)
           (function_body))))))
+
+==============================================
+Multi dimensional indexing with trailing comma
+==============================================
+
+someExp[x, y,]
+
+----------------------------------------------
+
+(source_file
+  (indexing_expression
+    (simple_identifier)
+    (indexing_suffix
+      (simple_identifier)
+      (simple_identifier))))
+
+============================
+Indexing with trailing comma
+============================
+
+someExp[x,]
+
+----------------------------
+
+(source_file
+  (indexing_expression
+    (simple_identifier)
+    (indexing_suffix
+      (simple_identifier))))
