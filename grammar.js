@@ -1123,14 +1123,6 @@ module.exports = grammar({
 
     _member_access_operator: $ => choice(".", "::", alias($.safe_nav, '?.')),
 
-    _indexing_suffix: $ => seq(
-      '[',
-      $._expression,
-      repeat(seq(',', $._expression)),
-      optional(','),
-      ']'
-    ),
-
     _postfix_unary_suffix: $ => choice(
       $._postfix_unary_operator,
       $.navigation_suffix,
