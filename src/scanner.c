@@ -308,15 +308,16 @@ static bool followed_by_arrow(TSLexer *lexer) {
         }
         continue;
       } else if (lexer->lookahead == '*') {
-        // Block comment — skip to */
+        // Block comment — skip to */ (with nesting)
         skip(lexer);
-        while (!lexer->eof(lexer)) {
+        unsigned depth = 1;
+        while (depth > 0 && !lexer->eof(lexer)) {
           if (lexer->lookahead == '*') {
             skip(lexer);
-            if (lexer->lookahead == '/') {
-              skip(lexer);
-              break;
-            }
+            if (lexer->lookahead == '/') { skip(lexer); depth--; }
+          } else if (lexer->lookahead == '/') {
+            skip(lexer);
+            if (lexer->lookahead == '*') { skip(lexer); depth++; }
           } else {
             skip(lexer);
           }
