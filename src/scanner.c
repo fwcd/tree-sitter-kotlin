@@ -286,6 +286,54 @@ static bool check_word(TSLexer *lexer, const char *word, unsigned len) {
   return !is_word_char(lexer->lookahead);
 }
 
+// Skip whitespace (space, tab, newline, CR) and comments (// and nested /* */)
+// using skip() so characters are not included in the current token.
+// Returns false if a bare '/' is encountered (not a comment), true otherwise.
+static bool skip_whitespace_and_comments(TSLexer *lexer) {
+  for (;;) {
+    while (iswspace(lexer->lookahead)) skip(lexer);
+    if (lexer->lookahead != '/') return true;
+    skip(lexer);
+    if (lexer->lookahead == '/') {
+      // Line comment — skip to end of line
+      skip(lexer);
+      while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
+             !lexer->eof(lexer)) {
+        skip(lexer);
+      }
+    } else if (lexer->lookahead == '*') {
+      // Block comment — skip to */ (with nesting)
+      skip(lexer);
+      unsigned depth = 1;
+      while (depth > 0 && !lexer->eof(lexer)) {
+        if (lexer->lookahead == '*') {
+          skip(lexer);
+          if (lexer->lookahead == '/') { skip(lexer); depth--; }
+        } else if (lexer->lookahead == '/') {
+          skip(lexer);
+          if (lexer->lookahead == '*') { skip(lexer); depth++; }
+        } else {
+          skip(lexer);
+        }
+      }
+    } else {
+      // Bare '/' — not a comment
+      return false;
+    }
+  }
+}
+
+// After scan_for_word has matched "else", peek past optional whitespace
+// and comments for "->". If found, this is a when-entry's `else ->`,
+// not an if-else. Uses skip() so characters are not included in the
+// current token.
+static bool followed_by_arrow(TSLexer *lexer) {
+  if (!skip_whitespace_and_comments(lexer)) return false;
+  if (lexer->lookahead != '-') return false;
+  skip(lexer);
+  return lexer->lookahead == '>';
+}
+
 // Check if the current position has a visibility modifier (public, private,
 // protected, internal) followed by horizontal whitespace and "constructor".
 // Uses skip() — safe to call speculatively since no token boundary is changed.
@@ -450,37 +498,8 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             skip(lexer);
           }
           // Skip any whitespace and further comments after this line comment.
-          while (iswspace(lexer->lookahead)) skip(lexer);
-          while (lexer->lookahead == '/') {
-            skip(lexer);
-            if (lexer->lookahead == '/') {
-              skip(lexer);
-              while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
-                     lexer->lookahead != 0 && !lexer->eof(lexer)) {
-                skip(lexer);
-              }
-              while (iswspace(lexer->lookahead)) skip(lexer);
-            } else if (lexer->lookahead == '*') {
-              skip(lexer);
-              unsigned depth = 1;
-              bool star = false;
-              while (depth > 0 && !lexer->eof(lexer)) {
-                if (lexer->lookahead == '*') { skip(lexer); star = true; }
-                else if (lexer->lookahead == '/') {
-                  skip(lexer);
-                  if (star) { star = false; depth--; }
-                  else { if (lexer->lookahead == '*') { depth++; skip(lexer); } star = false; }
-                } else { star = false; skip(lexer); }
-              }
-              while (iswspace(lexer->lookahead)) skip(lexer);
-            } else {
-              // A lone '/' (division) after a comment — division is a
-              // continuation operator, suppress ASI. Tree-sitter resets
-              // to P0, internal lexer matches the line comment, then the
-              // scanner is called again and sees the bare '/' directly.
-              return false;
-            }
-          }
+          // A bare '/' (division) after comments is a continuation operator.
+          if (!skip_whitespace_and_comments(lexer)) return false;
           // Now check the next real token.
           switch (lexer->lookahead) {
             case '.': case ',': case ':': case '*': case '%':
@@ -492,7 +511,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               if (lexer->lookahead == '=') return false;
               return true;
             case 'e':
-              if (scan_for_word(lexer, "lse", 3)) return false;
+              if (scan_for_word(lexer, "lse", 3)) {
+                if (followed_by_arrow(lexer)) return true;
+                return false;
+              }
               return true;
             case 'a':
               if (scan_for_word(lexer, "s", 1)) return false;
@@ -589,6 +611,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             case 'e':
               lexer->mark_end(lexer);
               if (scan_for_word(lexer, "lse", 3)) {
+                if (followed_by_arrow(lexer)) return true;
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               }
@@ -637,9 +660,11 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
         skip(lexer);
         return lexer->lookahead != '=';
 
-      // Don't insert a semicolon before an else
+      // Don't insert a semicolon before an else, unless it's
+      // followed by "->" (a when-entry's else, not an if-else).
       case 'e':
-        return !scan_for_word(lexer, "lse", 3);
+        if (!scan_for_word(lexer, "lse", 3)) return true;
+        return followed_by_arrow(lexer);
 
       // Don't insert a semicolon before an as
       case 'a':
