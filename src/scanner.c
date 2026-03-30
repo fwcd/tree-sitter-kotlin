@@ -286,6 +286,53 @@ static bool check_word(TSLexer *lexer, const char *word, unsigned len) {
   return !is_word_char(lexer->lookahead);
 }
 
+// After scan_for_word has matched "else", peek past optional whitespace
+// and comments for "->". If found, this is a when-entry's `else ->`,
+// not an if-else. Uses skip() so characters are not included in the
+// current token.
+static bool followed_by_arrow(TSLexer *lexer) {
+  for (;;) {
+    // Skip whitespace
+    while (lexer->lookahead == ' ' || lexer->lookahead == '\t' ||
+           lexer->lookahead == '\n' || lexer->lookahead == '\r') {
+      skip(lexer);
+    }
+    // Skip line comments
+    if (lexer->lookahead == '/') {
+      skip(lexer);
+      if (lexer->lookahead == '/') {
+        // Line comment — skip to end of line
+        while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
+               !lexer->eof(lexer)) {
+          skip(lexer);
+        }
+        continue;
+      } else if (lexer->lookahead == '*') {
+        // Block comment — skip to */
+        skip(lexer);
+        while (!lexer->eof(lexer)) {
+          if (lexer->lookahead == '*') {
+            skip(lexer);
+            if (lexer->lookahead == '/') {
+              skip(lexer);
+              break;
+            }
+          } else {
+            skip(lexer);
+          }
+        }
+        continue;
+      }
+      // Bare '/' — not a comment, not '-'. Can't be "->".
+      return false;
+    }
+    break;
+  }
+  if (lexer->lookahead != '-') return false;
+  skip(lexer);
+  return lexer->lookahead == '>';
+}
+
 // Check if the current position has a visibility modifier (public, private,
 // protected, internal) followed by horizontal whitespace and "constructor".
 // Uses skip() — safe to call speculatively since no token boundary is changed.
@@ -492,7 +539,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               if (lexer->lookahead == '=') return false;
               return true;
             case 'e':
-              if (scan_for_word(lexer, "lse", 3)) return false;
+              if (scan_for_word(lexer, "lse", 3)) {
+                if (followed_by_arrow(lexer)) return true;
+                return false;
+              }
               return true;
             case 'a':
               if (scan_for_word(lexer, "s", 1)) return false;
@@ -589,6 +639,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             case 'e':
               lexer->mark_end(lexer);
               if (scan_for_word(lexer, "lse", 3)) {
+                if (followed_by_arrow(lexer)) return true;
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               }
@@ -637,9 +688,11 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
         skip(lexer);
         return lexer->lookahead != '=';
 
-      // Don't insert a semicolon before an else
+      // Don't insert a semicolon before an else, unless it's
+      // followed by "->" (a when-entry's else, not an if-else).
       case 'e':
-        return !scan_for_word(lexer, "lse", 3);
+        if (!scan_for_word(lexer, "lse", 3)) return true;
+        return followed_by_arrow(lexer);
 
       // Don't insert a semicolon before an as
       case 'a':
