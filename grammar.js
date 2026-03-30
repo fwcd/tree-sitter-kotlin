@@ -160,6 +160,10 @@ module.exports = grammar({
     // ambiguity between call_suffix and _generic_call_suffix (both can match type_arguments + args)
     [$.call_suffix, $._generic_call_suffix],
     [$._call_suffix_no_trailing_lambda, $._generic_call_suffix_no_trailing_lambda],
+
+    // prec.dynamic on the else-branch doesn't suppress GLR the way prec.right did,
+    // so shift-reduce conflicts within if_expression must be declared explicitly.
+    [$.if_expression, $.if_expression],
   ],
 
   externals: $ => [
@@ -1009,20 +1013,20 @@ module.exports = grammar({
       $._super_at
     )),
 
-    if_expression: $ => prec.right(seq(
+    if_expression: $ => seq(
       "if",
       "(", field('condition', $._expression), ")",
       choice(
-        field('consequence', $.control_structure_body),
-        seq(
+        prec.dynamic(1, seq(
           optional(field('consequence', $.control_structure_body)),
           optional(";"),
           "else",
           choice(field('alternative', $.control_structure_body), ";")
-        ),
+        )),
+        field('consequence', $.control_structure_body),
         ";"
       )
-    )),
+    ),
 
     when_subject: $ => seq(
       "(",
