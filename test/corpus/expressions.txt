@@ -312,6 +312,122 @@ when (this) {
           (null_literal))))))
 
 ================================================================================
+When expression with dangling if-else
+================================================================================
+
+when (x) {
+    is State.Canceled ->
+      if(isTrue) {
+        println(42)
+      }
+    else -> {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (when_expression
+    (when_subject
+      (simple_identifier))
+    (when_entry
+      (when_condition
+        (type_test
+          (user_type
+            (type_identifier)
+            (type_identifier))))
+      (control_structure_body
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments
+                    (value_argument
+                      (integer_literal))))))))))
+    (when_entry
+      (control_structure_body))))
+
+================================================================================
+When with if-else and else branch
+================================================================================
+
+when (x) {
+    1 -> if (a) b else c
+    else -> d
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (when_expression
+    (when_subject
+      (simple_identifier))
+    (when_entry
+      (when_condition
+        (integer_literal))
+      (control_structure_body
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (simple_identifier))
+          (control_structure_body
+            (simple_identifier)))))
+    (when_entry
+      (control_structure_body
+        (simple_identifier)))))
+
+================================================================================
+When with multiple if-no-else before else branch
+================================================================================
+
+when (x) {
+    is A -> if (a) doA()
+    is B -> if (b) doB()
+    else -> doDefault()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (when_expression
+    (when_subject
+      (simple_identifier))
+    (when_entry
+      (when_condition
+        (type_test
+          (user_type
+            (type_identifier))))
+      (control_structure_body
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))
+    (when_entry
+      (when_condition
+        (type_test
+          (user_type
+            (type_identifier))))
+      (control_structure_body
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))
+    (when_entry
+      (control_structure_body
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
 Expressions with Soft Keywords
 ================================================================================
 
