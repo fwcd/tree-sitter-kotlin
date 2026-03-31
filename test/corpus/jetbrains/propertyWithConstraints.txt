@@ -15,34 +15,34 @@ val <T> T.foo: String? where T : I1, T : I2 get() = null
 (source_file
   (line_comment)
   (class_declaration
-    (type_identifier))
+    name: (type_identifier))
   (line_comment)
   (class_declaration
-    (type_identifier))
+    name: (type_identifier))
   (line_comment)
   (property_declaration
     (binding_pattern_kind)
-    (type_parameters
+    type_parameters: (type_parameters
       (type_parameter
-        (type_identifier)))
+        name: (type_identifier)))
     receiver: (receiver_type
       (user_type
         (type_identifier)))
-    (variable_declaration
-      (simple_identifier)
-      (nullable_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (nullable_type
         (user_type
           (type_identifier))
         (quest)))
     (type_constraints
       (type_constraint
-        (type_identifier)
-        (user_type
+        name: (type_identifier)
+        bound: (user_type
           (type_identifier)))
       (type_constraint
-        (type_identifier)
-        (user_type
+        name: (type_identifier)
+        bound: (user_type
           (type_identifier))))
-    (getter
-      (function_body
+    getter: (getter
+      body: (function_body
         (null_literal)))))

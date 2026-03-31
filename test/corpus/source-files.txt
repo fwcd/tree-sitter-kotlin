@@ -15,7 +15,8 @@ val x = 4
         (type_identifier))
       (value_arguments
         (value_argument
-          (string_literal (string_content))))))
+          (string_literal
+            (string_content))))))
   (property_declaration
     (binding_pattern_kind)
     (variable_declaration
@@ -42,7 +43,8 @@ Multiple file annotations
         (type_identifier))
       (value_arguments
         (value_argument
-          (string_literal (string_content))))))
+          (string_literal
+            (string_content))))))
   (file_annotation
     (constructor_invocation
       (user_type
@@ -50,7 +52,8 @@ Multiple file annotations
       (value_arguments
         (value_argument
           (callable_reference
-            (type_identifier)))))))
+            (type_identifier)
+            (class_literal)))))))
 
 ================================================================================
 Imports

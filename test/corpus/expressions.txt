@@ -1000,11 +1000,11 @@ if (cond1) {
     consequence: (control_structure_body
       (statements
         (call_expression
-          (simple_identifier)
+          callee: (simple_identifier)
           (call_suffix
             (value_arguments
               (value_argument
-                (string_literal
+                value: (string_literal
                   (string_content))))))))
     alternative: (control_structure_body
       (if_expression
@@ -1012,20 +1012,20 @@ if (cond1) {
         consequence: (control_structure_body
           (statements
             (call_expression
-              (simple_identifier)
+              callee: (simple_identifier)
               (call_suffix
                 (value_arguments
                   (value_argument
-                    (string_literal
+                    value: (string_literal
                       (string_content))))))))
         alternative: (control_structure_body
           (statements
             (call_expression
-              (simple_identifier)
+              callee: (simple_identifier)
               (call_suffix
                 (value_arguments
                   (value_argument
-                    (string_literal
+                    value: (string_literal
                       (string_content))))))))))))
 
 ================================================================================

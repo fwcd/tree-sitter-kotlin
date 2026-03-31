@@ -39,24 +39,24 @@ abstract class Types {
   (class_declaration
     (modifiers
       (inheritance_modifier))
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (nullable_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (nullable_type
             (user_type
               (type_identifier))
             (quest)))
-        (null_literal))
+        initializer: (null_literal))
       (property_declaration
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection
@@ -66,9 +66,9 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection
@@ -81,9 +81,9 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (nullable_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (nullable_type
             (user_type
               (type_identifier)
               (type_arguments
@@ -102,9 +102,9 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection
@@ -119,26 +119,26 @@ abstract class Types {
                   (type_identifier)))))))
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
-            (function_type_parameters)
-            (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
+            parameters: (function_type_parameters)
+            return_type: (user_type
               (type_identifier))))
-        (lambda_literal))
+        initializer: (lambda_literal))
       (property_declaration
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
-            (function_type_parameters
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
+            parameters: (function_type_parameters
               (user_type
                 (type_identifier))
               (user_type
                 (type_identifier)))
-            (user_type
+            return_type: (user_type
               (type_identifier)
               (type_arguments
                 (type_projection
@@ -148,14 +148,14 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
             receiver: (receiver_type
               (user_type
                 (type_identifier)))
-            (function_type_parameters)
-            (user_type
+            parameters: (function_type_parameters)
+            return_type: (user_type
               (type_identifier)
               (type_arguments
                 (type_projection
@@ -165,18 +165,18 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
             receiver: (receiver_type
               (user_type
                 (type_identifier)))
-            (function_type_parameters
+            parameters: (function_type_parameters
               (user_type
                 (type_identifier))
               (user_type
                 (type_identifier)))
-            (user_type
+            return_type: (user_type
               (type_identifier)
               (type_arguments
                 (type_projection
@@ -186,13 +186,13 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
             receiver: (receiver_type
               (user_type
                 (type_identifier)))
-            (function_type_parameters
+            parameters: (function_type_parameters
               (nullable_type
                 (user_type
                   (type_identifier))
@@ -201,7 +201,7 @@ abstract class Types {
                 (user_type
                   (type_identifier))
                 (quest)))
-            (nullable_type
+            return_type: (nullable_type
               (user_type
                 (type_identifier)
                 (type_arguments
@@ -215,24 +215,24 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
             receiver: (receiver_type
               (user_type
                 (type_identifier)))
-            (function_type_parameters
+            parameters: (function_type_parameters
               (function_type
-                (function_type_parameters
+                parameters: (function_type_parameters
                   (user_type
                     (type_identifier)))
-                (user_type
+                return_type: (user_type
                   (type_identifier)))
               (nullable_type
                 (user_type
                   (type_identifier))
                 (quest)))
-            (nullable_type
+            return_type: (nullable_type
               (user_type
                 (type_identifier)
                 (type_arguments
@@ -245,15 +245,15 @@ abstract class Types {
       (function_declaration
         (modifiers
           (visibility_modifier))
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier)))
+            name: (type_identifier)))
         receiver: (receiver_type
           (user_type
             (type_identifier)
@@ -270,16 +270,16 @@ abstract class Types {
               (type_projection
                 (user_type
                   (type_identifier))))))
-        (simple_identifier)
-        (function_value_parameters)
-        (function_body))
+        name: (simple_identifier)
+        parameters: (function_value_parameters)
+        body: (function_body))
       (property_declaration
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection)))))
@@ -287,9 +287,9 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection)
@@ -298,13 +298,13 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (type_modifiers
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (type_modifiers
             (annotation
               (user_type
                 (type_identifier))))
-          (user_type
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection
@@ -320,9 +320,9 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection
@@ -339,9 +339,9 @@ abstract class Types {
         (modifiers
           (inheritance_modifier))
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)
             (type_arguments
               (type_projection)
@@ -351,21 +351,21 @@ abstract class Types {
       (function_declaration
         (modifiers
           (inheritance_modifier))
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (function_type
-              (function_type_parameters
+            name: (simple_identifier)
+            type: (function_type
+              parameters: (function_type_parameters
                 (parameter
-                  (simple_identifier)
-                  (user_type
+                  name: (simple_identifier)
+                  type: (user_type
                     (type_identifier)))
                 (parameter
-                  (simple_identifier)
-                  (nullable_type
+                  name: (simple_identifier)
+                  type: (nullable_type
                     (user_type
                       (type_identifier))
                     (quest))))
-              (user_type
+              return_type: (user_type
                 (type_identifier)))))))))

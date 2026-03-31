@@ -17,57 +17,57 @@ public class TypeModifiers {
   (class_declaration
     (modifiers
       (visibility_modifier))
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
-            (function_type_parameters)
-            (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
+            parameters: (function_type_parameters)
+            return_type: (user_type
               (type_identifier))))
-        (postfix_expression
+        initializer: (postfix_expression
           (null_literal)))
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (type_modifiers)
-          (function_type
-            (function_type_parameters)
-            (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (type_modifiers)
+          declared_type: (function_type
+            parameters: (function_type_parameters)
+            return_type: (user_type
               (type_identifier))))
-        (postfix_expression
+        initializer: (postfix_expression
           (null_literal)))
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (type_modifiers)
-          (function_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (type_modifiers)
+          declared_type: (function_type
             receiver: (receiver_type
               (user_type
                 (type_identifier)))
-            (function_type_parameters)
-            (user_type
+            parameters: (function_type_parameters)
+            return_type: (user_type
               (type_identifier))))
-        (postfix_expression
+        initializer: (postfix_expression
           (null_literal)))
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (function_type
             receiver: (receiver_type
               (parenthesized_type
                 (type_modifiers)
                 (function_type
-                  (function_type_parameters)
-                  (user_type
+                  parameters: (function_type_parameters)
+                  return_type: (user_type
                     (type_identifier)))))
-            (function_type_parameters)
-            (user_type
+            parameters: (function_type_parameters)
+            return_type: (user_type
               (type_identifier))))
-        (postfix_expression
+        initializer: (postfix_expression
           (null_literal))))))

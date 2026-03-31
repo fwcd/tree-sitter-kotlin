@@ -45,26 +45,26 @@ data class Modifiers(val x: Int) {
   (class_declaration
     (modifiers
       (class_modifier))
-    (type_identifier)
-    (primary_constructor
+    name: (type_identifier)
+    constructor: (primary_constructor
       (class_parameter
         (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
+        name: (simple_identifier)
+        parameter_type: (user_type
           (type_identifier))))
-    (class_body
+    body: (class_body
       (function_declaration
         (modifiers
           (function_modifier))
-        (simple_identifier)
-        (function_value_parameters))
+        name: (simple_identifier)
+        parameters: (function_value_parameters))
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier)))
-        (integer_literal))
+        initializer: (integer_literal))
       (getter
         (modifiers
           (function_modifier)))
@@ -74,26 +74,26 @@ data class Modifiers(val x: Int) {
       (function_declaration
         (modifiers
           (function_modifier))
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier))))
-        (user_type
+        return_type: (user_type
           (type_identifier))
-        (function_body
+        body: (function_body
           (statements
             (if_expression
               condition: (equality_expression
-                (simple_identifier)
-                (call_expression
-                  (navigation_expression
-                    (integer_literal)
+                lhs: (simple_identifier)
+                rhs: (call_expression
+                  callee: (navigation_expression
+                    receiver: (integer_literal)
                     (navigation_suffix
                       (simple_identifier)))
                   (call_suffix
@@ -103,84 +103,84 @@ data class Modifiers(val x: Int) {
                   (simple_identifier))))
             (jump_expression
               (call_expression
-                (simple_identifier)
+                callee: (simple_identifier)
                 (call_suffix
                   (value_arguments
                     (value_argument
-                      (additive_expression
-                        (simple_identifier)
-                        (integer_literal)))
+                      value: (additive_expression
+                        lhs: (simple_identifier)
+                        rhs: (integer_literal)))
                     (value_argument
-                      (additive_expression
-                        (simple_identifier)
-                        (simple_identifier))))))))))
+                      value: (additive_expression
+                        lhs: (simple_identifier)
+                        rhs: (simple_identifier))))))))))
       (function_declaration
         (modifiers
           (function_modifier))
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter_modifiers
             (parameter_modifier))
           (parameter
-            (simple_identifier)
-            (function_type
-              (function_type_parameters)
-              (user_type
+            name: (simple_identifier)
+            type: (function_type
+              parameters: (function_type_parameters)
+              return_type: (user_type
                 (type_identifier))))
           (parameter_modifiers
             (parameter_modifier))
           (parameter
-            (simple_identifier)
-            (function_type
-              (function_type_parameters)
-              (user_type
+            name: (simple_identifier)
+            type: (function_type
+              parameters: (function_type_parameters)
+              return_type: (user_type
                 (type_identifier)))))
-        (user_type
+        return_type: (user_type
           (type_identifier))
-        (function_body))
+        body: (function_body))
       (function_declaration
         (modifiers
           (member_modifier)
           (function_modifier))
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (nullable_type
+            name: (simple_identifier)
+            type: (nullable_type
               (user_type
                 (type_identifier))
               (quest))))
-        (function_body
+        body: (function_body
           (boolean_literal)))
       (class_declaration
         (modifiers
           (class_modifier))
-        (type_identifier))
+        name: (type_identifier))
       (function_declaration
         (modifiers
           (function_modifier))
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)
               (type_arguments
                 (type_projection
                   (user_type
                     (type_identifier)))))))
-        (function_body))
+        body: (function_body))
       (function_declaration
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (type_modifiers)
-            (function_type
+            name: (simple_identifier)
+            type: (type_modifiers)
+            type: (function_type
               receiver: (receiver_type
                 (user_type
                   (type_identifier)))
-              (function_type_parameters)
-              (user_type
+              parameters: (function_type_parameters)
+              return_type: (user_type
                 (type_identifier)))))
-        (function_body)))))
+        body: (function_body)))))

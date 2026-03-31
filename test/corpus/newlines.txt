@@ -216,7 +216,7 @@ else boo()
       (integer_literal))
     alternative: (control_structure_body
       (call_expression
-        (simple_identifier)
+        callee: (simple_identifier)
         (call_suffix
           (value_arguments))))))
 
@@ -236,7 +236,7 @@ if (!foo) 3 else boo()
       (integer_literal))
     alternative: (control_structure_body
       (call_expression
-        (simple_identifier)
+        callee: (simple_identifier)
         (call_suffix
           (value_arguments))))))
 

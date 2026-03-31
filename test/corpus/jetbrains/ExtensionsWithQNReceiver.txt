@@ -22,9 +22,9 @@ fun java.util.Map<*,*>.size() : Int = 1
         (type_arguments
           (type_projection)
           (type_projection))))
-    (variable_declaration
-      (simple_identifier)
-      (user_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (user_type
         (type_identifier))))
   (function_declaration
     receiver: (receiver_type
@@ -35,9 +35,9 @@ fun java.util.Map<*,*>.size() : Int = 1
         (type_arguments
           (type_projection)
           (type_projection))))
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    return_type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (integer_literal))))

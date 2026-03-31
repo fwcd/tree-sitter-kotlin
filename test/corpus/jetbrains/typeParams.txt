@@ -61,126 +61,126 @@ class TypeParams<in T1 : Any, out T2, T3 : (Int) -> Int, T4, T5 : Any?, T6 : T5,
         (simple_identifier)
         (simple_identifier))))
   (class_declaration
-    (type_identifier)
-    (type_parameters
+    name: (type_identifier)
+    type_parameters: (type_parameters
       (type_parameter
         (type_parameter_modifiers
           (variance_modifier))
-        (type_identifier)
-        (user_type
+        name: (type_identifier)
+        bound: (user_type
           (type_identifier)))
       (type_parameter
         (type_parameter_modifiers
           (variance_modifier))
-        (type_identifier))
+        name: (type_identifier))
       (type_parameter
-        (type_identifier)
-        (function_type
-          (function_type_parameters
+        name: (type_identifier)
+        bound: (function_type
+          parameters: (function_type_parameters
             (user_type
               (type_identifier)))
-          (user_type
+          return_type: (user_type
             (type_identifier))))
       (type_parameter
-        (type_identifier))
+        name: (type_identifier))
       (type_parameter
-        (type_identifier)
-        (nullable_type
+        name: (type_identifier)
+        bound: (nullable_type
           (user_type
             (type_identifier))
           (quest)))
       (type_parameter
-        (type_identifier)
-        (user_type
+        name: (type_identifier)
+        bound: (user_type
           (type_identifier)))
       (type_parameter
-        (type_identifier)))
+        name: (type_identifier)))
     (type_constraints
       (type_constraint
-        (type_identifier)
-        (nullable_type
+        name: (type_identifier)
+        bound: (nullable_type
           (user_type
             (type_identifier))
           (quest)))
       (type_constraint
-        (type_identifier)
-        (user_type
+        name: (type_identifier)
+        bound: (user_type
           (type_identifier)))
       (type_constraint
-        (type_identifier)
-        (user_type
+        name: (type_identifier)
+        bound: (user_type
           (type_identifier)))
       (type_constraint
-        (type_identifier)
-        (user_type
+        name: (type_identifier)
+        bound: (user_type
           (type_identifier))))
-    (class_body
+    body: (class_body
       (function_declaration
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (function_type
-              (function_type_parameters
+            name: (simple_identifier)
+            type: (function_type
+              parameters: (function_type_parameters
                 (user_type
                   (type_identifier)))
-              (user_type
+              return_type: (user_type
                 (type_identifier))))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier))))
-        (function_body))
+        body: (function_body))
       (function_declaration
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier))))
-        (function_body))
+        body: (function_body))
       (function_declaration
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)
               (type_arguments
                 (type_projection
                   (user_type
                     (type_identifier))))))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)
               (type_arguments
                 (type_projection
@@ -194,267 +194,267 @@ class TypeParams<in T1 : Any, out T2, T3 : (Int) -> Int, T4, T5 : Any?, T6 : T5,
                       (type_identifier))
                     (quest))))))
           (parameter
-            (simple_identifier)
-            (function_type
+            name: (simple_identifier)
+            type: (function_type
               receiver: (receiver_type
                 (parenthesized_type
                   (user_type
                     (type_identifier))))
-              (function_type_parameters
+              parameters: (function_type_parameters
                 (user_type
                   (type_identifier))
                 (user_type
                   (type_identifier)))
-              (user_type
+              return_type: (user_type
                 (type_identifier)))))
-        (function_body))
+        body: (function_body))
       (function_declaration
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier)))
-        (simple_identifier)
-        (function_value_parameters
+            name: (type_identifier)))
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (function_type
-              (function_type_parameters
+            name: (simple_identifier)
+            type: (function_type
+              parameters: (function_type_parameters
                 (user_type
                   (type_identifier)))
-              (user_type
+              return_type: (user_type
                 (type_identifier)))))
-        (function_body))
+        body: (function_body))
       (function_declaration
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier)
-            (nullable_type
+            name: (type_identifier)
+            bound: (nullable_type
               (user_type
                 (type_identifier))
               (quest)))
           (type_parameter
-            (type_identifier)
-            (user_type
+            name: (type_identifier)
+            bound: (user_type
               (type_identifier)))
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier)))
-        (simple_identifier)
-        (function_value_parameters
+            name: (type_identifier)))
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (function_type
-              (function_type_parameters
+            name: (simple_identifier)
+            type: (function_type
+              parameters: (function_type_parameters
                 (user_type
                   (type_identifier)))
-              (user_type
+              return_type: (user_type
                 (type_identifier)))))
         (type_constraints
           (type_constraint
-            (type_identifier)
-            (user_type
+            name: (type_identifier)
+            bound: (user_type
               (type_identifier)))
           (type_constraint
-            (type_identifier)
-            (user_type
+            name: (type_identifier)
+            bound: (user_type
               (type_identifier)))
           (type_constraint
-            (type_identifier)
-            (nullable_type
+            name: (type_identifier)
+            bound: (nullable_type
               (user_type
                 (type_identifier))
               (quest))))
-        (function_body))
+        body: (function_body))
       (function_declaration
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
-            (type_identifier)))
-        (simple_identifier)
-        (function_value_parameters
+            name: (type_identifier)))
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier))))
-        (function_body))
+        body: (function_body))
       (function_declaration
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier)))
+            name: (type_identifier)))
         receiver: (receiver_type
           (user_type
             (type_identifier)))
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier))))
-        (function_body))
+        body: (function_body))
       (property_declaration
         (binding_pattern_kind)
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier)))
+            name: (type_identifier)))
         receiver: (receiver_type
           (user_type
             (type_identifier)))
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier))))
       (getter
-        (function_body
+        body: (function_body
           (jump_expression
             (call_expression
-              (simple_identifier)
+              callee: (simple_identifier)
               (call_suffix
                 (value_arguments))))))
       (property_declaration
         (binding_pattern_kind)
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier)
-            (nullable_type
+            name: (type_identifier)
+            bound: (nullable_type
               (user_type
                 (type_identifier))
               (quest))))
         receiver: (receiver_type
           (user_type
             (type_identifier)))
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier))))
       (getter
-        (function_body
+        body: (function_body
           (jump_expression
             (call_expression
-              (simple_identifier)
+              callee: (simple_identifier)
               (call_suffix
                 (value_arguments))))))
       (property_declaration
         (binding_pattern_kind)
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
-            (type_identifier)
-            (user_type
+            name: (type_identifier)
+            bound: (user_type
               (type_identifier))))
         receiver: (receiver_type
           (user_type
             (type_identifier)))
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier))))
       (getter
-        (function_body
+        body: (function_body
           (jump_expression
             (call_expression
-              (simple_identifier)
+              callee: (simple_identifier)
               (call_suffix
                 (value_arguments))))))
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier))))
       (getter
-        (function_body
+        body: (function_body
           (jump_expression
             (call_expression
-              (simple_identifier)
+              callee: (simple_identifier)
               (call_suffix
                 (value_arguments))))))
       (function_declaration
         (modifiers
           (visibility_modifier)
           (function_modifier))
-        (type_parameters
+        type_parameters: (type_parameters
           (type_parameter
             (type_parameter_modifiers
               (reification_modifier))
-            (type_identifier))
+            name: (type_identifier))
           (type_parameter
             (type_parameter_modifiers
               (reification_modifier))
-            (type_identifier)))
-        (simple_identifier)
-        (function_value_parameters
+            name: (type_identifier)))
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter
-            (simple_identifier)
-            (user_type
+            name: (simple_identifier)
+            type: (user_type
               (type_identifier)))
           (parameter
-            (simple_identifier)
-            (function_type
-              (function_type_parameters
+            name: (simple_identifier)
+            type: (function_type
+              parameters: (function_type_parameters
                 (user_type
                   (type_identifier)))
-              (user_type
+              return_type: (user_type
                 (type_identifier)))))
-        (user_type
+        return_type: (user_type
           (type_identifier))
-        (function_body
+        body: (function_body
           (call_expression
-            (simple_identifier)
+            callee: (simple_identifier)
             (call_suffix
               (value_arguments
                 (value_argument
-                  (simple_identifier))))))))))
+                  value: (simple_identifier))))))))))

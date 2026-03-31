@@ -8,33 +8,33 @@ fun foo(a: Int): Int { var x = a; var y = x++; if (y+1 != x) return -1; return x
 
 (source_file
   (function_declaration
-    (simple_identifier)
-    (function_value_parameters
+    name: (simple_identifier)
+    parameters: (function_value_parameters
       (parameter
-        (simple_identifier)
-        (user_type
+        name: (simple_identifier)
+        type: (user_type
           (type_identifier))))
-    (user_type
+    return_type: (user_type
       (type_identifier))
-    (function_body
+    body: (function_body
       (statements
         (property_declaration
           (binding_pattern_kind)
-          (variable_declaration
-            (simple_identifier))
-          (simple_identifier))
+          variable: (variable_declaration
+            name: (simple_identifier))
+          initializer: (simple_identifier))
         (property_declaration
           (binding_pattern_kind)
-          (variable_declaration
-            (simple_identifier))
-          (postfix_expression
+          variable: (variable_declaration
+            name: (simple_identifier))
+          initializer: (postfix_expression
             (simple_identifier)))
         (if_expression
           condition: (equality_expression
-            (additive_expression
-              (simple_identifier)
-              (integer_literal))
-            (simple_identifier))
+            lhs: (additive_expression
+              lhs: (simple_identifier)
+              rhs: (integer_literal))
+            rhs: (simple_identifier))
           consequence: (control_structure_body
             (jump_expression
               (prefix_expression

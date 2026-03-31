@@ -31,79 +31,79 @@ fun (@a a.(a) -> a).f2() {}
   (line_comment)
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers)
-      (user_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers)
+      declared_type: (user_type
         (type_identifier))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers)
-      (function_type
-        (function_type_parameters
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers)
+      declared_type: (function_type
+        parameters: (function_type_parameters
           (user_type
             (type_identifier)))
-        (user_type
+        return_type: (user_type
           (type_identifier)))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers)
-      (function_type
-        (function_type_parameters
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers)
+      declared_type: (function_type
+        parameters: (function_type_parameters
           (user_type
             (type_identifier)))
-        (type_modifiers)
-        (user_type
+        return_type: (type_modifiers)
+        return_type: (user_type
           (type_identifier)))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers)
-      (function_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers)
+      declared_type: (function_type
         receiver: (receiver_type
           (user_type
             (type_identifier)))
-        (function_type_parameters)
-        (user_type
+        parameters: (function_type_parameters)
+        return_type: (user_type
           (type_identifier)))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers
         (annotation
           (user_type
             (type_identifier))))
-      (function_type
+      declared_type: (function_type
         receiver: (receiver_type
           (user_type
             (type_identifier)))
-        (function_type_parameters)
-        (user_type
+        parameters: (function_type_parameters)
+        return_type: (user_type
           (type_identifier)))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (function_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (function_type
         receiver: (receiver_type
           (parenthesized_type
             (type_modifiers)
             (user_type
               (type_identifier))))
-        (function_type_parameters)
-        (user_type
+        parameters: (function_type_parameters)
+        return_type: (user_type
           (type_identifier)))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (function_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (function_type
         receiver: (receiver_type
           (parenthesized_type
             (type_modifiers
@@ -112,14 +112,14 @@ fun (@a a.(a) -> a).f2() {}
                   (type_identifier))))
             (user_type
               (type_identifier))))
-        (function_type_parameters)
-        (user_type
+        parameters: (function_type_parameters)
+        return_type: (user_type
           (type_identifier)))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (user_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (user_type
         (type_identifier)
         (type_arguments
           (type_projection
@@ -130,9 +130,9 @@ fun (@a a.(a) -> a).f2() {}
               (type_identifier)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (user_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (user_type
         (type_identifier)
         (type_arguments
           (type_projection
@@ -146,9 +146,9 @@ fun (@a a.(a) -> a).f2() {}
               (type_identifier)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (user_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (user_type
         (type_identifier)
         (type_arguments
           (type_projection
@@ -165,9 +165,9 @@ fun (@a a.(a) -> a).f2() {}
               (type_identifier)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (user_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (user_type
         (type_identifier)
         (type_arguments
           (type_projection
@@ -184,10 +184,10 @@ fun (@a a.(a) -> a).f2() {}
               (type_identifier)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers)
-      (user_type
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers)
+      declared_type: (user_type
         (type_identifier)
         (type_arguments
           (type_projection
@@ -195,64 +195,64 @@ fun (@a a.(a) -> a).f2() {}
               (type_identifier)))))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers
         (annotation
           (user_type
             (type_identifier))))
-      (user_type
+      declared_type: (user_type
         (type_identifier))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers
         (annotation
           (user_type
             (type_identifier))))
-      (user_type
+      declared_type: (user_type
         (type_identifier))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers
         (annotation
           (user_type
             (type_identifier)))
         (annotation
           (user_type
             (type_identifier))))
-      (user_type
+      declared_type: (user_type
         (type_identifier))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers
         (annotation
           (user_type
             (type_identifier)))
         (annotation
           (user_type
             (type_identifier))))
-      (user_type
+      declared_type: (user_type
         (type_identifier))))
   (property_declaration
     (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier)
-      (type_modifiers)
-      (function_type
-        (function_type_parameters
+    variable: (variable_declaration
+      name: (simple_identifier)
+      declared_type: (type_modifiers)
+      declared_type: (function_type
+        parameters: (function_type_parameters
           (type_modifiers)
           (parenthesized_type
             (function_type
-              (function_type_parameters)
-              (user_type
+              parameters: (function_type_parameters)
+              return_type: (user_type
                 (type_identifier)))))
-        (user_type
+        return_type: (user_type
           (type_identifier)))))
   (function_declaration
     (modifiers
@@ -266,9 +266,9 @@ fun (@a a.(a) -> a).f2() {}
             (type_identifier))))
       (user_type
         (type_identifier)))
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body))
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body))
   (function_declaration
     receiver: (receiver_type
       (parenthesized_type
@@ -280,11 +280,11 @@ fun (@a a.(a) -> a).f2() {}
           receiver: (receiver_type
             (user_type
               (type_identifier)))
-          (function_type_parameters
+          parameters: (function_type_parameters
             (user_type
               (type_identifier)))
-          (user_type
+          return_type: (user_type
             (type_identifier)))))
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body)))
+    name: (simple_identifier)
+    parameters: (function_value_parameters)
+    body: (function_body)))

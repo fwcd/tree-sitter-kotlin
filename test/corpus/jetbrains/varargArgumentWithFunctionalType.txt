@@ -21,31 +21,31 @@ class VarargArgumentWithFunctionalType {
     (identifier
       (simple_identifier)))
   (class_declaration
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (property_declaration
         (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (user_type
+        variable: (variable_declaration
+          name: (simple_identifier)
+          declared_type: (user_type
             (type_identifier))))))
   (class_declaration
-    (type_identifier)
-    (class_body
+    name: (type_identifier)
+    body: (class_body
       (function_declaration
-        (simple_identifier)
-        (function_value_parameters
+        name: (simple_identifier)
+        parameters: (function_value_parameters
           (parameter_modifiers
             (parameter_modifier))
           (parameter
-            (simple_identifier)
-            (function_type
+            name: (simple_identifier)
+            type: (function_type
               receiver: (receiver_type
                 (user_type
                   (type_identifier)))
-              (function_type_parameters
+              parameters: (function_type_parameters
                 (user_type
                   (type_identifier)))
-              (user_type
+              return_type: (user_type
                 (type_identifier)))))
-        (function_body)))))
+        body: (function_body)))))
