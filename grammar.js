@@ -657,6 +657,7 @@ module.exports = grammar({
     function_type_parameters: $ => prec.left(1, seq(
       "(",
       optional(sep1(choice($.parameter, $._type), ",")),
+      optional(","),
       ")"
     )),
 
@@ -963,7 +964,7 @@ module.exports = grammar({
       ),
     ),
 
-    lambda_parameters: $ => sep1($._lambda_parameter, ","),
+    lambda_parameters: $ => seq(sep1($._lambda_parameter, ","), optional(",")),
 
     _lambda_parameter: $ => choice(
       $.variable_declaration,
