@@ -16,6 +16,8 @@ enum TokenType {
   STRING_CONTENT,
   PRIMARY_CONSTRUCTOR_KEYWORD,
   IMPORT_DOT,
+  INTERPOLATION_EXPRESSION_START,
+  INTERPOLATION_IDENTIFIER_START,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -45,16 +47,21 @@ enum TokenType {
 typedef char Delimiter;
 
 // We use a stack to keep track of the string delimiters.
+// Each entry is two bytes: [delimiter_byte, prefix_len_byte].
+// delimiter_byte: '"' for single-quoted, '"'+1 for triple-quoted.
+// prefix_len_byte: number of '$' signs required to trigger interpolation
+//   (1 for regular strings and $"...", 2 for $$"...", etc.; max 255).
 typedef Array(Delimiter) Stack;
 
-static inline void stack_push(Stack *stack, char chr, bool triple) {
-  if (stack->size >= TREE_SITTER_SERIALIZATION_BUFFER_SIZE) abort();
+static inline void stack_push(Stack *stack, char chr, bool triple, uint8_t prefix_len) {
+  if (stack->size + 1 >= TREE_SITTER_SERIALIZATION_BUFFER_SIZE) abort();
   array_push(stack, (Delimiter)(triple ? (chr + 1) : chr));
+  array_push(stack, (Delimiter)prefix_len);
 }
 
-static inline Delimiter stack_pop(Stack *stack) {
-  if (stack->size == 0) abort();
-  return array_pop(stack);
+static inline void stack_pop(Stack *stack) {
+  if (stack->size < 2) abort();
+  stack->size -= 2;
 }
 
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
@@ -64,49 +71,76 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 // Scanner functions
 
 static bool scan_string_start(TSLexer *lexer, Stack *stack) {
+  // Count leading '$' signs (the interpolation prefix). Capped at 255.
+  uint8_t prefix_len = 0;
+  while (lexer->lookahead == '$') {
+    advance(lexer);
+    if (prefix_len < 255) prefix_len++;
+  }
+  // Regular strings with no prefix still use a single '$' as the trigger.
+  if (prefix_len == 0) prefix_len = 1;
+
   if (lexer->lookahead != '"') return false;
   advance(lexer);
   lexer->mark_end(lexer);
   for (unsigned count = 1; count < DELIMITER_LENGTH; ++count) {
     if (lexer->lookahead != '"') {
       // It's not a triple quoted delimiter.
-      stack_push(stack, '"', false);
+      stack_push(stack, '"', false, prefix_len);
       return true;
     }
     advance(lexer);
   }
   lexer->mark_end(lexer);
-  stack_push(stack, '"', true);
+  stack_push(stack, '"', true, prefix_len);
   return true;
 }
 
-static bool scan_string_content(TSLexer *lexer, Stack *stack) {
-  if (stack->size == 0) return false;  // Stack is empty. We're not in a string.
-  Delimiter end_char = stack->contents[stack->size - 1];  // peek
-  bool is_triple = false;
+static bool scan_string_content(TSLexer *lexer, Stack *stack,
+                                const bool *valid_symbols) {
+  if (stack->size < 2) return false;  // Stack is empty. We're not in a string.
+  uint8_t prefix_len = (uint8_t)stack->contents[stack->size - 1];
+  Delimiter raw_delim = stack->contents[stack->size - 2];
+  bool is_triple = (raw_delim & 1) != 0;
+  char end_char = is_triple ? (char)(raw_delim - 1) : (char)raw_delim;
   bool has_content = false;
-  if (end_char & 1) {
-    is_triple = true;
-    end_char -= 1;
-  }
   while (lexer->lookahead) {
     if (lexer->lookahead == '$') {
-      // if we did not just start reading stuff, then we should stop
-      // lexing right here, so we can offer the opportunity to lex a
-      // interpolated identifier
+      // If we already have content, stop here so the caller can emit it
+      // before we deal with the potential interpolation.
       if (has_content) {
         lexer->result_symbol = STRING_CONTENT;
-        return has_content;
+        return true;
       }
-      // otherwise, if this is the start, determine if it is an
-      // interpolated identifier.
-      // otherwise, it's just string content, so continue
-      advance(lexer);
-      if (iswalpha(lexer->lookahead) || lexer->lookahead == '{') {
-        // this must be a string interpolation, let's
-        // fail so we parse it as such
+      // Count consecutive '$' signs up to prefix_len to determine whether
+      // this is an interpolation trigger or literal content.
+      uint8_t dollar_count = 0;
+      while (lexer->lookahead == '$' && dollar_count < prefix_len) {
+        advance(lexer);
+        dollar_count++;
+      }
+      if (dollar_count == prefix_len &&
+          (iswalpha(lexer->lookahead) || lexer->lookahead == '{')) {
+        // Exactly the right number of '$' signs, followed by an identifier
+        // start or '{'. We have already advanced past the '$' signs so emit
+        // the appropriate interpolation-start token directly here.
+        if (valid_symbols[INTERPOLATION_EXPRESSION_START] &&
+            lexer->lookahead == '{') {
+          advance(lexer);
+          lexer->mark_end(lexer);
+          lexer->result_symbol = INTERPOLATION_EXPRESSION_START;
+          return true;
+        }
+        if (valid_symbols[INTERPOLATION_IDENTIFIER_START] &&
+            iswalpha(lexer->lookahead)) {
+          lexer->mark_end(lexer);
+          lexer->result_symbol = INTERPOLATION_IDENTIFIER_START;
+          return true;
+        }
         return false;
       }
+      // Fewer '$' signs than the prefix, or not followed by alpha/'{':
+      // the dollar signs are literal string content.
       lexer->result_symbol = STRING_CONTENT;
       lexer->mark_end(lexer);
       return true;
@@ -197,6 +231,7 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack) {
   }
   return false;
 }
+
 
 static bool scan_multiline_comment(TSLexer *lexer) {
   if (lexer->lookahead != '/') return false;
@@ -924,9 +959,10 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
     return scan_import_list_delimiter(lexer);
   }
 
-  // content or end
-  if (valid_symbols[STRING_CONTENT] && scan_string_content(lexer, payload)) {
-    return true;
+  // content, end, or interpolation start
+  if (valid_symbols[STRING_CONTENT] || valid_symbols[INTERPOLATION_EXPRESSION_START] ||
+      valid_symbols[INTERPOLATION_IDENTIFIER_START]) {
+    if (scan_string_content(lexer, payload, valid_symbols)) return true;
   }
 
   // a string might follow after some whitespace, so we can't lookahead

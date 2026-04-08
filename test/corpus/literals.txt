@@ -135,6 +135,25 @@ More string interpolation
   (string_literal))
 
 ================================================================================
+Multiline string interpolation with prefix
+================================================================================
+
+$$"""
+In here we can have a verbatim $, while interpolation is triggered
+by $$x
+"""
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (string_content)
+    (string_content)
+    (interpolated_identifier)
+    (string_content)))
+
+================================================================================
 Integer literals
 ================================================================================
 

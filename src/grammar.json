@@ -4512,8 +4512,8 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "STRING",
-              "value": "${"
+              "type": "SYMBOL",
+              "name": "_interpolation_expression_start"
             },
             {
               "type": "ALIAS",
@@ -4534,8 +4534,8 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "STRING",
-              "value": "$"
+              "type": "SYMBOL",
+              "name": "_interpolation_identifier_start"
             },
             {
               "type": "ALIAS",
@@ -7523,6 +7523,14 @@
     {
       "type": "SYMBOL",
       "name": "_import_dot"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_interpolation_expression_start"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_interpolation_identifier_start"
     }
   ],
   "inline": [],
