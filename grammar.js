@@ -1046,13 +1046,15 @@ module.exports = grammar({
 
     when_entry: $ => seq(
       choice(
-        seq($.when_condition, repeat(seq(",", $.when_condition)), optional(",")),
+        seq($.when_condition, repeat(seq(",", $.when_condition)), optional($.guard_condition), optional(",")),
         "else"
       ),
       "->",
       $.control_structure_body,
       optional($._semi)
     ),
+
+    guard_condition: $ => seq("if", $._expression),
 
     when_condition: $ => choice(
       $._expression,

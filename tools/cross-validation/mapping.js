@@ -115,6 +115,7 @@ const TS_TO_PSI = {
   when_subject: null,
   when_entry: 'WHEN_ENTRY',
   when_condition: null,
+  guard_condition: 'WHEN_ENTRY_GUARD',
   try_expression: 'TRY',
   catch_block: 'CATCH',
   finally_block: 'FINALLY',
@@ -378,6 +379,7 @@ const ALL_TS_NAMED_NODES = new Set([
   'function_type_parameters',
   'function_value_parameters',
   'getter',
+  'guard_condition',
   'hex_literal',
   'identifier',
   'if_expression',
@@ -580,6 +582,7 @@ const ALL_PSI_COMPOSITE_NODES = new Set([
   'WHEN_CONDITION_IS_PATTERN',
   'WHEN_CONDITION_WITH_EXPRESSION',
   'WHEN_ENTRY',
+  'WHEN_ENTRY_GUARD',
   'WHILE',
   // Additional nodes found in SKIP_PSI_NODES
   'THROW',
