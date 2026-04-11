@@ -112,18 +112,34 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
         lexer->result_symbol = STRING_CONTENT;
         return true;
       }
-      // Count consecutive '$' signs up to prefix_len to determine whether
-      // this is an interpolation trigger or literal content.
-      uint8_t dollar_count = 0;
-      while (lexer->lookahead == '$' && dollar_count < prefix_len) {
+      // Kotlin 2.1 multi-dollar interpolation: in a string with prefix_len N,
+      // exactly N consecutive '$' followed by alpha/'{' triggers interpolation.
+      // Excess leading '$' signs are literal string content.
+      //
+      // Strategy: consume the first '$' and mark_end there, then count
+      // remaining '$' signs. If total > prefix_len, return STRING_CONTENT
+      // for just the first '$' (tree-sitter rewinds to mark_end). On the
+      // next scan call, the remaining dollars will be re-examined.
+      advance(lexer);
+      lexer->mark_end(lexer);
+      uint16_t additional_dollars = 0;
+      while (lexer->lookahead == '$') {
         advance(lexer);
-        dollar_count++;
+        additional_dollars++;
       }
-      if (dollar_count == prefix_len &&
+      uint16_t total_dollars = 1 + additional_dollars;
+      if (total_dollars >= prefix_len &&
           (iswalpha(lexer->lookahead) || lexer->lookahead == '{')) {
-        // Exactly the right number of '$' signs, followed by an identifier
-        // start or '{'. We have already advanced past the '$' signs so emit
-        // the appropriate interpolation-start token directly here.
+        if (total_dollars > prefix_len) {
+          // Excess: emit first '$' as literal STRING_CONTENT.
+          // mark_end is after the first '$'; tree-sitter rewinds there.
+          lexer->result_symbol = STRING_CONTENT;
+          return true;
+        }
+        // Exact match: emit interpolation start token.
+        if (additional_dollars > 0) {
+          lexer->mark_end(lexer);
+        }
         if (valid_symbols[INTERPOLATION_EXPRESSION_START] &&
             lexer->lookahead == '{') {
           advance(lexer);
@@ -133,16 +149,17 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
         }
         if (valid_symbols[INTERPOLATION_IDENTIFIER_START] &&
             iswalpha(lexer->lookahead)) {
-          lexer->mark_end(lexer);
           lexer->result_symbol = INTERPOLATION_IDENTIFIER_START;
           return true;
         }
         return false;
       }
-      // Fewer '$' signs than the prefix, or not followed by alpha/'{':
-      // the dollar signs are literal string content.
+      // Not enough '$' signs or not followed by alpha/'{':
+      // all consumed dollars are literal string content.
+      if (additional_dollars > 0) {
+        lexer->mark_end(lexer);
+      }
       lexer->result_symbol = STRING_CONTENT;
-      lexer->mark_end(lexer);
       return true;
     }
     if (lexer->lookahead == '\\') {
@@ -1000,16 +1017,22 @@ void tree_sitter_kotlin_external_scanner_destroy(void *payload) {
 
 unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buffer) {
   Stack *stack = (Stack *)payload;
-  if (stack->size > 0) {
-    // it's an undefined behavior to memcpy 0 bytes
-    memcpy(buffer, stack->contents, stack->size);
+  unsigned n = stack->size;
+  if (n > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
+    n = TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
   }
-  return stack->size;
+  if (n > 0) {
+    // it's an undefined behavior to memcpy 0 bytes
+    memcpy(buffer, stack->contents, n);
+  }
+  return n;
 }
 
 void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) {
   Stack *stack = (Stack *)payload;
-  if (length > 0) {
+  // Stack entries are 2 bytes each (delimiter + prefix_len).
+  // Discard corrupted state with odd length.
+  if (length > 0 && length % 2 == 0) {
     array_reserve(stack, length);
     memcpy(stack->contents, buffer, length);
     stack->size = length;
