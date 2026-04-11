@@ -172,6 +172,8 @@ module.exports = grammar({
     $.string_content,
     $._primary_constructor_keyword,
     $._import_dot,
+    $._interpolation_expression_start,
+    $._interpolation_identifier_start,
   ],
 
   extras: $ => [
@@ -937,8 +939,8 @@ module.exports = grammar({
     line_string_expression: $ => seq("${", $._expression, "}"),
 
     _interpolation: $ => choice(
-      seq("${", alias($._expression, $.interpolated_expression), "}"),
-      seq("$", alias($.simple_identifier, $.interpolated_identifier))
+      seq($._interpolation_expression_start, alias($._expression, $.interpolated_expression), "}"),
+      seq($._interpolation_identifier_start, alias($.simple_identifier, $.interpolated_identifier)),
     ),
 
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(

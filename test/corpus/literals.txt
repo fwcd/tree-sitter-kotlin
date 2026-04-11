@@ -135,6 +135,143 @@ More string interpolation
   (string_literal))
 
 ================================================================================
+Multiline string interpolation with prefix
+================================================================================
+
+$$"""
+In here we can have a verbatim $, while interpolation is triggered
+by $$x
+"""
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (string_content)
+    (string_content)
+    (interpolated_identifier)
+    (string_content)))
+
+================================================================================
+Single-line string interpolation with prefix
+================================================================================
+
+$$"hello $$name"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (interpolated_identifier)))
+
+================================================================================
+Expression interpolation with prefix
+================================================================================
+
+$$"value: $${x + 1}"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (interpolated_expression
+      (additive_expression
+        (simple_identifier)
+        (integer_literal)))))
+
+================================================================================
+Triple-dollar prefix interpolation
+================================================================================
+
+$$$"""triple $$$name"""
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (interpolated_identifier)))
+
+================================================================================
+Excess dollars before interpolation
+================================================================================
+
+$$"""$$$name"""
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (interpolated_identifier)))
+
+================================================================================
+Excess dollars before expression interpolation
+================================================================================
+
+$$"$$${x + 1}"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (interpolated_expression
+      (additive_expression
+        (simple_identifier)
+        (integer_literal)))))
+
+================================================================================
+Literal dollar in multi-dollar string
+================================================================================
+
+$$"literal $ and $$name"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (string_content)
+    (string_content)
+    (string_content)
+    (interpolated_identifier)))
+
+================================================================================
+Multiple interpolations in multi-dollar string
+================================================================================
+
+$$"$$a and $${b + c}"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (interpolated_identifier)
+    (string_content)
+    (interpolated_expression
+      (additive_expression
+        (simple_identifier)
+        (simple_identifier)))))
+
+================================================================================
+Nested multi-dollar strings
+================================================================================
+
+$$"$${$$"inner $$x"}"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (string_literal
+    (interpolated_expression
+      (string_literal
+        (string_content)
+        (interpolated_identifier)))))
+
+================================================================================
 Integer literals
 ================================================================================
 
