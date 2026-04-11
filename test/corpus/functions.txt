@@ -347,3 +347,21 @@ fun f() = null
    (simple_identifier)
    (function_value_parameters)
    (function_body (null_literal))))
+
+==================================
+Function block with trailing comma
+==================================
+
+{ x, -> 42 + x}
+
+----------------------------------
+
+(source_file
+  (lambda_literal
+    (lambda_parameters
+      (variable_declaration
+        (simple_identifier)))
+    (statements
+      (additive_expression
+        (integer_literal)
+        (simple_identifier)))))
