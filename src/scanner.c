@@ -577,6 +577,9 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             case 'c':
               if (scan_for_word(lexer, "atch", 4)) return false;
               return true;
+            case 'b':
+              if (scan_for_word(lexer, "y", 1)) return false;
+              return true;
             case 'f':
               if (scan_for_word(lexer, "inally", 6)) return false;
               return true;
@@ -711,6 +714,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '!':
         skip(lexer);
         return lexer->lookahead != '=';
+
+      // Don't insert a semicolon before 'by' (explicit delegation and property delegates)
+      case 'b':
+        return !scan_for_word(lexer, "y", 1);
 
       // Don't insert a semicolon before an else, unless it's
       // followed by "->" (a when-entry's else, not an if-else).

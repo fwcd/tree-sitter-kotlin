@@ -465,6 +465,117 @@ object AppConfig : Config by DefaultConfig {
             (string_content)))))))
 
 ================================================================================
+Object declaration with explicit delegation on next line
+================================================================================
+
+object AppConfig : Config
+by DefaultConfig {
+    override fun get(key: String) = "custom"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body
+          (string_literal
+            (string_content)))))))
+
+================================================================================
+Object declaration with explicit delegation, generic type, by on next line
+================================================================================
+
+object Foo : Base.Factory<Input, Output>
+by Base.Factory.create(Impl)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier)
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))
+            (type_projection
+              (user_type
+                (type_identifier)))))
+        (call_expression
+          (navigation_expression
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier)))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (simple_identifier)))))))))
+
+================================================================================
+Object declaration with explicit delegation, line comment before by
+================================================================================
+
+object Foo : Config
+// use the default implementation
+by DefaultConfig
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (line_comment)
+        (simple_identifier)))))
+
+================================================================================
+Object declaration with explicit delegation, block comment before by
+:skip
+================================================================================
+
+object Foo : Config
+/* use the default implementation */
+by DefaultConfig
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (multiline_comment)
+        (simple_identifier)))))
+
+================================================================================
 Class with multiple delegation specifiers
 ================================================================================
 
@@ -558,6 +669,127 @@ class Example {
                               (interpolated_identifier)
                               (string_content)
                               (interpolated_identifier))))))))))))))))
+
+================================================================================
+Class with explicit delegation, by on next line
+================================================================================
+
+class Derived(b: Base) : Base
+by b
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))))
+
+================================================================================
+Property delegation with by on next line
+================================================================================
+
+class Example {
+    val lazyValue: String
+    by lazy { "computed" }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (property_delegate
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (string_literal
+                      (string_content))))))))))))
+
+================================================================================
+Property delegation, line comment before by
+================================================================================
+
+class Example {
+    val lazyValue: String
+    // computed on first access
+    by lazy { "computed" }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (line_comment)
+        (property_delegate
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (string_literal
+                      (string_content))))))))))))
+
+================================================================================
+Property delegation, block comment before by
+:skip
+================================================================================
+
+class Example {
+    val lazyValue: String
+    /* computed on first access */
+    by lazy { "computed" }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (multiline_comment)
+        (property_delegate
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (string_literal
+                      (string_content))))))))))))
 
 ================================================================================
 Properties
