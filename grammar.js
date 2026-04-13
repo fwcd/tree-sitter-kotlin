@@ -66,8 +66,10 @@ module.exports = grammar({
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
 
-    // @Type(... could either be an annotation constructor invocation or an annotated expression
-    [$.constructor_invocation, $._unescaped_annotation],
+    // @Type(... — in Kotlin, ( after annotation name is always constructor args.
+    // Resolved via prec(1) on _annotation_constructor_invocation so the parser
+    // always shifts (consuming '(' as value_arguments) rather than reducing
+    // (completing user_type). Scoped to annotations only.
 
     // "expect" as a plaform modifier conflicts with expect as an identifier
     [$.platform_modifier, $.simple_identifier],
@@ -101,6 +103,9 @@ module.exports = grammar({
 
     // ambiguity between prefix expressions and annotations before functions
     [$._statement, $.prefix_expression],
+    // _statement_annotation vs annotation (in prefix_expression and modifiers):
+    // both parse @Identifier but route through different rules.
+    [$.statement_annotation, $.annotation],
     [$.prefix_expression, $.when_subject],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
@@ -330,6 +335,13 @@ module.exports = grammar({
     )),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
+
+    // Annotation-scoped variant with prec(1) to resolve the shift/reduce
+    // conflict at `user_type • (` — always shift (consume `(` as constructor
+    // args). This matches Kotlin semantics where `(` after an annotation name
+    // is always constructor arguments. Scoped here rather than on the shared
+    // constructor_invocation to avoid changing delegation_specifier behavior.
+    _annotation_constructor_invocation: $ => prec(1, seq($.user_type, $.value_arguments)),
 
     _annotated_delegation_specifier: $ => seq(repeat($.annotation), $.delegation_specifier),
 
@@ -683,13 +695,24 @@ module.exports = grammar({
     _statement: $ => choice(
       $._declaration,
       seq(
-        repeat(choice($.label, $.annotation)),
+        repeat(choice($.label, $.statement_annotation)),
         choice(
           $.assignment,
           $._loop_statement,
           $._expression
         )
       )
+    ),
+
+    // Structurally identical to annotation, but a distinct rule so that
+    // the parser state machine does not merge it with the annotation
+    // reduction inside modifiers. Without this separation, modifiers
+    // (PREC.MODIFIERS) always wins the reduce/reduce conflict and the
+    // annotation-expression path is never explored, causing
+    // @Annotation("args") (expr) to produce ERROR nodes.
+    statement_annotation: $ => choice(
+      $._single_annotation,
+      $._multi_annotation
     ),
 
     label: $ => token(seq(
@@ -1264,7 +1287,7 @@ module.exports = grammar({
     ),
 
     _unescaped_annotation: $ => choice(
-      $.constructor_invocation,
+      alias($._annotation_constructor_invocation, $.constructor_invocation),
       $.user_type
     ),
 

@@ -873,6 +873,23 @@
         }
       ]
     },
+    "_annotation_constructor_invocation": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "user_type"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "value_arguments"
+          }
+        ]
+      }
+    },
     "_annotated_delegation_specifier": {
       "type": "SEQ",
       "members": [
@@ -3072,7 +3089,7 @@
                   },
                   {
                     "type": "SYMBOL",
-                    "name": "annotation"
+                    "name": "statement_annotation"
                   }
                 ]
               }
@@ -3095,6 +3112,19 @@
               ]
             }
           ]
+        }
+      ]
+    },
+    "statement_annotation": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_single_annotation"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_multi_annotation"
         }
       ]
     },
@@ -6295,8 +6325,13 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "constructor_invocation"
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_annotation_constructor_invocation"
+          },
+          "named": true,
+          "value": "constructor_invocation"
         },
         {
           "type": "SYMBOL",
@@ -7272,10 +7307,6 @@
       "callable_reference"
     ],
     [
-      "constructor_invocation",
-      "_unescaped_annotation"
-    ],
-    [
       "platform_modifier",
       "simple_identifier"
     ],
@@ -7362,6 +7393,10 @@
     [
       "_statement",
       "prefix_expression"
+    ],
+    [
+      "statement_annotation",
+      "annotation"
     ],
     [
       "prefix_expression",
@@ -7534,5 +7569,6 @@
     }
   ],
   "inline": [],
-  "supertypes": []
+  "supertypes": [],
+  "reserved": {}
 }
