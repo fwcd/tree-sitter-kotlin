@@ -239,3 +239,139 @@ class EnvironmentSpec {
           (user_type
             (type_identifier)))
       ))))
+
+==================
+Annotation with args before parenthesized expression
+==================
+
+fun test() {
+    @Suppress("X")
+    (x as String)
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (statement_annotation
+          (constructor_invocation
+            (user_type (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal (string_content))))))
+        (parenthesized_expression
+          (as_expression
+            (simple_identifier)
+            (user_type (type_identifier))))))))
+
+==================
+Annotation with args before parenthesized expression in if block
+==================
+
+class Test {
+    fun test() {
+        if (true) {
+            @Suppress("X")
+            (x as String)
+        }
+    }
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (statements
+            (if_expression
+              condition: (boolean_literal)
+              consequence: (control_structure_body
+                (statements
+                  (statement_annotation
+                    (constructor_invocation
+                      (user_type (type_identifier))
+                      (value_arguments
+                        (value_argument
+                          (string_literal (string_content))))))
+                  (parenthesized_expression
+                    (as_expression
+                      (simple_identifier)
+                      (user_type (type_identifier)))))))))))))
+
+==================
+Annotation with args before parenthesized expression on same line
+==================
+
+fun test() { @Suppress("X") (x as String) }
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (statement_annotation
+          (constructor_invocation
+            (user_type (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal (string_content))))))
+        (parenthesized_expression
+          (as_expression
+            (simple_identifier)
+            (user_type (type_identifier))))))))
+
+==================
+No-arg annotation before non-paren expression
+==================
+
+fun test() {
+    @Volatile
+    x
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (prefix_expression
+          (annotation
+            (user_type (type_identifier)))
+          (simple_identifier))))))
+
+==================
+Annotation on declaration still uses modifiers
+==================
+
+@Suppress("X")
+val x = 1
+
+---
+
+(source_file
+  (property_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type (type_identifier))
+          (value_arguments
+            (value_argument
+              (string_literal (string_content)))))))
+    (binding_pattern_kind)
+    (variable_declaration (simple_identifier))
+    (integer_literal)))
