@@ -947,3 +947,32 @@ catch (e: Error) { }
       (simple_identifier)
       (user_type
         (type_identifier)))))
+
+=========================================================================================
+Block comments between standalone identifiers starting with continuation-keyword letters
+:skip
+=========================================================================================
+
+fun doo() {
+/**/
+e
+/**/
+a
+/**/
+w
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (multiline_comment)
+      (statements
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)
+        (multiline_comment)
+        (simple_identifier)))))
