@@ -8,7 +8,6 @@
 
 enum TokenType {
   AUTOMATIC_SEMICOLON,
-  IMPORT_LIST_DELIMITER,
   SAFE_NAV,
   MULTILINE_COMMENT,
   STRING_START,
@@ -826,78 +825,6 @@ static bool scan_safe_nav(TSLexer *lexer) {
   return true;
 }
 
-static bool scan_line_sep(TSLexer *lexer) {
-  // Line Seps: [ CR, LF, CRLF ]
-  int state = 0;
-  while (true) {
-    switch(lexer->lookahead) {
-      case  ' ':
-      case '\t':
-      case '\v':
-        // Skip whitespace
-        advance(lexer);
-        break;
-
-      case '\n':
-        advance(lexer);
-        return true;
-
-      case '\r':
-        if (state == 1)
-          return true;
-
-        state = 1;
-        advance(lexer);
-        break;
-
-      default:
-        // We read a CR
-        if (state == 1)
-          return true;
-
-        return false;
-    }
-  }
-}
-
-static bool scan_import_list_delimiter(TSLexer *lexer) {
-  // Import lists are terminated either by an empty line or a non import statement
-  lexer->result_symbol = IMPORT_LIST_DELIMITER;
-  lexer->mark_end(lexer);
-
-  // if eof; return true
-  if (lexer->eof(lexer))
-    return true;
-
-  // Scan for the first line seperator
-  if (!scan_line_sep(lexer))
-    return false;
-
-  // if line.sep line.sep; return true
-  if (scan_line_sep(lexer)) {
-    lexer->mark_end(lexer);
-    return true;
-  }
-
-  // if line.sep [^import]; return true
-  while (true) {
-    switch (lexer->lookahead) {
-      case  ' ':
-      case '\t':
-      case '\v':
-        // Skip whitespace
-        advance(lexer);
-        break;
-
-      case 'i':
-        return !scan_for_word(lexer, "mport", 5);
-
-      default:
-        return true;
-    }
-  }
-}
-
 // Scan a dot in import identifiers. Matches '.' normally, but when the dot
 // is followed by a newline and then the 'import' keyword, produces an
 // AUTOMATIC_SEMICOLON (zero-width, before the dot) instead. This cleanly
@@ -970,10 +897,6 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
         return true;
       }
     }
-  }
-
-  if (valid_symbols[IMPORT_LIST_DELIMITER]) {
-    return scan_import_list_delimiter(lexer);
   }
 
   // content, end, or interpolation start

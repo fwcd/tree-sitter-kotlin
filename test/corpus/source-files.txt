@@ -83,8 +83,7 @@ fun main() {
       (identifier
         (simple_identifier)
         (simple_identifier)
-        (simple_identifier))))
-  (import_list
+        (simple_identifier)))
     (import_header
       (identifier
         (simple_identifier)
