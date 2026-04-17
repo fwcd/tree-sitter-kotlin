@@ -9,7 +9,6 @@
 enum TokenType {
   AUTOMATIC_SEMICOLON,
   IMPORT_LIST_DELIMITER,
-  SAFE_NAV,
   MULTILINE_COMMENT,
   STRING_START,
   STRING_END,
@@ -802,30 +801,6 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
   }
 }
 
-static bool scan_safe_nav(TSLexer *lexer) {
-  lexer->result_symbol = SAFE_NAV;
-  lexer->mark_end(lexer);
-
-  // skip white space
-  if (!scan_whitespace_and_comments(lexer))
-    return false;
-
-  if (lexer->lookahead != '?')
-    return false;
-
-  advance(lexer);
-
-  if (!scan_whitespace_and_comments(lexer))
-    return false;
-
-  if (lexer->lookahead != '.')
-    return false;
-
-  advance(lexer);
-  lexer->mark_end(lexer);
-  return true;
-}
-
 static bool scan_line_sep(TSLexer *lexer) {
   // Line Seps: [ CR, LF, CRLF ]
   int state = 0;
@@ -938,10 +913,6 @@ static bool scan_import_dot(TSLexer *lexer) {
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
     bool ret = scan_automatic_semicolon(lexer, valid_symbols);
-    if (!ret && valid_symbols[SAFE_NAV] && lexer->lookahead == '?') {
-      return scan_safe_nav(lexer);
-    }
-
     // if we fail to find an automatic semicolon, it's still possible that we may
     // want to lex a string or comment later
     if (ret) return ret;
@@ -993,10 +964,6 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
 
   if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer)) {
     return true;
-  }
-
-  if (valid_symbols[SAFE_NAV]) {
-    return scan_safe_nav(lexer);
   }
 
   return false;

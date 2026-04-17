@@ -170,7 +170,6 @@ module.exports = grammar({
   externals: $ => [
     $._automatic_semicolon,
     $._import_list_delimiter,
-    $.safe_nav,
     $.multiline_comment,
     $._string_start,
     $._string_end,
@@ -1154,7 +1153,7 @@ module.exports = grammar({
 
     _postfix_unary_operator: $ => choice("++", "--", "!!"),
 
-    _member_access_operator: $ => choice(".", "::", alias($.safe_nav, '?.')),
+    _member_access_operator: $ => choice(".", "::", "?."),
 
     _postfix_unary_suffix: $ => choice(
       $._postfix_unary_operator,
