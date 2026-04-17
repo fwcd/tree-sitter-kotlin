@@ -181,6 +181,7 @@ fun main() {
           (call_expression
             (navigation_expression
               (simple_identifier)
+              (line_comment)
               (navigation_suffix
                 (simple_identifier)))
             (call_suffix

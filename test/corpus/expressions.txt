@@ -48,43 +48,10 @@ Safe Navigation
 ================================================================================
 
 a?.bar()
-a? .bar()
-a? . bar()
-a?
-  .bar()
-a ? . bar()
 
 --------------------------------------------------------------------------------
 
 (source_file
-  (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
-        (simple_identifier)))
-    (call_suffix
-      (value_arguments)))
-  (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
-        (simple_identifier)))
-    (call_suffix
-      (value_arguments)))
-  (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
-        (simple_identifier)))
-    (call_suffix
-      (value_arguments)))
-  (call_expression
-    (navigation_expression
-      (simple_identifier)
-      (navigation_suffix
-        (simple_identifier)))
-    (call_suffix
-      (value_arguments)))
   (call_expression
     (navigation_expression
       (simple_identifier)

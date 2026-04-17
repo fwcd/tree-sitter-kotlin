@@ -5834,12 +5834,7 @@
           "value": "::"
         },
         {
-          "type": "ALIAS",
-          "content": {
-            "type": "SYMBOL",
-            "name": "safe_nav"
-          },
-          "named": false,
+          "type": "STRING",
           "value": "?."
         }
       ]
@@ -7495,10 +7490,6 @@
     {
       "type": "SYMBOL",
       "name": "_import_list_delimiter"
-    },
-    {
-      "type": "SYMBOL",
-      "name": "safe_nav"
     },
     {
       "type": "SYMBOL",
