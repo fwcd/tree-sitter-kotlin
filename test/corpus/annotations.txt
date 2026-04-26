@@ -257,7 +257,7 @@ fun test() {
     (function_value_parameters)
     (function_body
       (statements
-        (statement_annotation
+        (annotation
           (constructor_invocation
             (user_type (type_identifier))
             (value_arguments
@@ -296,7 +296,7 @@ class Test {
               condition: (boolean_literal)
               consequence: (control_structure_body
                 (statements
-                  (statement_annotation
+                  (annotation
                     (constructor_invocation
                       (user_type (type_identifier))
                       (value_arguments
@@ -321,7 +321,7 @@ fun test() { @Suppress("X") (x as String) }
     (function_value_parameters)
     (function_body
       (statements
-        (statement_annotation
+        (annotation
           (constructor_invocation
             (user_type (type_identifier))
             (value_arguments

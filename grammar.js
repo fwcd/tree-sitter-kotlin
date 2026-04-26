@@ -105,7 +105,7 @@ module.exports = grammar({
     [$._statement, $.prefix_expression],
     // _statement_annotation vs annotation (in prefix_expression and modifiers):
     // both parse @Identifier but route through different rules.
-    [$.statement_annotation, $.annotation],
+    [$._statement_annotation, $.annotation],
     [$.prefix_expression, $.when_subject],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
@@ -695,7 +695,7 @@ module.exports = grammar({
     _statement: $ => choice(
       $._declaration,
       seq(
-        repeat(choice($.label, $.statement_annotation)),
+        repeat(choice($.label, alias($._statement_annotation, $.annotation))),
         choice(
           $.assignment,
           $._loop_statement,
@@ -710,7 +710,10 @@ module.exports = grammar({
     // (PREC.MODIFIERS) always wins the reduce/reduce conflict and the
     // annotation-expression path is never explored, causing
     // @Annotation("args") (expr) to produce ERROR nodes.
-    statement_annotation: $ => choice(
+    // Hidden (_) to keep it internal; aliased to $.annotation in _statement
+    // so the CST uses a single "annotation" node name in all contexts,
+    // matching PSI's unified ANNOTATION_ENTRY.
+    _statement_annotation: $ => choice(
       $._single_annotation,
       $._multi_annotation
     ),

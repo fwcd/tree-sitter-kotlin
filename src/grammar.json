@@ -3088,8 +3088,13 @@
                     "name": "label"
                   },
                   {
-                    "type": "SYMBOL",
-                    "name": "statement_annotation"
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_statement_annotation"
+                    },
+                    "named": true,
+                    "value": "annotation"
                   }
                 ]
               }
@@ -3115,7 +3120,7 @@
         }
       ]
     },
-    "statement_annotation": {
+    "_statement_annotation": {
       "type": "CHOICE",
       "members": [
         {
@@ -7395,7 +7400,7 @@
       "prefix_expression"
     ],
     [
-      "statement_annotation",
+      "_statement_annotation",
       "annotation"
     ],
     [
@@ -7569,6 +7574,5 @@
     }
   ],
   "inline": [],
-  "supertypes": [],
-  "reserved": {}
+  "supertypes": []
 }

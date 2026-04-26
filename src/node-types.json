@@ -2034,6 +2034,10 @@
           "named": true
         },
         {
+          "type": "annotation",
+          "named": true
+        },
+        {
           "type": "anonymous_function",
           "named": true
         },
@@ -2207,10 +2211,6 @@
         },
         {
           "type": "spread_expression",
-          "named": true
-        },
-        {
-          "type": "statement_annotation",
           "named": true
         },
         {
@@ -7820,6 +7820,10 @@
           "named": true
         },
         {
+          "type": "annotation",
+          "named": true
+        },
+        {
           "type": "anonymous_function",
           "named": true
         },
@@ -8009,10 +8013,6 @@
         },
         {
           "type": "spread_expression",
-          "named": true
-        },
-        {
-          "type": "statement_annotation",
           "named": true
         },
         {
@@ -8222,29 +8222,6 @@
     }
   },
   {
-    "type": "statement_annotation",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "constructor_invocation",
-          "named": true
-        },
-        {
-          "type": "use_site_target",
-          "named": true
-        },
-        {
-          "type": "user_type",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "statements",
     "named": true,
     "fields": {},
@@ -8254,6 +8231,10 @@
       "types": [
         {
           "type": "additive_expression",
+          "named": true
+        },
+        {
+          "type": "annotation",
           "named": true
         },
         {
@@ -8430,10 +8411,6 @@
         },
         {
           "type": "spread_expression",
-          "named": true
-        },
-        {
-          "type": "statement_annotation",
           "named": true
         },
         {
@@ -10108,13 +10085,11 @@
   },
   {
     "type": "line_comment",
-    "named": true,
-    "extra": true
+    "named": true
   },
   {
     "type": "multiline_comment",
-    "named": true,
-    "extra": true
+    "named": true
   },
   {
     "type": "noinline",
