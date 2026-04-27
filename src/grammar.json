@@ -919,6 +919,18 @@
           ]
         },
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_by_delegation_hint"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "STRING",
           "value": "by"
         },
@@ -2016,6 +2028,18 @@
     "property_delegate": {
       "type": "SEQ",
       "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_by_delegation_hint"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
         {
           "type": "STRING",
           "value": "by"
@@ -7554,6 +7578,10 @@
     {
       "type": "SYMBOL",
       "name": "_interpolation_identifier_start"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_by_delegation_hint"
     }
   ],
   "inline": [],

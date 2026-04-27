@@ -16,6 +16,7 @@ enum TokenType {
   IMPORT_DOT,
   INTERPOLATION_EXPRESSION_START,
   INTERPOLATION_IDENTIFIER_START,
+  BY_DELEGATION_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -575,6 +576,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             case 'c':
               if (scan_for_word(lexer, "atch", 4)) return false;
               return true;
+            case 'b':
+              if (valid_symbols[BY_DELEGATION_HINT] &&
+                  scan_for_word(lexer, "y", 1)) return false;
+              return true;
             case 'f':
               if (scan_for_word(lexer, "inally", 6)) return false;
               return true;
@@ -680,6 +685,15 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
                 return true;
               }
               return true;
+            case 'b':
+              if (valid_symbols[BY_DELEGATION_HINT]) {
+                lexer->mark_end(lexer);
+                if (scan_for_word(lexer, "y", 1)) {
+                  lexer->result_symbol = MULTILINE_COMMENT;
+                  return true;
+                }
+              }
+              return true;
             default:
               // the original position (P0, before the comment), so the
               // ASI token is zero-width. The block comment will be
@@ -709,6 +723,13 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '!':
         skip(lexer);
         return lexer->lookahead != '=';
+
+      // Don't insert a semicolon before 'by' in delegation contexts.
+      // Gated on BY_DELEGATION_HINT so `by` remains a usable soft-keyword
+      // identifier in non-delegation positions.
+      case 'b':
+        return !(valid_symbols[BY_DELEGATION_HINT] &&
+                 scan_for_word(lexer, "y", 1));
 
       // Don't insert a semicolon before an else, unless it's
       // followed by "->" (a when-entry's else, not an if-else).
@@ -839,6 +860,10 @@ static bool scan_import_dot(TSLexer *lexer) {
 }
 
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
+  // BY_DELEGATION_HINT is declared in the grammar (optional, before `by` in
+  // explicit_delegation and property_delegate) purely so it appears in
+  // valid_symbols when the parser is in a delegation context. The scanner
+  // never emits it; it's used only as a context flag in scan_automatic_semicolon.
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
     bool ret = scan_automatic_semicolon(lexer, valid_symbols);
     // if we fail to find an automatic semicolon, it's still possible that we may

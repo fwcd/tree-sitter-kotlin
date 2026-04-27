@@ -177,6 +177,7 @@ module.exports = grammar({
     $._import_dot,
     $._interpolation_expression_start,
     $._interpolation_identifier_start,
+    $._by_delegation_hint,
   ],
 
   extras: $ => [
@@ -345,6 +346,7 @@ module.exports = grammar({
         $.user_type,
         $.function_type
       ),
+      optional($._by_delegation_hint),
       "by",
       // Use a restricted expression that doesn't allow trailing lambda calls
       // to avoid ambiguity with class_body in object literals.
@@ -519,7 +521,7 @@ module.exports = grammar({
       ))
     )),
 
-    property_delegate: $ => seq("by", $._expression),
+    property_delegate: $ => seq(optional($._by_delegation_hint), "by", $._expression),
 
     destructuring_declaration: $ => prec.right(seq(
       optional($.modifiers),

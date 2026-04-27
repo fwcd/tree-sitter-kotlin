@@ -30,3 +30,153 @@ fun foo() {
       (simple_identifier)
       (indexing_suffix
         (integer_literal))))))))
+
+================================================================================
+by as a standalone identifier expression statement
+================================================================================
+
+fun foo() {
+  val by = 1
+  println(by)
+  by
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (simple_identifier)))))
+        (simple_identifier)))))
+
+================================================================================
+by as receiver of a navigation expression after a newline
+================================================================================
+
+fun foo() {
+  val x = doSomething()
+  by.let { it }
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (simple_identifier))))))))))
+
+================================================================================
+by as a function call after a newline (silent misparse on branch)
+================================================================================
+
+fun foo() {
+  val x = 1
+  by()
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+by as a function call with arg after a newline (silent misparse on branch)
+================================================================================
+
+fun foo() {
+  val a: Int = 1
+  by(a)
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (integer_literal))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (simple_identifier)))))))))
+
+================================================================================
+by as left operand of an additive expression after a newline (silent misparse on branch)
+================================================================================
+
+fun foo() {
+  someFunc()
+  by + 1
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (additive_expression
+          (simple_identifier)
+          (integer_literal))))))
