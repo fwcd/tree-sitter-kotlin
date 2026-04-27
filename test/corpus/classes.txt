@@ -556,7 +556,6 @@ by DefaultConfig
 
 ================================================================================
 Object declaration with explicit delegation, block comment before by
-:skip
 ================================================================================
 
 object Foo : Config
@@ -759,7 +758,6 @@ class Example {
 
 ================================================================================
 Property delegation, block comment before by
-:skip
 ================================================================================
 
 class Example {

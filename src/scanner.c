@@ -685,6 +685,15 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
                 return true;
               }
               return true;
+            case 'b':
+              if (valid_symbols[BY_DELEGATION_HINT]) {
+                lexer->mark_end(lexer);
+                if (scan_for_word(lexer, "y", 1)) {
+                  lexer->result_symbol = MULTILINE_COMMENT;
+                  return true;
+                }
+              }
+              return true;
             default:
               // the original position (P0, before the comment), so the
               // ASI token is zero-width. The block comment will be
