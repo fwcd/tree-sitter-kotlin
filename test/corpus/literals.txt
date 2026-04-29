@@ -89,20 +89,24 @@ ${"""string interpolation"""} $literal
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content))
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (string_literal
         (string_content)))
     (string_content))
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (string_literal
         (string_content)))
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content)))
 
@@ -150,6 +154,7 @@ by $$x
     (string_content)
     (string_content)
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content)))
 
@@ -164,6 +169,7 @@ $$"hello $$name"
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -177,6 +183,7 @@ $$"value: $${x + 1}"
 (source_file
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (additive_expression
         (simple_identifier)
@@ -193,6 +200,7 @@ $$$"""triple $$$name"""
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -206,6 +214,7 @@ $$"""$$$name"""
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -219,6 +228,7 @@ $$"$$${x + 1}"
 (source_file
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (additive_expression
         (simple_identifier)
@@ -237,6 +247,7 @@ $$"literal $ and $$name"
     (string_content)
     (string_content)
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -249,8 +260,10 @@ $$"$$a and $${b + c}"
 
 (source_file
   (string_literal
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (additive_expression
         (simple_identifier)
@@ -266,9 +279,11 @@ $$"$${$$"inner $$x"}"
 
 (source_file
   (string_literal
+    (interpolation_expression_start)
     (interpolated_expression
       (string_literal
         (string_content)
+        (interpolation_identifier_start)
         (interpolated_identifier)))))
 
 ================================================================================
@@ -323,11 +338,13 @@ assertEquals("\u214E\uA7B5\u2CEF", "\u2132\uA7B4\u2CEF".lowercase())
     (call_suffix
       (value_arguments
         (value_argument
-          (string_literal (string_content)))
+          (string_literal
+            (string_content)))
         (value_argument
           (call_expression
             (navigation_expression
-              (string_literal (string_content))
+              (string_literal
+                (string_content))
               (navigation_suffix
                 (simple_identifier)))
             (call_suffix

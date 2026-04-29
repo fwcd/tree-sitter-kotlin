@@ -4567,8 +4567,13 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "_interpolation_expression_start"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_interpolation_expression_start"
+              },
+              "named": true,
+              "value": "interpolation_expression_start"
             },
             {
               "type": "ALIAS",
@@ -4589,8 +4594,13 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "_interpolation_identifier_start"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_interpolation_identifier_start"
+              },
+              "named": true,
+              "value": "interpolation_identifier_start"
             },
             {
               "type": "ALIAS",
