@@ -4585,8 +4585,13 @@
               "value": "interpolated_expression"
             },
             {
-              "type": "STRING",
-              "value": "}"
+              "type": "ALIAS",
+              "content": {
+                "type": "STRING",
+                "value": "}"
+              },
+              "named": true,
+              "value": "interpolation_expression_end"
             }
           ]
         },

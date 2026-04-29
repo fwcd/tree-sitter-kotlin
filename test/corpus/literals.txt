@@ -98,6 +98,7 @@ ${"""string interpolation"""} $literal
     (interpolated_expression
       (string_literal
         (string_content)))
+    (interpolation_expression_end)
     (string_content))
   (string_literal
     (string_content)
@@ -105,6 +106,7 @@ ${"""string interpolation"""} $literal
     (interpolated_expression
       (string_literal
         (string_content)))
+    (interpolation_expression_end)
     (string_content)
     (interpolation_identifier_start)
     (interpolated_identifier)
@@ -187,7 +189,8 @@ $$"value: $${x + 1}"
     (interpolated_expression
       (additive_expression
         (simple_identifier)
-        (integer_literal)))))
+        (integer_literal)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Triple-dollar prefix interpolation
@@ -232,7 +235,8 @@ $$"$$${x + 1}"
     (interpolated_expression
       (additive_expression
         (simple_identifier)
-        (integer_literal)))))
+        (integer_literal)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Literal dollar in multi-dollar string
@@ -267,7 +271,8 @@ $$"$$a and $${b + c}"
     (interpolated_expression
       (additive_expression
         (simple_identifier)
-        (simple_identifier)))))
+        (simple_identifier)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Nested multi-dollar strings
@@ -284,7 +289,8 @@ $$"$${$$"inner $$x"}"
       (string_literal
         (string_content)
         (interpolation_identifier_start)
-        (interpolated_identifier)))))
+        (interpolated_identifier)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Integer literals
