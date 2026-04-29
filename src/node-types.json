@@ -8465,6 +8465,18 @@
           "named": true
         },
         {
+          "type": "interpolation_expression_end",
+          "named": true
+        },
+        {
+          "type": "interpolation_expression_start",
+          "named": true
+        },
+        {
+          "type": "interpolation_identifier_start",
+          "named": true
+        },
+        {
           "type": "string_content",
           "named": true
         }
@@ -10074,6 +10086,18 @@
   {
     "type": "internal",
     "named": false
+  },
+  {
+    "type": "interpolation_expression_end",
+    "named": true
+  },
+  {
+    "type": "interpolation_expression_start",
+    "named": true
+  },
+  {
+    "type": "interpolation_identifier_start",
+    "named": true
   },
   {
     "type": "is",

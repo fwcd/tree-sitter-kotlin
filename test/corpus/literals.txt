@@ -89,20 +89,26 @@ ${"""string interpolation"""} $literal
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content))
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (string_literal
         (string_content)))
+    (interpolation_expression_end)
     (string_content))
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (string_literal
         (string_content)))
+    (interpolation_expression_end)
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content)))
 
@@ -150,6 +156,7 @@ by $$x
     (string_content)
     (string_content)
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content)))
 
@@ -164,6 +171,7 @@ $$"hello $$name"
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -177,10 +185,12 @@ $$"value: $${x + 1}"
 (source_file
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (additive_expression
         (simple_identifier)
-        (integer_literal)))))
+        (integer_literal)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Triple-dollar prefix interpolation
@@ -193,6 +203,7 @@ $$$"""triple $$$name"""
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -206,6 +217,7 @@ $$"""$$$name"""
 (source_file
   (string_literal
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -219,10 +231,12 @@ $$"$$${x + 1}"
 (source_file
   (string_literal
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (additive_expression
         (simple_identifier)
-        (integer_literal)))))
+        (integer_literal)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Literal dollar in multi-dollar string
@@ -237,6 +251,7 @@ $$"literal $ and $$name"
     (string_content)
     (string_content)
     (string_content)
+    (interpolation_identifier_start)
     (interpolated_identifier)))
 
 ================================================================================
@@ -249,12 +264,15 @@ $$"$$a and $${b + c}"
 
 (source_file
   (string_literal
+    (interpolation_identifier_start)
     (interpolated_identifier)
     (string_content)
+    (interpolation_expression_start)
     (interpolated_expression
       (additive_expression
         (simple_identifier)
-        (simple_identifier)))))
+        (simple_identifier)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Nested multi-dollar strings
@@ -266,10 +284,13 @@ $$"$${$$"inner $$x"}"
 
 (source_file
   (string_literal
+    (interpolation_expression_start)
     (interpolated_expression
       (string_literal
         (string_content)
-        (interpolated_identifier)))))
+        (interpolation_identifier_start)
+        (interpolated_identifier)))
+    (interpolation_expression_end)))
 
 ================================================================================
 Integer literals
@@ -323,11 +344,13 @@ assertEquals("\u214E\uA7B5\u2CEF", "\u2132\uA7B4\u2CEF".lowercase())
     (call_suffix
       (value_arguments
         (value_argument
-          (string_literal (string_content)))
+          (string_literal
+            (string_content)))
         (value_argument
           (call_expression
             (navigation_expression
-              (string_literal (string_content))
+              (string_literal
+                (string_content))
               (navigation_suffix
                 (simple_identifier)))
             (call_suffix

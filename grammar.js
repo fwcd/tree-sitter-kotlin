@@ -962,8 +962,8 @@ module.exports = grammar({
     line_string_expression: $ => seq("${", $._expression, "}"),
 
     _interpolation: $ => choice(
-      seq($._interpolation_expression_start, alias($._expression, $.interpolated_expression), "}"),
-      seq($._interpolation_identifier_start, alias($.simple_identifier, $.interpolated_identifier)),
+      seq(alias($._interpolation_expression_start, $.interpolation_expression_start), alias($._expression, $.interpolated_expression), alias("}", $.interpolation_expression_end)),
+      seq(alias($._interpolation_identifier_start, $.interpolation_identifier_start), alias($.simple_identifier, $.interpolated_identifier)),
     ),
 
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(

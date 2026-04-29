@@ -4567,8 +4567,13 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "_interpolation_expression_start"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_interpolation_expression_start"
+              },
+              "named": true,
+              "value": "interpolation_expression_start"
             },
             {
               "type": "ALIAS",
@@ -4580,8 +4585,13 @@
               "value": "interpolated_expression"
             },
             {
-              "type": "STRING",
-              "value": "}"
+              "type": "ALIAS",
+              "content": {
+                "type": "STRING",
+                "value": "}"
+              },
+              "named": true,
+              "value": "interpolation_expression_end"
             }
           ]
         },
@@ -4589,8 +4599,13 @@
           "type": "SEQ",
           "members": [
             {
-              "type": "SYMBOL",
-              "name": "_interpolation_identifier_start"
+              "type": "ALIAS",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_interpolation_identifier_start"
+              },
+              "named": true,
+              "value": "interpolation_identifier_start"
             },
             {
               "type": "ALIAS",

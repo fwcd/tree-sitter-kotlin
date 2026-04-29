@@ -665,8 +665,10 @@ class Example {
                         (value_arguments
                           (value_argument
                             (string_literal
+                              (interpolation_identifier_start)
                               (interpolated_identifier)
                               (string_content)
+                              (interpolation_identifier_start)
                               (interpolated_identifier))))))))))))))))
 
 ================================================================================
