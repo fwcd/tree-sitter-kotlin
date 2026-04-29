@@ -128,7 +128,7 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
       }
       uint16_t total_dollars = 1 + additional_dollars;
       if (total_dollars >= prefix_len &&
-          (iswalpha(lexer->lookahead) || lexer->lookahead == '{')) {
+          (iswalpha(lexer->lookahead) || lexer->lookahead == '_' || lexer->lookahead == '{')) {
         if (total_dollars > prefix_len) {
           // Excess: emit first '$' as literal STRING_CONTENT.
           // mark_end is after the first '$'; tree-sitter rewinds there.
@@ -147,7 +147,7 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
           return true;
         }
         if (valid_symbols[INTERPOLATION_IDENTIFIER_START] &&
-            iswalpha(lexer->lookahead)) {
+            (iswalpha(lexer->lookahead) || lexer->lookahead == '_')) {
           lexer->result_symbol = INTERPOLATION_IDENTIFIER_START;
           return true;
         }
