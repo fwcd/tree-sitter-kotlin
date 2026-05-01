@@ -142,6 +142,13 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
         if (valid_symbols[INTERPOLATION_EXPRESSION_START] &&
             lexer->lookahead == '{') {
           advance(lexer);
+          // Empty interpolation "${}" is invalid Kotlin (compile error:
+          // "Expecting an expression"). Refuse to emit the interpolation
+          // token so the parser produces an ERROR node instead of matching
+          // a zero-width expression.
+          if (lexer->lookahead == '}') {
+            return false;
+          }
           lexer->mark_end(lexer);
           lexer->result_symbol = INTERPOLATION_EXPRESSION_START;
           return true;
