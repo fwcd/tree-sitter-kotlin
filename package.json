@@ -60,7 +60,7 @@
   "devDependencies": {
     "tree-sitter-cli": "^0.24.4",
     "prebuildify": "^6.0.0",
-    "vitest": "^3.0.0"
+    "vitest": "^4.1.0"
   },
   "tree-sitter": [
     {
