@@ -17,6 +17,7 @@ enum TokenType {
   INTERPOLATION_EXPRESSION_START,
   INTERPOLATION_IDENTIFIER_START,
   BY_DELEGATION_HINT,
+  CATCH_CONTINUATION,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -587,14 +588,16 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               if (scan_for_word(lexer, "here", 4)) return false;
               return true;
             case 'c':
-              if (scan_for_word(lexer, "atch", 4)) return false;
+              if (valid_symbols[CATCH_CONTINUATION] &&
+                  scan_for_word(lexer, "atch", 4)) return false;
               return true;
             case 'b':
               if (valid_symbols[BY_DELEGATION_HINT] &&
                   scan_for_word(lexer, "y", 1)) return false;
               return true;
             case 'f':
-              if (scan_for_word(lexer, "inally", 6)) return false;
+              if (valid_symbols[CATCH_CONTINUATION] &&
+                  scan_for_word(lexer, "inally", 6)) return false;
               return true;
             default:
               return true;
@@ -823,12 +826,18 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
           // Can't reliably check 'catch' now. Just insert ASI.
           return true;
         }
-        // Not in constructor context — check for 'catch'
-        return !scan_for_word(lexer, "atch", 4);
+        // Suppress ASI before a `catch` that continues a try-expression (the
+        // parser signals this via CATCH_CONTINUATION). Otherwise `catch` is a
+        // soft-keyword identifier statement (e.g. Flow's `catch { }` operator)
+        // and the statement terminator is correct.
+        return !(valid_symbols[CATCH_CONTINUATION] &&
+                 scan_for_word(lexer, "atch", 4));
 
-      // Don't insert a semicolon before finally (continues try_expression)
+      // `finally` mirrors `catch`: continue the try-expression only when the
+      // parser is positioned for it; otherwise terminate the statement.
       case 'f':
-        return !scan_for_word(lexer, "inally", 6);
+        return !(valid_symbols[CATCH_CONTINUATION] &&
+                 scan_for_word(lexer, "inally", 6));
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier

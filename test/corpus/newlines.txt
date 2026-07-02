@@ -522,3 +522,97 @@ fun testIsActive() {
                         (simple_identifier)))
                     (annotated_lambda
                       (lambda_literal))))))))))))
+
+================================================================================
+catch as a soft-keyword statement (Flow operator)
+================================================================================
+
+fun f() {
+    flow
+        .onEach { x() }
+        .catch<Throwable> { y() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (call_expression
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (annotated_lambda
+                  (lambda_literal
+                    (statements
+                      (call_expression
+                        (simple_identifier)
+                        (call_suffix
+                          (value_arguments))))))))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))))))
+
+================================================================================
+try-catch with catch and finally on new lines still continues
+================================================================================
+
+fun f() {
+    try {
+        a()
+    }
+    catch (e: E) {
+        b()
+    }
+    finally {
+        c()
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (try_expression
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (catch_block
+            (simple_identifier)
+            (user_type
+              (type_identifier))
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments)))))
+          (finally_block
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments))))))))))

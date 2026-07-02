@@ -185,6 +185,11 @@ module.exports = grammar({
     $._interpolation_expression_start,
     $._interpolation_identifier_start,
     $._by_delegation_hint,
+    // Phantom token (never emitted): its presence in valid_symbols tells the
+    // scanner the parser is positioned to accept a `catch`/`finally` clause, so
+    // ASI is suppressed there but not before a soft-keyword `catch`/`finally`
+    // statement (e.g. Flow's `catch { }` operator).
+    $._catch_continuation,
   ],
 
   extras: $ => [
@@ -1127,6 +1132,7 @@ module.exports = grammar({
     )),
 
     catch_block: $ => seq(
+      optional($._catch_continuation),
       "catch",
       "(",
       repeat($.annotation),
@@ -1137,7 +1143,7 @@ module.exports = grammar({
       $._block,
     ),
 
-    finally_block: $ => seq("finally", $._block),
+    finally_block: $ => seq(optional($._catch_continuation), "finally", $._block),
 
     jump_expression: $ => choice(
       prec.right(PREC.RETURN_OR_THROW, seq("throw", $._expression)),
