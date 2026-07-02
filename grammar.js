@@ -300,7 +300,8 @@ module.exports = grammar({
       $._class_parameters
     ),
 
-    class_body: $ => seq("{", optional($._class_member_declarations), "}"),
+    // A leading `;` is an empty member (e.g. `class C : B() {; ... }`).
+    class_body: $ => seq("{", optional($._semi), optional($._class_member_declarations), "}"),
 
     _class_parameters: $ => seq(
       "(",
