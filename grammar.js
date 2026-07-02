@@ -73,6 +73,11 @@ module.exports = grammar({
     // GLR explores both and keeps whichever yields a valid parse.
     [$.context_receiver, $.simple_identifier],
 
+    // `{ (x) …` — a single-element destructuring parameter vs a parenthesized
+    // expression beginning the lambda body. Keep both readings so the trailing
+    // `->` (or its absence) decides.
+    [$._name_based_destructuring_entry, $._primary_expression],
+
     // @Type(... — in Kotlin, ( after annotation name is always constructor args.
     // Resolved via prec(1) on _annotation_constructor_invocation so the parser
     // always shifts (consuming '(' as value_arguments) rather than reducing
@@ -513,13 +518,17 @@ module.exports = grammar({
       optional(seq(":", $._type))
     )),
 
-    // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming
-    _name_based_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
+    // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming.
+    // No VAR_DECL precedence here: a bare `(x)` in a lambda must stay ambiguous
+    // with a parenthesized expression so GLR can pick the reading that parses
+    // (the trailing `->` decides). The `[_name_based_destructuring_entry,
+    // _primary_expression]` conflict keeps both alive.
+    _name_based_destructuring_entry: $ => seq(
       optional($.binding_pattern_kind),
       $.simple_identifier,
       optional(seq(":", $._type)),
       optional(seq("=", $.simple_identifier))  // renaming: val localName = propertyName
-    )),
+    ),
 
     // Entry in positional (bracketed) destructuring — supports optional val/var, NO renaming
     _positional_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
@@ -994,11 +1003,12 @@ module.exports = grammar({
       seq(alias($._interpolation_identifier_start, $.interpolation_identifier_start), alias($.simple_identifier, $.interpolated_identifier)),
     ),
 
-    lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
-      "{",
-      optional(seq(optional($.lambda_parameters), "->")),
-      optional($.statements),
-      "}"
+    // A choice (not `optional(params ->)`) so GLR keeps both readings of a body
+    // that opens with `(`: `{ (x)(args) }` (a parenthesized-expression statement)
+    // and `{ (x) -> … }` (a destructuring parameter). The trailing `->` decides.
+    lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, choice(
+      seq("{", optional($.statements), "}"),
+      seq("{", optional($.lambda_parameters), "->", optional($.statements), "}")
     )),
 
     multi_variable_declaration: $ => choice(

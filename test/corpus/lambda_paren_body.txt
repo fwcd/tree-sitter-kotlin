@@ -1,0 +1,136 @@
+================================================================================
+Lambda body starting with a parenthesized-expression call
+================================================================================
+
+fun f() {
+    credentials?.let { (authenticationFunction)(call, it) }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (parenthesized_expression
+                      (simple_identifier))
+                    (call_suffix
+                      (value_arguments
+                        (value_argument
+                          (simple_identifier))
+                        (value_argument
+                          (simple_identifier))))))))))))))
+
+================================================================================
+Lambda body is a parenthesized expression with a navigation call
+================================================================================
+
+fun f() {
+    run { (x).foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (navigation_expression
+                      (parenthesized_expression
+                        (simple_identifier))
+                      (navigation_suffix
+                        (simple_identifier)))
+                    (call_suffix
+                      (value_arguments))))))))))))
+
+================================================================================
+Single-element destructuring lambda parameter still parses
+================================================================================
+
+fun f() {
+    xs.map { (x) -> x }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))))
+                (statements
+                  (simple_identifier))))))))))
+
+================================================================================
+Multi-element destructuring lambda parameter still parses
+================================================================================
+
+fun f() {
+    m.forEach { (k, v) -> use(k, v) }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (multi_variable_declaration
+                    (variable_declaration
+                      (simple_identifier))
+                    (variable_declaration
+                      (simple_identifier))))
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments
+                        (value_argument
+                          (simple_identifier))
+                        (value_argument
+                          (simple_identifier))))))))))))))
