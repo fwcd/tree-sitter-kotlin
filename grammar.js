@@ -123,6 +123,10 @@ module.exports = grammar({
     // ambiguity between prefix unary operators and other expression types
     [$.call_expression, $._generic_call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
 
+    // runs of adjacent imports group greedily into one import_list even when
+    // imports interleave with statements (Kotlin scripts).
+    [$.import_list],
+
     // ambiguity between multiple user types and class property/function declarations
     [$.user_type],
     [$.user_type, $.anonymous_function],
@@ -224,8 +228,14 @@ module.exports = grammar({
       optional($.shebang_line),
       repeat($.file_annotation),
       optional($.package_header),
-      optional($.import_list),
-      repeat(seq($._statement, $._semi))
+      // In `.kt` files imports precede statements; Kotlin scripts (`.kts`, e.g.
+      // Gradle build files) may place imports after statements, so allow import
+      // lists and statements to interleave. The `[import_list]` conflict lets GLR
+      // group runs of adjacent imports into a single import_list.
+      repeat(choice(
+        $.import_list,
+        seq($._statement, $._semi)
+      ))
     ),
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),

@@ -1,0 +1,73 @@
+================================================================================
+Imports after a statement (Kotlin script)
+================================================================================
+
+plugins {
+    kotlin("jvm")
+}
+
+import foo.bar.baz
+import foo.bar.qux
+
+val x = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (simple_identifier)
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (string_literal
+                      (string_content)))))))))))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Imports before statements still group into one import_list
+================================================================================
+
+import a.b.c
+import a.b.d
+
+fun main() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)
+        (simple_identifier))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))

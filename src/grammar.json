@@ -38,29 +38,26 @@
           ]
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "import_list"
-            },
-            {
-              "type": "BLANK"
-            }
-          ]
-        },
-        {
           "type": "REPEAT",
           "content": {
-            "type": "SEQ",
+            "type": "CHOICE",
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_statement"
+                "name": "import_list"
               },
               {
-                "type": "SYMBOL",
-                "name": "_semi"
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_statement"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_semi"
+                  }
+                ]
               }
             ]
           }
@@ -7654,6 +7651,9 @@
       "navigation_expression",
       "prefix_expression",
       "comparison_expression"
+    ],
+    [
+      "import_list"
     ],
     [
       "user_type"
