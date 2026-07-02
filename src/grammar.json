@@ -5835,8 +5835,17 @@
           ]
         },
         {
-          "type": "STRING",
-          "value": "::"
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "::"
+            },
+            {
+              "type": "STRING",
+              "value": "?::"
+            }
+          ]
         },
         {
           "type": "CHOICE",
@@ -7464,6 +7473,10 @@
   "conflicts": [
     [
       "_primary_expression",
+      "callable_reference"
+    ],
+    [
+      "_primary_expression_no_trailing_lambda",
       "callable_reference"
     ],
     [

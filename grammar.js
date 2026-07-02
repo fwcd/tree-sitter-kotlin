@@ -65,6 +65,8 @@ module.exports = grammar({
 
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
+    // Same conflict for the nullable-receiver reference token '?::'.
+    [$._primary_expression_no_trailing_lambda, $.callable_reference],
 
     // `context` is a soft keyword: `context(...)` may be a context-receiver
     // declaration prefix or an ordinary call whose callee is named `context`.
@@ -1147,7 +1149,9 @@ module.exports = grammar({
 
     callable_reference: $ => seq(
       optional(alias($.simple_identifier, $.type_identifier)), // TODO
-      "::",
+      // `?::` is a distinct 3-char token so a nullable receiver (`String?::plus`)
+      // wins maximal-munch over the elvis operator `?:`; plain `::` is unaffected.
+      choice("::", "?::"),
       choice($.simple_identifier, "class")
     ),
 

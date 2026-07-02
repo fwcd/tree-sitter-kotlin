@@ -1,0 +1,84 @@
+================================================================================
+Callable reference with type receiver
+================================================================================
+
+val f = Int::toString
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (simple_identifier)))))
+
+================================================================================
+Bound callable reference without receiver
+================================================================================
+
+val f = ::println
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (simple_identifier))))
+
+================================================================================
+Nullable receiver callable reference
+================================================================================
+
+val f = String?::plus
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (simple_identifier))))
+
+================================================================================
+Elvis operator is unaffected by the ?:: token
+================================================================================
+
+fun g(a: String?, b: String?): String = a ?: b ?: "z"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))
+          (quest)))
+      (parameter
+        (simple_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))
+          (quest))))
+    (user_type
+      (type_identifier))
+    (function_body
+      (elvis_expression
+        (elvis_expression
+          (simple_identifier)
+          (simple_identifier))
+        (string_literal
+          (string_content))))))
