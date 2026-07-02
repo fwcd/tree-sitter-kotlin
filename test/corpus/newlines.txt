@@ -616,3 +616,54 @@ fun f() {
                 (simple_identifier)
                 (call_suffix
                   (value_arguments))))))))))
+
+================================================================================
+Parenthesized statement after a local function (no call continuation)
+================================================================================
+
+fun outer() {
+    fun helper(): Boolean {
+        return true
+    }
+    (a.b() == true) ||
+        (c.d() == true)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters)
+          (user_type
+            (type_identifier))
+          (function_body
+            (statements
+              (jump_expression
+                (boolean_literal)))))
+        (disjunction_expression
+          (parenthesized_expression
+            (equality_expression
+              (call_expression
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))
+                (call_suffix
+                  (value_arguments)))
+              (boolean_literal)))
+          (parenthesized_expression
+            (equality_expression
+              (call_expression
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))
+                (call_suffix
+                  (value_arguments)))
+              (boolean_literal))))))))

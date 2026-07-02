@@ -3618,6 +3618,18 @@
             "name": "_expression"
           },
           {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_call_continuation"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
             "type": "SYMBOL",
             "name": "call_suffix"
           }
@@ -7796,6 +7808,10 @@
     {
       "type": "SYMBOL",
       "name": "_catch_continuation"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_call_continuation"
     }
   ],
   "inline": [],

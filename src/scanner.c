@@ -18,6 +18,7 @@ enum TokenType {
   INTERPOLATION_IDENTIFIER_START,
   BY_DELEGATION_HINT,
   CATCH_CONTINUATION,
+  CALL_CONTINUATION,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -534,11 +535,17 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '=':
       case '{':
       case '[':
-      case '(':
       case '?':
       case '|':
       case '&':
         return false;
+
+      // A newline `(` continues a call only where a call can actually follow
+      // (postfix position, signalled by CALL_CONTINUATION) — e.g. `foo\n(x)`.
+      // After a declaration such as a local `fun g() {}`, no call continues, so
+      // `(a) || (b)` on the next line begins a new statement (insert ASI).
+      case '(':
+        return !valid_symbols[CALL_CONTINUATION];
 
       // `::` begins a callable-reference statement (e.g. `::foo.startCoroutine`
       // right after a local function), so terminate the previous statement. A
