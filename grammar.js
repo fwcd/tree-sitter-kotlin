@@ -66,6 +66,11 @@ module.exports = grammar({
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
 
+    // `context` is a soft keyword: `context(...)` may be a context-receiver
+    // declaration prefix or an ordinary call whose callee is named `context`.
+    // GLR explores both and keeps whichever yields a valid parse.
+    [$.context_receiver, $.simple_identifier],
+
     // @Type(... — in Kotlin, ( after annotation name is always constructor args.
     // Resolved via prec(1) on _annotation_constructor_invocation so the parser
     // always shifts (consuming '(' as value_arguments) rather than reducing
@@ -468,7 +473,19 @@ module.exports = grammar({
       )
     ),
 
+    // Context parameters / receivers (Kotlin 1.6.20+ / 2.2): a `context(...)`
+    // prefix on a callable declaration. Entries are either context parameters
+    // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
+    // enclosing declaration must parse so its body is scored.
+    context_receiver: $ => seq(
+      "context",
+      "(",
+      optional(seq(sep1(choice($.parameter, $._type), ","), optional(","))),
+      ")"
+    ),
+
     function_declaration: $ => prec.right(seq( // TODO
+      optional($.context_receiver),
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
@@ -504,6 +521,7 @@ module.exports = grammar({
     )),
 
     property_declaration: $ => prec.right(seq(
+      optional($.context_receiver),
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
@@ -658,6 +676,8 @@ module.exports = grammar({
     _type_projection_modifier: $ => $.variance_modifier,
 
     function_type: $ => seq(
+      // Context parameters may prefix a function type: `context(C) () -> Unit`.
+      optional($.context_receiver),
       optional(seq(field("receiver", $.receiver_type), ".")),
       $.function_type_parameters,
       "->",
@@ -1340,6 +1360,7 @@ module.exports = grammar({
       // Batch 6: structural keywords used as identifiers
       "companion",
       "constructor",
+      "context",
       "init",
       "dynamic",
       "where",
