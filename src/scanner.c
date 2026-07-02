@@ -398,6 +398,26 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
+// Assumes the caller has just matched the word `where` and the cursor sits
+// right after it. Distinguishes a type-constraint clause (`where T : Bound`,
+// `where @Ann T : Bound`, `where A : X, B : Y`) — where ASI must be suppressed
+// so the clause continues the declaration — from a soft-keyword `where` used as
+// an ordinary identifier (`where = { … }`, `where?.let { … }`, `where: Type`,
+// `where.foo`), where the statement has ended and ASI should be inserted.
+// A type constraint is always `where <type-parameter-name> :` (optionally
+// preceded by annotations). Uses skip() so nothing is added to the token.
+static bool where_starts_type_constraint(TSLexer *lexer) {
+  while (iswspace(lexer->lookahead)) skip(lexer);
+  // An annotated type parameter (`where @Ann T : …`) is a type constraint.
+  if (lexer->lookahead == '@') return true;
+  // Anything not starting an identifier (`=`, `?`, `.`, `:`, `(`, …) is the
+  // `where` soft-keyword used as an identifier — not a type constraint.
+  if (!is_word_char(lexer->lookahead)) return false;
+  while (is_word_char(lexer->lookahead)) skip(lexer);
+  while (iswspace(lexer->lookahead)) skip(lexer);
+  return lexer->lookahead == ':';
+}
+
 // Check whether the current position is a (possibly multi-word) run of
 // constructor modifiers followed by "constructor" — e.g. `constructor`,
 // `protected constructor`, `protected actual constructor`, `actual constructor`.
@@ -597,7 +617,8 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               if (scan_for_word(lexer, "s", 1)) return false;
               return true;
             case 'w':
-              if (scan_for_word(lexer, "here", 4)) return false;
+              if (scan_for_word(lexer, "here", 4) &&
+                  where_starts_type_constraint(lexer)) return false;
               return true;
             case 'c':
               if (valid_symbols[CATCH_CONTINUATION] &&
@@ -708,7 +729,8 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               return true;
             case 'w':
               lexer->mark_end(lexer);
-              if (scan_for_word(lexer, "here", 4)) {
+              if (scan_for_word(lexer, "here", 4) &&
+                  where_starts_type_constraint(lexer)) {
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               }
@@ -786,9 +808,13 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
         return true;
       }
 
-      // Don't insert a semicolon before a where
+      // Don't insert a semicolon before a `where` type-constraint clause, but do
+      // before a soft-keyword `where` used as an identifier (Exposed's `where`
+      // query property). Detected by shape (`where <name> :`) rather than a
+      // parser-context hint, which keeps the generated parser small.
       case 'w':
-        return !scan_for_word(lexer, "here", 4);
+        return !(scan_for_word(lexer, "here", 4) &&
+                 where_starts_type_constraint(lexer));
 
       // Don't insert a semicolon before `instanceof`, or before `internal`
       // when followed by `constructor` in a class declaration context.
