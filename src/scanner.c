@@ -761,10 +761,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
                 }
               }
               return true;
-            // `internal`/`private`/`protected constructor` or `@Ann constructor`
-            // after a block comment continues a class header's primary
-            // constructor (`class X /* c */ @JvmOverloads constructor(...)`).
-            case 'i': case 'p':
+            // A bare `constructor`, `internal`/`private`/`protected constructor`,
+            // or `@Ann constructor` after a block comment continues a class
+            // header's primary constructor (`class X /* c */ constructor(...)`).
+            case 'c': case 'i': case 'p':
               if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
                   !valid_symbols[STRING_CONTENT]) {
                 lexer->mark_end(lexer);
