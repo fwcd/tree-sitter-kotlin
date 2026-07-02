@@ -66,6 +66,11 @@ module.exports = grammar({
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
 
+    // `context` is a soft keyword: `context(...)` may be a context-receiver
+    // declaration prefix or an ordinary call whose callee is named `context`.
+    // GLR explores both and keeps whichever yields a valid parse.
+    [$.context_receiver, $.simple_identifier],
+
     // @Type(... — `(` after an annotation name is usually constructor args, but
     // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
     // conflict below, with prec.dynamic on _annotation_constructor_invocation
@@ -502,12 +507,24 @@ module.exports = grammar({
       )
     ),
 
+    // Context parameters / receivers (Kotlin 1.6.20+ / 2.2): a `context(...)`
+    // prefix on a callable declaration. Entries are either context parameters
+    // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
+    // enclosing declaration must parse so its body is scored.
+    context_receiver: $ => seq(
+      "context",
+      "(",
+      optional(seq(sep1(choice($.parameter, $._type), ","), optional(","))),
+      ")"
+    ),
+
     // `public fun Foo.bar() { … }` also parses as an infix expression, because
     // the visibility modifiers are soft keywords in `simple_identifier`. Both
     // readings are complete, so this is the dynamic-precedence decision #278
     // made for `class` and `object` (issue #277); at the time `fun` was not
     // reachable that way, and the GLR conflict on annotations made it so.
     function_declaration: $ => prec.dynamic(1, prec.right(seq( // TODO
+      optional($.context_receiver),
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
@@ -543,6 +560,7 @@ module.exports = grammar({
     )),
 
     property_declaration: $ => prec.right(seq(
+      optional($.context_receiver),
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
@@ -697,6 +715,8 @@ module.exports = grammar({
     _type_projection_modifier: $ => $.variance_modifier,
 
     function_type: $ => seq(
+      // Context parameters may prefix a function type: `context(C) () -> Unit`.
+      optional($.context_receiver),
       optional(seq(field("receiver", $.receiver_type), ".")),
       $.function_type_parameters,
       "->",
@@ -1379,6 +1399,7 @@ module.exports = grammar({
       // Batch 6: structural keywords used as identifiers
       "companion",
       "constructor",
+      "context",
       "init",
       "dynamic",
       "where",
