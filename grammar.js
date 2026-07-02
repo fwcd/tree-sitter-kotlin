@@ -199,11 +199,6 @@ module.exports = grammar({
     // ASI is suppressed there but not before a soft-keyword `catch`/`finally`
     // statement (e.g. Flow's `catch { }` operator).
     $._catch_continuation,
-    // Phantom token (never emitted): valid only in postfix position (after an
-    // expression, before a call_suffix). Lets the scanner tell a newline `(` that
-    // continues a call (`foo\n(x)`) from one that begins a new statement after a
-    // declaration (`fun g() {}` \n `(a) || (b)`), where no call can continue.
-    $._call_continuation,
   ],
 
   extras: $ => [
@@ -843,7 +838,7 @@ module.exports = grammar({
 
     postfix_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $._postfix_unary_operator)),
 
-    call_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, optional($._call_continuation), $.call_suffix)),
+    call_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.call_suffix)),
 
     // Generic call expression: call with REQUIRED type_arguments.
     // prec.dynamic(1) tells GLR to prefer the generic-call interpretation

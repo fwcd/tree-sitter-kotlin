@@ -810,13 +810,14 @@ fun foo() {
                     (integer_literal)))))))))))
 
 ================================================================================
-Comment before call parentheses
+Comment before call arguments
 ================================================================================
 
 fun foo() {
-    bar
+    bar(
         // comment
-        (1, 2)
+        1, 2
+    )
 }
 
 --------------------------------------------------------------------------------
@@ -829,9 +830,9 @@ fun foo() {
       (statements
         (call_expression
           (simple_identifier)
-          (line_comment)
           (call_suffix
             (value_arguments
+              (line_comment)
               (value_argument
                 (integer_literal))
               (value_argument
