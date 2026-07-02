@@ -630,6 +630,19 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               if (valid_symbols[CATCH_CONTINUATION] &&
                   scan_for_word(lexer, "inally", 6)) return false;
               return true;
+            // `internal`/`private`/`protected` preceding a `constructor` after a
+            // comment continue a class header's primary constructor
+            // (`class X // c` \n `internal constructor(...)`).
+            case 'i': case 'p':
+              if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+                  !valid_symbols[STRING_CONTENT] &&
+                  check_modifier_then_constructor(lexer)) return false;
+              return true;
+            case '@':
+              if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+                  !valid_symbols[STRING_CONTENT] &&
+                  check_annotation_then_constructor(lexer)) return false;
+              return true;
             default:
               return true;
           }
@@ -737,6 +750,29 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               if (valid_symbols[BY_DELEGATION_HINT]) {
                 lexer->mark_end(lexer);
                 if (scan_for_word(lexer, "y", 1)) {
+                  lexer->result_symbol = MULTILINE_COMMENT;
+                  return true;
+                }
+              }
+              return true;
+            // `internal`/`private`/`protected constructor` or `@Ann constructor`
+            // after a block comment continues a class header's primary
+            // constructor (`class X /* c */ @JvmOverloads constructor(...)`).
+            case 'i': case 'p':
+              if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+                  !valid_symbols[STRING_CONTENT]) {
+                lexer->mark_end(lexer);
+                if (check_modifier_then_constructor(lexer)) {
+                  lexer->result_symbol = MULTILINE_COMMENT;
+                  return true;
+                }
+              }
+              return true;
+            case '@':
+              if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+                  !valid_symbols[STRING_CONTENT]) {
+                lexer->mark_end(lexer);
+                if (check_annotation_then_constructor(lexer)) {
                   lexer->result_symbol = MULTILINE_COMMENT;
                   return true;
                 }

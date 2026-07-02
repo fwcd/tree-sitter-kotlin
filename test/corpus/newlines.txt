@@ -701,3 +701,96 @@ protected actual constructor(
         (user_type
           (type_identifier))))
     (class_body)))
+
+================================================================================
+Line comment before a modified primary constructor
+================================================================================
+
+internal class UnknownFieldException
+// used by coroutines exception recovery
+internal constructor(message: String?) : SerializationException(message) {
+    constructor(index: Int) : this("field $index")
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (line_comment)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))
+          (quest))))
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments
+          (value_argument
+            (simple_identifier)))))
+    (class_body
+      (secondary_constructor
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (constructor_delegation_call
+          (value_arguments
+            (value_argument
+              (string_literal
+                (string_content)
+                (interpolation_identifier_start)
+                (interpolated_identifier)))))))))
+
+================================================================================
+KDoc and annotation before a primary constructor
+================================================================================
+
+class Differ<T>
+/** doc comment */
+@JvmOverloads
+constructor(
+    private val diffCallback: Callback<T>,
+) {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (class_parameter
+        (modifiers
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
