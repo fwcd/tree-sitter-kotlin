@@ -522,7 +522,6 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
   switch (lexer->lookahead) {
       case ',':
       case '.':
-      case ':':
       case '*':
       case '%':
       case '>':
@@ -535,6 +534,13 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '|':
       case '&':
         return false;
+
+      // `::` begins a callable-reference statement (e.g. `::foo.startCoroutine`
+      // right after a local function), so terminate the previous statement. A
+      // single `:` continues one (supertype lists, annotation targets) — suppress.
+      case ':':
+        skip(lexer);
+        return lexer->lookahead == ':';
 
       // Handle `/` — could be division, line comment, or block comment.
       // For division: no ASI (continuation operator).

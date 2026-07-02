@@ -481,3 +481,44 @@ actual constructor(actual final override val capacity: Int) : ObjectPool<T> {
         (simple_identifier)
         (function_value_parameters)
         (function_body)))))
+
+================================================================================
+Callable-reference statement after a local function
+================================================================================
+
+fun testIsActive() {
+    suspend fun check() {}
+    ::check.startCoroutine(Continuation(ctx) {})
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (modifiers
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))
+        (call_expression
+          (navigation_expression
+            (callable_reference
+              (simple_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments
+                      (value_argument
+                        (simple_identifier)))
+                    (annotated_lambda
+                      (lambda_literal))))))))))))
