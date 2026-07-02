@@ -304,7 +304,11 @@ static bool scan_multiline_comment(TSLexer *lexer) {
           lexer->mark_end(lexer);
           return true;
         }
-        return false;
+        // A literal NUL byte (0x00) inside the comment is valid content (e.g. a
+        // JSON conformance test documenting a NUL); consume it and continue.
+        advance(lexer);
+        after_star = false;
+        break;
       default:
         advance(lexer);
         after_star = false;
@@ -588,8 +592,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
           // Line comment — skip to end of line using skip() since
           // line_comment is an internal token (the grammar handles it).
           skip(lexer);
+          // A NUL byte (0x00) inside a line comment is valid content, so rely on
+          // eof() (not `!= 0`) to find the end of the comment.
           while (lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
-                 lexer->lookahead != 0 && !lexer->eof(lexer)) {
+                 !lexer->eof(lexer)) {
             skip(lexer);
           }
           // Skip any whitespace and further comments after this line comment.
