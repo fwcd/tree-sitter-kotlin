@@ -435,3 +435,49 @@ val y = 2
     (variable_declaration
       (simple_identifier))
     (integer_literal)))
+
+================================================================================
+actual constructor after a class-header newline
+================================================================================
+
+abstract class DefaultPool<T : Any>
+actual constructor(actual final override val capacity: Int) : ObjectPool<T> {
+    fun x() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (inheritance_modifier))
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (modifiers
+          (platform_modifier)
+          (inheritance_modifier)
+          (member_modifier))
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))

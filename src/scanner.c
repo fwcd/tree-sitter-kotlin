@@ -744,9 +744,25 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
         if (!scan_for_word(lexer, "lse", 3)) return true;
         return followed_by_arrow(lexer);
 
-      // Don't insert a semicolon before an as
-      case 'a':
-        return !scan_for_word(lexer, "s", 1);
+      // `as` continues an expression; `actual constructor` (after a class-header
+      // newline, as in KMP `actual` declarations) is a primary constructor, not a
+      // new statement. Any other `a…` word terminates the statement (insert ASI).
+      case 'a': {
+        char word[16];
+        unsigned wlen = 0;
+        while (is_word_char(lexer->lookahead) && wlen < 15) {
+          word[wlen++] = (char)lexer->lookahead;
+          skip(lexer);
+        }
+        word[wlen] = '\0';
+        if (strcmp(word, "as") == 0) return false;
+        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+            !valid_symbols[STRING_CONTENT] && strcmp(word, "actual") == 0) {
+          while (iswspace(lexer->lookahead)) skip(lexer);
+          if (check_word(lexer, "constructor", 11)) return false;
+        }
+        return true;
+      }
 
       // Don't insert a semicolon before a where
       case 'w':
