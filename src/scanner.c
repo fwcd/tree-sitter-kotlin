@@ -104,7 +104,11 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
   bool is_triple = (raw_delim & 1) != 0;
   char end_char = is_triple ? (char)(raw_delim - 1) : (char)raw_delim;
   bool has_content = false;
-  while (lexer->lookahead) {
+  // Use eof() rather than `lookahead != 0`: a literal NUL byte (0x00) inside a
+  // string is valid content (e.g. raw strings holding binary/SSE data), not the
+  // end of input. Stopping at it would leave the string unterminated and desync
+  // the parse for the rest of the file.
+  while (!lexer->eof(lexer)) {
     if (lexer->lookahead == '$') {
       // If we already have content, stop here so the caller can emit it
       // before we deal with the potential interpolation.
