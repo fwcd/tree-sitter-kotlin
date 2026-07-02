@@ -667,3 +667,37 @@ fun outer() {
                 (call_suffix
                   (value_arguments)))
               (boolean_literal))))))))
+
+================================================================================
+Multi-modifier primary constructor after a class-header newline
+================================================================================
+
+actual abstract class Message<M>
+protected actual constructor(
+    actual val adapter: Int,
+) {
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (modifiers
+          (platform_modifier))
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))

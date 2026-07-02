@@ -398,28 +398,29 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
-// Check if the current position has a visibility modifier (public, private,
-// protected, internal) followed by horizontal whitespace and "constructor".
+// Check whether the current position is a (possibly multi-word) run of
+// constructor modifiers followed by "constructor" — e.g. `constructor`,
+// `protected constructor`, `protected actual constructor`, `actual constructor`.
 // Uses skip() — safe to call speculatively since no token boundary is changed.
 static bool check_modifier_then_constructor(TSLexer *lexer) {
-  // Buffer the first word to identify the modifier
-  char word[20];
-  unsigned len = 0;
-  while (is_word_char(lexer->lookahead) && len < 19) {
-    word[len++] = (char)lexer->lookahead;
-    skip(lexer);
+  for (;;) {
+    char word[20];
+    unsigned len = 0;
+    while (is_word_char(lexer->lookahead) && len < 19) {
+      word[len++] = (char)lexer->lookahead;
+      skip(lexer);
+    }
+    word[len] = '\0';
+    if (strcmp(word, "constructor") == 0) return true;
+    // A constructor may be preceded by visibility and KMP expect/actual modifiers.
+    if (strcmp(word, "public") != 0 && strcmp(word, "private") != 0 &&
+        strcmp(word, "protected") != 0 && strcmp(word, "internal") != 0 &&
+        strcmp(word, "actual") != 0 && strcmp(word, "expect") != 0) {
+      return false;
+    }
+    // Skip whitespace (incl. newlines) before the next modifier / "constructor".
+    while (iswspace(lexer->lookahead)) skip(lexer);
   }
-  word[len] = '\0';
-
-  if (strcmp(word, "public") != 0 && strcmp(word, "private") != 0 &&
-      strcmp(word, "protected") != 0 && strcmp(word, "internal") != 0) {
-    return false;
-  }
-
-  // Skip horizontal whitespace (not newlines)
-  while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
-
-  return check_word(lexer, "constructor", 11);
 }
 
 // Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar,
@@ -777,9 +778,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
         word[wlen] = '\0';
         if (strcmp(word, "as") == 0) return false;
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-            !valid_symbols[STRING_CONTENT] && strcmp(word, "actual") == 0) {
+            !valid_symbols[STRING_CONTENT] &&
+            (strcmp(word, "actual") == 0 || strcmp(word, "expect") == 0)) {
           while (iswspace(lexer->lookahead)) skip(lexer);
-          if (check_word(lexer, "constructor", 11)) return false;
+          if (check_modifier_then_constructor(lexer)) return false;
         }
         return true;
       }
