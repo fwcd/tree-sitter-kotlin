@@ -1,0 +1,139 @@
+================================================================================
+when entry with a guard condition
+================================================================================
+
+fun f(x: Any) = when (x) {
+    is Int if x > 0 -> "pos"
+    else -> "other"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (type_test
+              (user_type
+                (type_identifier))))
+          (guard_condition
+            (comparison_expression
+              (simple_identifier)
+              (integer_literal)))
+          (control_structure_body
+            (string_literal
+              (string_content))))
+        (when_entry
+          (control_structure_body
+            (string_literal
+              (string_content))))))))
+
+================================================================================
+else entry with a guard condition
+================================================================================
+
+fun f(type: String) = when (type) {
+    "tc" -> teamCity()
+    else if isIntellij() -> teamCity()
+    else -> console()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (string_literal
+              (string_content)))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (guard_condition
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+else body that is an if-expression is not a guard
+================================================================================
+
+fun f(t: Int) = when (t) {
+    1 -> a()
+    else -> if (isX()) b() else c()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (if_expression
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments)))
+              (control_structure_body
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments))))
+              (control_structure_body
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments)))))))))))
