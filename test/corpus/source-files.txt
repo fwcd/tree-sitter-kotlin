@@ -142,3 +142,30 @@ class MyClass
   (multiline_comment)
   (class_declaration
     (type_identifier)))
+
+================================================================================
+Import followed by doc comment then enum (fwcd#274)
+================================================================================
+
+import foo
+
+/**
+ * Documentation
+ */
+enum class Color { RED, GREEN }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier))))
+  (multiline_comment)
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier)))))

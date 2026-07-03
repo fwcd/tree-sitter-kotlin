@@ -730,11 +730,22 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
               // so tree-sitter will re-scan from here).
               return true;
             case 'e':
-              lexer->mark_end(lexer);
-              if (scan_for_word(lexer, "lse", 3)) {
-                if (followed_by_arrow(lexer)) return true;
-                lexer->result_symbol = MULTILINE_COMMENT;
-                return true;
+              // A block comment before an `else` continues an if-expression, so
+              // pre-mark and emit MULTILINE_COMMENT (suppressing the ASI). But
+              // when the parser is in an import header — signalled by IMPORT_DOT
+              // being a valid next token, since `import foo` can continue as
+              // `foo.bar` — an `e…` word is a new top-level declaration
+              // (`enum`/`external`/…), never an `else`. There we must NOT
+              // pre-mark: leaving mark_end at P0 makes the ASI land before the
+              // comment so the comment becomes a sibling instead of being
+              // swallowed into the import (fwcd/tree-sitter-kotlin#274).
+              if (!valid_symbols[IMPORT_DOT]) {
+                lexer->mark_end(lexer);
+                if (scan_for_word(lexer, "lse", 3)) {
+                  if (followed_by_arrow(lexer)) return true;
+                  lexer->result_symbol = MULTILINE_COMMENT;
+                  return true;
+                }
               }
               return true;
             case 'a':
