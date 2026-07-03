@@ -118,6 +118,12 @@ module.exports = grammar({
     // _statement_annotation vs annotation (in prefix_expression and modifiers):
     // both parse @Identifier but route through different rules.
     [$._statement_annotation, $.annotation],
+    // `@Ann • (` — consume `(` as annotation constructor args (`@Ann(x)`) OR
+    // reduce the bare `@Ann` so the `(…) -> T` is the *annotated function type*
+    // (`@Composable (String) -> Unit`). GLR explores both and keeps whichever
+    // completes; the trailing `->` decides. _annotation_constructor_invocation
+    // has prec.dynamic(1) so `@Ann(x)` stays args when both would parse.
+    [$._annotation_constructor_invocation, $._unescaped_annotation],
     [$.prefix_expression, $.when_subject],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
@@ -365,7 +371,7 @@ module.exports = grammar({
     // args). This matches Kotlin semantics where `(` after an annotation name
     // is always constructor arguments. Scoped here rather than on the shared
     // constructor_invocation to avoid changing delegation_specifier behavior.
-    _annotation_constructor_invocation: $ => prec(1, seq($.user_type, $.value_arguments)),
+    _annotation_constructor_invocation: $ => prec.dynamic(1, seq($.user_type, $.value_arguments)),
 
     _annotated_delegation_specifier: $ => seq(repeat($.annotation), $.delegation_specifier),
 
