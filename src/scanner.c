@@ -575,7 +575,16 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       // single `:` continues one (supertype lists, annotation targets) — suppress.
       case ':':
         skip(lexer);
-        return lexer->lookahead == ':';
+        if (lexer->lookahead == ':') return true;
+        // Single `:` continuation. We already consumed the `:` with skip(); if a
+        // block comment follows (`class Foo\n : /* c */ Bar()`), the caller's
+        // MULTILINE_COMMENT path would otherwise start after the `:` and strand
+        // it as trivia (fwcd/tree-sitter-kotlin: colon lost). Consume the
+        // whitespace/comments here so no token is produced and the whole scan
+        // returns false — tree-sitter then re-lexes from the start, recovering
+        // both the `:` and the comment.
+        skip_whitespace_and_comments(lexer);
+        return false;
 
       // Handle `/` — could be division, line comment, or block comment.
       // For division: no ASI (continuation operator).

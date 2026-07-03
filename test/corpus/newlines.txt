@@ -104,6 +104,25 @@ class Foo
     (class_body)))
 
 ================================================================================
+Block comment right after a continuation colon
+================================================================================
+
+class Foo
+    : /* base */ Bar()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))))
+
+================================================================================
 Question mark after newline
 ================================================================================
 
