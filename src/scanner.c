@@ -299,7 +299,13 @@ static bool scan_multiline_comment(TSLexer *lexer) {
           lexer->mark_end(lexer);
           return true;
         }
-        return false;
+        // A literal NUL byte inside the comment (lookahead is '\0' but not EOF)
+        // must be consumed like any other comment content. Returning here without
+        // advancing leaves the lexer at the same offset, so tree-sitter re-invokes
+        // the scanner forever on inputs such as "/*\0" -> a parse-time hang (DoS).
+        advance(lexer);
+        after_star = false;
+        break;
       default:
         advance(lexer);
         after_star = false;
