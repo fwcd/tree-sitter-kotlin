@@ -39,3 +39,6 @@ tools/cross-validation/fixtures/
 
 # Generated cross-validation report (regenerated via npm run cross-validate)
 tools/cross-validation/report.md
+
+# Claude Code local config
+.claude/
