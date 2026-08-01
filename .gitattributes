@@ -1,1 +1,5 @@
 src/** linguist-vendored
+
+# Contains an intentional NUL byte (regression fixture); keep bytes verbatim so
+# EOL normalization can't corrupt it.
+test/corpus/null_byte_comment.txt -text
