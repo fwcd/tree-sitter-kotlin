@@ -1,0 +1,156 @@
+================================================================================
+Isolated internal open class control
+================================================================================
+
+internal open class InternalBase {
+    open fun internalWork(): InternalResult = InternalResult()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (modifiers
+          (inheritance_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (user_type
+          (type_identifier))
+        (function_body
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))
+
+================================================================================
+Adjacent internal classes preserve class declarations
+================================================================================
+
+package com.fixture.core.internal
+
+internal open class InternalBase {
+    open fun internalWork(): InternalResult = InternalResult()
+}
+
+internal class InternalResult {
+    fun done() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)))
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (modifiers
+          (inheritance_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (user_type
+          (type_identifier))
+        (function_body
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments)))))))
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Modifier-led class followed by unmodified class
+================================================================================
+
+internal open class First {}
+class Second {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body))
+  (class_declaration
+    (type_identifier)
+    (class_body)))
+
+================================================================================
+Comment and annotation between modifier-led classes
+================================================================================
+
+internal open class First {}
+// declaration boundary
+@Marker internal class Second {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body))
+  (line_comment)
+  (class_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (visibility_modifier))
+    (type_identifier)
+    (class_body)))
+
+================================================================================
+Several adjacent modifier-led classes
+================================================================================
+
+internal open class First {}
+internal class Second {}
+private final class Third {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body))
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (class_body))
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body)))
