@@ -1101,3 +1101,67 @@ interface Foo<A, B> : ((T, A?) -> B?)
           (user_type
             (type_identifier))
           (quest))))))
+
+================================================================================
+Class with several modifiers followed by another declaration
+================================================================================
+
+internal open class First {}
+class Second {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (class_body))
+  (class_declaration
+    (type_identifier)
+    (class_body)))
+
+================================================================================
+Class with several annotations followed by another declaration
+================================================================================
+
+@Component
+@ConfigurationProperties(prefix = "app")
+class First {
+    var url: String? = null
+}
+
+class Second {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (simple_identifier)
+              (string_literal
+                (string_content)))))))
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (nullable_type
+            (user_type
+              (type_identifier))
+            (quest)))
+        (null_literal))))
+  (class_declaration
+    (type_identifier)
+    (class_body)))
