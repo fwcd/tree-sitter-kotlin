@@ -1371,6 +1371,14 @@ module.exports = grammar({
 
     line_comment: $ => token(seq('//', /.*/)),
 
+    // `multiline_comment` is an external token (src/scanner.c) so that nested
+    // and unterminated comments can be handled. This internal definition
+    // covers the common non-nested, terminated case and gives tree-sitter's
+    // own lexer a fallback for when the external scanner declines a token —
+    // e.g. when scan_automatic_semicolon has skipped a comment to look at the
+    // token behind it and reports "no semicolon here".
+    multiline_comment: _ => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
+
     // ==========
     // Separators and operations
     // ==========

@@ -951,7 +951,6 @@ catch (e: Error) { }
 
 =========================================================================================
 Block comments between standalone identifiers starting with continuation-keyword letters
-:skip
 =========================================================================================
 
 fun doo() {
@@ -977,3 +976,172 @@ w
         (simple_identifier)
         (multiline_comment)
         (simple_identifier)))))
+
+================================================================================
+Import followed by block comment before a modifier keyword
+================================================================================
+
+import a.b
+
+/* comment */
+annotation class Foo
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))))
+  (multiline_comment)
+  (class_declaration
+    (modifiers
+      (class_modifier))
+    (type_identifier)))
+
+================================================================================
+Block comment before else in a when entry
+================================================================================
+
+val x = when (k) {
+  1 -> "a"
+  /* c */ else -> "b"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (when_expression
+      (when_subject
+        (simple_identifier))
+      (when_entry
+        (when_condition
+          (integer_literal))
+        (control_structure_body
+          (string_literal
+            (string_content))))
+      (multiline_comment)
+      (when_entry
+        (control_structure_body
+          (string_literal
+            (string_content)))))))
+
+================================================================================
+Block comment before by delegation
+================================================================================
+
+class A : B
+/* c */ by delegate
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (multiline_comment)
+        (simple_identifier)))))
+
+================================================================================
+Block comment before an identifier starting with b outside a delegation
+================================================================================
+
+fun f() {
+  bar()
+  /* c */ baz()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (multiline_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Block comment before catch and finally
+================================================================================
+
+try { foo() }
+/* c */ catch (e: Exception) { }
+/* c */ finally { close() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (try_expression
+    (statements
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (multiline_comment)
+    (catch_block
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (multiline_comment)
+    (finally_block
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Nested block comment followed by code on the same line
+================================================================================
+
+val a = 1
+/* /* nested */ */ val b = 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal))
+  (multiline_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Terminated block comment at end of file
+================================================================================
+
+import a.b
+/* terminated */
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))))
+  (multiline_comment))
