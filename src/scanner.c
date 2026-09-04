@@ -504,21 +504,42 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       if (scan_for_word(lexer, "here", 4)) return false;
       return true;
     case 'c':
-      if (scan_for_word(lexer, "atch", 4)) return false;
+      if (scan_for_word(lexer, "atch", 4)) {
+        // `catch` only continues a try_expression when its parameter list
+        // follows; a bare `catch` word is an ordinary identifier, so the
+        // statement really did end at the line break. A bare '/' means
+        // division, which is likewise not a catch_block.
+        if (!skip_whitespace_and_comments(lexer)) return true;
+        return lexer->lookahead != '(';
+      }
       return true;
     case 'b':
       if (valid_symbols[BY_DELEGATION_HINT] &&
           scan_for_word(lexer, "y", 1)) return false;
       return true;
     case 'f':
-      if (scan_for_word(lexer, "inally", 6)) return false;
+      if (scan_for_word(lexer, "inally", 6)) {
+        // Same as `catch` above: only a following block makes this a
+        // finally_block rather than an identifier.
+        if (!skip_whitespace_and_comments(lexer)) return true;
+        return lexer->lookahead != '{';
+      }
       return true;
     default:
       return true;
   }
 }
 
-static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) {
+// `cursor_clean` is an out-param for the `return false` case only. Most of the
+// keyword probes below skip over source text to make their decision, and skip()
+// drags token_start with it, so on a false return the caller can no longer lex a
+// token at the original position -- anything it produced would silently swallow
+// the skipped text as padding. It therefore defaults to false (dirty) and is set
+// only by the handful of returns that are provably still at the first
+// non-whitespace character. Skipping *whitespace* is safe (that is what skip() is
+// for); skipping comment or keyword text is not.
+static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
+                                     bool *cursor_clean) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
   lexer->mark_end(lexer);
 
@@ -552,7 +573,9 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
     skip(lexer);
   }
 
-  // Skip whitespace and comments
+  // Skip whitespace and comments. Unreachable today (the helper only skips
+  // whitespace and always succeeds); left dirty deliberately, so that if it
+  // ever does skip comments the conservative answer is already in place.
   if (!scan_whitespace_and_comments(lexer))
     return false;
 
@@ -568,8 +591,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
         lexer->mark_end(lexer);
         return true;
 
-      // Don't insert a semicolon in other cases
+      // Don't insert a semicolon in other cases. Nothing but whitespace has
+      // been skipped, so a string or comment token may still start here.
       default:
+        *cursor_clean = true;
         return false;
     }
   }
@@ -589,6 +614,9 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '?':
       case '|':
       case '&':
+        // Decided from lookahead alone, so the cursor never moved past it and
+        // e.g. scan_import_dot can still claim the '.'.
+        *cursor_clean = true;
         return false;
 
       // Handle `/` — could be division, line comment, or block comment.
@@ -660,23 +688,43 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
             // lookahead moves the cursor. Committing it unconditionally would
             // pin the token end past the comment even when no continuation
             // follows, fusing the two statements, so mark_end is called only
-            // in the branches that need it. That is the pre-existing
-            // behaviour for this path, kept deliberately: these shapes are
-            // out of scope here, and #274 is fixed for the non-nested case
-            // below.
+            // in the branches that need it.
+            //
+            // NOTE: both definitions of `multiline_comment` share one symbol
+            // id, so the internal token silently truncates a nested comment at
+            // its first `*/`. Anything added below must therefore keep
+            // producing the token here rather than deferring to the fallback
+            // with `return false`.
+            //
+            // This path still carries the #274 symptom and is deliberately
+            // out of scope. The `skip()` loop below drags token_start onto the
+            // follower, so the outcome depends on which arm runs:
+            //   - an arm that calls mark_end pins the token there, so a
+            //     continuation follower yields a zero-width multiline_comment;
+            //   - the same arms with a non-continuation follower leave
+            //     result_symbol as AUTOMATIC_SEMICOLON, and the comment text
+            //     becomes that zero-width token's padding, so the node vanishes
+            //     from the tree with no ERROR reported;
+            //   - `default` (and `b` outside a delegation context) never calls
+            //     mark_end, so the semicolon lands in front of the comment and
+            //     scan_multiline_comment emits it correctly on the next call.
+            // #274 is fixed only for the non-nested, NUL-free case below.
             while (iswspace(lexer->lookahead)) skip(lexer);
             switch (lexer->lookahead) {
               case '.': case ',': case ':': case '*': case '%':
               case '>': case '<': case '=': case '{': case '[':
               case '(': case '?': case '|': case '&': case '/':
                 // A continuation operator needs no further lookahead, so the
-                // comment's end can be pinned exactly here.
+                // end can be marked without probing. It is not the comment's
+                // real end: the whitespace skip above already moved
+                // token_start here, so the node is zero-width (see NOTE).
                 lexer->mark_end(lexer);
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               case '!': case 'e': case 'a': case 'w':
                 // May or may not begin a continuation, and finding out moves
-                // the cursor past it, so pin the end first.
+                // the cursor past it, so mark the end first (again zero-width,
+                // see NOTE).
                 lexer->mark_end(lexer);
                 if (!asi_after_comment(lexer, valid_symbols)) {
                   lexer->result_symbol = MULTILINE_COMMENT;
@@ -867,10 +915,24 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   // valid_symbols when the parser is in a delegation context. The scanner
   // never emits it; it's used only as a context flag in scan_automatic_semicolon.
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
-    bool ret = scan_automatic_semicolon(lexer, valid_symbols);
-    // if we fail to find an automatic semicolon, it's still possible that we may
-    // want to lex a string or comment later
+    bool cursor_clean = false;
+    bool ret = scan_automatic_semicolon(lexer, valid_symbols, &cursor_clean);
+    // If we fail to find an automatic semicolon, it's still possible that we may
+    // want to lex a string or comment later -- but only if the ASI scan left the
+    // cursor at the first non-whitespace character. Once it has skipped over
+    // comment or keyword text, token_start has moved and any token produced
+    // below would silently swallow everything in between as padding.
+    //
+    // Error recovery is exempt. There tree-sitter marks every external symbol
+    // valid at once (STRING_CONTENT alongside AUTOMATIC_SEMICOLON is the
+    // giveaway -- a statement can never end inside a string), and that is the
+    // only way MULTILINE_COMMENT or STRING_START is reachable after a keyword
+    // probe. The text is already bound for an ERROR node, so an external token
+    // with a dragged start beats no token at all: without this exemption the
+    // internal lexer tears an unterminated `/*` into `/` plus a bogus
+    // wildcard_import, and a nested comment collapses to zero width.
     if (ret) return ret;
+    if (!cursor_clean && !valid_symbols[STRING_CONTENT]) return false;
   }
 
   // Match dots in import identifiers, refusing dots that would cause

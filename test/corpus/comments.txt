@@ -1145,3 +1145,287 @@ import a.b
         (simple_identifier)
         (simple_identifier))))
   (multiline_comment))
+
+================================================================================
+Block comment before an identifier named `catch`
+================================================================================
+
+fun f() { val catch = 1
+
+/* c */
+catch.hashCode() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (multiline_comment)
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Line comment before an identifier named `catch`
+================================================================================
+
+fun f() { val catch = 1
+
+// c
+catch.hashCode() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (line_comment)
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Block comment before an identifier named `finally`
+================================================================================
+
+fun f() { val finally = 1
+
+/* c */
+finally.hashCode() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (multiline_comment)
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Block comments around a division operator after a line break
+================================================================================
+
+val a = 6
+/* c */ / /* d */ 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (multiplicative_expression
+      (integer_literal)
+      (multiline_comment)
+      (multiline_comment)
+      (integer_literal))))
+
+================================================================================
+Block comment on its own line before a division operator
+================================================================================
+
+val a = 6
+/* c */
+/ /* d */ 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (multiplicative_expression
+      (integer_literal)
+      (multiline_comment)
+      (multiline_comment)
+      (integer_literal))))
+
+================================================================================
+Line comment before a division operator
+================================================================================
+
+val a = 6
+// c
+/ /* d */ 2
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (multiplicative_expression
+      (integer_literal)
+      (line_comment)
+      (multiline_comment)
+      (integer_literal))))
+
+================================================================================
+Comment between a second `catch` and its parameter list
+================================================================================
+
+fun f() {
+try { foo() }
+catch (a: A) { }
+/* c */ catch /* d */ (b: B) { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (try_expression
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (catch_block
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (multiline_comment)
+          (catch_block
+            (multiline_comment)
+            (simple_identifier)
+            (user_type
+              (type_identifier))))))))
+
+================================================================================
+Line comment before a `catch` whose parameter list is preceded by a comment
+================================================================================
+
+fun f() {
+try { foo() }
+catch (a: A) { }
+// c
+catch /* d */ (b: B) { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (try_expression
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (catch_block
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (line_comment)
+          (catch_block
+            (multiline_comment)
+            (simple_identifier)
+            (user_type
+              (type_identifier))))))))
+
+================================================================================
+Comment between `finally` and its block
+================================================================================
+
+fun f() {
+try { foo() }
+catch (a: A) { }
+/* c */ finally /* d */ { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (try_expression
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (catch_block
+            (simple_identifier)
+            (user_type
+              (type_identifier)))
+          (multiline_comment)
+          (finally_block
+            (multiline_comment)))))))
+
+================================================================================
+Identifier named `catch` divided after a block comment
+================================================================================
+
+fun f() { val catch = 4
+/* c */
+catch / 2 }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (multiline_comment)
+        (multiplicative_expression
+          (simple_identifier)
+          (integer_literal))))))
