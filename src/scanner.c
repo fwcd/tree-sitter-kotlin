@@ -845,11 +845,23 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
           return true;
         }
         // Not in constructor context — check for 'catch'
-        return !scan_for_word(lexer, "atch", 4);
+        if (!scan_for_word(lexer, "atch", 4)) return true;
+        // Same follower requirement as the comment path in asi_after_comment:
+        // only a parameter list makes this a catch_block. A bare `catch` word
+        // is an ordinary identifier, and Kotlin puts the newline *after* an
+        // infix operator (`simpleIdentifier NL* rangeExpression`), never before
+        // it, so the statement really did end at the line break. A bare '/'
+        // means division, which is likewise not a catch_block.
+        if (!skip_whitespace_and_comments(lexer)) return true;
+        return lexer->lookahead != '(';
 
       // Don't insert a semicolon before finally (continues try_expression)
       case 'f':
-        return !scan_for_word(lexer, "inally", 6);
+        if (!scan_for_word(lexer, "inally", 6)) return true;
+        // Same as `catch` above: only a following block makes this a
+        // finally_block rather than an identifier.
+        if (!skip_whitespace_and_comments(lexer)) return true;
+        return lexer->lookahead != '{';
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier
