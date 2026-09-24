@@ -1,0 +1,117 @@
+================================================================================
+Actual primary constructor continues a generic class header
+================================================================================
+
+public actual class Server<TEngine : Engine, TConfig : Engine.Config>
+actual constructor(
+    rootConfig: Config,
+    factory: Factory<TEngine, TConfig>,
+    configure: TConfig.() -> Unit
+) {
+    fun work() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (platform_modifier))
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier)))
+      (type_parameter
+        (type_identifier)
+        (user_type
+          (type_identifier)
+          (type_identifier))))
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))
+            (type_projection
+              (user_type
+                (type_identifier))))))
+      (class_parameter
+        (simple_identifier)
+        (function_type
+          (receiver_type
+            (user_type
+              (type_identifier)))
+          (function_type_parameters)
+          (user_type
+            (type_identifier)))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Actual-prefixed calls remain separate statements after a class
+================================================================================
+
+class Empty
+actualCall()
+class Other
+asctual()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier))
+  (call_expression
+    (simple_identifier)
+    (call_suffix
+      (value_arguments)))
+  (class_declaration
+    (type_identifier))
+  (call_expression
+    (simple_identifier)
+    (call_suffix
+      (value_arguments))))
+
+================================================================================
+Newline casts retain continuation
+================================================================================
+
+val first = value
+as String
+val second = value
+as? String
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (as_expression
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (as_expression
+      (simple_identifier)
+      (user_type
+        (type_identifier)))))
