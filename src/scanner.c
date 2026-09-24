@@ -758,9 +758,18 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
         if (!scan_for_word(lexer, "lse", 3)) return true;
         return followed_by_arrow(lexer);
 
-      // Don't insert a semicolon before an as
+      // Continue casts and next-line actual primary constructors. Restrict
+      // constructor lookahead to class headers and keep identifier boundaries.
       case 'a':
-        return !scan_for_word(lexer, "s", 1);
+        skip(lexer);
+        if (lexer->lookahead == 's') return !check_word(lexer, "s", 1);
+        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_word(lexer, "ctual", 5)) {
+          while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
+          if (check_word(lexer, "constructor", 11)) return false;
+        }
+        return true;
 
       // Don't insert a semicolon before a where
       case 'w':
