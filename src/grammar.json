@@ -874,7 +874,7 @@
       ]
     },
     "_annotation_constructor_invocation": {
-      "type": "PREC",
+      "type": "PREC_DYNAMIC",
       "value": 1,
       "content": {
         "type": "SEQ",
@@ -7527,6 +7527,10 @@
     ],
     [
       "type_modifiers"
+    ],
+    [
+      "_annotation_constructor_invocation",
+      "_unescaped_annotation"
     ],
     [
       "not_nullable_type"
