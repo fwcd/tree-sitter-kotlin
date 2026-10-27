@@ -375,3 +375,112 @@ val x = 1
     (binding_pattern_kind)
     (variable_declaration (simple_identifier))
     (integer_literal)))
+
+==================
+Annotated function type
+==================
+
+fun f(content: @Composable () -> Unit) {}
+val g: (@Composable () -> Unit)? = null
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (user_type (type_identifier))))
+        (function_type
+          (function_type_parameters)
+          (user_type (type_identifier)))))
+    (function_body))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (nullable_type
+        (parenthesized_type
+          (type_modifiers
+            (annotation
+              (user_type (type_identifier))))
+          (function_type
+            (function_type_parameters)
+            (user_type (type_identifier))))
+        (quest)))
+    (null_literal)))
+
+==================
+Annotated function type with parameters
+==================
+
+fun f(content: @Composable (Int) -> Unit) {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (user_type (type_identifier))))
+        (function_type
+          (function_type_parameters
+            (user_type (type_identifier)))
+          (user_type (type_identifier)))))
+    (function_body)))
+
+==================
+Type annotation with arguments before a function type
+==================
+
+fun f(content: @Composable() (Int) -> Unit) {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (constructor_invocation
+              (user_type (type_identifier))
+              (value_arguments))))
+        (function_type
+          (function_type_parameters
+            (user_type (type_identifier)))
+          (user_type (type_identifier)))))
+    (function_body)))
+
+==================
+Type annotation with arguments after whitespace
+==================
+
+fun f(name: @Named ("x") String) {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (constructor_invocation
+              (user_type (type_identifier))
+              (value_arguments
+                (value_argument
+                  (string_literal (string_content)))))))
+        (user_type (type_identifier))))
+    (function_body)))

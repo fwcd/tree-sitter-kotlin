@@ -66,10 +66,10 @@ module.exports = grammar({
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
 
-    // @Type(... — in Kotlin, ( after annotation name is always constructor args.
-    // Resolved via prec(1) on _annotation_constructor_invocation so the parser
-    // always shifts (consuming '(' as value_arguments) rather than reducing
-    // (completing user_type). Scoped to annotations only.
+    // @Type(... — `(` after an annotation name is usually constructor args, but
+    // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
+    // conflict below, with prec.dynamic on _annotation_constructor_invocation
+    // preferring constructor args when both readings parse.
 
     // "expect" as a plaform modifier conflicts with expect as an identifier
     [$.platform_modifier, $.simple_identifier],
@@ -144,6 +144,8 @@ module.exports = grammar({
 
     // ambiguity between type modifiers before an @
     [$.type_modifiers],
+    // `@A (` : annotation arguments, or (in a type) `@A` followed by a function type
+    [$._annotation_constructor_invocation, $._unescaped_annotation],
     // ambiguity between associating type modifiers
     [$.not_nullable_type],
 
@@ -332,12 +334,13 @@ module.exports = grammar({
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
 
-    // Annotation-scoped variant with prec(1) to resolve the shift/reduce
-    // conflict at `user_type • (` — always shift (consume `(` as constructor
-    // args). This matches Kotlin semantics where `(` after an annotation name
-    // is always constructor arguments. Scoped here rather than on the shared
-    // constructor_invocation to avoid changing delegation_specifier behavior.
-    _annotation_constructor_invocation: $ => prec(1, seq($.user_type, $.value_arguments)),
+    // Annotation-scoped variant: `user_type • (` is kept as a GLR conflict, and
+    // prec.dynamic(1) prefers constructor args when both readings parse, e.g.
+    // `@Suppress("X") (x as String)`. In a type, `@A () -> Unit` only parses
+    // with `(` as a function type, which kotlinc also accepts. Scoped
+    // here rather than on the shared constructor_invocation to avoid changing
+    // delegation_specifier behavior.
+    _annotation_constructor_invocation: $ => prec.dynamic(1, seq($.user_type, $.value_arguments)),
 
     _annotated_delegation_specifier: $ => seq(repeat($.annotation), $.delegation_specifier),
 
