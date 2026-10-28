@@ -486,7 +486,12 @@ module.exports = grammar({
       )
     ),
 
-    function_declaration: $ => prec.right(seq( // TODO
+    // `public fun Foo.bar() { … }` also parses as an infix expression, because
+    // the visibility modifiers are soft keywords in `simple_identifier`. Both
+    // readings are complete, so this is the dynamic-precedence decision #278
+    // made for `class` and `object` (issue #277); at the time `fun` was not
+    // reachable that way, and the GLR conflict on annotations made it so.
+    function_declaration: $ => prec.dynamic(1, prec.right(seq( // TODO
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
@@ -496,7 +501,7 @@ module.exports = grammar({
       optional(seq(":", $._type)),
       optional($.type_constraints),
       optional($.function_body)
-    )),
+    ))),
 
     function_body: $ => choice($._block, seq("=", $._expression)),
 
