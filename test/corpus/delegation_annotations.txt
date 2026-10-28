@@ -196,3 +196,57 @@ class C : I by impl
         (user_type
           (type_identifier))
         (simple_identifier)))))
+
+================================================================================
+Annotated supertype followed by a class body
+================================================================================
+
+class C : @A Base() {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (annotation
+      (user_type
+        (type_identifier)))
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Annotated explicit delegation followed by a class body
+================================================================================
+
+class C : @A I by impl {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (annotation
+      (user_type
+        (type_identifier)))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
