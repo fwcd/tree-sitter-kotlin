@@ -784,7 +784,7 @@
         "members": [
           {
             "type": "SYMBOL",
-            "name": "delegation_specifier"
+            "name": "_annotated_delegation_specifier"
           },
           {
             "type": "REPEAT",
@@ -797,7 +797,7 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "delegation_specifier"
+                  "name": "_annotated_delegation_specifier"
                 }
               ]
             }
@@ -7531,6 +7531,10 @@
     [
       "_annotation_constructor_invocation",
       "_unescaped_annotation"
+    ],
+    [
+      "_annotated_delegation_specifier",
+      "_type_modifier"
     ],
     [
       "not_nullable_type"
