@@ -53,7 +53,6 @@ typedef char Delimiter;
 typedef Array(Delimiter) Stack;
 
 static inline void stack_push(Stack *stack, char chr, bool triple, uint8_t prefix_len) {
-  if (stack->size + 1 >= TREE_SITTER_SERIALIZATION_BUFFER_SIZE) abort();
   array_push(stack, (Delimiter)(triple ? (chr + 1) : chr));
   array_push(stack, (Delimiter)prefix_len);
 }
@@ -70,6 +69,12 @@ static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
 // Scanner functions
 
 static bool scan_string_start(TSLexer *lexer, Stack *stack) {
+  // The stack is serialized whole, two bytes per open string, so it holds at
+  // most TREE_SITTER_SERIALIZATION_BUFFER_SIZE / 2 of them. When it is full,
+  // decline the string start before consuming any input; the parser then
+  // recovers with an ERROR node instead of the scanner aborting the host.
+  if (stack->size + 2 > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) return false;
+
   // Count leading '$' signs (the interpolation prefix). Capped at 255.
   uint8_t prefix_len = 0;
   while (lexer->lookahead == '$') {
