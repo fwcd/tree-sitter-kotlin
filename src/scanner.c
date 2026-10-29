@@ -575,7 +575,12 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       if (scan_for_word(lexer, "s", 1)) return false;
       return true;
     case 'w':
-      if (scan_for_word(lexer, "here", 4)) return false;
+      if (scan_for_word(lexer, "here", 4)) {
+        // Like `catch` and `finally`: `where` only continues a declaration
+        // when a type constraint follows. `where()` is a call to a function
+        // named where, and the statement before it has already ended.
+        return followed_by(lexer, '(');
+      }
       return true;
     case 'c':
       if (scan_for_word(lexer, "atch", 4)) {
@@ -903,7 +908,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
 
       // Don't insert a semicolon before a where
       case 'w':
-        return !scan_for_word(lexer, "here", 4);
+        if (!scan_for_word(lexer, "here", 4)) return true;
+        // Same follower rule as catch/finally: a real type-constraint clause
+        // never opens with '(' — `where()` is an ordinary call.
+        return followed_by(lexer, '(');
 
       // Don't insert a semicolon before `instanceof`, or before `internal`
       // when followed by `constructor` in a class declaration context.
