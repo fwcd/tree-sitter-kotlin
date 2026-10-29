@@ -6973,6 +6973,10 @@
         {
           "type": "SYMBOL",
           "name": "annotation"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_modifier"
         }
       ]
     },

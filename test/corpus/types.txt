@@ -657,3 +657,41 @@ class C<reified out T, @Ann out U>
               (type_identifier)))
           (variance_modifier))
         (type_identifier)))))
+
+================================================================================
+General modifiers on a type parameter
+================================================================================
+
+class C<abstract T>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (inheritance_modifier))
+        (type_identifier)))))
+
+================================================================================
+General modifiers alongside an annotation and variance on a type parameter
+================================================================================
+
+class C<abstract @A out T>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (inheritance_modifier)
+          (annotation
+            (user_type
+              (type_identifier)))
+          (variance_modifier))
+        (type_identifier)))))
