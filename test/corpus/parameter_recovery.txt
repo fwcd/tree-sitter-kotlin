@@ -1,0 +1,68 @@
+================================================================================
+Function parameter without an explicit type
+================================================================================
+
+fun test1(a) {}
+fun test2(a = 4) {}
+fun test3(@ann(parameter) a) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)))
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier))
+      (integer_literal))
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter_modifiers
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (simple_identifier))))))
+      (parameter
+        (simple_identifier)))
+    (function_body)))
+
+================================================================================
+val and var on a function parameter
+================================================================================
+
+fun f(val x: Int = 1) {}
+fun g(var y: String) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (binding_pattern_kind)
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (integer_literal))
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (binding_pattern_kind)
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body)))

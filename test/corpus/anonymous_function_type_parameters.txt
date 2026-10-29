@@ -1,0 +1,45 @@
+================================================================================
+Type parameters on an anonymous function
+================================================================================
+
+val x = fun <T>(a: T): T = a
+val y = fun T.<A>(x: T): T = x
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (anonymous_function
+      (type_parameters
+        (type_parameter
+          (type_identifier)))
+      (function_value_parameters
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier))
+      (function_body
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (anonymous_function
+      (type_identifier)
+      (type_parameters
+        (type_parameter
+          (type_identifier)))
+      (function_value_parameters
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (user_type
+        (type_identifier))
+      (function_body
+        (simple_identifier)))))
