@@ -2,13 +2,18 @@
   "schemaVersion": 1,
   "fixturesCommit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
   "positiveInventoryPairs": 447,
-  "comparedFixtures": 438,
-  "fixtureContentHash": "b8e2bf76935d2c8e688b5eae141a196f0ed7bf129d004b4e1ed83ec7b70ef644",
+  "comparedFixtures": 436,
+  "fixtureContentHash": "946c62787d7d902c2881055f669ad81602fcee998bd5844f25c194bc329e4354",
   "parser": {
     "src/parser.c": "0f24692a3861153cc5a2f2546e3890df8568b350c28ac42390cb65e128918722",
     "src/scanner.c": "08bd0f1da5f32d07f019f71a6ed559d9aa4346970ddde176cd731a524b17016c"
   },
   "excluded": [
+    {
+      "id": "companionBlocks/mixOfRegularAndStaticCompanionMethods",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set."
+    },
     {
       "id": "companionBlocks/mixOfRegularAndStaticMethods",
       "policy": "experimental-syntax-v1",
@@ -16,6 +21,11 @@
     },
     {
       "id": "companionBlocks/smoke",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set."
+    },
+    {
+      "id": "companionExtension",
       "policy": "experimental-syntax-v1",
       "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set."
     },
@@ -489,8 +499,6 @@
     "annotation/Annotations",
     "annotation/modifiersMigration/newModifiers",
     "annotation/values/arraysWithNonConstantValue",
-    "companionBlocks/mixOfRegularAndStaticCompanionMethods",
-    "companionExtension",
     "destructuring/danglingAnnotation",
     "examples/util/Comparison",
     "greatSyntacticShift/nullableTypes",
