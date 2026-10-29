@@ -1,0 +1,4304 @@
+================================================================================
+Primary constructor / minimal-reproductions-0-preceding_line_comment
+================================================================================
+
+actual class A
+// c
+actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (line_comment)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-1-preceding_block_comment
+================================================================================
+
+actual class A
+/* c */
+actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-2-preceding_nested_comment
+================================================================================
+
+actual class A
+/* outer /* inner */ */
+actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-3-preceding_line_and_block
+================================================================================
+
+actual class A
+// c
+/* c */
+actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (line_comment)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-4-between_block_comment
+================================================================================
+
+actual class A
+actual /* c */ constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-5-between_line_comment
+================================================================================
+
+actual class A
+actual // c
+constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (line_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-6-between_nested_comment
+================================================================================
+
+actual class A
+actual /* outer /* inner */ */ constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-7-between_newline
+================================================================================
+
+actual class A
+actual
+constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-8-between_crlf
+================================================================================
+
+actual class A
+actual
+constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-9-between_public
+================================================================================
+
+actual class A
+actual public constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-10-between_private
+================================================================================
+
+actual class A
+actual private constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-11-between_protected
+================================================================================
+
+actual class A
+actual protected constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-12-between_internal
+================================================================================
+
+actual class A
+actual internal constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-13-annotation_before_actual
+================================================================================
+
+actual class A
+@Anno actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier)))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-14-annotation_between
+================================================================================
+
+actual class A
+actual @Anno constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (user_type
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-15-preceding_comment_same_line
+================================================================================
+
+actual class A
+/* c */ actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-16-preceding_line_then_inline_block
+================================================================================
+
+actual class A
+// c
+/* c */ actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (line_comment)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-17-between_line_and_block
+================================================================================
+
+actual class A
+actual // c
+/* c */ constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (line_comment)
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-18-between_annotation_qualified
+================================================================================
+
+actual class A
+actual @com.example.Ann constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (user_type
+            (type_identifier)
+            (type_identifier)
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-19-between_annotation_arguments
+================================================================================
+
+actual class A
+actual @Ann(name = ")") constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (simple_identifier)
+                (string_literal
+                  (string_content)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-20-annotation_qualified_before_actual
+================================================================================
+
+actual class A
+@com.example.Ann actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier)
+            (type_identifier)
+            (type_identifier)))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-21-annotation_arguments_before_actual
+================================================================================
+
+actual class A
+@Ann(name = ")") actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (simple_identifier)
+                (string_literal
+                  (string_content))))))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-22-public_before_actual
+================================================================================
+
+actual class A
+public actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-23-private_before_actual
+================================================================================
+
+actual class A
+private actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-24-protected_before_actual
+================================================================================
+
+actual class A
+protected actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-25-internal_before_actual
+================================================================================
+
+actual class A
+internal actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-26-actual_public_annotation
+================================================================================
+
+actual class A
+actual public @Ann constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (visibility_modifier)
+        (annotation
+          (user_type
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-27-actual_annotation_public
+================================================================================
+
+actual class A
+actual @Ann public constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (user_type
+            (type_identifier)))
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-28-between_newline_public
+================================================================================
+
+actual class A
+actual
+public constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (visibility_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-29-bare_cr_between
+================================================================================
+
+actual class A
+actualconstructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-30-preceding_nul_comment
+================================================================================
+
+actual class A
+/* c d */
+actual constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-31-between_nul_comment
+================================================================================
+
+actual class A
+actual /* c d */ constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / minimal-reproductions-32-between_comment_no_spaces
+================================================================================
+
+actual class A
+actual/* c */constructor(x: Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Primary constructor / extra-results-0-after_constructor_block
+================================================================================
+
+actual class A
+actual constructor /* c */ (x: Int) {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / extra-results-1-after_constructor_line
+================================================================================
+
+actual class A
+actual constructor // c
+(x: Int) {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (line_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / extra-results-2-after_constructor_nested
+================================================================================
+
+actual class A
+actual constructor /* outer /* inner */ */ (x: Int) {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / extra-results-3-after_constructor_nul
+================================================================================
+
+actual class A
+actual constructor /* c d */ (x: Int) {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / extra-results-4-after_constructor_newline
+================================================================================
+
+actual class A
+actual constructor
+(x: Int) {
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / unicode-cli-results-1-_
+================================================================================
+
+fun f() {
+    class A
+    actual constructor_ 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / unicode-cli-results-2-1
+================================================================================
+
+fun f() {
+    class A
+    actual constructor1 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / unicode-cli-results-3-é
+================================================================================
+
+fun f() {
+    class A
+    actual constructoré 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / unicode-cli-results-5-Ж
+================================================================================
+
+fun f() {
+    class A
+    actual constructorЖ 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / unicode-cli-results-6-名
+================================================================================
+
+fun f() {
+    class A
+    actual constructor名 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / unicode-cli-results-7-١
+================================================================================
+
+fun f() {
+    class A
+    actual constructor١ 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / unicode-cli-results-8-𝐀
+================================================================================
+
+fun f() {
+    class A
+    actual constructor𝐀 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / unicode-cli-results-9-λX
+================================================================================
+
+fun f() {
+    class A
+    actual constructorλX 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / trivia-0-0
+================================================================================
+
+actual class A 
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-0-1
+================================================================================
+
+actual class A
+internal  actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-0-2
+================================================================================
+
+actual class A
+internal actual  constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-0-3
+================================================================================
+
+actual class A
+internal actual constructor  (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-1-0
+================================================================================
+
+actual class A
+
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-1-1
+================================================================================
+
+actual class A
+internal
+ actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-1-2
+================================================================================
+
+actual class A
+internal actual
+ constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-1-3
+================================================================================
+
+actual class A
+internal actual constructor
+ (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-2-0
+================================================================================
+
+actual class A
+
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-2-1
+================================================================================
+
+actual class A
+internal
+ actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-2-2
+================================================================================
+
+actual class A
+internal actual
+ constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-2-3
+================================================================================
+
+actual class A
+internal actual constructor
+ (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-3-0
+================================================================================
+
+actual class A
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-3-1
+================================================================================
+
+actual class A
+internal actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-3-2
+================================================================================
+
+actual class A
+internal actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-3-3
+================================================================================
+
+actual class A
+internal actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-4-0
+================================================================================
+
+actual class A/* c */
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-4-1
+================================================================================
+
+actual class A
+internal/* c */ actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (multiline_comment)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-4-2
+================================================================================
+
+actual class A
+internal actual/* c */ constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-4-3
+================================================================================
+
+actual class A
+internal actual constructor/* c */ (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-5-0
+================================================================================
+
+actual class A/* c d */
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-5-1
+================================================================================
+
+actual class A
+internal/* c d */ actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (multiline_comment)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-5-2
+================================================================================
+
+actual class A
+internal actual/* c d */ constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-5-3
+================================================================================
+
+actual class A
+internal actual constructor/* c d */ (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-6-0
+================================================================================
+
+actual class A/* a /* b */ c */
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-6-1
+================================================================================
+
+actual class A
+internal/* a /* b */ c */ actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (multiline_comment)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-6-2
+================================================================================
+
+actual class A
+internal actual/* a /* b */ c */ constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-6-3
+================================================================================
+
+actual class A
+internal actual constructor/* a /* b */ c */ (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-7-0
+================================================================================
+
+actual class A// c
+
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (line_comment)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-7-1
+================================================================================
+
+actual class A
+internal// c
+ actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (line_comment)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-7-2
+================================================================================
+
+actual class A
+internal actual// c
+ constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (line_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-7-3
+================================================================================
+
+actual class A
+internal actual constructor// c
+ (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (line_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-8-0
+================================================================================
+
+actual class A
+// c
+/* a /* b d */ c */
+
+internal
+actual
+constructor
+(x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (line_comment)
+    (multiline_comment)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-8-1
+================================================================================
+
+actual class A
+internal
+// c
+/* a /* b d */ c */
+ actual constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (line_comment)
+        (multiline_comment)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-8-2
+================================================================================
+
+actual class A
+internal actual
+// c
+/* a /* b d */ c */
+ constructor (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (line_comment)
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / trivia-8-3
+================================================================================
+
+actual class A
+internal actual constructor
+// c
+/* a /* b d */ c */
+ (x: Int) : B { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (line_comment)
+      (multiline_comment)
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Primary constructor / annotation-0-0
+================================================================================
+
+actual class A
+@A internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier)))
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-1-1
+================================================================================
+
+actual class A
+internal @com.example.A actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (annotation
+          (user_type
+            (type_identifier)
+            (type_identifier)
+            (type_identifier)))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-2-2
+================================================================================
+
+actual class A
+internal actual @`A)` constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier)
+        (annotation
+          (user_type
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-3-0
+================================================================================
+
+actual class A
+@λ internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier)))
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-4-1
+================================================================================
+
+actual class A
+internal @A(")") actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content))))))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-5-2
+================================================================================
+
+actual class A
+internal actual @A(')') constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (character_literal))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-6-0
+================================================================================
+
+actual class A
+@A(""" ) """) internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content))))))
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-7-1
+================================================================================
+
+actual class A
+internal @A(f(")", nested = listOf(1, 2)), arrayOf("]")) actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments
+                      (value_argument
+                        (string_literal
+                          (string_content)))
+                      (value_argument
+                        (simple_identifier)
+                        (call_expression
+                          (simple_identifier)
+                          (call_suffix
+                            (value_arguments
+                              (value_argument
+                                (integer_literal))
+                              (value_argument
+                                (integer_literal))))))))))
+              (value_argument
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments
+                      (value_argument
+                        (string_literal
+                          (string_content))))))))))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-8-2
+================================================================================
+
+actual class A
+internal actual @A("${f(")")}") constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (interpolation_expression_start)
+                  (interpolated_expression
+                    (call_expression
+                      (simple_identifier)
+                      (call_suffix
+                        (value_arguments
+                          (value_argument
+                            (string_literal
+                              (string_content)))))))
+                  (interpolation_expression_end)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-9-0
+================================================================================
+
+actual class A
+@A($$""" $${f(")")} """) internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content)
+                  (interpolation_expression_start)
+                  (interpolated_expression
+                    (call_expression
+                      (simple_identifier)
+                      (call_suffix
+                        (value_arguments
+                          (value_argument
+                            (string_literal
+                              (string_content)))))))
+                  (interpolation_expression_end)
+                  (string_content))))))
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-10-1
+================================================================================
+
+actual class A
+internal @A(/* a /* b d */ c */ ")") actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (multiline_comment)
+              (value_argument
+                (string_literal
+                  (string_content))))))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-11-2
+================================================================================
+
+actual class A
+internal actual @[A B(")")] constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier)
+        (annotation
+          (user_type
+            (type_identifier))
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-12-0
+================================================================================
+
+actual class A
+@com /* c */ . example /* c */ . A internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (user_type
+            (type_identifier)
+            (multiline_comment)
+            (type_identifier)
+            (multiline_comment)
+            (type_identifier)))
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-12-1
+================================================================================
+
+actual class A
+internal @com /* c */ . example /* c */ . A actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (annotation
+          (user_type
+            (type_identifier)
+            (multiline_comment)
+            (type_identifier)
+            (multiline_comment)
+            (type_identifier)))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-12-2
+================================================================================
+
+actual class A
+internal actual @com /* c */ . example /* c */ . A constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier)
+        (annotation
+          (user_type
+            (type_identifier)
+            (multiline_comment)
+            (type_identifier)
+            (multiline_comment)
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-13-1
+================================================================================
+
+actual class A
+internal @A< X, Y >() actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)))
+                (type_projection
+                  (user_type
+                    (type_identifier)))))
+            (value_arguments)))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-14-2
+================================================================================
+
+actual class A
+internal actual @A(value = `f)`()) constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (simple_identifier)
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments))))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-15-0
+================================================================================
+
+actual class A
+@A(value = 1 / 2) internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (simple_identifier)
+                (multiplicative_expression
+                  (integer_literal)
+                  (integer_literal))))))
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / annotation-16-1
+================================================================================
+
+actual class A
+internal @A(value = ")\"") actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (simple_identifier)
+                (string_literal
+                  (string_content))))))
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-360
+================================================================================
+
+class A
+// c
+{}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (line_comment)
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-361
+================================================================================
+
+class A
+// c
+(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (line_comment)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-362
+================================================================================
+
+class A
+// c
+: B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (line_comment)
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-363
+================================================================================
+
+class A
+// c
+<T> {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (line_comment)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-364
+================================================================================
+
+class A<T>
+// c
+where T : B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (line_comment)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / local-following-365
+================================================================================
+
+fun f() {
+class A
+// c
+actual()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (line_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Primary constructor / local-following-367
+================================================================================
+
+fun f() {
+class A
+// c
+val x = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (line_comment)
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / local-following-368
+================================================================================
+
+fun f() {
+class A
+// c
+class B {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (line_comment)
+        (class_declaration
+          (type_identifier)
+          (class_body))))))
+
+================================================================================
+Primary constructor / header-continuation-369
+================================================================================
+
+class A
+/* c */{}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-370
+================================================================================
+
+class A
+/* c */(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-371
+================================================================================
+
+class A
+/* c */: B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-372
+================================================================================
+
+class A
+/* c */<T> {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-373
+================================================================================
+
+class A<T>
+/* c */where T : B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (multiline_comment)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / local-following-374
+================================================================================
+
+fun f() {
+class A
+/* c */actual()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (multiline_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Primary constructor / local-following-376
+================================================================================
+
+fun f() {
+class A
+/* c */val x = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (multiline_comment)
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / local-following-377
+================================================================================
+
+fun f() {
+class A
+/* c */class B {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (multiline_comment)
+        (class_declaration
+          (type_identifier)
+          (class_body))))))
+
+================================================================================
+Primary constructor / header-continuation-378
+================================================================================
+
+class A/* c */{}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-379
+================================================================================
+
+class A/* c */(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-380
+================================================================================
+
+class A/* c */: B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-381
+================================================================================
+
+class A/* c */<T> {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-382
+================================================================================
+
+class A<T>/* c */where T : B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (multiline_comment)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-383
+================================================================================
+
+class A
+/* a /* b d */ c */{}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-384
+================================================================================
+
+class A
+/* a /* b d */ c */(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-385
+================================================================================
+
+class A
+/* a /* b d */ c */: B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-386
+================================================================================
+
+class A
+/* a /* b d */ c */<T> {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (multiline_comment)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (class_body)))
+
+================================================================================
+Primary constructor / header-continuation-387
+================================================================================
+
+class A<T>
+/* a /* b d */ c */where T : B {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (multiline_comment)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / local-following-388
+================================================================================
+
+fun f() {
+class A
+/* a /* b d */ c */actual()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (multiline_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Primary constructor / local-following-390
+================================================================================
+
+fun f() {
+class A
+/* a /* b d */ c */val x = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (multiline_comment)
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+Primary constructor / local-following-391
+================================================================================
+
+fun f() {
+class A
+/* a /* b d */ c */class B {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier))
+        (multiline_comment)
+        (class_declaration
+          (type_identifier)
+          (class_body))))))
+
+================================================================================
+Primary constructor / modifier-abstract
+================================================================================
+
+actual class A
+abstract actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (inheritance_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-actual
+================================================================================
+
+actual class A
+actual actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-annotation
+================================================================================
+
+actual class A
+annotation actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-const
+================================================================================
+
+actual class A
+const actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (property_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-crossinline
+================================================================================
+
+actual class A
+crossinline actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (parameter_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-data
+================================================================================
+
+actual class A
+data actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-expect
+================================================================================
+
+actual class A
+expect actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-external
+================================================================================
+
+actual class A
+external actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-final
+================================================================================
+
+actual class A
+final actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (inheritance_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-infix
+================================================================================
+
+actual class A
+infix actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-inline
+================================================================================
+
+actual class A
+inline actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-inner
+================================================================================
+
+actual class A
+inner actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-internal
+================================================================================
+
+actual class A
+internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-lateinit
+================================================================================
+
+actual class A
+lateinit actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (member_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-noinline
+================================================================================
+
+actual class A
+noinline actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (parameter_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-open
+================================================================================
+
+actual class A
+open actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (inheritance_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-operator
+================================================================================
+
+actual class A
+operator actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-override
+================================================================================
+
+actual class A
+override actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (member_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-private
+================================================================================
+
+actual class A
+private actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-protected
+================================================================================
+
+actual class A
+protected actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-public
+================================================================================
+
+actual class A
+public actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-sealed
+================================================================================
+
+actual class A
+sealed actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-suspend
+================================================================================
+
+actual class A
+suspend actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-tailrec
+================================================================================
+
+actual class A
+tailrec actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-value
+================================================================================
+
+actual class A
+value actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-vararg
+================================================================================
+
+actual class A
+vararg actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (parameter_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / use-site-group-0
+================================================================================
+
+actual class A
+actual @field:[A B(")")] constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (use_site_target)
+          (user_type
+            (type_identifier))
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / use-site-group-1
+================================================================================
+
+actual class A
+actual @param:[A B] constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (use_site_target)
+          (user_type
+            (type_identifier))
+          (user_type
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / use-site-group-2
+================================================================================
+
+actual class A
+actual @param:A(")") constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (use_site_target)
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
