@@ -186,6 +186,10 @@ module.exports = grammar({
 
     // ambiguity caused by 'suspend'
     [$.function_modifier, $.simple_identifier],
+    // `fun f(suspend x: () -> Unit)`: with every modifier allowed in a
+    // parameter list, `suspend` can start either a parameter modifier or the
+    // parameter's type. Nothing tells them apart until the type is read.
+    [$._type_modifier, $.function_modifier],
     [$._type_modifier, $.simple_identifier],
     [$.delegation_specifier, $._type_modifier, $.simple_identifier],
     [$.anonymous_function, $.function_modifier],
@@ -1473,7 +1477,12 @@ module.exports = grammar({
       $._modifier
     )),
 
-    parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
+    // `fun f(data x: Int) {}`. Kotlin's parser accepts any modifier in a
+    // parameter list and leaves WRONG_MODIFIER_TARGET to the compiler; PSI
+    // builds a VALUE_PARAMETER whose MODIFIER_LIST holds the stray modifier.
+    // Restricting this to parameter modifiers turned the whole parameter list
+    // into an error instead.
+    parameter_modifiers: $ => repeat1(choice($.annotation, $._modifier)),
 
     _modifier: $ => choice(
       $.class_modifier,
