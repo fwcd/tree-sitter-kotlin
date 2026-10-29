@@ -70,8 +70,8 @@ inspection. Relative paths and namespaces preserve colliding filenames.
 
 All 438 eligible inputs are checked into `test/corpus/jetbrains/`:
 
-- 373 parse-clean fixtures have structural CST expectations.
-- 65 remaining parser failures use Tree-sitter's explicit `:error` attribute.
+- 399 parse-clean fixtures have structural CST expectations.
+- 39 remaining parser failures use Tree-sitter's explicit `:error` attribute.
   They run in CI and are listed in `test/jetbrains-fixtures.json`; they are not
   skipped. A fixture that starts parsing cleanly fails its error expectation
   until regeneration promotes it to a structural test.

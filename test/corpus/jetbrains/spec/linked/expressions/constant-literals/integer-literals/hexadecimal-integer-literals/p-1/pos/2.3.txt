@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/hexadecimal-integer-literals/p-1/pos/2.3
-:error
 ==================
 
 val value = 0x3_c_c_c_7_8_____
@@ -11,3 +10,5 @@ val value = 0X______________
 val value = 0X0_
 val value = 0X1e_
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)))

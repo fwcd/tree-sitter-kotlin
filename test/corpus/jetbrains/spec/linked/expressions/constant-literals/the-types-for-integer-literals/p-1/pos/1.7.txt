@@ -1,8 +1,9 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/the-types-for-integer-literals/p-1/pos/1.7
-:error
 ==================
 
 val value = 0bL
 val value = 0BL
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))))

@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/the-types-for-integer-literals/p-1/pos/1.2
-:error
 ==================
 
 val value = 1234_5678_90L
@@ -18,3 +17,5 @@ val value = 1_____________L
 val value = 9____________0_L
 val value = 1_______________________________________________________________________________________________________________________________________________________L
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))))

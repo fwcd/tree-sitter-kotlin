@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/decimal-integer-literals/p-1/pos/2.2
-:error
 ==================
 
 val value = 1_
@@ -9,3 +8,5 @@ val value = 1_____________
 val value = 9____________0_
 val value = 1_______________________________________________________________________________________________________________________________________________________
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)))

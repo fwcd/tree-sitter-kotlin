@@ -1,8 +1,9 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/hexadecimal-integer-literals/p-1/pos/1.2
-:error
 ==================
 
 val value = 0x
 val value = 0X
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (hex_literal)))

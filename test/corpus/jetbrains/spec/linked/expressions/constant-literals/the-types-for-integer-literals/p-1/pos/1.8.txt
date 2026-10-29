@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/the-types-for-integer-literals/p-1/pos/1.8
-:error
 ==================
 
 val value = 0b0_00_01_11_11_00_00L
@@ -25,3 +24,5 @@ val value = 0B______________L
 val value = 0B0_L
 val value = 0b10_L
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (bin_literal))))

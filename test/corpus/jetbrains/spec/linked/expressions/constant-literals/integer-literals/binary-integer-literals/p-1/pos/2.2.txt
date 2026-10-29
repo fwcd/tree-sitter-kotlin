@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/binary-integer-literals/p-1/pos/2.2
-:error
 ==================
 
 val value = 0b_000111010001111
@@ -8,3 +7,5 @@ val value = 0b_______011001
 val value = 0B_0_1_0_1_1_0_0
 val value = 0b_
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)))

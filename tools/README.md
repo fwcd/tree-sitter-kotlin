@@ -60,8 +60,8 @@ which also detects missing anonymous tokens absent from a printed tree. Binding
 or verdict unavailability fails generation. It creates a corpus case for every
 eligible fixture:
 
-- 373 parse-clean fixtures currently have CST expectations.
-- 65 known parser failures currently use `:error` and an empty CST expectation.
+- 399 parse-clean fixtures currently have CST expectations.
+- 39 known parser failures currently use `:error` and an empty CST expectation.
 
 Both categories run under `npm test`. Known failures are never silently omitted
 or marked `:skip`; a newly clean parse requires promotion to a structural test.

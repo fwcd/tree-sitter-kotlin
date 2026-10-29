@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: spec/linked/expressions/constant-literals/real-literals/p-4/pos/2.1
-:error
 ==================
 
 val value = 0_E0
@@ -23,3 +22,5 @@ val value = 00000000000000000000000000000000000000000000000000000000000000000000
 val value = 0_000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0____E-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 val value = 9999999999999999999999999999999999999999999_______________999999999999999999999999999999999999999999999.33333333333333333333333333333333333333333333333_333333333333333333333333333333333333333_e3_3f
 ---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)))
