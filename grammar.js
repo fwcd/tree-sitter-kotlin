@@ -273,9 +273,11 @@ module.exports = grammar({
     $._by_delegation_hint,
     $._primary_constructor_hint,
     $._callable_reference_quest,
+    $._comment_continuation_hint,
   ],
 
   extras: $ => [
+    $._comment_continuation_hint,
     $.line_comment,
     $.multiline_comment,
     /\s+/ // Whitespace
