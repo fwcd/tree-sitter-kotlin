@@ -270,6 +270,7 @@ module.exports = grammar({
     $._primary_constructor_hint,
     $._callable_reference_quest,
     $._comment_continuation_hint,
+    $._try_clause_hint,
   ],
 
   extras: $ => [
@@ -1482,7 +1483,10 @@ module.exports = grammar({
       )
     )),
 
+    // Non-emitted context flag for ASI: these keywords continue a statement
+    // only at a try-clause slot; elsewhere they are ordinary identifiers.
     catch_block: $ => seq(
+      optional($._try_clause_hint),
       "catch",
       "(",
       repeat($.annotation),
@@ -1494,7 +1498,7 @@ module.exports = grammar({
       $._block,
     ),
 
-    finally_block: $ => seq("finally", $._block),
+    finally_block: $ => seq(optional($._try_clause_hint), "finally", $._block),
 
     jump_expression: $ => choice(
       prec.right(PREC.RETURN_OR_THROW, seq("throw", $._expression)),
