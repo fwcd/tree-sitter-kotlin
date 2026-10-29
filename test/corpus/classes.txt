@@ -1393,3 +1393,344 @@ class C : Base() { class D : Base() { fun f() {} } }
             (simple_identifier)
             (function_value_parameters)
             (function_body)))))))
+
+================================================================================
+Leading semicolon in a class body
+================================================================================
+
+class C {;
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Class body containing only a semicolon
+================================================================================
+
+class C {;}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body)))
+
+================================================================================
+Leading semicolon in a class body with a supertype
+================================================================================
+
+class C : B() {;
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Leading semicolon in a function body
+================================================================================
+
+fun f() {;
+    g()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Leading semicolon in an object body
+================================================================================
+
+object O {;
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Leading semicolon in an interface body
+================================================================================
+
+interface I {;
+    fun f()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
+
+================================================================================
+Leading semicolon in an initializer block
+================================================================================
+
+class C {
+    init {;
+        g()
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (anonymous_initializer
+        (statements
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))
+
+================================================================================
+Leading semicolon in a lambda
+================================================================================
+
+val l = {;
+    g()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Leading semicolon after lambda parameters
+================================================================================
+
+val l = { x: Int ->;
+    g()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (lambda_parameters
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Leading semicolon in a companion object body
+================================================================================
+
+class C {
+    companion object {;
+        fun f() {}
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_object
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body)))))))
+
+================================================================================
+Leading semicolon in a getter body
+================================================================================
+
+val p: Int
+    get() {;
+        return 1
+    }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (getter
+    (function_body
+      (statements
+        (jump_expression
+          (integer_literal))))))
+
+================================================================================
+Leading semicolon in try, catch and finally blocks
+================================================================================
+
+fun f() {
+    try {;
+        g()
+    } catch (e: E) {;
+        h()
+    } finally {;
+        i()
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (try_expression
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (catch_block
+            (simple_identifier)
+            (user_type
+              (type_identifier))
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments)))))
+          (finally_block
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments))))))))))
+
+================================================================================
+Leading semicolon in a when entry body
+================================================================================
+
+fun f(x: Int) {
+    when (x) {
+        1 -> {;
+            g()
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            (simple_identifier))
+          (when_entry
+            (when_condition
+              (integer_literal))
+            (control_structure_body
+              (statements
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments)))))))))))
+
+================================================================================
+Leading semicolon in an object literal body
+================================================================================
+
+val o = object : B() {;
+    fun f() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments)))
+      (class_body
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))

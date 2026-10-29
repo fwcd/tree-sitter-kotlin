@@ -298,7 +298,18 @@ module.exports = grammar({
       $._class_parameters
     ),
 
-    class_body: $ => seq("{", optional($._class_member_declarations), "}"),
+    // A body may open with a single stray `;`, which kotlinc accepts:
+    //
+    //     class CancelledParentAttachTest : TestBase() {;
+    //
+    // as kotlinx-coroutines-reactive writes it. `_class_member_declarations`
+    // allows a separator between and after members but not before the first,
+    // so the leading one is spelled out here. It is the literal token rather
+    // than `$._semi`, deliberately: `_semi` is the ASI external token, and
+    // making it valid right after `{` would let the scanner emit one for the
+    // newline that opens every ordinary multi-line body. Two leading `;` stay
+    // an error, as in PSI.
+    class_body: $ => seq("{", optional(";"), optional($._class_member_declarations), "}"),
 
     _class_parameters: $ => seq(
       "(",
@@ -761,7 +772,7 @@ module.exports = grammar({
 
     control_structure_body: $ => choice($._block, $._statement),
 
-    _block: $ => prec(PREC.BLOCK, seq("{", optional($.statements), "}")),
+    _block: $ => prec(PREC.BLOCK, seq("{", optional(";"), optional($.statements), "}")),
 
     _loop_statement: $ => choice(
       $.for_statement,
@@ -1008,6 +1019,7 @@ module.exports = grammar({
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
       "{",
       optional(seq(optional($.lambda_parameters), "->")),
+      optional(";"),
       optional($.statements),
       "}"
     )),
