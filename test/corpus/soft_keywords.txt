@@ -180,3 +180,78 @@ fun foo() {
         (additive_expression
           (simple_identifier)
           (integer_literal))))))
+
+================================================================================
+catch as left operand of an additive expression after a newline
+================================================================================
+
+fun foo() {
+  bar()
+  catch + 1
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (additive_expression
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+finally as left operand of an additive expression after a newline
+================================================================================
+
+fun foo() {
+  bar()
+  finally + 1
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (additive_expression
+          (simple_identifier)
+          (integer_literal))))))
+
+================================================================================
+catch divided after a newline
+================================================================================
+
+fun foo() {
+  bar()
+  catch / 2
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (multiplicative_expression
+          (simple_identifier)
+          (integer_literal))))))
