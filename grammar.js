@@ -1242,20 +1242,17 @@ module.exports = grammar({
       optional("suspend"),
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
-      alias($._anonymous_function_value_parameters, $.function_value_parameters),
+      // Kotlin accepts type parameters on an anonymous function in two
+      // placements, and one slot here covers both: with no receiver
+      // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
+      // renders as TYPE_PARAMETER_LIST following the receiver dot). Keeping it
+      // to a single slot after the optional receiver avoids two optional
+      // placements competing for the same `<`.
+      optional($.type_parameters),
+      $.function_value_parameters,
       optional(seq(":", $._type)),
       optional($.function_body)
     )),
-
-    _anonymous_function_value_parameters: $ => seq(
-      "(", optional(seq(sep1($._anonymous_function_value_parameter, ","), optional(","))), ")"
-    ),
-
-    _anonymous_function_value_parameter: $ => seq(
-      optional($.parameter_modifiers),
-      alias($._optionally_typed_parameter, $.parameter),
-      optional(seq("=", $._expression))
-    ),
 
     _optionally_typed_parameter: $ => seq($.simple_identifier, optional(seq(":", $._type))),
 
