@@ -499,17 +499,6 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
-// After a word has matched, peek past optional
-// whitespace and comments for a following character. For catch/finally,
-// callers first require TRY_CLAUSE_HINT; a follower alone cannot distinguish
-// a real clause from a call to a soft-keyword identifier. Anything else means the word
-// was an ordinary identifier — `catch<Throwable> { }` is a generic call, and
-// the statement before it has already ended.
-static bool followed_by(TSLexer *lexer, int32_t expected) {
-  if (!skip_whitespace_and_comments(lexer)) return false;
-  return lexer->lookahead == expected;
-}
-
 // Check if the current position has a visibility modifier (public, private,
 // protected, internal) followed by horizontal whitespace and "constructor".
 // Uses skip() — safe to call speculatively since no token boundary is changed.
@@ -708,6 +697,31 @@ static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity) {
   return ascii && length > 0;
 }
 
+// After `where` has matched, decide whether a type-constraint clause follows:
+// `where T : Bound` or `where @Ann T : Bound`. Any other follower means `where`
+// is an ordinary identifier (`where?.let`, `where = x`, `where()`) and the
+// statement before it has already ended. Uses skip() only.
+static bool where_type_constraint_follows(TSLexer *lexer) {
+  if (!skip_whitespace_and_comments(lexer)) return false;
+  if (lexer->lookahead == '@') return true;
+  if (!constructor_word_char(lexer->lookahead)) return false;
+  while (constructor_word_char(lexer->lookahead)) skip(lexer);
+  if (!skip_whitespace_and_comments(lexer)) return false;
+  return lexer->lookahead == ':';
+}
+
+// Advance-only twin of where_type_constraint_follows for callers that must
+// re-read the text afterwards.
+static bool where_type_constraint_follows_adv(TSLexer *lexer, bool *newline) {
+  if (!constructor_trivia(lexer, newline)) return false;
+  if (lexer->lookahead == '@') return true;
+  char word[32] = {0};
+  constructor_word(lexer, word, sizeof(word));
+  if (word[0] == '\0') return false;
+  if (!constructor_trivia(lexer, newline)) return false;
+  return lexer->lookahead == ':';
+}
+
 static bool constructor_modifier(const char *word) {
   static const char *const words[] = {
     "public", "private", "protected", "internal", "actual", "expect",
@@ -882,7 +896,7 @@ static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
   // Match main's class-header boundaries: :: and [ start a statement, while
   // a lone colon continues delegation. Bare ( can still open a constructor.
   if (strcmp(first_word, "where") == 0)
-    continuation = constructor_trivia(lexer, &newline) && lexer->lookahead != '(';
+    continuation = where_type_constraint_follows_adv(lexer, &newline);
   if (first == ':') { advance(lexer); continuation = lexer->lookahead != ':'; }
   if (strcmp(first_word, "finally") == 0) {
     continuation = valid_symbols[TRY_CLAUSE_HINT];
@@ -932,10 +946,8 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       return true;
     case 'w':
       if (scan_for_word(lexer, "here", 4)) {
-        // Like `catch` and `finally`: `where` only continues a declaration
-        // when a type constraint follows. `where()` is a call to a function
-        // named where, and the statement before it has already ended.
-        return followed_by(lexer, '(');
+        // `where` only continues a declaration when a type constraint follows.
+        return !where_type_constraint_follows(lexer);
       }
       return true;
     case 'c':
@@ -977,7 +989,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_s
   if (strcmp(word, "as") == 0) return true;
   if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
   if (strcmp(word, "where") == 0) {
-    return constructor_trivia(lexer, &newline) && lexer->lookahead != '(';
+    return where_type_constraint_follows_adv(lexer, &newline);
   }
   if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) {
     return valid_symbols[TRY_CLAUSE_HINT];
@@ -1246,12 +1258,10 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       case 'a':
         return !scan_for_word(lexer, "s", 1);
 
-      // Don't insert a semicolon before a where
+      // Don't insert a semicolon before a where type-constraint clause
       case 'w':
         if (!scan_for_word(lexer, "here", 4)) return true;
-        // Same follower rule as catch/finally: a real type-constraint clause
-        // never opens with '(' — `where()` is an ordinary call.
-        return followed_by(lexer, '(');
+        return !where_type_constraint_follows(lexer);
 
       // Don't insert a semicolon before `instanceof`, or before `internal`
       // when followed by `constructor` in a class declaration context.

@@ -9,27 +9,28 @@ fun foo() {
 }
 
 ---
+
 (source_file
   (function_declaration
-  (simple_identifier)
-  (function_value_parameters)
-  (function_body
-    (statements
-    (property_declaration
-      (binding_pattern_kind)
-      (variable_declaration
-      (simple_identifier))
-      (call_expression
-      (simple_identifier)
-      (call_suffix
-        (value_arguments
-        (value_argument
-          (simple_identifier))))))
-    (postfix_expression
-      (indexing_expression
-      (simple_identifier)
-      (indexing_suffix
-        (integer_literal))))))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier))))))
+        (postfix_expression
+          (indexing_expression
+            (simple_identifier)
+            (indexing_suffix
+              (integer_literal))))))))
 
 ================================================================================
 by as a standalone identifier expression statement
@@ -300,3 +301,143 @@ class C(@A private val open:Int)
         (simple_identifier)
         (user_type
           (type_identifier))))))
+
+================================================================================
+where as a navigation receiver after a newline
+================================================================================
+
+fun build() {
+    append(" FROM ")
+    where?.let {
+        append(" WHERE ")
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content))))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments
+                        (value_argument
+                          (string_literal
+                            (string_content)))))))))))))))
+
+================================================================================
+where as an assignment target after a newline
+================================================================================
+
+fun f() {
+    op()
+    where = predicate
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (assignment
+          (directly_assignable_expression
+            (simple_identifier))
+          (simple_identifier))))))
+
+================================================================================
+where type constraint after a newline still continues the declaration
+================================================================================
+
+fun <T> f(x: T): T
+    where T : Comparable<T> = x
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))))))
+    (function_body
+      (simple_identifier))))
+
+================================================================================
+where type constraint with an annotated type parameter after a newline
+================================================================================
+
+fun <T> f(x: T): T
+    where @Ann T : Comparable<T> = x
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier))
+    (type_constraints
+      (type_constraint
+        (annotation
+          (user_type
+            (type_identifier)))
+        (type_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))))))
+    (function_body
+      (simple_identifier))))
