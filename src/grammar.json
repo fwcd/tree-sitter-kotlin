@@ -8018,10 +8018,6 @@
     ],
     [
       "_primary_expression",
-      "callable_reference"
-    ],
-    [
-      "_primary_expression",
       "_callable_reference_name"
     ],
     [
@@ -8258,11 +8254,6 @@
     [
       "_primary_expression",
       "_primary_expression_no_trailing_lambda"
-    ],
-    [
-      "_primary_expression",
-      "_primary_expression_no_trailing_lambda",
-      "callable_reference"
     ],
     [
       "_primary_expression",
