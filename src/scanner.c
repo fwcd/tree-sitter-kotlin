@@ -590,6 +590,21 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
     }
   }
 
+  // Characters that continue the previous expression across a newline.
+  //
+  // '(' and '[' are deliberately absent. Kotlin requires a call's '(' and an
+  // index's '[' to sit on the same line as what they apply to, so a line
+  // starting with one begins a new statement:
+  //
+  //     ftp.close()
+  //     (ftp.executor as ExecutorService).awaitTermination(1, SECONDS)
+  //
+  // is two statements, not `close()(...)`. Treating them as continuations
+  // merged the lines with no error node at all.
+  //
+  // '{' stays: `foo()` followed by `{ … }` on the next line is a trailing
+  // lambda, which is one expression — confirmed against the Kotlin PSI, as
+  // was every other character in this set.
   switch (lexer->lookahead) {
       case ',':
       case '.':
@@ -600,8 +615,6 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '<':
       case '=':
       case '{':
-      case '[':
-      case '(':
       case '?':
       case '|':
       case '&':
@@ -631,9 +644,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
           if (!skip_whitespace_and_comments(lexer)) return false;
           // Now check the next real token.
           switch (lexer->lookahead) {
+            // Same set as above; '(' and '[' start a new statement.
             case '.': case ',': case ':': case '*': case '%':
-            case '>': case '<': case '=': case '{': case '[':
-            case '(': case '?': case '|': case '&': case '/':
+            case '>': case '<': case '=': case '{':
+            case '?': case '|': case '&': case '/':
               return false;
             case '!':
               skip(lexer);
@@ -719,9 +733,10 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
           // after, the MULTILINE_COMMENT span would swallow the keyword
           // and the parser would never see it.
           switch (lexer->lookahead) {
+            // Same set as above; '(' and '[' start a new statement.
             case '.': case ',': case ':': case '%':
-            case '>': case '<': case '=': case '{': case '[':
-            case '(': case '?': case '|': case '&': case '/':
+            case '>': case '<': case '=': case '{':
+            case '?': case '|': case '&': case '/':
             case '*':
               // Continuation operator — produce MULTILINE_COMMENT.
               lexer->mark_end(lexer);

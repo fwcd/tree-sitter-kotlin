@@ -66,3 +66,303 @@ val ty x get () = 3
     (getter
       (function_body
         (integer_literal)))))
+
+================================================================================
+Newline before ( ends the statement
+================================================================================
+
+fun f(ftp: Ftp) {
+    ftp.close()
+    (ftp.executor as ExecutorService).awaitTermination(1, SECONDS)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (navigation_expression
+            (parenthesized_expression
+              (as_expression
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))
+                (user_type
+                  (type_identifier))))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (integer_literal))
+              (value_argument
+                (simple_identifier)))))))))
+
+================================================================================
+Newline before [ ends the statement
+================================================================================
+
+fun f(m: Map<Int, Int>) {
+    foo()
+    [1, 2].forEach { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))
+            (type_projection
+              (user_type
+                (type_identifier)))))))
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (navigation_expression
+            (collection_literal
+              (integer_literal)
+              (integer_literal))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal))))))))
+
+================================================================================
+Newline before ( after a line comment ends the statement
+================================================================================
+
+fun f() {
+    foo()
+    // note
+    (a as B).c()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (line_comment)
+        (call_expression
+          (navigation_expression
+            (parenthesized_expression
+              (as_expression
+                (simple_identifier)
+                (user_type
+                  (type_identifier))))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Newline before ( after a block comment ends the statement
+================================================================================
+
+fun f() {
+    foo()
+    /* note */
+    (a as B).c()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (multiline_comment)
+        (call_expression
+          (navigation_expression
+            (parenthesized_expression
+              (as_expression
+                (simple_identifier)
+                (user_type
+                  (type_identifier))))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+when entries whose conditions start with (
+================================================================================
+
+fun f(a: Boolean, b: Boolean) = when {
+    (a) -> 1
+    (b) -> 2
+    else -> 3
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)))
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_entry
+          (when_condition
+            (parenthesized_expression
+              (simple_identifier)))
+          (control_structure_body
+            (integer_literal)))
+        (when_entry
+          (when_condition
+            (parenthesized_expression
+              (simple_identifier)))
+          (control_structure_body
+            (integer_literal)))
+        (when_entry
+          (control_structure_body
+            (integer_literal)))))))
+
+================================================================================
+Newline before { is still a trailing lambda
+================================================================================
+
+fun f() = foo()
+    { it }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments)
+          (annotated_lambda
+            (lambda_literal
+              (statements
+                (simple_identifier)))))))))
+
+================================================================================
+Parenthesised continuation after an operator is unaffected
+================================================================================
+
+val x = a +
+    (b)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (additive_expression
+      (simple_identifier)
+      (parenthesized_expression
+        (simple_identifier)))))
+
+================================================================================
+Multi-line argument list is unaffected
+================================================================================
+
+fun f() = foo(
+    a,
+    b
+)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments
+            (value_argument
+              (simple_identifier))
+            (value_argument
+              (simple_identifier))))))))
+
+================================================================================
+Multi-line index is unaffected
+================================================================================
+
+fun f(m: Map<Int, Int>) = m[
+    1
+]
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))
+            (type_projection
+              (user_type
+                (type_identifier)))))))
+    (function_body
+      (indexing_expression
+        (simple_identifier)
+        (indexing_suffix
+          (integer_literal))))))
