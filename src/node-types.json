@@ -265,6 +265,10 @@
           "named": true
         },
         {
+          "type": "type_parameters",
+          "named": true
+        },
+        {
           "type": "user_type",
           "named": true
         }
@@ -4171,6 +4175,10 @@
         },
         {
           "type": "bin_literal",
+          "named": true
+        },
+        {
+          "type": "binding_pattern_kind",
           "named": true
         },
         {
