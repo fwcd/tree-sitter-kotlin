@@ -155,6 +155,13 @@ module.exports = grammar({
     // annotation it is an ordinary use-site target on the declaration. The two
     // readings are identical until the file's shape decides between them.
     [$.file_annotation, $.use_site_target],
+    // Before `package` a targeted annotation is a file annotation; elsewhere
+    // the same `@target:` prefix belongs to a declaration annotation.
+    [$.use_site_target, $.non_file_annotation_target],
+    // A modifier before `package` may belong to the package directive's own
+    // modifier list or to a declaration that follows; `@` after it is the
+    // first token that could tell them apart, and it does not.
+    [$.package_modifiers, $.modifiers],
     [$.parameter_modifier, $.simple_identifier],
     [$.modifiers],
     [$.parameter_modifiers],
@@ -315,16 +322,51 @@ module.exports = grammar({
     // annotation wins, which is what Kotlin's parser does — it only falls back
     // to the declaration's modifier list once another annotation precedes it,
     // and there this rule is not reachable.
-    file_annotation: $ => prec.dynamic(1, seq(
-      "@", "file", ":",
-      choice(
-        seq("[", repeat1($._unescaped_annotation), "]"),
-        $._unescaped_annotation
-      ),
-      optional($._semi)
-    )),
+    file_annotation: $ => choice(
+      prec.dynamic(1, seq(
+        "@", "file", ":",
+        $._file_annotation_body,
+        optional($._semi)
+      )),
+      // `@field:A package p`. Before the package directive Kotlin's parser
+      // puts a targeted annotation in the file annotation list whatever the
+      // target is — but only there. The same `@field:A` in front of a
+      // declaration belongs to that declaration, which PSI confirms:
+      // `@field:A val y = 1` is a PROPERTY with a MODIFIER_LIST, while
+      // `@field:A package p` is a FILE_ANNOTATION_LIST. So this reading is
+      // given a negative dynamic precedence and survives only where the
+      // declaration reading cannot complete, which is exactly the package
+      // case. Only `@file:` keeps the bare spelling, so its tree is unchanged.
+      prec.dynamic(-1, seq(
+        "@",
+        alias($.non_file_annotation_target, $.use_site_target),
+        $._file_annotation_body,
+        optional($._semi)
+      ))
+    ),
 
-    package_header: $ => seq("package", $.identifier, $._semi),
+    _file_annotation_body: $ => choice(
+      seq("[", repeat1($._unescaped_annotation), "]"),
+      $._unescaped_annotation
+    ),
+
+    // `public @[A] package p`. Unlike a targeted annotation, which becomes a
+    // file annotation, modifiers before `package` are part of the package
+    // directive itself: PSI puts them in a MODIFIER_LIST inside
+    // PACKAGE_DIRECTIVE. The compiler then reports the wrong target.
+    //
+    // The list has to begin with a real modifier. An annotation on its own in
+    // front of `package` is not a modifier list and not valid Kotlin: PSI
+    // reports `Expecting "file:" prefix for file annotations` for both
+    // `@A package p` and `@[A] package p`, while `public package p`,
+    // `public @A package p` and `public @[A] package p` are all clean. Those
+    // two therefore stay errors here.
+    package_header: $ => seq(
+      optional(alias($.package_modifiers, $.modifiers)),
+      "package", $.identifier, $._semi
+    ),
+
+    package_modifiers: $ => seq($._modifier, repeat(choice($.annotation, $._modifier))),
 
     import_list: $ => repeat1($.import_header),
 
@@ -1628,9 +1670,18 @@ module.exports = grammar({
       // the head of the file; once an ordinary annotation precedes it, as in
       // `@A @file:B` before a function, Kotlin's parser puts both entries in
       // the declaration's MODIFIER_LIST.
-      choice("all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate", "file"),
+      choice($._use_site_target_name, "file"),
       ":"
     ),
+
+    _use_site_target_name: $ => choice(
+      "all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate"
+    ),
+
+    // Only ever used through an alias to `use_site_target`, so that a file
+    // annotation can carry a non-`file` target without `@file:` itself
+    // gaining a child it never had.
+    non_file_annotation_target: $ => seq($._use_site_target_name, ":"),
 
     _unescaped_annotation: $ => choice(
       alias($._annotation_constructor_invocation, $.constructor_invocation),

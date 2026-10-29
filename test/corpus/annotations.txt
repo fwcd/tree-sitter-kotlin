@@ -666,3 +666,48 @@ fun f(){}
     (simple_identifier)
     (function_value_parameters)
     (function_body)))
+
+================================================================================
+Targeted annotation before a package directive
+================================================================================
+
+@field:A package p
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (use_site_target)
+    (user_type
+      (type_identifier)))
+  (package_header
+    (identifier
+      (simple_identifier))))
+
+================================================================================
+Modifiers on a package directive
+================================================================================
+
+public @[A] package p
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (package_header
+    (modifiers
+      (visibility_modifier)
+      (annotation
+        (user_type
+          (type_identifier))))
+    (identifier
+      (simple_identifier))))
+
+================================================================================
+An untargeted annotation alone before a package directive is an error
+:error
+================================================================================
+
+@A package p
+
+--------------------------------------------------------------------------------
+
