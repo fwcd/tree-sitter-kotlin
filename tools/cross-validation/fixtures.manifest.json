@@ -1,11 +1,11 @@
 {
   "schemaVersion": 3,
   "fixturesCommit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
-  "pairs": 438,
+  "pairs": 436,
   "positiveInventoryPairs": 447,
-  "files": 876,
-  "subdirectories": 56,
-  "contentHash": "b8e2bf76935d2c8e688b5eae141a196f0ed7bf129d004b4e1ed83ec7b70ef644",
+  "files": 872,
+  "subdirectories": 55,
+  "contentHash": "946c62787d7d902c2881055f669ad81602fcee998bd5844f25c194bc329e4354",
   "fixtures": [
     "AnonymousInitializer",
     "BabySteps",
@@ -145,8 +145,6 @@
     "anonymousReturnWithGenericType",
     "classMembers",
     "classObject",
-    "companionBlocks/mixOfRegularAndStaticCompanionMethods",
-    "companionExtension",
     "complicateLTGTE",
     "const",
     "contextParameters/annotatedContextParameterType",
@@ -449,6 +447,27 @@
   "psiValidOnly": true,
   "contextExclusions": [
     {
+      "id": "companionBlocks/mixOfRegularAndStaticCompanionMethods",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticCompanionMethods.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticCompanionMethods.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "1150ba8864ab9cc757845f6936d4faa71994100c966612210cd488e29371dbc8",
+      "goldenSha256": "a790f091f4b79d57c7a4be0c39021ebde862453cfd5d889bcb7e71e14ef64923",
+      "vendoredSha256": "1150ba8864ab9cc757845f6936d4faa71994100c966612210cd488e29371dbc8",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/companionBlocks/mixOfRegularAndStaticCompanionMethods.kt",
+        "golden": ".context-exclusions/companionBlocks/mixOfRegularAndStaticCompanionMethods.txt"
+      },
+      "feature": "CompanionBlocksAndExtensions"
+    },
+    {
       "id": "companionBlocks/mixOfRegularAndStaticMethods",
       "suite": "psi",
       "sourcePath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticMethods.kt",
@@ -487,6 +506,27 @@
       "artifacts": {
         "source": ".context-exclusions/companionBlocks/smoke.kt",
         "golden": ".context-exclusions/companionBlocks/smoke.txt"
+      },
+      "feature": "CompanionBlocksAndExtensions"
+    },
+    {
+      "id": "companionExtension",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionExtension.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionExtension.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "e8d936651ffcec8f569b4de492b83e9ed18163744fe61bcd6fe9b59168f3ed5f",
+      "goldenSha256": "93a927185c0bc50f564b5fd6e87fa18dc56ddd74f31f280c634cf361ea45dac2",
+      "vendoredSha256": "e8d936651ffcec8f569b4de492b83e9ed18163744fe61bcd6fe9b59168f3ed5f",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/companionExtension.kt",
+        "golden": ".context-exclusions/companionExtension.txt"
       },
       "feature": "CompanionBlocksAndExtensions"
     },
@@ -745,9 +785,9 @@
       ],
       "profile": "identity",
       "paired": 680,
-      "imported": 378,
+      "imported": 376,
       "rejectedPsiInvalid": 293,
-      "excludedContext": 9,
+      "excludedContext": 11,
       "unpairedSources": [],
       "skippedOtherGoldens": 1451
     },
@@ -2314,28 +2354,6 @@
       "sourceSha256": "3f8f873a26b7f0b2c44e8839c0d494f2a5953385c2e76c399adc738f99a622ff",
       "goldenSha256": "45e6b458c248751c6e6f940912633ca25fc6311a1ce96a2d2d880ec715894ec7",
       "vendoredSha256": "3f8f873a26b7f0b2c44e8839c0d494f2a5953385c2e76c399adc738f99a622ff"
-    },
-    "companionBlocks/mixOfRegularAndStaticCompanionMethods": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticCompanionMethods.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticCompanionMethods.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "1150ba8864ab9cc757845f6936d4faa71994100c966612210cd488e29371dbc8",
-      "goldenSha256": "a790f091f4b79d57c7a4be0c39021ebde862453cfd5d889bcb7e71e14ef64923",
-      "vendoredSha256": "1150ba8864ab9cc757845f6936d4faa71994100c966612210cd488e29371dbc8"
-    },
-    "companionExtension": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionExtension.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionExtension.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "e8d936651ffcec8f569b4de492b83e9ed18163744fe61bcd6fe9b59168f3ed5f",
-      "goldenSha256": "93a927185c0bc50f564b5fd6e87fa18dc56ddd74f31f280c634cf361ea45dac2",
-      "vendoredSha256": "e8d936651ffcec8f569b4de492b83e9ed18163744fe61bcd6fe9b59168f3ed5f"
     },
     "complicateLTGTE": {
       "suite": "psi",
