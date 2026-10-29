@@ -1,0 +1,24 @@
+==================
+JetBrains PSI: secondaryConstructors/enumParsing
+==================
+
+// COMPILATION_ERRORS
+
+enum class A {
+   abc1(1,2,3),
+   abc2(1,2,3) {},
+   abc3;
+
+   constructor(x: Int) {}
+
+   init {}
+
+   constructor(x: Int): this() {}
+   init {
+
+   }
+}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (enum_class_body (enum_entry (simple_identifier) (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)) (value_argument (integer_literal)))) (enum_entry (simple_identifier) (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)) (value_argument (integer_literal))) (class_body)) (enum_entry (simple_identifier)) (secondary_constructor (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))))) (anonymous_initializer) (secondary_constructor (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (constructor_delegation_call (value_arguments))) (anonymous_initializer))))

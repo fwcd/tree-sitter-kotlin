@@ -1,0 +1,14 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/binary-integer-literals/p-1/pos/2.3
+==================
+
+val value = 0b0_1_0_1_0_1_____
+val value = 0B1_______0_______1_______0_
+val value = 0B000000000_
+val value = 0b_
+val value = 0B______________
+val value = 0B0_
+val value = 0b10_
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (bin_literal)))

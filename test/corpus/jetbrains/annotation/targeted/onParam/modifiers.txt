@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: annotation/targeted/onParam/modifiers
+==================
+
+// COMPILATION_ERRORS
+
+public class A(public @param:Ann private @param:[Ann] val value: String)
+---
+
+(source_file (line_comment) (class_declaration (modifiers (visibility_modifier)) (type_identifier) (primary_constructor (class_parameter (modifiers (visibility_modifier) (annotation (use_site_target) (user_type (type_identifier))) (visibility_modifier) (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))))

@@ -1,5 +1,5 @@
 ==================
-specialNames
+JetBrains PSI: specialNames
 ==================
 
 object SpecialNames {
@@ -7,12 +7,4 @@ object SpecialNames {
 }
 ---
 
-(source_file
-  (object_declaration
-    (type_identifier)
-    (class_body
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier))
-        (integer_literal)))))
+(source_file (object_declaration (type_identifier) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)))))

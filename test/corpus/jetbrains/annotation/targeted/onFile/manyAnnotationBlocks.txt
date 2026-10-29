@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: annotation/targeted/onFile/manyAnnotationBlocks
+==================
+
+// COMPILATION_ERRORS
+
+@file:foo
+@file:[bar baz]
+package bar
+
+---
+
+(source_file (line_comment) (file_annotation (user_type (type_identifier))) (file_annotation (user_type (type_identifier)) (user_type (type_identifier))) (package_header (identifier (simple_identifier))))

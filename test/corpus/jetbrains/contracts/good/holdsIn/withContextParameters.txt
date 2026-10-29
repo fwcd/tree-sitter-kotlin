@@ -1,0 +1,24 @@
+==================
+JetBrains PSI: contracts/good/holdsIn/withContextParameters
+==================
+
+// LANGUAGE: +HoldsInContracts, +ContextParameters
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+// ISSUE: KT-79324, KT-79325
+import kotlin.contracts.*
+
+context(a: Boolean)
+inline fun conditionInContext(block: () -> Int) {
+    contract { a holdsIn block }
+    block()
+}
+
+context(noinline a: () -> Int)
+inline fun lambdaInContext(condition: Boolean): Unit {
+    contract { condition holdsIn a }            //KT-79324 should be ERROR_IN_CONTRACT_DESCRIPTION
+    a()
+}
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier)))) (function_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (simple_identifier) (simple_identifier) (simple_identifier))))))) (call_expression (simple_identifier) (call_suffix (value_arguments)))))) (function_declaration (modifiers (context_receiver (parameter_modifiers (parameter_modifier)) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (simple_identifier) (simple_identifier) (simple_identifier))))))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments)))))))

@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: recovery/objects/declarations/TypeParameterss
+:error
+==================
+
+// COMPILATION_ERRORS
+
+object Foo<T, R>
+
+object Foo<T, R> {}
+
+object Foo<T, R> : Bar {
+
+}
+---

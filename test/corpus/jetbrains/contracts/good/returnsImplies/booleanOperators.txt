@@ -1,0 +1,41 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/booleanOperators
+==================
+
+import kotlin.contracts.*
+
+@OptIn(ExperimentalContracts::class)
+fun myRequire(b: Boolean) {
+    contract {
+        returns() implies (b)
+    }
+    if (!b) throw IllegalStateException()
+}
+
+@OptIn(ExperimentalContracts::class)
+fun myRequireAnd(b1: Boolean, b2: Boolean) {
+    contract {
+        returns() implies (b1 && b2)
+    }
+    if (!(b1 && b2)) throw IllegalStateException()
+}
+
+@OptIn(ExperimentalContracts::class)
+fun myRequireOr(b1: Boolean, b2: Boolean) {
+    contract {
+        returns() implies (b1 || b2)
+    }
+    if (!(b1 || b2)) throw IllegalStateException()
+}
+
+@OptIn(ExperimentalContracts::class)
+fun myRequireNot(b: Boolean) {
+    contract {
+        returns() implies (!b)
+    }
+    if (b) throw IllegalStateException()
+}
+
+---
+
+(source_file (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (simple_identifier)))))))) (if_expression condition: (prefix_expression (simple_identifier)) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (conjunction_expression (simple_identifier) (simple_identifier))))))))) (if_expression condition: (prefix_expression (parenthesized_expression (conjunction_expression (simple_identifier) (simple_identifier)))) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (disjunction_expression (simple_identifier) (simple_identifier))))))))) (if_expression condition: (prefix_expression (parenthesized_expression (disjunction_expression (simple_identifier) (simple_identifier)))) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (prefix_expression (simple_identifier))))))))) (if_expression condition: (simple_identifier) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))

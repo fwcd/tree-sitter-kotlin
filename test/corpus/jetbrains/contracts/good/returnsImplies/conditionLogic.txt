@@ -1,0 +1,129 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/conditionLogic
+==================
+
+import kotlin.contracts.*
+
+@OptIn(ExperimentalContracts::class)
+fun test1(x: String?): Any? {
+    contract {
+        returnsNotNull() implies (!(x == null))
+    }
+
+    return x
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test2(x: String?): Any? {
+    contract {
+        returnsNotNull() implies (x is String)
+    }
+
+    return x
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test3(x: String?): Any? {
+    contract {
+        returnsNotNull() implies (x !is String)
+    }
+
+    return x
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test4(x: String?, y: String?): Any? {
+    contract {
+        returns(true) implies (x != null && y != null)
+    }
+
+    return x != null && y != null
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test5(x: Any?): Any? {
+    contract {
+        returns(true) implies (x != null || x is Any)
+    }
+
+    return x != null
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test6(x: Any?): Any? {
+    contract {
+        returns(true) implies (x is String? && x != null)
+    }
+
+    return x is String
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test7(x: Any?): Any? {
+    contract {
+        returns(true) implies (x is String? && x != null || x is Int)
+    }
+
+    return x is String
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test8(x: Any?): Any? {
+    contract {
+        returns(true) implies (x is String || x is Int)
+    }
+
+    return x is String || x is Int
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test9(x: Any?): Any? {
+    contract {
+        returns(true) implies (x is String || x is Int)
+    }
+
+    if(x is String){
+        return true
+    }
+    return x is Int
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test10(x: Any?): Any? {
+    contract {
+        returns(true) implies (x is Comparable<*> || x is CharSequence)
+    }
+
+    return x is String
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test11(x: Any?): Any? {
+    contract {
+        returns(true) implies (x is Comparable<*> && x is CharSequence)
+    }
+
+    return x is String
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test12(x: Any?): Any? {
+    contract {
+        returns(true) implies (x is Comparable<*> && (x is CharSequence || x is Number))
+    }
+
+    return x is String || x is Int
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test13(x: Any?): Any? {
+    contract {
+        returns(true) implies (!(x !is Comparable<*> || (x !is CharSequence && !(x is Number))))
+    }
+
+    return x is String || x is Int
+}
+
+---
+
+(source_file (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (prefix_expression (parenthesized_expression (equality_expression (simple_identifier) (null_literal))))))))))) (jump_expression (simple_identifier))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (check_expression (simple_identifier) (user_type (type_identifier)))))))))) (jump_expression (simple_identifier))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (check_expression (simple_identifier) (user_type (type_identifier)))))))))) (jump_expression (simple_identifier))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest))) (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (conjunction_expression (equality_expression (simple_identifier) (null_literal)) (equality_expression (simple_identifier) (null_literal)))))))))) (jump_expression (conjunction_expression (equality_expression (simple_identifier) (null_literal)) (equality_expression (simple_identifier) (null_literal))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (disjunction_expression (equality_expression (simple_identifier) (null_literal)) (check_expression (simple_identifier) (user_type (type_identifier))))))))))) (jump_expression (equality_expression (simple_identifier) (null_literal)))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (conjunction_expression (check_expression (simple_identifier) (nullable_type (user_type (type_identifier)) (quest))) (equality_expression (simple_identifier) (null_literal)))))))))) (jump_expression (check_expression (simple_identifier) (user_type (type_identifier))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (disjunction_expression (conjunction_expression (check_expression (simple_identifier) (nullable_type (user_type (type_identifier)) (quest))) (equality_expression (simple_identifier) (null_literal))) (check_expression (simple_identifier) (user_type (type_identifier))))))))))) (jump_expression (check_expression (simple_identifier) (user_type (type_identifier))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier))))))))))) (jump_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier)))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier))))))))))) (if_expression condition: (check_expression (simple_identifier) (user_type (type_identifier))) consequence: (control_structure_body (statements (jump_expression (boolean_literal))))) (jump_expression (check_expression (simple_identifier) (user_type (type_identifier))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))) (check_expression (simple_identifier) (user_type (type_identifier))))))))))) (jump_expression (check_expression (simple_identifier) (user_type (type_identifier))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (conjunction_expression (check_expression (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))) (check_expression (simple_identifier) (user_type (type_identifier))))))))))) (jump_expression (check_expression (simple_identifier) (user_type (type_identifier))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (conjunction_expression (check_expression (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))) (parenthesized_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier))))))))))))) (jump_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier)))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (prefix_expression (parenthesized_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))) (parenthesized_expression (conjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (prefix_expression (parenthesized_expression (check_expression (simple_identifier) (user_type (type_identifier))))))))))))))))) (jump_expression (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier)))))))))

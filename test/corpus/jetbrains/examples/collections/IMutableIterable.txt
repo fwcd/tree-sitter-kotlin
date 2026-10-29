@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: examples/collections/IMutableIterable
+==================
+
+// COMPILATION_ERRORS
+
+open class IMutableIterable<out T> : IIterable<T> {
+  fun mutableIterator() : IMutableIterator<T>
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (simple_identifier) (function_value_parameters) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))))

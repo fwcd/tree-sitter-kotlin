@@ -1,5 +1,5 @@
 ==================
-validKotlinFunInterface
+JetBrains PSI: validKotlinFunInterface
 ==================
 
 // COMPILATION_ERRORS
@@ -23,30 +23,4 @@ fun
 interface Foo
 ---
 
-(source_file
-  (line_comment)
-  (class_declaration
-    (type_identifier))
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (function_declaration
-        (simple_identifier)
-        (function_value_parameters))))
-  (class_declaration
-    (modifiers
-      (visibility_modifier))
-    (type_identifier))
-  (class_declaration
-    (modifiers
-      (annotation
-        (user_type
-          (type_identifier))))
-    (type_identifier))
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (class_declaration
-        (type_identifier))))
-  (class_declaration
-    (type_identifier)))
+(source_file (line_comment) (class_declaration (type_identifier)) (class_declaration (type_identifier) (class_body (function_declaration (simple_identifier) (function_value_parameters)))) (class_declaration (modifiers (visibility_modifier)) (type_identifier)) (class_declaration (modifiers (annotation (user_type (type_identifier)))) (type_identifier)) (class_declaration (type_identifier) (class_body (class_declaration (type_identifier)))) (class_declaration (type_identifier)))

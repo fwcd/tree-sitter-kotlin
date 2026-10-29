@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: script/ShebangWithPackage
+==================
+
+#!/usr/bin/env kotlin
+
+package test
+
+println(args)
+
+---
+
+(source_file (shebang_line) (package_header (identifier (simple_identifier))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))

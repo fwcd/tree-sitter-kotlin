@@ -1,0 +1,42 @@
+==================
+JetBrains PSI: contextParametersAndAnnotations
+==================
+
+// COMPILATION_ERRORS
+
+annotation class Ann
+
+context(_: String)
+@Ann
+fun foo1() {}
+
+@Ann
+context(_: String)
+fun foo2() {}
+
+private
+context(_: String)
+inline
+@Ann
+context(_: String)
+public
+fun foo3() {}
+
+context(_: String)
+@Ann
+val foo1: String get() = ""
+
+@Ann
+context(_: String)
+val foo2: String get() = ""
+
+private
+context(_: String)
+inline
+@Ann
+context(_: String)
+public
+val foo3: String get() = ""
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier)))) (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (modifiers (annotation (user_type (type_identifier))) (context_receiver (parameter (simple_identifier) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)) (simple_identifier) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier)))) (function_modifier) (annotation (user_type (type_identifier))) (context_receiver (parameter (simple_identifier) (user_type (type_identifier)))) (visibility_modifier)) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier)))) (annotation (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (string_literal)))) (property_declaration (modifiers (annotation (user_type (type_identifier))) (context_receiver (parameter (simple_identifier) (user_type (type_identifier))))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (string_literal)))) (simple_identifier) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier)))) (function_modifier) (annotation (user_type (type_identifier))) (context_receiver (parameter (simple_identifier) (user_type (type_identifier)))) (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (string_literal)))))

@@ -1,0 +1,42 @@
+==================
+JetBrains PSI: examples/Queue
+==================
+
+// COMPILATION_ERRORS
+
+class Queue<T> : IPushPop<T> {
+  private class Item<T>(val data : T, var next : Item<T>)
+
+  private var head : Item<T> = null
+  private var tail : Item<T> = null
+
+  override fun push(item : T) {
+    val i = Item(item)
+    if (tail == null) {
+      head = i
+      tail = head
+    } else {
+      tail.next = i
+      tail = i
+    }
+  }
+
+  override fun pop() =
+    if (head == null)
+      throw UnderflowException()
+    else {
+      val result = head.data
+      head = head.next
+      if (head == null)
+        tail = null
+      result
+    }
+
+  override val isEmpty
+    get() = head == null
+
+
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (class_declaration (modifiers (visibility_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier))) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (null_literal)) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (null_literal)) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))) (if_expression condition: (equality_expression (simple_identifier) (null_literal)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier)) (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier)))) alternative: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier) (navigation_suffix (simple_identifier))) (simple_identifier)) (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier)))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (if_expression condition: (equality_expression (simple_identifier) (null_literal)) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments))))) alternative: (control_structure_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (assignment (directly_assignable_expression (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (if_expression condition: (equality_expression (simple_identifier) (null_literal)) consequence: (control_structure_body (assignment (directly_assignable_expression (simple_identifier)) (null_literal)))) (simple_identifier)))))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (equality_expression (simple_identifier) (null_literal)))))))

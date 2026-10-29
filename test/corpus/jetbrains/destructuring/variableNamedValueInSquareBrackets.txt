@@ -1,0 +1,33 @@
+==================
+JetBrains PSI: destructuring/variableNamedValueInSquareBrackets
+==================
+
+// ISSUE: KT-83920
+// LANGUAGE: +NameBasedDestructuring
+
+data class Box(val key: String, val value: String)
+
+fun foo1(b: Box, l: List<Box>) {
+    val [key, value] = b
+    for ([key, value] in l) {}
+    l.forEach { [key, value] -> }
+}
+fun foo2(b: Box, l: List<Box>) {
+    [val key, val value] = b
+    for ([val key, val value] in l) {}
+    l.forEach { [val key, val value] -> }
+}
+fun foo3(b: Box, l: List<Box>) {
+    val (key, value) = b
+    for ((key, value) in l) {}
+    l.forEach { (key, value) -> }
+}
+fun foo4(b: Box, l: List<Box>) {
+    (val key, val value) = b
+    for ((val key, val value) in l) {}
+    l.forEach { (val key, val value) -> }
+}
+
+---
+
+(source_file (line_comment) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body (statements (property_declaration (binding_pattern_kind) (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))) (simple_identifier)) (for_statement (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))) (simple_identifier) (control_structure_body)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (lambda_parameters (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))))))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body (statements (destructuring_declaration (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier)) (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier)) (for_statement (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier)) (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier) (control_structure_body)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (lambda_parameters (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier)) (variable_declaration (binding_pattern_kind) (simple_identifier))))))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body (statements (property_declaration (binding_pattern_kind) (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))) (simple_identifier)) (for_statement (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))) (simple_identifier) (control_structure_body)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (lambda_parameters (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))))))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body (statements (destructuring_declaration (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier)) (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier)) (for_statement (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier)) (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier) (control_structure_body)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (lambda_parameters (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier)) (variable_declaration (binding_pattern_kind) (simple_identifier))))))))))))

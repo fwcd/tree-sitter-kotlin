@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: annotation/targeted/onField/simpleFieldAnnotation
+==================
+
+// COMPILATION_ERRORS
+
+class A {
+
+    @field:Deprecated
+    val a = "String"
+
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (property_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))))))

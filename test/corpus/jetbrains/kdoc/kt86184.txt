@@ -1,0 +1,17 @@
+==================
+JetBrains PSI: kdoc/kt86184
+==================
+
+/**
+ * `` foo bar [Foo]
+ *
+ * @param p  `int` param
+ * @return something [Int]
+ */
+fun foo(p: Int) {
+
+}
+
+---
+
+(source_file (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body)))

@@ -1,0 +1,24 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/the-types-for-integer-literals/p-1/pos/1.1
+==================
+
+val value = 1234567890L
+val value = 23456789L
+val value = 345678L
+val value = 4567L
+val value = 56L
+val value = 65L
+val value = 7654L
+val value = 876543L
+val value = 98765432L
+
+val value = 0L
+val value = 1L
+
+val value = 100000L
+val value = 1000001L
+
+val value = 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999L
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (integer_literal))))

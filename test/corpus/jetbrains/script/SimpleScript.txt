@@ -1,0 +1,9 @@
+==================
+JetBrains PSI: script/SimpleScript
+==================
+
+println(1)
+
+---
+
+(source_file (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal))))))

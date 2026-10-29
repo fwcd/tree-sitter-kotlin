@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: annotation/targeted/onField/delegate
+==================
+
+// COMPILATION_ERRORS
+
+class C {
+    @delegate:Transient
+    val plainField: Int = 1
+
+    @delegate:Transient
+    val lazy by lazy { 1 }
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (property_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (integer_literal)) (property_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (property_delegate (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (integer_literal)))))))))))

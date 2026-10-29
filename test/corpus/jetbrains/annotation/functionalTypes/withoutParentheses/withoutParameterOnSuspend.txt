@@ -1,0 +1,57 @@
+==================
+JetBrains PSI: annotation/functionalTypes/withoutParentheses/withoutParameterOnSuspend
+==================
+
+// COMPILATION_ERRORS
+
+// Issue: KT-31734
+
+val x: (@Foo suspend () -> Unit) get() = {}
+
+val x: @Foo (suspend () -> Unit) get() = {}
+
+val x: suspend @Foo () -> Unit get() = {}
+
+val x: Comparable<@Foo suspend @Bar(10) @Foo () -> Unit> get() = {}
+
+val x: Any = {} as @Foo suspend () -> Unit
+
+fun foo(x: (suspend @Foo () -> Unit)) = x
+
+fun foo(x: suspend @Foo(10) @Bar () -> Unit = { x: Int -> x }) {}
+
+fun foo() {
+    val x: @Foo suspend @Bar () -> Unit = {}
+}
+
+fun foo() {
+    val x = { x: suspend @Foo () -> () -> Unit -> x }
+}
+
+abstract class A {
+    abstract var x: @Foo suspend (suspend () -> (() -> Unit)) -> Int
+}
+
+fun foo(vararg x: @Foo @Bar(10) @Foo () -> Unit) = 10
+
+fun foo(): @Foo.Bar suspend () -> Unit = {}
+
+fun foo(): () -> @Foo.Bar suspend () -> Unit = {}
+
+val x: Any get() = fun(): @Foo suspend () -> Unit {}
+
+fun foo() {
+    var x: (@Foo ()->suspend ()->Unit) -> Unit = {}
+}
+
+fun foo(x: Any) {
+    if (x as @Foo @Bar(10) suspend @Foo () -> Unit is suspend @Foo @Bar(10) @Foo () -> Unit) {}
+}
+
+fun foo(y: Any) {
+    var x = y as (@Foo suspend () -> () -> Unit) -> Unit
+}
+
+---
+
+(source_file (line_comment) (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier))))) (getter (function_body (lambda_literal)))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (parenthesized_type (type_modifiers) (function_type (function_type_parameters) (user_type (type_identifier))))) (getter (function_body (lambda_literal)))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (getter (function_body (lambda_literal)))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_modifiers (annotation (user_type (type_identifier))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier))))))) (getter (function_body (lambda_literal)))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (as_expression (lambda_literal) (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))))) (function_body (simple_identifier))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (lambda_literal (lambda_parameters (variable_declaration (simple_identifier) (user_type (type_identifier)))) (statements (simple_identifier)))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier))) (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (lambda_literal))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (lambda_literal (lambda_parameters (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (function_type (function_type_parameters) (user_type (type_identifier)))))) (statements (simple_identifier))))))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (class_body (property_declaration (modifiers (inheritance_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters (type_modifiers) (function_type (function_type_parameters) (parenthesized_type (function_type (function_type_parameters) (user_type (type_identifier)))))) (user_type (type_identifier))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter_modifiers (parameter_modifier)) (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (integer_literal))) (function_declaration (simple_identifier) (function_value_parameters) (type_modifiers (annotation (user_type (type_identifier) (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier))) (function_body (lambda_literal))) (function_declaration (simple_identifier) (function_value_parameters) (function_type (function_type_parameters) (type_modifiers (annotation (user_type (type_identifier) (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (function_body (lambda_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (anonymous_function (function_value_parameters) (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier))) (function_body))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (function_type (function_type_parameters (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (type_modifiers) (function_type (function_type_parameters) (user_type (type_identifier))))) (user_type (type_identifier)))) (lambda_literal))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (if_expression condition: (check_expression (as_expression (simple_identifier) (type_modifiers (annotation (user_type (type_identifier))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (type_modifiers (annotation (user_type (type_identifier))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) consequence: (control_structure_body))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (as_expression (simple_identifier) (function_type (function_type_parameters (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (function_type (function_type_parameters) (user_type (type_identifier))))) (user_type (type_identifier)))))))))

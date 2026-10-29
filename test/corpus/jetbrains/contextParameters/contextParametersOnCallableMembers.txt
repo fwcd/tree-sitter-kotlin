@@ -1,0 +1,31 @@
+==================
+JetBrains PSI: contextParameters/contextParametersOnCallableMembers
+==================
+
+// LANGUAGE: +ContextParameters
+
+annotation class MyAnnotation
+class A {
+    val x = 1
+}
+class B
+
+class ContextParametersOnCallableMembers {
+    context(a: A, _: B)
+    @MyAnnotation
+    fun Int.function(): Int = a.x
+
+    context(a: A, _: B)
+    @MyAnnotation
+    val Int.property: Int get() = a.x
+
+    context(a: A, _: B)
+    @MyAnnotation
+    var Int.propertyWithSetter: Int
+        get() = a.x
+        set(v) { }
+}
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (class_declaration (type_identifier) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)))) (class_declaration (type_identifier)) (class_declaration (type_identifier) (class_body (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (annotation (user_type (type_identifier)))) receiver: (receiver_type (user_type (type_identifier))) (simple_identifier) (function_value_parameters) (user_type (type_identifier)) (function_body (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (annotation (user_type (type_identifier)))) (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (annotation (user_type (type_identifier)))) (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))) (setter (parameter_with_optional_type (simple_identifier)) (function_body)))))

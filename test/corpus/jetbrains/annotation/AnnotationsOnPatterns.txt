@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: annotation/AnnotationsOnPatterns
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+
+    when (e) {
+      is @[a] T -> d
+    }
+}
+
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (when_expression (when_subject (simple_identifier)) (when_entry (when_condition (type_test (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier)))) (control_structure_body (simple_identifier))))))))

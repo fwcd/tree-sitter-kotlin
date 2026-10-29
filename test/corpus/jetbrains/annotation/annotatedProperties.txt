@@ -1,0 +1,36 @@
+==================
+JetBrains PSI: annotation/annotatedProperties
+==================
+
+// FILE: MyAnnotation.kt
+annotation class MyAnnotation
+// FILE: MyAnnotation2.kt
+annotation class MyAnnotation2
+// FILE: MyAnnotation3.kt
+annotation class MyAnnotation3
+// FILE: MyAnnotation4.kt
+annotation class MyAnnotation4
+// FILE: MyAnnotation5.kt
+annotation class MyAnnotation5
+// FILE: MyAnnotation6.kt
+annotation class MyAnnotation6
+// FILE: MyAnnotation7.kt
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class MyAnnotation7
+// FILE: MyAnnotation8.kt
+@Target(AnnotationTarget.TYPE)
+annotation class MyAnnotation8
+
+// FILE: Test.kt
+class Test(@get:MyAnnotation @set:MyAnnotation2 @setparam:MyAnnotation3 @property:MyAnnotation4 @field:MyAnnotation5 @param:MyAnnotation6 var bar: String) {
+    fun @receiver:MyAnnotation7 @MyAnnotation8 Int.fooF() = Unit
+    fun @receiver:MyAnnotation7 @MyAnnotation8 Int?.fooWithNullableReceiver(l: Long) = Unit
+    var @receiver:MyAnnotation7 @MyAnnotation8 Int.fooP
+        get() = Unit
+        set(value) {}
+}
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)) (line_comment) (class_declaration (type_identifier) (primary_constructor (class_parameter (modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (class_body (function_declaration receiver: (receiver_type (type_modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (user_type (type_identifier)))) (user_type (type_identifier))) (simple_identifier) (function_value_parameters) (function_body (simple_identifier))) (function_declaration receiver: (receiver_type (type_modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (user_type (type_identifier)))) (nullable_type (user_type (type_identifier)) (quest))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (simple_identifier))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (type_modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (user_type (type_identifier)))) (user_type (type_identifier))) (variable_declaration (simple_identifier))) (getter (function_body (simple_identifier))) (setter (parameter_with_optional_type (simple_identifier)) (function_body)))))

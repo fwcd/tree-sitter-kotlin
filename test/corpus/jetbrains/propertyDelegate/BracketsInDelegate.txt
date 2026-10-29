@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: propertyDelegate/BracketsInDelegate
+==================
+
+// COMPILATION_ERRORS
+
+val a by A {}
+---
+
+(source_file (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (property_delegate (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal)))))))

@@ -1,5 +1,5 @@
 ==================
-TypeConstraints
+JetBrains PSI: TypeConstraints
 ==================
 
 // COMPILATION_ERRORS
@@ -9,16 +9,4 @@ class foo<T> where T : T {
 }
 ---
 
-(source_file
-  (line_comment)
-  (class_declaration
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier)))
-    (type_constraints
-      (type_constraint
-        (type_identifier)
-        (user_type
-          (type_identifier))))
-    (class_body)))
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (type_constraints (type_constraint (type_identifier) (user_type (type_identifier)))) (class_body)))

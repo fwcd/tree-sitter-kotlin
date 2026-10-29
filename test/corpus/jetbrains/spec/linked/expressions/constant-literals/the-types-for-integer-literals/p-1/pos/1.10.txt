@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/the-types-for-integer-literals/p-1/pos/1.10
+==================
+
+val value = l1234
+val value = L0xA0Al
+val value = _l
+val value = _L
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)))

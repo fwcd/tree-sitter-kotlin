@@ -1,0 +1,86 @@
+==================
+JetBrains PSI: examples/collections/ArrayList
+==================
+
+// COMPILATION_ERRORS
+
+class ArrayList<T> : IMutableList<T> {
+  private var data = MutableArray(10)
+  private var used = 0
+  private var version = 0
+
+  override fun iterator() : IIterator<T> = mutableIterator()
+
+  override fun mutableIterator() : IMutableIterator<T> = object : IMutableIterator() { // T is inferred
+    private val index = 0
+    private var myVersion = version
+
+    private fun checkVersion() {
+      if (version != myVersion)
+        throw ConcurrentModificationException()
+    }
+
+    override fun next() {
+      checkVersion()
+      if (hasNext)
+        throw NoMoreElementsException()
+      data[index++]
+    }
+
+    override val hasNext
+      get() = index < used
+
+
+    override fun remove() {
+      checkVersion()
+      val result = ArrayList.this.remove(index - 1)
+      myVersion = version
+      result
+    }
+  }
+
+  override fun get(index : Int) {
+    checkIndex(index)
+    data[index]
+  }
+
+  private fun checkIndex(index : Int) {
+    if (index > used)
+      throw IndexOutOfBoundsException(index)
+  }
+
+  override val isEmpty
+    get() = used == 0
+
+
+  override val size
+    get() = used
+
+
+  override fun set(index : Int, value : T) {
+    checkIndex(index)
+    var result = data[index]
+    data[index] = value
+    result
+  }
+
+  override fun add(index : Int, value : T) {
+    ensureSize(used + 1)
+    if (index == used) {
+      data[used++] = value
+    } else if (index < used) {
+      for (i in used-1..index) // backwards, special operator...  Need to optimize this to be a real indexed loop
+        data[i + 1] = data[i]
+      data[index] = value
+      used++
+    } else throw IndexOutOfBoundsException(index)
+  }
+
+  override fun remove(index : Int) {
+    for (i in index..used-1)
+     data[i] = data[i + 1]
+  }
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal)))))) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))) (function_body (call_expression (simple_identifier) (call_suffix (value_arguments))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))) (function_body (object_literal (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (class_body (line_comment) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (function_declaration (modifiers (visibility_modifier)) (simple_identifier) (function_value_parameters) (function_body (statements (if_expression condition: (equality_expression (simple_identifier) (simple_identifier)) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (if_expression condition: (simple_identifier) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments)))))) (indexing_expression (simple_identifier) (indexing_suffix (postfix_expression (simple_identifier))))))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (comparison_expression (simple_identifier) (simple_identifier)))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (additive_expression (simple_identifier) (integer_literal))))))) (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier)) (simple_identifier)))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (indexing_expression (simple_identifier) (indexing_suffix (simple_identifier)))))) (function_declaration (modifiers (visibility_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (if_expression condition: (comparison_expression (simple_identifier) (simple_identifier)) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))))))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (equality_expression (simple_identifier) (integer_literal)))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (simple_identifier))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (indexing_expression (simple_identifier) (indexing_suffix (simple_identifier)))) (assignment (directly_assignable_expression (simple_identifier) (indexing_suffix (simple_identifier))) (simple_identifier)) (simple_identifier)))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (additive_expression (simple_identifier) (integer_literal)))))) (if_expression condition: (equality_expression (simple_identifier) (simple_identifier)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier) (indexing_suffix (postfix_expression (simple_identifier)))) (simple_identifier)))) alternative: (control_structure_body (if_expression condition: (comparison_expression (simple_identifier) (simple_identifier)) consequence: (control_structure_body (statements (for_statement (variable_declaration (simple_identifier)) (range_expression (additive_expression (simple_identifier) (integer_literal)) (simple_identifier))) (line_comment) (assignment (directly_assignable_expression (simple_identifier) (indexing_suffix (additive_expression (simple_identifier) (integer_literal)))) (indexing_expression (simple_identifier) (indexing_suffix (simple_identifier)))) (assignment (directly_assignable_expression (simple_identifier) (indexing_suffix (simple_identifier))) (simple_identifier)) (postfix_expression (simple_identifier)))) alternative: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (for_statement (variable_declaration (simple_identifier)) (range_expression (simple_identifier) (additive_expression (simple_identifier) (integer_literal)))) (assignment (directly_assignable_expression (simple_identifier) (indexing_suffix (simple_identifier))) (indexing_expression (simple_identifier) (indexing_suffix (additive_expression (simple_identifier) (integer_literal)))))))))))
