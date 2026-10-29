@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: kdoc/MultipleAsterisksOnTheSameLine
+==================
+
+/**
+ * *
+ * **
+ * *
+ ******
+** **
+ * *
+**/
+
+---
+
+(source_file (multiline_comment))

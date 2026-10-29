@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: annotation/at/recoveryWhitespaceBeforeColon
+==================
+
+// COMPILATION_ERRORS
+
+// These two cases were working before, added them just in case
+@set: ann1
+var x1: Int = 1
+
+@set: ann2
+var x2: Int = 2
+
+---
+
+(source_file (line_comment) (line_comment) (property_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (integer_literal)) (property_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (integer_literal)))

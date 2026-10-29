@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: kdoc/AtTags
+==================
+
+/**
+ * @tag
+ * text @notATag
+ * ```
+ * @notATag and some description
+ * ```
+ * @
+ */
+---
+
+(source_file (multiline_comment))

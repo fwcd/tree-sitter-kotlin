@@ -1,0 +1,52 @@
+==================
+JetBrains PSI: examples/Builder
+==================
+
+// COMPILATION_ERRORS
+
+val foo = object : AntBuilder() {
+
+  @lazy val groovy = library {
+    classpath("$libs/groovy-...")
+  }
+
+  @lazy val gant = library {
+    File("$gantHome/lib").files.each {
+      classpath(it)
+    }
+  }
+
+  @lazy val JPS = module {
+    targetLevel = "1.5"
+    classpath(antLayout, gant, groovy)
+    src("$projectHome/antLayout/src")
+  }
+
+}.build()
+
+class AntBuilder {
+  abstract class ClassPathEntry {}
+
+  class Module : ClassPathEntry {
+    fun classpath(entries : ClassPathEntry/*...*/) { /*...*/ }
+    var targetLevel : String
+    fun src(src : String) { /*...*/ }
+  }
+
+  class Library : ClassPathEntry {
+    fun classpath(entries : ClassPathEntry/*...*/) { /*...*/ }
+  }
+
+  fun library(initializer :   Library.() -> Library) {
+    val lib = Library()
+    lib.initializer()
+    return lib
+  }
+
+  fun classpath(/*...*/)
+
+  fun module(/*...*/)
+}
+---
+
+(source_file (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (navigation_expression (object_literal (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (class_body (property_declaration (modifiers (annotation (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (interpolation_identifier_start) (interpolated_identifier) (string_content)))))))))))) (property_declaration (modifiers (annotation (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (navigation_expression (navigation_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (interpolation_identifier_start) (interpolated_identifier) (string_content)))))) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))))))))) (property_declaration (modifiers (annotation (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (assignment (directly_assignable_expression (simple_identifier)) (string_literal (string_content))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (simple_identifier)) (value_argument (simple_identifier))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (interpolation_identifier_start) (interpolated_identifier) (string_content)))))))))))))) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments)))) (class_declaration (type_identifier) (class_body (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (class_body)) (class_declaration (type_identifier) (delegation_specifier (user_type (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (multiline_comment)) (function_body (multiline_comment))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (multiline_comment))))) (class_declaration (type_identifier) (delegation_specifier (user_type (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (multiline_comment)) (function_body (multiline_comment))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (function_type receiver: (receiver_type (user_type (type_identifier))) (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments)))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (jump_expression (simple_identifier))))) (function_declaration (simple_identifier) (function_value_parameters (multiline_comment))) (function_declaration (simple_identifier) (function_value_parameters (multiline_comment))))))

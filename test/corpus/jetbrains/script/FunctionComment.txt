@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: script/FunctionComment
+==================
+
+/** Comment */
+fun test() {}
+
+// Some other comment
+
+
+---
+
+(source_file (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (line_comment))

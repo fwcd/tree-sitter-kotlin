@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: annotation/AnnotatedExpressions
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+    @[a] foo
+    1
+    @[a] this
+}
+
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (prefix_expression (annotation (user_type (type_identifier))) (simple_identifier)) (integer_literal) (prefix_expression (annotation (user_type (type_identifier))) (this_expression))))))

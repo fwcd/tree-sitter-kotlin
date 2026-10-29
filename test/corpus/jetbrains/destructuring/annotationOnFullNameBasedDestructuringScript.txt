@@ -1,0 +1,20 @@
+==================
+JetBrains PSI: destructuring/annotationOnFullNameBasedDestructuringScript
+==================
+
+annotation class Ann(val x: String = "")
+
+data class Foo(val first: String)
+
+val x = Foo("")
+
+@Ann (var first) = x
+@Ann(var a = first) = x
+@Ann() (var b = first) = x
+@Ann("") (var c = first) = x
+@Ann(val d = first) = x
+@Ann() (val e = first) = x
+@Ann("") (val f = first) = x
+---
+
+(source_file (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)) (string_literal)))) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal)))))) (destructuring_declaration (modifiers (annotation (user_type (type_identifier)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier)) (destructuring_declaration (modifiers (annotation (user_type (type_identifier)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier) (simple_identifier))) (simple_identifier)) (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier) (simple_identifier))) (simple_identifier)) (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal)))))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier) (simple_identifier))) (simple_identifier)) (destructuring_declaration (modifiers (annotation (user_type (type_identifier)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier) (simple_identifier))) (simple_identifier)) (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier) (simple_identifier))) (simple_identifier)) (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal)))))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier) (simple_identifier))) (simple_identifier)))

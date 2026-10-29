@@ -1,0 +1,25 @@
+==================
+JetBrains PSI: contracts/good/callsInPlace/atMostOnce
+==================
+
+import kotlin.contracts.*
+
+@OptIn(ExperimentalContracts::class)
+inline fun inlineRun(block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+    block()
+}
+
+@OptIn(ExperimentalContracts::class)
+fun myRun(block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.AT_MOST_ONCE)
+    }
+    block()
+}
+
+---
+
+(source_file (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier)))))) (function_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))) (call_expression (simple_identifier) (call_suffix (value_arguments)))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))) (call_expression (simple_identifier) (call_suffix (value_arguments)))))))

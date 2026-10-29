@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: propertyDelegate/TopLevelProperty
+==================
+
+// COMPILATION_ERRORS
+
+val p: Int by A()
+---
+
+(source_file (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (property_delegate (call_expression (simple_identifier) (call_suffix (value_arguments))))))

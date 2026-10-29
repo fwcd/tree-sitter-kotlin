@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: examples/map/IMap
+==================
+
+open class IMap<in K, out V> {
+  
+
+}
+---
+
+(source_file (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier)) (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier))) (class_body)))

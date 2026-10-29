@@ -1,0 +1,22 @@
+==================
+JetBrains PSI: destructuring/annotationOnFullNameBasedDestructuring
+==================
+
+// LANGUAGE: +NameBasedDestructuring +DeprecateNameMismatchInShortDestructuringWithParentheses +EnableNameBasedDestructuringShortForm
+
+data class Box(val first: String)
+
+annotation class Ann(val x: String = "")
+
+fun test1(x: Box) {
+    if (true) { @Ann (var first) = x }
+    if (true) { @Ann(var first) = x }
+    if (true) { @Ann() (var first) = x }
+    if (true) { @Ann("") (var first) = x }
+    if (true) { @Ann(val first) = x }
+    if (true) { @Ann() (val first) = x }
+    if (true) { @Ann("") (val first) = x }
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)) (string_literal)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (destructuring_declaration (modifiers (annotation (user_type (type_identifier)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier))))) (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (destructuring_declaration (modifiers (annotation (user_type (type_identifier)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier))))) (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier))))) (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal)))))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier))))) (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (destructuring_declaration (modifiers (annotation (user_type (type_identifier)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier))))) (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments)))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier))))) (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (destructuring_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal)))))) (multi_variable_declaration (variable_declaration (binding_pattern_kind) (simple_identifier))) (simple_identifier)))))))))

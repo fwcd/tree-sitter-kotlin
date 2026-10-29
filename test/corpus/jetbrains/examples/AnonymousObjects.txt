@@ -1,0 +1,32 @@
+==================
+JetBrains PSI: examples/AnonymousObjects
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+
+addMouseListener(object : MouseAdapter() {
+
+  private var clickCount = 0;
+
+  override fun mouseClicked(e : MouseEvent) {
+    clickCount++;
+    if (clickCount > 3) GOD.sendMessage(GodMEssages.TOO_MANY_CLICKS);
+  }
+})
+
+enum class GodMessages {
+  TOO_MANY_CLICKS,
+  ONE_MORE_MESSAGE
+}
+
+// Type of this variable is GOD_AnonymousClass
+val GOD = object {
+  fun sendMessage(message : GodMEssage) = throw RuntimeException(message.name)
+};
+
+}
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (object_literal (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (class_body (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (postfix_expression (simple_identifier)) (if_expression condition: (comparison_expression (simple_identifier) (integer_literal)) consequence: (control_structure_body (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))))))))) (class_declaration (type_identifier) (enum_class_body (enum_entry (simple_identifier)) (enum_entry (simple_identifier)))) (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (object_literal (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))))))))

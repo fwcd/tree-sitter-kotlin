@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: spec/linked/expressions/when-expression/p-1/pos/3.1
+==================
+
+fun case_1() {
+    when (value) {}
+}
+---
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (when_expression (when_subject (simple_identifier)))))))

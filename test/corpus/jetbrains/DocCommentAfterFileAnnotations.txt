@@ -1,5 +1,5 @@
 ==================
-DocCommentAfterFileAnnotations
+JetBrains PSI: DocCommentAfterFileAnnotations
 ==================
 
 // COMPILATION_ERRORS
@@ -11,12 +11,4 @@ DocCommentAfterFileAnnotations
 class C{}
 ---
 
-(source_file
-  (line_comment)
-  (file_annotation
-    (user_type
-      (type_identifier)))
-  (multiline_comment)
-  (class_declaration
-    (type_identifier)
-    (class_body)))
+(source_file (line_comment) (file_annotation (user_type (type_identifier))) (multiline_comment) (class_declaration (type_identifier) (class_body)))

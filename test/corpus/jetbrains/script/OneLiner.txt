@@ -1,0 +1,9 @@
+==================
+JetBrains PSI: script/OneLiner
+==================
+
+val x = 6; println(x * 7)
+
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (multiplicative_expression (simple_identifier) (integer_literal)))))))

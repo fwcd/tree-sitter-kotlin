@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: examples/priorityqueues/PriorityQueueAsPushPop
+==================
+
+// COMPILATION_ERRORS
+
+class PriorityQueueAsPushPop<T>(wrapped : IPriorityQueue<T>) : IPushPop<T> {
+  override fun pop() = wrapped.extract()
+  override fun push(item : T) = wrapped.add(item)
+  override val isEmpty
+    get() = wrapped.isEmpty
+
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))))

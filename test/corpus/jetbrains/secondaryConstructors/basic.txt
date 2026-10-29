@@ -1,0 +1,27 @@
+==================
+JetBrains PSI: secondaryConstructors/basic
+==================
+
+// COMPILATION_ERRORS
+
+class A {
+    constructor() {}
+
+    val x: Int
+
+    private @annot constructor(x: Int) {}
+
+    @constructor fun constructor() {}
+
+    @annot protected constructor(x: Int, y: Int) : this(1,2) {}
+
+    @[constructor] public constructor() : super() {
+        x = 1
+    }
+}
+
+@constructor class B
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (secondary_constructor (function_value_parameters)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (secondary_constructor (modifiers (visibility_modifier) (annotation (user_type (type_identifier)))) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))))) (function_declaration (modifiers (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters) (function_body)) (secondary_constructor (modifiers (annotation (user_type (type_identifier))) (visibility_modifier)) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (constructor_delegation_call (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal))))) (secondary_constructor (modifiers (annotation (user_type (type_identifier))) (visibility_modifier)) (function_value_parameters) (constructor_delegation_call (value_arguments)) (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)))))) (class_declaration (modifiers (annotation (user_type (type_identifier)))) (type_identifier)))

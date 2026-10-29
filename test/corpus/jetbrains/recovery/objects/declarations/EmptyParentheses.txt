@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: recovery/objects/declarations/EmptyParentheses
+:error
+==================
+
+// COMPILATION_ERRORS
+
+object Foo()
+
+object Foo() {}
+
+object Foo() : Bar {
+
+}
+---

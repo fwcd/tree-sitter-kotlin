@@ -1,0 +1,39 @@
+==================
+JetBrains PSI: annotation/values/arrays
+==================
+
+// FILE: Arrays.kt
+annotation class Arrays(
+    val ia: IntArray,
+    val la: LongArray,
+    val fa: FloatArray,
+    val da: DoubleArray,
+    val ca: CharArray,
+    val ba: BooleanArray
+)
+
+// FILE: WithArrays.kt
+@Arrays(
+    [1, 2, 3],
+    [1L],
+    [],
+    [2.2],
+    ['a'],
+    [true, false]
+)
+class WithArrays
+
+// FILE: WithExplicitArrays.kt
+@Arrays(
+    intArrayOf(1, 2, 3),
+    longArrayOf(1L),
+    floatArrayOf(),
+    doubleArrayOf(2.2),
+    charArrayOf('a'),
+    booleanArrayOf(true, false),
+)
+class WithExplicitArrays
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (collection_literal (integer_literal) (integer_literal) (integer_literal))) (value_argument (collection_literal (long_literal (integer_literal)))) (value_argument (collection_literal)) (value_argument (collection_literal (real_literal))) (value_argument (collection_literal (character_literal))) (value_argument (collection_literal (boolean_literal) (boolean_literal))))))) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)) (value_argument (integer_literal)))))) (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (long_literal (integer_literal))))))) (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments)))) (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (real_literal)))))) (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (character_literal)))))) (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal)) (value_argument (boolean_literal)))))))))) (type_identifier)))

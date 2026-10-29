@@ -1,0 +1,24 @@
+==================
+JetBrains PSI: annotation/at/enumEntries
+==================
+
+// COMPILATION_ERRORS
+
+enum class A {
+    @[Ann] @Ann(1) X(),
+
+    @Ann Y() {},
+
+    private @Ann() Z(),
+
+    @Ann @private Q,
+
+    // TODO: try to make Ann() working here (?)
+    @Ann() W;
+
+    @Ann fun foo() {}
+}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (enum_class_body (enum_entry (modifiers (annotation (user_type (type_identifier))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (simple_identifier) (value_arguments)) (enum_entry (modifiers (annotation (user_type (type_identifier)))) (simple_identifier) (value_arguments) (class_body)) (enum_entry (modifiers (visibility_modifier) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments)))) (simple_identifier) (value_arguments)) (enum_entry (modifiers (annotation (user_type (type_identifier))) (annotation (user_type (type_identifier)))) (simple_identifier)) (line_comment) (enum_entry (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments)))) (simple_identifier)) (function_declaration (modifiers (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters) (function_body)))))

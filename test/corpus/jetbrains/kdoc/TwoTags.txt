@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: kdoc/TwoTags
+==================
+
+/**
+ * @author Dmitry Jemerov
+ * @since M12
+ */
+---
+
+(source_file (multiline_comment))

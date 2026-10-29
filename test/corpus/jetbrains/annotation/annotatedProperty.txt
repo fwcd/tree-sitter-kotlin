@@ -1,0 +1,28 @@
+==================
+JetBrains PSI: annotation/annotatedProperty
+==================
+
+// FILE: Properties.kt
+@Anno
+internal var withCustomSetter = "OK"
+    set(value) {}
+
+@Anno
+internal var withCustomGetter = "OK"
+    get() = "KO"
+
+@Anno
+internal var custom = "OK"
+    get() = field
+    set(value) {
+        field = value
+    }
+
+@Anno
+internal var variable = "OK"
+
+// FILE: Anno.kt
+annotation class Anno
+---
+
+(source_file (line_comment) (property_declaration (modifiers (annotation (user_type (type_identifier))) (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))) (setter (parameter_with_optional_type (simple_identifier)) (function_body)) (property_declaration (modifiers (annotation (user_type (type_identifier))) (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))) (getter (function_body (string_literal (string_content)))) (property_declaration (modifiers (annotation (user_type (type_identifier))) (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))) (getter (function_body (simple_identifier))) (setter (parameter_with_optional_type (simple_identifier)) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier))))) (property_declaration (modifiers (annotation (user_type (type_identifier))) (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)))

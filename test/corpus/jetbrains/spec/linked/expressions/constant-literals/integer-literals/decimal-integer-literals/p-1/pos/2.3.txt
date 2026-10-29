@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/decimal-integer-literals/p-1/pos/2.3
+==================
+
+val value = _5678_90
+val value = _2_3_4_5_6_7_8_9_
+val value = _____________0000
+val value = _______________________________________________________________________________________________________________________________________________________0
+val value = ____________________________________________________
+val value = _
+val value = _0_
+val value = _9_
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)))

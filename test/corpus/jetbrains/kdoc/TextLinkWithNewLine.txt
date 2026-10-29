@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: kdoc/TextLinkWithNewLine
+==================
+
+/**
+ * [Kotl
+ * in](https://kotlinlang.org) is made by [JetBrains][1]
+ * [1]: https://www.jetbrains.com/
+ */
+---
+
+(source_file (multiline_comment))

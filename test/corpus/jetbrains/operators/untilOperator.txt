@@ -1,0 +1,14 @@
+==================
+JetBrains PSI: operators/untilOperator
+==================
+
+// COMPILATION_ERRORS
+
+fun main() {
+    for (i in 0..<n) {
+
+    }
+}
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (for_statement (variable_declaration (simple_identifier)) (range_expression (integer_literal) (simple_identifier)) (control_structure_body))))))

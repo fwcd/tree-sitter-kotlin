@@ -1,5 +1,5 @@
 ==================
-TypeAlias
+JetBrains PSI: TypeAlias
 ==================
 
 // COMPILATION_ERRORS
@@ -21,90 +21,4 @@ typealias foo<A, B : A> = bar ;
 
 ---
 
-(source_file
-  (line_comment)
-  (package_header
-    (identifier
-      (simple_identifier)
-      (simple_identifier)
-      (simple_identifier)))
-  (type_alias
-    (type_identifier)
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier)))
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier)
-        (user_type
-          (type_identifier))))
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier))
-      (type_parameter
-        (type_identifier)))
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier))
-      (type_parameter
-        (type_identifier)
-        (user_type
-          (type_identifier))))
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier)))
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier)
-        (user_type
-          (type_identifier))))
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier))
-      (type_parameter
-        (type_identifier)))
-    (user_type
-      (type_identifier)))
-  (type_alias
-    (type_identifier)
-    (type_parameters
-      (type_parameter
-        (type_identifier))
-      (type_parameter
-        (type_identifier)
-        (user_type
-          (type_identifier))))
-    (user_type
-      (type_identifier))))
+(source_file (line_comment) (package_header (identifier (simple_identifier) (simple_identifier) (simple_identifier))) (type_alias (type_identifier) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier))) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (type_alias (type_identifier) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier))) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (user_type (type_identifier))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier) (user_type (type_identifier)))) (user_type (type_identifier))))
