@@ -463,6 +463,16 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
+// After scan_for_word has matched "catch" or "finally", peek past optional
+// whitespace and comments for the character a real clause must open with:
+// '(' for `catch (e: E)`, '{' for `finally { }`. Anything else means the word
+// was an ordinary identifier — `catch<Throwable> { }` is a generic call, and
+// the statement before it has already ended.
+static bool followed_by(TSLexer *lexer, int32_t expected) {
+  if (!skip_whitespace_and_comments(lexer)) return false;
+  return lexer->lookahead == expected;
+}
+
 // Check if the current position has a visibility modifier (public, private,
 // protected, internal) followed by horizontal whitespace and "constructor".
 // Uses skip() — safe to call speculatively since no token boundary is changed.
@@ -605,10 +615,12 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
   // '{' stays: `foo()` followed by `{ … }` on the next line is a trailing
   // lambda, which is one expression — confirmed against the Kotlin PSI, as
   // was every other character in this set.
+  //
+  // '<' stays: a line may open with type arguments that continue the previous
+  // construct — `is T` then `<X>` is one type, which the Kotlin PSI confirms.
   switch (lexer->lookahead) {
       case ',':
       case '.':
-      case ':':
       case '*':
       case '%':
       case '>':
@@ -618,6 +630,17 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
       case '?':
       case '|':
       case '&':
+        return false;
+
+      // ':' continues the previous construct — `class A` then `: B()` is one
+      // declaration — but '::' opens a callable reference, which starts a new
+      // statement:
+      //
+      //     suspend fun g() {}
+      //     ::g.use()
+      case ':':
+        skip(lexer);
+        if (lexer->lookahead == ':') return true;
         return false;
 
       // Handle `/` — could be division, line comment, or block comment.
@@ -645,9 +668,13 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
           // Now check the next real token.
           switch (lexer->lookahead) {
             // Same set as above; '(' and '[' start a new statement.
-            case '.': case ',': case ':': case '*': case '%':
+            case '.': case ',': case '*': case '%':
             case '>': case '<': case '=': case '{':
             case '?': case '|': case '&': case '/':
+              return false;
+            case ':':
+              skip(lexer);
+              if (lexer->lookahead == ':') return true;
               return false;
             case '!':
               skip(lexer);
@@ -734,12 +761,22 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
           // and the parser would never see it.
           switch (lexer->lookahead) {
             // Same set as above; '(' and '[' start a new statement.
-            case '.': case ',': case ':': case '%':
+            // ':' is handled below so that '::' can start one.
+            case '.': case ',': case '%':
             case '>': case '<': case '=': case '{':
             case '?': case '|': case '&': case '/':
             case '*':
               // Continuation operator — produce MULTILINE_COMMENT.
               lexer->mark_end(lexer);
+              lexer->result_symbol = MULTILINE_COMMENT;
+              return true;
+            case ':':
+              // mark_end before peeking, so the ':' is not swallowed.
+              lexer->mark_end(lexer);
+              skip(lexer);
+              // '::' opens a callable reference and starts a new statement,
+              // so leave result_symbol alone and let the ASI stand.
+              if (lexer->lookahead == ':') return true;
               lexer->result_symbol = MULTILINE_COMMENT;
               return true;
             case '!':
@@ -887,12 +924,16 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols) 
           // Can't reliably check 'catch' now. Just insert ASI.
           return true;
         }
-        // Not in constructor context — check for 'catch'
-        return !scan_for_word(lexer, "atch", 4);
+        // Not in constructor context — check for 'catch'. A real catch clause
+        // opens with '('; `catch<T> { }` is a call to a function named catch.
+        if (!scan_for_word(lexer, "atch", 4)) return true;
+        return !followed_by(lexer, '(');
 
-      // Don't insert a semicolon before finally (continues try_expression)
+      // Don't insert a semicolon before finally (continues try_expression).
+      // As with catch, only when a real clause follows.
       case 'f':
-        return !scan_for_word(lexer, "inally", 6);
+        if (!scan_for_word(lexer, "inally", 6)) return true;
+        return !followed_by(lexer, '{');
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier

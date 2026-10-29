@@ -708,3 +708,270 @@ val List<Int>.x: Int get() = 1
     (getter
       (function_body
         (integer_literal)))))
+
+================================================================================
+Generic call to a function named catch after a newline
+================================================================================
+
+fun f() {
+    a()
+    catch<Throwable> { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))
+            (annotated_lambda
+              (lambda_literal))))))))
+
+================================================================================
+Generic call to a function named finally after a newline
+================================================================================
+
+fun f() {
+    a()
+    finally<Throwable> { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))
+            (annotated_lambda
+              (lambda_literal))))))))
+
+================================================================================
+Callable reference at statement start after a local function
+================================================================================
+
+fun f() {
+    suspend fun g() {}
+    ::g.use()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (modifiers
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))
+        (call_expression
+          (navigation_expression
+            (callable_reference
+              (simple_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Callable reference at statement start after a line comment
+================================================================================
+
+fun f() {
+    foo()
+    // note
+    ::g.use()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (line_comment)
+        (call_expression
+          (navigation_expression
+            (callable_reference
+              (simple_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Callable reference at statement start after a block comment
+================================================================================
+
+fun f() {
+    foo()
+    /* note */
+    ::g.use()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (navigation_expression
+            (callable_reference
+              (simple_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+A real catch clause still continues the try
+================================================================================
+
+fun f() {
+    try { a() }
+    catch (e: E) { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (try_expression
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (catch_block
+            (simple_identifier)
+            (user_type
+              (type_identifier))))))))
+
+================================================================================
+A real finally clause still continues the try
+================================================================================
+
+fun f() {
+    try { a() }
+    finally { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (try_expression
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (finally_block))))))
+
+================================================================================
+A single colon still continues the declaration
+================================================================================
+
+class A
+    : B()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))))
+
+================================================================================
+Type arguments still continue across a newline
+================================================================================
+
+fun foo(e: Any) {
+  when (e) {
+    is T
+    <X>
+    -> 1
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            (simple_identifier))
+          (when_entry
+            (when_condition
+              (type_test
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))
+            (control_structure_body
+              (integer_literal))))))))
