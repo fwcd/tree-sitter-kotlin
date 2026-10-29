@@ -106,6 +106,7 @@ module.exports = grammar({
 
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
+    [$._primary_expression, $._callable_reference_name],
 
     // `context` is a soft keyword: `context(...)` may be a context-receiver
     // declaration prefix or an ordinary call whose callee is named `context`.
@@ -217,6 +218,11 @@ module.exports = grammar({
     // Three-way conflict: callable_reference (Foo::bar) starts with simple_identifier
     // which both primary_expression variants can match.
     [$._primary_expression, $._primary_expression_no_trailing_lambda, $.callable_reference],
+    [$._primary_expression, $._primary_expression_no_trailing_lambda, $._callable_reference_name],
+
+    // Inside the callable-reference receiver the parser must choose a
+    // production at `Name <` before it can see whether any `?` follows.
+
 
     // ambiguity between call_suffix and _generic_call_suffix (both can match type_arguments + args)
     [$.call_suffix, $._generic_call_suffix],
@@ -235,6 +241,7 @@ module.exports = grammar({
     $._interpolation_identifier_start,
     $._by_delegation_hint,
     $._primary_constructor_hint,
+    $._callable_reference_quest,
   ],
 
   extras: $ => [
@@ -1305,8 +1312,45 @@ module.exports = grammar({
       $._break_at
     ),
 
+    // Kotlin's callableReference takes a receiverType, but reusing the type
+    // rules here is what broke the first attempt: nullable_type pulls in
+    // parenthesized_type and type_modifiers, which puts the whole type grammar
+    // in expression-reachable position and changes how `?` resolves across
+    // safe-call, elvis and nullable types. 39 of 404 corpus tests regressed,
+    // in delegation, comments, destructuring and enums -- nowhere near
+    // callable references.
+    //
+    // So this slot gets its own receiver, admitting only what a callable
+    // reference receiver can actually be: a possibly-qualified name, optional
+    // type arguments, and any number of `?`. No parenthesized types and no
+    // type modifiers, which also keeps `((Int) -> Unit)?::invoke` rejected,
+    // matching the Kotlin parser ("Expecting ')'").
+    //
+    // Hidden, so its children inline and `String::plus` keeps exactly the tree
+    // it has today: (callable_reference (type_identifier) (simple_identifier)).
+    // Just a name. A wider receiver -- qualification and type arguments, as
+    // Kotlin's receiverType allows -- was built and measured first, and it
+    // reshaped 46 real-world files: it flattens `a.b.C::class` into one node
+    // where the Kotlin parser keeps the qualified name as nested
+    // DOT_QUALIFIED_EXPRESSION inside a CLASS_LITERAL_EXPRESSION. Per-file PSI
+    // comparison put 42 of those files in a state where neither the old nor
+    // the new tree matched PSI. The narrow receiver fixes the same real-world
+    // files with no reshaping at all, so the extra reach is not worth it until
+    // the receiver can preserve that nesting.
+    //
+    // Split from the nullable form below so the two are distinct rules and the
+    // ambiguity between them can be declared as a conflict and explored.
+    _callable_reference_name: $ => alias($.simple_identifier, $.type_identifier),
+
+    // Aliased literals rather than $.quest, so this does not share
+    // nullable_type's generated repeat symbol.
+    _callable_reference_nullable: $ => seq(
+      $._callable_reference_name,
+      repeat1(alias($._callable_reference_quest, $.quest))
+    ),
+
     callable_reference: $ => seq(
-      optional(alias($.simple_identifier, $.type_identifier)), // TODO
+      optional(choice($._callable_reference_name, $._callable_reference_nullable)),
       "::",
       choice($.simple_identifier, "class")
     ),

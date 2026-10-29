@@ -6275,6 +6275,36 @@
         }
       ]
     },
+    "_callable_reference_name": {
+      "type": "ALIAS",
+      "content": {
+        "type": "SYMBOL",
+        "name": "simple_identifier"
+      },
+      "named": true,
+      "value": "type_identifier"
+    },
+    "_callable_reference_nullable": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_callable_reference_name"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_callable_reference_quest"
+            },
+            "named": true,
+            "value": "quest"
+          }
+        }
+      ]
+    },
     "callable_reference": {
       "type": "SEQ",
       "members": [
@@ -6282,13 +6312,17 @@
           "type": "CHOICE",
           "members": [
             {
-              "type": "ALIAS",
-              "content": {
-                "type": "SYMBOL",
-                "name": "simple_identifier"
-              },
-              "named": true,
-              "value": "type_identifier"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_callable_reference_name"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_callable_reference_nullable"
+                }
+              ]
             },
             {
               "type": "BLANK"
@@ -7961,6 +7995,10 @@
       "callable_reference"
     ],
     [
+      "_primary_expression",
+      "_callable_reference_name"
+    ],
+    [
       "context_receiver",
       "simple_identifier"
     ],
@@ -8186,6 +8224,11 @@
       "callable_reference"
     ],
     [
+      "_primary_expression",
+      "_primary_expression_no_trailing_lambda",
+      "_callable_reference_name"
+    ],
+    [
       "call_suffix",
       "_generic_call_suffix"
     ],
@@ -8239,6 +8282,10 @@
     {
       "type": "SYMBOL",
       "name": "_primary_constructor_hint"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_callable_reference_quest"
     }
   ],
   "inline": [],
