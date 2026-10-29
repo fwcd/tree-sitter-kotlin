@@ -2981,10 +2981,18 @@
             "name": "user_type"
           },
           {
-            "type": "STRING",
-            "value": "dynamic"
+            "type": "SYMBOL",
+            "name": "_dynamic_type"
           }
         ]
+      }
+    },
+    "_dynamic_type": {
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "STRING",
+        "value": "dynamic"
       }
     },
     "not_nullable_type": {
@@ -3382,8 +3390,25 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "_declaration"
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "label"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_declaration"
+            }
+          ]
         },
         {
           "type": "SEQ",
@@ -6797,11 +6822,39 @@
       ]
     },
     "type_parameter_modifiers": {
-      "type": "REPEAT1",
-      "content": {
-        "type": "SYMBOL",
-        "name": "_type_parameter_modifier"
-      }
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_type_parameter_modifier"
+              }
+            },
+            {
+              "type": "SYMBOL",
+              "name": "variance_modifier"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_type_parameter_modifier"
+              }
+            }
+          ]
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_type_parameter_modifier"
+          }
+        }
+      ]
     },
     "_type_parameter_modifier": {
       "type": "CHOICE",
@@ -6809,10 +6862,6 @@
         {
           "type": "SYMBOL",
           "name": "reification_modifier"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "variance_modifier"
         },
         {
           "type": "SYMBOL",
@@ -8035,6 +8084,10 @@
   ],
   "conflicts": [
     [
+      "_dynamic_type",
+      "simple_identifier"
+    ],
+    [
       "_primary_expression",
       "callable_reference"
     ],
@@ -8045,6 +8098,9 @@
     [
       "context_receiver",
       "simple_identifier"
+    ],
+    [
+      "prefix_expression"
     ],
     [
       "_name_based_destructuring_entry_expr",

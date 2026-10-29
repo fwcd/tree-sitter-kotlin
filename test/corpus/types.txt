@@ -525,3 +525,135 @@ val x: @A Foo.() -> Bar = TODO()
       (simple_identifier)
       (call_suffix
         (value_arguments)))))
+
+================================================================================
+Qualified type beginning with dynamic
+================================================================================
+
+fun f(x: dynamic.T) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_identifier))))
+    (function_body)))
+
+================================================================================
+Deeply qualified type beginning with dynamic
+================================================================================
+
+fun f(x: dynamic.a.T) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_identifier)
+          (type_identifier))))
+    (function_body)))
+
+================================================================================
+Plain dynamic type still parses
+================================================================================
+
+fun f(x: dynamic) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)))
+    (function_body)))
+
+================================================================================
+Dynamic receiver still parses
+================================================================================
+
+fun dynamic.foo()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    receiver: (receiver_type)
+    (simple_identifier)
+    (function_value_parameters)))
+
+================================================================================
+Variance keyword as a type parameter name
+================================================================================
+
+class C<out out>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier)))))
+
+================================================================================
+Variance keywords naming each other
+================================================================================
+
+class C<in out, out in>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier))
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier)))))
+
+================================================================================
+Variance alongside other type parameter modifiers
+================================================================================
+
+class C<reified out T, @Ann out U>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (reification_modifier)
+          (variance_modifier))
+        (type_identifier))
+      (type_parameter
+        (type_parameter_modifiers
+          (annotation
+            (user_type
+              (type_identifier)))
+          (variance_modifier))
+        (type_identifier)))))
