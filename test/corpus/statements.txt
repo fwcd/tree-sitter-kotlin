@@ -1169,3 +1169,112 @@ fun <T> f() where T : Any {
         (user_type
           (type_identifier))))
     (function_body)))
+
+================================================================================
+Annotation before an assignment
+================================================================================
+
+fun f() {
+    @Suppress("UNCHECKED_CAST")
+    x = g()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (annotated_expression
+          (annotation
+            (constructor_invocation
+              (user_type
+                (type_identifier))
+              (value_arguments
+                (value_argument
+                  (string_literal
+                    (string_content))))))
+          (assignment
+            (directly_assignable_expression
+              (simple_identifier))
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+Annotation before a loop
+================================================================================
+
+fun f() {
+    @A
+    while (c) {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (annotated_expression
+          (annotation
+            (user_type
+              (type_identifier)))
+          (while_statement
+            (simple_identifier)
+            (control_structure_body)))))))
+
+================================================================================
+Annotations still belong to a declaration, not the statement before it
+================================================================================
+
+@A
+@B
+abstract class C
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (annotation
+        (user_type
+          (type_identifier)))
+      (inheritance_modifier))
+    (type_identifier)))
+
+================================================================================
+Annotation before a property accessor stays with the accessor
+================================================================================
+
+val x: T
+    @A
+    get() = y()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (getter
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier))))
+    (function_body
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))))

@@ -171,6 +171,37 @@
     }
   },
   {
+    "type": "annotated_expression",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "annotation",
+          "named": true
+        },
+        {
+          "type": "assignment",
+          "named": true
+        },
+        {
+          "type": "do_while_statement",
+          "named": true
+        },
+        {
+          "type": "for_statement",
+          "named": true
+        },
+        {
+          "type": "while_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "annotated_lambda",
     "named": true,
     "fields": {},
@@ -2098,6 +2129,10 @@
       "types": [
         {
           "type": "additive_expression",
+          "named": true
+        },
+        {
+          "type": "annotated_expression",
           "named": true
         },
         {
@@ -7927,6 +7962,10 @@
           "named": true
         },
         {
+          "type": "annotated_expression",
+          "named": true
+        },
+        {
           "type": "annotation",
           "named": true
         },
@@ -8338,6 +8377,10 @@
       "types": [
         {
           "type": "additive_expression",
+          "named": true
+        },
+        {
+          "type": "annotated_expression",
           "named": true
         },
         {

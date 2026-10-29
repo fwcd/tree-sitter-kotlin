@@ -1011,15 +1011,32 @@ module.exports = grammar({
       // annotations on a declaration are already handled by `modifiers`, and
       // allowing both here would make them ambiguous.
       seq(optional($.label), $._declaration),
-      seq(
-        repeat(choice($.label, alias($._statement_annotation, $.annotation))),
-        choice(
-          $.assignment,
-          $._loop_statement,
-          $._expression
-        )
-      )
+      seq(repeat($.label), $._expression),
+      seq($._statement_annotations, repeat($.label), $._expression),
+      seq(repeat($.label), choice($.assignment, $._loop_statement)),
+      // `@Suppress("x") y = f()` and `@A for (...) {}`. An annotation before an
+      // expression already groups with it through `prefix_expression`, but an
+      // assignment and a loop are not expressions, and `_statement` is hidden,
+      // so the annotation came out as a sibling of the statement it annotates
+      // and nothing said which statement it belonged to. JetBrains wraps an
+      // annotated statement in ANNOTATED_EXPRESSION; this is that grouping.
+      alias($._annotated_statement, $.annotated_expression)
     ),
+
+    _annotated_statement: $ => seq(
+      $._statement_annotations,
+      choice($.assignment, $._loop_statement)
+    ),
+
+    // One shared symbol for the statement-level annotation prefix, used by
+    // every arm above that can carry one. Giving each arm its own `repeat1`
+    // makes the prefixes distinct symbols, and the parser then has to choose
+    // between them before it has seen the statement that disambiguates — which
+    // is what let a multi-annotation prefix be stolen from a declaration,
+    // detaching `@Deprecated(...) @Suppress(...) public abstract class C` from
+    // its annotations. Sharing it means the prefix reduces once and only the
+    // tail decides.
+    _statement_annotations: $ => repeat1(alias($._statement_annotation, $.annotation)),
 
     // Structurally identical to annotation, but a distinct rule so that
     // the parser state machine does not merge it with the annotation
