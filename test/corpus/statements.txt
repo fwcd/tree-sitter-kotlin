@@ -857,6 +857,7 @@ fun f() {
           (simple_identifier)
           (call_suffix
             (value_arguments)))
+        (multiline_comment)
         (call_expression
           (navigation_expression
             (callable_reference
