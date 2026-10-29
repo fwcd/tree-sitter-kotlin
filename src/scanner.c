@@ -17,6 +17,7 @@ enum TokenType {
   INTERPOLATION_EXPRESSION_START,
   INTERPOLATION_IDENTIFIER_START,
   BY_DELEGATION_HINT,
+  PRIMARY_CONSTRUCTOR_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -73,6 +74,13 @@ typedef char Delimiter;
 //   interpolation (1 for regular strings and $"...", 2 for $$"...", etc.; max
 //   PREFIX_LEN_MAX), or PREFIX_LEN_UNREPRESENTABLE for a longer prefix.
 typedef Array(Delimiter) Stack;
+
+typedef struct {
+  Stack strings;
+  // A comment is an extra token. Preserve a class-header line break while
+  // emitting that comment, until the constructor/ASI decision can be made.
+  bool constructor_newline;
+} Scanner;
 
 static inline void stack_push(Stack *stack, char chr, bool triple, uint16_t prefix_len) {
   uint8_t delim = (uint8_t)(triple ? (chr + 1) : chr);
@@ -323,7 +331,7 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
 }
 
 
-static bool scan_multiline_comment(TSLexer *lexer) {
+static bool scan_multiline_comment(TSLexer *lexer, bool *newline) {
   if (lexer->lookahead != '/') return false;
   advance(lexer);
   if (lexer->lookahead != '*') return false;
@@ -332,6 +340,8 @@ static bool scan_multiline_comment(TSLexer *lexer) {
   bool after_star = false;
   unsigned nesting_depth = 1;
   for (;;) {
+    if (newline && (lexer->lookahead == '\n' || lexer->lookahead == '\r'))
+      *newline = true;
     switch (lexer->lookahead) {
       case '*':
         advance(lexer);
@@ -542,6 +552,254 @@ static bool check_annotation_then_constructor(TSLexer *lexer) {
   }
   // Check directly for 'constructor'
   return check_word(lexer, "constructor", 11);
+}
+
+
+// Probe only while the grammar can start a primary constructor. The hidden
+// hint commits that alternative before trivia/modifiers are lexed, so every
+// ASI path sees the same decision without changing comment token boundaries.
+// Probes use advance(), never skip(): a zero-width hint/semicolon stays at
+// the original mark even after looking through comments and annotation args.
+static bool constructor_space(int32_t c) {
+  return c == ' ' || (c >= '\t' && c <= '\r') || c == 0x85 || c == 0xa0 ||
+         c == 0x1680 || (c >= 0x2000 && c <= 0x200a) || c == 0x2028 ||
+         c == 0x2029 || c == 0x202f || c == 0x205f || c == 0x3000;
+}
+
+static bool constructor_trivia(TSLexer *lexer, bool *newline) {
+  for (;;) {
+    while (constructor_space(lexer->lookahead)) {
+      if (lexer->lookahead == '\n' || lexer->lookahead == '\r') *newline = true;
+      advance(lexer);
+    }
+    if (lexer->lookahead != '/') return true;
+    advance(lexer);
+    if (lexer->lookahead == '/') {
+      while (!lexer->eof(lexer) && lexer->lookahead != '\n' && lexer->lookahead != '\r') advance(lexer);
+    } else if (lexer->lookahead == '*') {
+      advance(lexer);
+      unsigned depth = 1;
+      while (depth && !lexer->eof(lexer)) {
+        int32_t c = lexer->lookahead;
+        if (c == '\n' || c == '\r') *newline = true;
+        advance(lexer);
+        if (c == '/' && lexer->lookahead == '*') { advance(lexer); depth++; }
+        else if (c == '*' && lexer->lookahead == '/') { advance(lexer); depth--; }
+      }
+      if (depth) return false;
+    } else return false;
+  }
+}
+
+// Read complete identifiers, including non-ASCII continuations. Only an
+// entirely ASCII word can be a modifier/constructor keyword. The generated
+// lexer still validates Unicode identifiers; this probe never emits them.
+static bool constructor_word_char(int32_t c) {
+  if (c < 128) return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+    (c >= '0' && c <= '9') || c == '_';
+  return !constructor_space(c);
+}
+
+static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity) {
+  unsigned length = 0;
+  bool ascii = true;
+  while (!lexer->eof(lexer) && constructor_word_char(lexer->lookahead)) {
+    if (lexer->lookahead >= 128 || length + 1 >= capacity) ascii = false;
+    if (length + 1 < capacity) word[length++] = (char)lexer->lookahead;
+    advance(lexer);
+  }
+  word[length] = '\0';
+  return ascii && length > 0;
+}
+
+static bool constructor_modifier(const char *word) {
+  static const char *const words[] = {
+    "public", "private", "protected", "internal", "actual", "expect",
+    "final", "open", "abstract", "sealed", "const", "override", "lateinit",
+    "tailrec", "operator", "infix", "inline", "external", "suspend", "data",
+    "inner", "value", "annotation", "noinline", "crossinline", "vararg"
+  };
+  for (unsigned i = 0; i < sizeof(words) / sizeof(words[0]); i++)
+    if (strcmp(word, words[i]) == 0) return true;
+  return false;
+}
+
+typedef struct { char end; char kind; unsigned dollars; } ConstructorProbeFrame;
+typedef Array(ConstructorProbeFrame) ConstructorProbeStack;
+
+// Balanced annotation arguments/types, with strings, chars, quoted identifiers,
+// nested/NUL comments and interpolation. An explicit stack keeps lookahead
+// nesting independent of the C call stack and the scanner's serialized strings.
+static bool constructor_balanced(TSLexer *lexer, char close) {
+  ConstructorProbeStack stack;
+  array_init(&stack);
+  array_push(&stack, ((ConstructorProbeFrame){close, 0, 0}));
+  advance(lexer);
+  bool ok = false;
+  while (stack.size && !lexer->eof(lexer)) {
+    ConstructorProbeFrame frame = *array_back(&stack);
+    int32_t c = lexer->lookahead;
+    if (frame.kind) {
+      if (frame.kind == 1 && c == '\\') { advance(lexer); if (!lexer->eof(lexer)) advance(lexer); continue; }
+      if (c == frame.end) {
+        advance(lexer);
+        if (frame.kind != 2) { (void)array_pop(&stack); continue; }
+        if (lexer->lookahead == '"') {
+          advance(lexer);
+          if (lexer->lookahead == '"') { advance(lexer); (void)array_pop(&stack); }
+        }
+        continue;
+      }
+      if (frame.end == '"' && c == '$') {
+        unsigned run = 0;
+        while (lexer->lookahead == '$') { advance(lexer); run++; }
+        if (run >= frame.dollars && lexer->lookahead == '{') {
+          advance(lexer);
+          array_push(&stack, ((ConstructorProbeFrame){'}', 0, 0}));
+        }
+        continue;
+      }
+      advance(lexer); continue;
+    }
+    if (c == frame.end) { advance(lexer); (void)array_pop(&stack); continue; }
+    if (c == '(' || c == '[' || c == '{' || (c == '<' && frame.end == '>')) {
+      array_push(&stack, ((ConstructorProbeFrame){c == '(' ? ')' : c == '[' ? ']' : c == '{' ? '}' : '>', 0, 0}));
+      advance(lexer); continue;
+    }
+    if (c == '/') { bool newline = false; if (!constructor_trivia(lexer, &newline)) continue; continue; }
+    unsigned dollars = 1;
+    if (c == '$') {
+      dollars = 0;
+      while (lexer->lookahead == '$') { advance(lexer); dollars++; }
+      c = lexer->lookahead;
+    }
+    if (c == '"' || c == '\'' || c == '`') {
+      char kind = c == '`' ? 3 : 1;
+      advance(lexer);
+      if (c == '"' && lexer->lookahead == '"') {
+        advance(lexer);
+        if (lexer->lookahead == '"') { advance(lexer); kind = 2; }
+        else continue; // Empty ordinary string.
+      }
+      array_push(&stack, ((ConstructorProbeFrame){(char)c, kind, dollars}));
+      continue;
+    }
+    advance(lexer);
+  }
+  ok = stack.size == 0;
+  array_delete(&stack);
+  return ok;
+}
+
+static bool constructor_annotation(TSLexer *lexer) {
+  advance(lexer); // @
+  bool newline = false;
+  if (!constructor_trivia(lexer, &newline)) return false;
+  if (lexer->lookahead == '[') return constructor_balanced(lexer, ']');
+  for (;;) {
+    if (!constructor_trivia(lexer, &newline)) return false;
+    if (lexer->lookahead == '`') {
+      advance(lexer);
+      while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
+      if (lexer->eof(lexer)) return false;
+      advance(lexer);
+    } else {
+      if (!constructor_word_char(lexer->lookahead)) return false;
+      char ignored[32]; constructor_word(lexer, ignored, sizeof(ignored));
+    }
+    if (!constructor_trivia(lexer, &newline)) return false;
+    if (lexer->lookahead == ':') {
+      advance(lexer); // use-site target
+      if (!constructor_trivia(lexer, &newline)) return false;
+      if (lexer->lookahead == '[') return constructor_balanced(lexer, ']');
+      continue;
+    }
+    if (lexer->lookahead == '.') { advance(lexer); continue; }
+    break;
+  }
+  if (!constructor_trivia(lexer, &newline)) return false;
+  if (lexer->lookahead == '<' && !constructor_balanced(lexer, '>')) return false;
+  if (!constructor_trivia(lexer, &newline)) return false;
+  if (lexer->lookahead == '(' && !constructor_balanced(lexer, ')')) return false;
+  return true;
+}
+
+static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
+                                          const bool *valid_symbols) {
+  bool newline = scanner->constructor_newline;
+  scanner->constructor_newline = false;
+  while (constructor_space(lexer->lookahead)) {
+    if (lexer->lookahead == '\n' || lexer->lookahead == '\r') newline = true;
+    skip(lexer);
+  }
+  // Emit leading block comments normally, rather than absorbing them into a
+  // speculative hint. Line comments are handled by the internal lexer. This
+  // also leaves class bodies/delegation clauses after comments available to
+  // the ordinary lexer when there is no explicit constructor.
+  if (lexer->lookahead == '/') {
+    if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, &newline)) {
+      scanner->constructor_newline = newline;
+      return true;
+    }
+    return false; // Line comment or division; neither needs an ASI here.
+  }
+  lexer->mark_end(lexer);
+  if (lexer->lookahead == ';') {
+    advance(lexer);
+    lexer->mark_end(lexer);
+    lexer->result_symbol = AUTOMATIC_SEMICOLON;
+    return valid_symbols[AUTOMATIC_SEMICOLON];
+  }
+  if (lexer->eof(lexer)) {
+    lexer->result_symbol = AUTOMATIC_SEMICOLON;
+    return valid_symbols[AUTOMATIC_SEMICOLON];
+  }
+  const bool header_newline = newline;
+  int32_t first = lexer->lookahead;
+  char first_word[32] = {0};
+  bool first_identifier = true;
+  for (;;) {
+    if (lexer->lookahead == '@') {
+      if (!constructor_annotation(lexer)) break;
+    } else {
+      char word[32] = {0};
+      bool ascii = constructor_word(lexer, word, sizeof(word));
+      if (first_identifier) { memcpy(first_word, word, sizeof(word)); first_identifier = false; }
+      if (!ascii) break;
+      if (strcmp(word, "constructor") == 0) {
+        if (constructor_trivia(lexer, &newline) && lexer->lookahead == '(') {
+          lexer->result_symbol = PRIMARY_CONSTRUCTOR_HINT;
+          return true;
+        }
+        break;
+      }
+      if (!constructor_modifier(word)) break;
+    }
+    if (!constructor_trivia(lexer, &newline)) break;
+  }
+  // Preserve the old class-header continuations on a failed constructor probe.
+  bool continuation = first == '(' || first == '{' || first == '<' ||
+    first == '.' || first == '?' || first == ',' || first == '*' ||
+    first == '%' || first == '>' || first == '=' || first == '|' || first == '&' ||
+    strcmp(first_word, "as") == 0 || strcmp(first_word, "where") == 0 ||
+    (valid_symbols[BY_DELEGATION_HINT] && strcmp(first_word, "by") == 0);
+  // Match main's class-header boundaries: :: and [ start a statement, while
+  // a lone colon continues delegation. Bare ( can still open a constructor.
+  if (first == ':') { advance(lexer); continuation = lexer->lookahead != ':'; }
+  if (strcmp(first_word, "finally") == 0) {
+    continuation = constructor_trivia(lexer, &newline) && lexer->lookahead == '{';
+  }
+  if (first == '!') { advance(lexer); continuation = lexer->lookahead == '='; }
+  if (strcmp(first_word, "else") == 0) {
+    continuation = true;
+    if (constructor_trivia(lexer, &newline) && lexer->lookahead == '-') {
+      advance(lexer);
+      continuation = lexer->lookahead != '>';
+    }
+  }
+  lexer->result_symbol = AUTOMATIC_SEMICOLON;
+  return (header_newline ? !continuation : strcmp(first_word, "import") == 0) &&
+    valid_symbols[AUTOMATIC_SEMICOLON];
 }
 
 // After a comment has been skipped following a line break, decide whether an
@@ -897,7 +1155,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
         if (!scan_for_word(lexer, "lse", 3)) return true;
         return followed_by_arrow(lexer);
 
-      // Don't insert a semicolon before an as
+      // Cast continuation outside a primary-constructor context.
       case 'a':
         return !scan_for_word(lexer, "s", 1);
 
@@ -945,7 +1203,7 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
             if (lexer->lookahead != kw[i]) { matched = false; break; }
             advance(lexer);
           }
-          if (matched && !is_word_char(lexer->lookahead)) {
+          if (matched && !constructor_word_char(lexer->lookahead)) {
             lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
             lexer->mark_end(lexer);
             return true;
@@ -1024,6 +1282,10 @@ static bool scan_import_dot(TSLexer *lexer) {
 }
 
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
+  Scanner *scanner = payload;
+  if (valid_symbols[PRIMARY_CONSTRUCTOR_HINT] && !valid_symbols[STRING_CONTENT])
+    return scan_primary_constructor_hint(scanner, lexer, valid_symbols);
+  scanner->constructor_newline = false;
   // BY_DELEGATION_HINT is declared in the grammar (optional, before `by` in
   // explicit_delegation and property_delegate) purely so it appears in
   // valid_symbols when the parser is in a delegation context. The scanner
@@ -1066,7 +1328,7 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
         if (lexer->lookahead != kw[i]) { matched = false; break; }
         advance(lexer);
       }
-      if (matched && !is_word_char(lexer->lookahead)) {
+      if (matched && !constructor_word_char(lexer->lookahead)) {
         lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
         lexer->mark_end(lexer);
         return true;
@@ -1077,19 +1339,19 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   // content, end, or interpolation start
   if (valid_symbols[STRING_CONTENT] || valid_symbols[INTERPOLATION_EXPRESSION_START] ||
       valid_symbols[INTERPOLATION_IDENTIFIER_START]) {
-    if (scan_string_content(lexer, payload, valid_symbols)) return true;
+    if (scan_string_content(lexer, &scanner->strings, valid_symbols)) return true;
   }
 
   // a string might follow after some whitespace, so we can't lookahead
   // until we get rid of it
   while (iswspace(lexer->lookahead)) skip(lexer);
 
-  if (valid_symbols[STRING_START] && scan_string_start(lexer, payload)) {
+  if (valid_symbols[STRING_START] && scan_string_start(lexer, &scanner->strings)) {
     lexer->result_symbol = STRING_START;
     return true;
   }
 
-  if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer)) {
+  if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, NULL)) {
     return true;
   }
 
@@ -1097,20 +1359,21 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
 }
 
 void *tree_sitter_kotlin_external_scanner_create() {
-  Stack *stack = ts_calloc(1, sizeof(Stack));
-  if (stack == NULL) abort();
-  array_init(stack);
-  return stack;
+  Scanner *scanner = ts_calloc(1, sizeof(Scanner));
+  if (scanner == NULL) abort();
+  array_init(&scanner->strings);
+  return scanner;
 }
 
 void tree_sitter_kotlin_external_scanner_destroy(void *payload) {
-  Stack *stack = (Stack *)payload;
-  array_delete(stack);
-  ts_free(stack);
+  Scanner *scanner = payload;
+  array_delete(&scanner->strings);
+  ts_free(scanner);
 }
 
 unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buffer) {
-  Stack *stack = (Stack *)payload;
+  Scanner *scanner = payload;
+  Stack *stack = &scanner->strings;
   unsigned n = stack->size;
   if (n > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
     n = TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
@@ -1118,17 +1381,27 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
   if (n > 0) {
     // it's an undefined behavior to memcpy 0 bytes
     memcpy(buffer, stack->contents, n);
+    // Delimiters are 34/35, leaving bit 2 unused even at the 512-string
+    // nesting limit. Borrow it only in the serialized first delimiter;
+    // deserialization clears it before any string operation.
+    if (scanner->constructor_newline) buffer[0] |= 4;
+  } else if (scanner->constructor_newline) {
+    buffer[0] = 4;
+    return 1;
   }
   return n;
 }
 
 void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) {
-  Stack *stack = (Stack *)payload;
+  Scanner *scanner = payload;
+  Stack *stack = &scanner->strings;
+  scanner->constructor_newline = length > 0 && (buffer[0] & 4) != 0;
   // Stack entries are 2 bytes each (delimiter + prefix_len).
   // Discard corrupted state with odd length.
   if (length > 0 && length % 2 == 0) {
     array_reserve(stack, length);
     memcpy(stack->contents, buffer, length);
+    stack->contents[0] &= (Delimiter)~4;
     stack->size = length;
   } else {
     array_clear(stack);
