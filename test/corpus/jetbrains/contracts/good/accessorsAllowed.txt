@@ -1,0 +1,43 @@
+==================
+JetBrains PSI: contracts/good/accessorsAllowed
+==================
+
+// LANGUAGE: +AllowContractsOnPropertyAccessors, +ContextParameters
+
+@file:OptIn(ExperimentalContracts::class)
+
+import kotlin.contracts.*
+
+var Int?.prop : Int?
+    get() {
+        contract { returns() implies (this@prop != null) }
+        return null
+    }
+    set(v: Int?) {
+        contract {
+            returns() implies (v != null)
+            returns() implies (this@prop != null)
+        }
+    }
+
+sealed class Status {
+    class Ok : Status() {}
+    class Error(val message: String) : Status()
+}
+
+val Status.isError: Boolean
+    get() {
+        contract { returns (true) implies (this@isError is Status.Error) }
+        return this is Status.Error
+    }
+
+context(s: Status)
+val isContextError: Boolean
+    get() {
+        contract { returns (true) implies (s is Status.Error) }
+        return s is Status.Error
+    }
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier)))))) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (nullable_type (user_type (type_identifier)) (quest))) (variable_declaration (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (getter (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (equality_expression (this_expression (type_identifier)) (null_literal))))))))) (jump_expression (null_literal))))) (setter (parameter_with_optional_type (simple_identifier) (nullable_type (user_type (type_identifier)) (quest))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (equality_expression (simple_identifier) (null_literal)))) (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (equality_expression (this_expression (type_identifier)) (null_literal)))))))))))) (class_declaration (modifiers (class_modifier)) (type_identifier) (class_body (class_declaration (type_identifier) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (class_body)) (class_declaration (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments)))))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (check_expression (this_expression (type_identifier)) (user_type (type_identifier) (type_identifier)))))))))) (jump_expression (check_expression (this_expression) (user_type (type_identifier) (type_identifier))))))) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (check_expression (simple_identifier) (user_type (type_identifier) (type_identifier)))))))))) (jump_expression (check_expression (simple_identifier) (user_type (type_identifier) (type_identifier))))))))

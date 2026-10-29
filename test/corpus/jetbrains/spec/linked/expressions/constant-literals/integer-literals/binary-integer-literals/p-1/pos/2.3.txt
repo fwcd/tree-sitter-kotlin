@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/binary-integer-literals/p-1/pos/2.3
+:error
+==================
+
+val value = 0b0_1_0_1_0_1_____
+val value = 0B1_______0_______1_______0_
+val value = 0B000000000_
+val value = 0b_
+val value = 0B______________
+val value = 0B0_
+val value = 0b10_
+---

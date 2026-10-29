@@ -1,0 +1,9 @@
+==================
+JetBrains PSI: propertyDelegate/PropertyWithInitializer
+:error
+==================
+
+// COMPILATION_ERRORS
+
+val p: Int by A() = 1
+---

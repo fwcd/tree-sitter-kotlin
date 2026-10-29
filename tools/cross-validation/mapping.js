@@ -42,6 +42,10 @@ const TS_TO_PSI = {
   function_body: 'BLOCK',
   function_value_parameters: 'VALUE_PARAMETER_LIST',
   parameter: 'VALUE_PARAMETER',
+  // One node covers both spellings: PSI splits them into CONTEXT_PARAMETER_LIST
+  // (named, `context(a: A)`, Kotlin 2.2) and CONTEXT_RECEIVER_LIST (bare types,
+  // the deprecated 1.6.20 form). The named form is the current syntax.
+  context_receiver: 'CONTEXT_PARAMETER_LIST',
   parameter_with_optional_type: 'VALUE_PARAMETER',
   getter: 'PROPERTY_ACCESSOR',
   setter: 'PROPERTY_ACCESSOR',

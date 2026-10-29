@@ -7,6 +7,8 @@ const os = require('os');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const { SOURCE_ROOTS, METADATA_FILE, goldenHasPsiError, verifyGoldenFormat, preprocessSource } = require('./psi-fixture-sources');
+const { buildManifest, writeManifest } = require('./cross-validation/manifest');
+const { contextExclusion, exclusionPaths, requiredContextIds } = require('./psi-fixture-context');
 
 const CROSS_VALIDATION_DIR = path.join(__dirname, 'cross-validation');
 const FIXTURES_DIR = path.join(CROSS_VALIDATION_DIR, 'fixtures');
@@ -36,7 +38,7 @@ function copyFiles(src, destination, extensions = ['.kt', '.kts'], goldenExt = '
   if (!Array.isArray(extensions)) extensions = [extensions];
   const { namespace = '', suite = 'psi', upstreamRoot = '', profile = 'identity' } = options;
   const files = listFilesRecursive(src), present = new Set(files);
-  const stats = { matchedPairs: 0, pairs: 0, files: 0, rejected: [], sources: {},
+  const stats = { matchedPairs: 0, pairs: 0, files: 0, rejected: [], contextExclusions: [], sources: {},
     unpairedSources: [], skippedGoldens: 0, collisions: [], dirs: 0 };
   const directories = new Set(), basenames = new Map();
   for (const source of files) {
@@ -52,6 +54,14 @@ function copyFiles(src, destination, extensions = ['.kt', '.kts'], goldenExt = '
     const descriptor = { suite, sourcePath: `${upstreamRoot}/${source}`, goldenPath: `${upstreamRoot}/${golden}`,
       extension, parseKind: extension === '.kts' ? 'script' : 'file', profile,
       sourceSha256: sha256(raw), goldenSha256: sha256(psi) };
+    const excluded = contextExclusion(id, descriptor, raw, psi);
+    if (excluded) {
+      const paths = exclusionPaths(excluded, destination);
+      fs.mkdirSync(path.dirname(paths.ktFile), { recursive: true });
+      fs.writeFileSync(paths.ktFile, raw); fs.writeFileSync(paths.psiFile, psi);
+      stats.contextExclusions.push(excluded);
+      continue;
+    }
     if (goldenHasPsiError(psi.toString('utf8'))) {
       stats.rejected.push({ id, ...descriptor, reason: 'PsiErrorElement' });
       continue;
@@ -98,19 +108,24 @@ function vendor({ commit, sourceRepo, fixturesDir = FIXTURES_DIR }) {
       git(['fetch', '--depth=1', 'origin', commit], source);
       git(['checkout', 'FETCH_HEAD'], source);
     }
-    const metadata = { schemaVersion: 1, commit, psiValidOnly: true, sourceRoots: [], sources: {}, rejected: [] };
+    const metadata = { schemaVersion: 2, commit, psiValidOnly: true, sourceRoots: [], sources: {}, rejected: [], contextExclusions: [] };
     for (const root of SOURCE_ROOTS) {
       const stats = copyFiles(path.join(source, root.path), staging, root.extensions, '.txt',
         { ...root, upstreamRoot: root.path });
       if (!stats.matchedPairs || !stats.pairs) throw new Error(`No positive PSI pairs under ${root.path} at ${commit}`);
       Object.assign(metadata.sources, stats.sources); metadata.rejected.push(...stats.rejected);
+      metadata.contextExclusions.push(...stats.contextExclusions);
       metadata.sourceRoots.push({ ...root, paired: stats.matchedPairs, imported: stats.pairs,
-        rejectedPsiInvalid: stats.rejected.length, unpairedSources: stats.unpairedSources,
+        rejectedPsiInvalid: stats.rejected.length, excludedContext: stats.contextExclusions.length, unpairedSources: stats.unpairedSources,
         skippedOtherGoldens: stats.skippedGoldens });
     }
     const sorted = (a, b) => a < b ? -1 : a > b ? 1 : 0;
     metadata.sources = Object.fromEntries(Object.entries(metadata.sources).sort(([a], [b]) => sorted(a, b)));
     metadata.rejected.sort((a, b) => sorted(a.id, b.id));
+    metadata.contextExclusions.sort((a, b) => sorted(a.id, b.id));
+    if (JSON.stringify(metadata.contextExclusions.map(record => record.id)) !== JSON.stringify(requiredContextIds(SOURCE_ROOTS))) {
+      throw new Error('Required fixture policy inputs disappeared; review the context policy for this pin');
+    }
     fs.writeFileSync(path.join(staging, METADATA_FILE), JSON.stringify(metadata, null, 2) + '\n');
     let backup;
     if (fs.existsSync(fixturesDir)) {
@@ -121,7 +136,10 @@ function vendor({ commit, sourceRepo, fixturesDir = FIXTURES_DIR }) {
     }
     try { fs.renameSync(staging, fixturesDir); installed = true; }
     catch (error) { if (backup) fs.renameSync(backup, fixturesDir); throw error; }
-    if (fixturesDir === FIXTURES_DIR) fs.writeFileSync(VERSION_FILE, commit + '\n');
+    if (fixturesDir === FIXTURES_DIR) {
+      fs.writeFileSync(VERSION_FILE, commit + '\n');
+      writeManifest(buildManifest(fixturesDir));
+    }
     return metadata;
   } finally {
     fs.rmSync(temporary, { recursive: true, force: true });
@@ -139,6 +157,8 @@ function main(args) {
   }
   const report = vendor({ commit, sourceRepo });
   console.log(JSON.stringify({ commit, positivePairs: Object.keys(report.sources).length,
+    positiveInventoryPairs: Object.keys(report.sources).length + report.contextExclusions.length,
+    excludedContext: report.contextExclusions.map(record => ({ id: record.id, policy: record.policy, reason: record.reason })),
     rejectedPsiInvalid: report.rejected.length, sources: report.sourceRoots }, null, 2));
 }
 

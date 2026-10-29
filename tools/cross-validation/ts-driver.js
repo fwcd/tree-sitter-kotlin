@@ -18,12 +18,8 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-// The grammar checkout, which is where the parser and its tree-sitter CLI
-// live. Upstream this file sat inside that checkout and `../..` was correct;
-// in the toolkit the tools are a separate harness, so the grammar has to be
-// resolved. Getting this wrong is not loud: `tree-sitter parse` simply reports
-// "No language found" and every fixture is recorded as TS_PARSE_ERROR, which
-// reads like a total grammar regression rather than a misconfigured harness.
+// Resolve the repository containing the parser and its native CLI. An explicit
+// KOTLIN_GRAMMAR_ROOT can select another checkout for comparison.
 const REPO_ROOT = require('../grammar-root').grammarRoot() || path.resolve(__dirname, '..', '..');
 const TREE_SITTER_BIN = path.join(REPO_ROOT, 'node_modules', '.bin', 'tree-sitter');
 

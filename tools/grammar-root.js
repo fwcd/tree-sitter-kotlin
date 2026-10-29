@@ -1,16 +1,4 @@
-/**
- * Locate the grammar checkout the tools measure.
- *
- * In the upstream repository these tools sat beside `src/`, so tests could just
- * `require('../../src/node-types.json')`. The toolkit lives outside that repo
- * on purpose, so the grammar has to be found rather than assumed: an explicit
- * `KOTLIN_GRAMMAR_ROOT`, otherwise the clone the toolkit manages.
- *
- * Returns null rather than throwing, so a test can skip with a clear reason
- * instead of failing for a missing checkout that says nothing about the code.
- *
- * @module tools/grammar-root
- */
+/** Locate this repository's grammar or an explicit KOTLIN_GRAMMAR_ROOT. */
 
 'use strict';
 
@@ -21,7 +9,6 @@ const path = require('node:path');
 function grammarRoot() {
   const candidates = [
     process.env.KOTLIN_GRAMMAR_ROOT,
-    path.resolve(__dirname, '..', '.upstream'),
     path.resolve(__dirname, '..'), // tools/ inside a grammar checkout
     path.resolve(__dirname, '..', '..'), // tools/ still inside a grammar checkout
   ].filter(Boolean);
@@ -39,6 +26,6 @@ function nodeTypes() {
 }
 
 /** Message explaining a skip, so a skipped test is never mysterious. */
-const MISSING = 'no grammar checkout found; set KOTLIN_GRAMMAR_ROOT or run bin/pr-review once to create .upstream';
+const MISSING = 'no grammar checkout found; set KOTLIN_GRAMMAR_ROOT';
 
 module.exports = { grammarRoot, nodeTypes, MISSING };

@@ -14,6 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { CONTEXT_EXCLUSIONS_DIR } = require('../psi-fixture-context');
 
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 
@@ -34,6 +35,9 @@ function listFixtureFiles(extension, dir = FIXTURES_DIR) {
     for (const entry of fs.readdirSync(absDir, { withFileTypes: true })) {
       const rel = relDir ? `${relDir}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
+        // Retained whole-file goldens are oracle validation inputs, with an
+        // explicit context exclusion. They are not grammar-comparison inputs.
+        if (rel === CONTEXT_EXCLUSIONS_DIR) continue;
         walk(rel);
       } else if (entry.isFile() && entry.name.endsWith(extension)) {
         found.push(rel);

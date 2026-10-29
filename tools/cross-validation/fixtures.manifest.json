@@ -1,10 +1,11 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "fixturesCommit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
-  "pairs": 447,
-  "files": 894,
-  "subdirectories": 57,
-  "contentHash": "2de728c84b748668c11dee158c551645c5a97e734b4c439ac029043c6251e6b9",
+  "pairs": 438,
+  "positiveInventoryPairs": 447,
+  "files": 876,
+  "subdirectories": 56,
+  "contentHash": "b8e2bf76935d2c8e688b5eae141a196f0ed7bf129d004b4e1ed83ec7b70ef644",
   "fixtures": [
     "AnonymousInitializer",
     "BabySteps",
@@ -145,8 +146,6 @@
     "classMembers",
     "classObject",
     "companionBlocks/mixOfRegularAndStaticCompanionMethods",
-    "companionBlocks/mixOfRegularAndStaticMethods",
-    "companionBlocks/smoke",
     "companionExtension",
     "complicateLTGTE",
     "const",
@@ -166,10 +165,6 @@
     "contextParameters/trailingComma",
     "contextParameters/unnamed",
     "contextParametersAndAnnotations",
-    "contracts/FunctionWithMultilineContract",
-    "contracts/FunctionsWithTypeConstraintsAndContract",
-    "contracts/PropertyAccessorsContracts",
-    "contracts/SimpleFunctionWithContract",
     "contracts/contracts",
     "contracts/contractsPropertyAccessors",
     "contracts/contractsSecondaryConstructor",
@@ -217,7 +212,6 @@
     "contracts/good/returnsImplies/withErasedType",
     "contracts/good/returnsImplies/withInfixFunction",
     "contracts/good/returnsImplies/withOperatorFunction",
-    "contracts/good/variousContracts/newSyntax/functionsWithContract",
     "contracts/nonKotlinContractCall",
     "contracts/nonKotlinContractCall2",
     "contracts/operator",
@@ -315,8 +309,6 @@
     "localClass",
     "modifiers",
     "mustUseReturnValueAndOverrides",
-    "mustUseReturnValueFullEnabled",
-    "mustUseReturnValueHalfEnabled",
     "namedCompanionObject",
     "nestedClasses",
     "newLabels/basic",
@@ -455,6 +447,293 @@
     "varargArgumentWithFunctionalType"
   ],
   "psiValidOnly": true,
+  "contextExclusions": [
+    {
+      "id": "companionBlocks/mixOfRegularAndStaticMethods",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticMethods.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticMethods.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "4b100e9264224d7eb122caa7e431bd2ec8d8efb79041a1582326f43c1c01948a",
+      "goldenSha256": "4cb1f83c76a37cd4466747adfef5c49b9222c568c03e9c1fe6e2e73757724242",
+      "vendoredSha256": "4b100e9264224d7eb122caa7e431bd2ec8d8efb79041a1582326f43c1c01948a",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/companionBlocks/mixOfRegularAndStaticMethods.kt",
+        "golden": ".context-exclusions/companionBlocks/mixOfRegularAndStaticMethods.txt"
+      },
+      "feature": "CompanionBlocksAndExtensions"
+    },
+    {
+      "id": "companionBlocks/smoke",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionBlocks/smoke.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionBlocks/smoke.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "ea67196022a6bfecd20f8b51a5375903083ef3daba536b78bc4415fc0a3e4922",
+      "goldenSha256": "8c516bbb5f878e9ad33c36f019011970d96a832e79fdda876d0dfcd6249e5ab4",
+      "vendoredSha256": "ea67196022a6bfecd20f8b51a5375903083ef3daba536b78bc4415fc0a3e4922",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/companionBlocks/smoke.kt",
+        "golden": ".context-exclusions/companionBlocks/smoke.txt"
+      },
+      "feature": "CompanionBlocksAndExtensions"
+    },
+    {
+      "id": "contracts/FunctionWithMultilineContract",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionWithMultilineContract.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionWithMultilineContract.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "3c8d0b68d770a764b6be61e0dd3b64fc2170796d1e915c6a56144efecc6c9b88",
+      "goldenSha256": "df19819c3a79b0c26ff6e5ac4ec51300afdfdd19620667e7569b7c0a7034d74b",
+      "vendoredSha256": "3c8d0b68d770a764b6be61e0dd3b64fc2170796d1e915c6a56144efecc6c9b88",
+      "policy": "experimental-syntax-v1",
+      "reason": "ContractSyntaxV2 is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/contracts/FunctionWithMultilineContract.kt",
+        "golden": ".context-exclusions/contracts/FunctionWithMultilineContract.txt"
+      },
+      "feature": "ContractSyntaxV2"
+    },
+    {
+      "id": "contracts/FunctionsWithTypeConstraintsAndContract",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionsWithTypeConstraintsAndContract.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionsWithTypeConstraintsAndContract.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "cf029d85a5f453012af2b9f35bf4d0f92d74caadfd15e0becc47aa5fa1941f96",
+      "goldenSha256": "5bc901a50ed11cd5bfd028fa2c59a18c2cfcbe0924b3f2d2510ea4533c2a90b1",
+      "vendoredSha256": "cf029d85a5f453012af2b9f35bf4d0f92d74caadfd15e0becc47aa5fa1941f96",
+      "policy": "experimental-syntax-v1",
+      "reason": "ContractSyntaxV2 is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/contracts/FunctionsWithTypeConstraintsAndContract.kt",
+        "golden": ".context-exclusions/contracts/FunctionsWithTypeConstraintsAndContract.txt"
+      },
+      "feature": "ContractSyntaxV2"
+    },
+    {
+      "id": "contracts/PropertyAccessorsContracts",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/PropertyAccessorsContracts.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/PropertyAccessorsContracts.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "c215b10153e634273e3aa6b66ab8897cf6292fe6a91fc61cfeb8886ff36cb606",
+      "goldenSha256": "c19ed5445af9efcc878ba857d43f81c4e897751c834c86c532a2f9ca517eb568",
+      "vendoredSha256": "c215b10153e634273e3aa6b66ab8897cf6292fe6a91fc61cfeb8886ff36cb606",
+      "policy": "experimental-syntax-v1",
+      "reason": "ContractSyntaxV2 is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/contracts/PropertyAccessorsContracts.kt",
+        "golden": ".context-exclusions/contracts/PropertyAccessorsContracts.txt"
+      },
+      "feature": "ContractSyntaxV2"
+    },
+    {
+      "id": "contracts/SimpleFunctionWithContract",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/SimpleFunctionWithContract.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/SimpleFunctionWithContract.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "82967cacbc6654e2e4391f6b38cf69d0435486cc95fe13edb2300d8b745de428",
+      "goldenSha256": "f016a09603ad9bc15ccfdcad71df2f289bb25b0c33f1f2bdb6cb4347fdcf5d79",
+      "vendoredSha256": "82967cacbc6654e2e4391f6b38cf69d0435486cc95fe13edb2300d8b745de428",
+      "policy": "experimental-syntax-v1",
+      "reason": "ContractSyntaxV2 is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/contracts/SimpleFunctionWithContract.kt",
+        "golden": ".context-exclusions/contracts/SimpleFunctionWithContract.txt"
+      },
+      "feature": "ContractSyntaxV2"
+    },
+    {
+      "id": "contracts/good/variousContracts/newSyntax/functionsWithContract",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/good/variousContracts/newSyntax/functionsWithContract.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/good/variousContracts/newSyntax/functionsWithContract.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "784c932c30a70fa0cbb94c6dbca9bb4dc123ebcaf05731293819ec4bfcf87f85",
+      "goldenSha256": "e924bf87f228bf34b6d85bd3b99e4a789d4f7c9d01e64993a272aa95fc845516",
+      "vendoredSha256": "784c932c30a70fa0cbb94c6dbca9bb4dc123ebcaf05731293819ec4bfcf87f85",
+      "policy": "experimental-syntax-v1",
+      "reason": "ContractSyntaxV2 is experimental syntax outside this grammar's supported feature set.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/contracts/good/variousContracts/newSyntax/functionsWithContract.kt",
+        "golden": ".context-exclusions/contracts/good/variousContracts/newSyntax/functionsWithContract.txt"
+      },
+      "feature": "ContractSyntaxV2"
+    },
+    {
+      "id": "mustUseReturnValueFullEnabled",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueFullEnabled.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueFullEnabled.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "7d0f46b020bc7d856da3fa76b4841a0a75e19dd4488a090c5ca9cf374eb02198",
+      "goldenSha256": "0d1039b390e719b393fc8eb63d6f73648ef6af1f76d24bbc2800cd21758d4f2b",
+      "vendoredSha256": "7d0f46b020bc7d856da3fa76b4841a0a75e19dd4488a090c5ca9cf374eb02198",
+      "policy": "multifile-file-annotation-v1",
+      "reason": "Concatenated FILE sections: the pinned whole-file golden attaches the mid-file @file annotation to FUN/MODIFIER_LIST; a separate chunk needs FILE_ANNOTATION_LIST. Partitioning the golden does not preserve its node parents.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/mustUseReturnValueFullEnabled.kt",
+        "golden": ".context-exclusions/mustUseReturnValueFullEnabled.txt"
+      },
+      "preamble": {
+        "startByte": 0,
+        "endByte": 66,
+        "startLine": 1,
+        "endLine": 3,
+        "sha256": "78afda0991650ce9ce8ed58f0fff7a23d14bdfeb2af6ee8634925ca68a5f0cb4"
+      },
+      "chunks": [
+        {
+          "filename": "Unmarked.kt",
+          "startByte": 66,
+          "endByte": 306,
+          "startLine": 3,
+          "endLine": 16,
+          "sha256": "8f36bf1697ef0fa1765e5ba2aa56d56af3bf5d21a3adf773ed817a9021f23357"
+        },
+        {
+          "filename": "unmarkedTopLevel.kt",
+          "startByte": 306,
+          "endByte": 410,
+          "startLine": 16,
+          "endLine": 20,
+          "sha256": "27d212924cb233a9f3a37175dca2a66f046b617de0b481cd81b51c21a46162b8"
+        },
+        {
+          "filename": "markedTopLevel.kt",
+          "startByte": 410,
+          "endByte": 592,
+          "startLine": 20,
+          "endLine": 27,
+          "sha256": "ee7e5bf6c1d577b1ef1dc4de9a54f66d96abd9d61b03212ece8ed67da9433db9"
+        },
+        {
+          "filename": "Marked.kt",
+          "startByte": 592,
+          "endByte": 855,
+          "startLine": 27,
+          "endLine": 41,
+          "sha256": "dbcd7f143b3f417e51720a094e5ba31db54e9ced60de5177af316053c99e7c5c"
+        },
+        {
+          "filename": "MyEnum.kt",
+          "startByte": 855,
+          "endByte": 925,
+          "startLine": 41,
+          "endLine": 46,
+          "sha256": "6bddd938cae49267b1eae804b2ba8df4adc688b1032d5215ba42d48c211d222a"
+        }
+      ]
+    },
+    {
+      "id": "mustUseReturnValueHalfEnabled",
+      "suite": "psi",
+      "sourcePath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueHalfEnabled.kt",
+      "goldenPath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueHalfEnabled.txt",
+      "extension": ".kt",
+      "parseKind": "file",
+      "profile": "identity",
+      "sourceSha256": "1b7112cf5ed93dd22c99e8d1954eef660706ac981c7e38c85c4cf6a9552bf749",
+      "goldenSha256": "be8c9219fe67c0e4a1e719c469a1225d9d8ab304cc5131dddd656aca5305e93e",
+      "vendoredSha256": "1b7112cf5ed93dd22c99e8d1954eef660706ac981c7e38c85c4cf6a9552bf749",
+      "policy": "multifile-file-annotation-v1",
+      "reason": "Concatenated FILE sections: the pinned whole-file golden attaches the mid-file @file annotation to FUN/MODIFIER_LIST; a separate chunk needs FILE_ANNOTATION_LIST. Partitioning the golden does not preserve its node parents.",
+      "comparison": "excluded",
+      "golden": "retain-pinned-original",
+      "artifacts": {
+        "source": ".context-exclusions/mustUseReturnValueHalfEnabled.kt",
+        "golden": ".context-exclusions/mustUseReturnValueHalfEnabled.txt"
+      },
+      "preamble": {
+        "startByte": 0,
+        "endByte": 67,
+        "startLine": 1,
+        "endLine": 3,
+        "sha256": "e6e692f7abd9eb3cfeb45c665fe371124f26d953414d9fa32d84aaa01187aa57"
+      },
+      "chunks": [
+        {
+          "filename": "Unmarked.kt",
+          "startByte": 67,
+          "endByte": 307,
+          "startLine": 3,
+          "endLine": 16,
+          "sha256": "8f36bf1697ef0fa1765e5ba2aa56d56af3bf5d21a3adf773ed817a9021f23357"
+        },
+        {
+          "filename": "unmarkedTopLevel.kt",
+          "startByte": 307,
+          "endByte": 468,
+          "startLine": 16,
+          "endLine": 21,
+          "sha256": "bc76415a3ea1b197357989a0ef1efc3e2a72b53b309fef8c76bf1fa4376f4d2a"
+        },
+        {
+          "filename": "markedTopLevel.kt",
+          "startByte": 468,
+          "endByte": 593,
+          "startLine": 21,
+          "endLine": 27,
+          "sha256": "e067408435df8144ba57dd62103fa115ccfc914d69967dfd3cfdf8d9bcc73df0"
+        },
+        {
+          "filename": "Marked.kt",
+          "startByte": 593,
+          "endByte": 856,
+          "startLine": 27,
+          "endLine": 41,
+          "sha256": "dbcd7f143b3f417e51720a094e5ba31db54e9ced60de5177af316053c99e7c5c"
+        },
+        {
+          "filename": "MyEnum.kt",
+          "startByte": 856,
+          "endByte": 926,
+          "startLine": 41,
+          "endLine": 46,
+          "sha256": "6bddd938cae49267b1eae804b2ba8df4adc688b1032d5215ba42d48c211d222a"
+        }
+      ]
+    }
+  ],
   "sourceRoots": [
     {
       "suite": "psi",
@@ -466,8 +745,9 @@
       ],
       "profile": "identity",
       "paired": 680,
-      "imported": 387,
+      "imported": 378,
       "rejectedPsiInvalid": 293,
+      "excludedContext": 9,
       "unpairedSources": [],
       "skippedOtherGoldens": 1451
     },
@@ -482,6 +762,7 @@
       "paired": 109,
       "imported": 60,
       "rejectedPsiInvalid": 49,
+      "excludedContext": 0,
       "unpairedSources": [
         "templates/_layout/linkedTestsLayout.kt",
         "templates/_layout/notLinkedTestsLayout.kt",
@@ -2045,28 +2326,6 @@
       "goldenSha256": "a790f091f4b79d57c7a4be0c39021ebde862453cfd5d889bcb7e71e14ef64923",
       "vendoredSha256": "1150ba8864ab9cc757845f6936d4faa71994100c966612210cd488e29371dbc8"
     },
-    "companionBlocks/mixOfRegularAndStaticMethods": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticMethods.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionBlocks/mixOfRegularAndStaticMethods.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "4b100e9264224d7eb122caa7e431bd2ec8d8efb79041a1582326f43c1c01948a",
-      "goldenSha256": "4cb1f83c76a37cd4466747adfef5c49b9222c568c03e9c1fe6e2e73757724242",
-      "vendoredSha256": "4b100e9264224d7eb122caa7e431bd2ec8d8efb79041a1582326f43c1c01948a"
-    },
-    "companionBlocks/smoke": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/companionBlocks/smoke.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/companionBlocks/smoke.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "ea67196022a6bfecd20f8b51a5375903083ef3daba536b78bc4415fc0a3e4922",
-      "goldenSha256": "8c516bbb5f878e9ad33c36f019011970d96a832e79fdda876d0dfcd6249e5ab4",
-      "vendoredSha256": "ea67196022a6bfecd20f8b51a5375903083ef3daba536b78bc4415fc0a3e4922"
-    },
     "companionExtension": {
       "suite": "psi",
       "sourcePath": "compiler/psi/psi-impl/testData/psi/companionExtension.kt",
@@ -2275,50 +2534,6 @@
       "sourceSha256": "93cdad6805a97669093fa8e9d90058e78fa00b88607b1508167e9cc5a2dfeaad",
       "goldenSha256": "c7f904286212c739bacd0ef01085c3e6de573ada5850ce3ee5978c5f2a6f6f57",
       "vendoredSha256": "93cdad6805a97669093fa8e9d90058e78fa00b88607b1508167e9cc5a2dfeaad"
-    },
-    "contracts/FunctionWithMultilineContract": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionWithMultilineContract.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionWithMultilineContract.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "3c8d0b68d770a764b6be61e0dd3b64fc2170796d1e915c6a56144efecc6c9b88",
-      "goldenSha256": "df19819c3a79b0c26ff6e5ac4ec51300afdfdd19620667e7569b7c0a7034d74b",
-      "vendoredSha256": "3c8d0b68d770a764b6be61e0dd3b64fc2170796d1e915c6a56144efecc6c9b88"
-    },
-    "contracts/FunctionsWithTypeConstraintsAndContract": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionsWithTypeConstraintsAndContract.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/FunctionsWithTypeConstraintsAndContract.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "cf029d85a5f453012af2b9f35bf4d0f92d74caadfd15e0becc47aa5fa1941f96",
-      "goldenSha256": "5bc901a50ed11cd5bfd028fa2c59a18c2cfcbe0924b3f2d2510ea4533c2a90b1",
-      "vendoredSha256": "cf029d85a5f453012af2b9f35bf4d0f92d74caadfd15e0becc47aa5fa1941f96"
-    },
-    "contracts/PropertyAccessorsContracts": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/PropertyAccessorsContracts.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/PropertyAccessorsContracts.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "c215b10153e634273e3aa6b66ab8897cf6292fe6a91fc61cfeb8886ff36cb606",
-      "goldenSha256": "c19ed5445af9efcc878ba857d43f81c4e897751c834c86c532a2f9ca517eb568",
-      "vendoredSha256": "c215b10153e634273e3aa6b66ab8897cf6292fe6a91fc61cfeb8886ff36cb606"
-    },
-    "contracts/SimpleFunctionWithContract": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/SimpleFunctionWithContract.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/SimpleFunctionWithContract.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "82967cacbc6654e2e4391f6b38cf69d0435486cc95fe13edb2300d8b745de428",
-      "goldenSha256": "f016a09603ad9bc15ccfdcad71df2f289bb25b0c33f1f2bdb6cb4347fdcf5d79",
-      "vendoredSha256": "82967cacbc6654e2e4391f6b38cf69d0435486cc95fe13edb2300d8b745de428"
     },
     "contracts/contracts": {
       "suite": "psi",
@@ -2836,17 +3051,6 @@
       "sourceSha256": "53a42db2ca5e361ddfaf6d8539a867275c2de7eb0c65b6a09743e4dbc86e7899",
       "goldenSha256": "85fa7d4d3dcdf3b02e16a4c02d2ffc0772ccf2bb98a82590dea90e6bb5663a8c",
       "vendoredSha256": "53a42db2ca5e361ddfaf6d8539a867275c2de7eb0c65b6a09743e4dbc86e7899"
-    },
-    "contracts/good/variousContracts/newSyntax/functionsWithContract": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/contracts/good/variousContracts/newSyntax/functionsWithContract.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/contracts/good/variousContracts/newSyntax/functionsWithContract.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "784c932c30a70fa0cbb94c6dbca9bb4dc123ebcaf05731293819ec4bfcf87f85",
-      "goldenSha256": "e924bf87f228bf34b6d85bd3b99e4a789d4f7c9d01e64993a272aa95fc845516",
-      "vendoredSha256": "784c932c30a70fa0cbb94c6dbca9bb4dc123ebcaf05731293819ec4bfcf87f85"
     },
     "contracts/nonKotlinContractCall": {
       "suite": "psi",
@@ -3914,28 +4118,6 @@
       "sourceSha256": "af5515bf9700ac5222b2bc247031fa94b35e8285880e1acbab68eabb5134e5b9",
       "goldenSha256": "a6f91ccff2e3b76b2e11e0b7463ad85ce1173c467c7da6be441c015fcd3e85b8",
       "vendoredSha256": "af5515bf9700ac5222b2bc247031fa94b35e8285880e1acbab68eabb5134e5b9"
-    },
-    "mustUseReturnValueFullEnabled": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueFullEnabled.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueFullEnabled.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "7d0f46b020bc7d856da3fa76b4841a0a75e19dd4488a090c5ca9cf374eb02198",
-      "goldenSha256": "0d1039b390e719b393fc8eb63d6f73648ef6af1f76d24bbc2800cd21758d4f2b",
-      "vendoredSha256": "7d0f46b020bc7d856da3fa76b4841a0a75e19dd4488a090c5ca9cf374eb02198"
-    },
-    "mustUseReturnValueHalfEnabled": {
-      "suite": "psi",
-      "sourcePath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueHalfEnabled.kt",
-      "goldenPath": "compiler/psi/psi-impl/testData/psi/mustUseReturnValueHalfEnabled.txt",
-      "extension": ".kt",
-      "parseKind": "file",
-      "profile": "identity",
-      "sourceSha256": "1b7112cf5ed93dd22c99e8d1954eef660706ac981c7e38c85c4cf6a9552bf749",
-      "goldenSha256": "be8c9219fe67c0e4a1e719c469a1225d9d8ab304cc5131dddd656aca5305e93e",
-      "vendoredSha256": "1b7112cf5ed93dd22c99e8d1954eef660706ac981c7e38c85c4cf6a9552bf749"
     },
     "namedCompanionObject": {
       "suite": "psi",

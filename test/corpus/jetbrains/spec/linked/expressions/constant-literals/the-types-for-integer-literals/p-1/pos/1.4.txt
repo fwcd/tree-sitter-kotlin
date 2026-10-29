@@ -1,0 +1,8 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/the-types-for-integer-literals/p-1/pos/1.4
+:error
+==================
+
+val value = 0xL
+val value = 0XL
+---

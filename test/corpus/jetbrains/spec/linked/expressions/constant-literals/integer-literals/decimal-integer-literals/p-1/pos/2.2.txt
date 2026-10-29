@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/decimal-integer-literals/p-1/pos/2.2
+:error
+==================
+
+val value = 1_
+val value = 1_00000000000000000_
+val value = 1_____________
+val value = 9____________0_
+val value = 1_______________________________________________________________________________________________________________________________________________________
+---

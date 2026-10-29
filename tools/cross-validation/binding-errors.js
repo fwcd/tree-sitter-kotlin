@@ -31,7 +31,7 @@ let cached;
  * Load the grammar's parser binding.
  *
  * Both the `tree-sitter` runtime and the compiled language are resolved from
- * the grammar checkout, never from the toolkit: they share a native ABI, and
+ * the selected grammar checkout: they share a native ABI, and
  * mixing a runtime from one install with a language built against another is
  * how you get a segfault instead of a parse.
  *
