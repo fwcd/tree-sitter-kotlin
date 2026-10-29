@@ -1686,3 +1686,148 @@ when (animal) {
           (simple_identifier)
           (call_suffix
             (value_arguments)))))))
+
+
+================================================================================
+Callable reference on a nullable receiver
+================================================================================
+
+val f = String?::plus
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (simple_identifier))))
+
+
+================================================================================
+Callable reference on a nullable receiver with spaces
+================================================================================
+
+val f = String ?:: plus
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (simple_identifier))))
+
+
+================================================================================
+Class reference on a nullable receiver
+================================================================================
+
+val f = String?::class
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest))))
+
+
+================================================================================
+Callable reference on a doubly nullable receiver
+================================================================================
+
+val f = String??::plus
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (quest)
+      (simple_identifier))))
+
+
+================================================================================
+Safe navigation is unaffected by nullable callable references
+================================================================================
+
+fun f(a: A?) {
+    a?.b()
+    val g = A?::b
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))
+          (quest))))
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (callable_reference
+            (type_identifier)
+            (quest)
+            (simple_identifier)))))))
+
+
+================================================================================
+Elvis is unaffected by nullable callable references
+================================================================================
+
+val x = a ?: b
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (elvis_expression
+      (simple_identifier)
+      (simple_identifier))))
+
+
+================================================================================
+Function type is not a callable reference receiver
+:error
+================================================================================
+
+val f = ((Int) -> Unit)?::invoke
+
+--------------------------------------------------------------------------------
+

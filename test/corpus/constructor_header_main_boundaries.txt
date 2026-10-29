@@ -1,0 +1,65 @@
+================================================================================
+Constructor header preserves main / main-integration-0
+================================================================================
+
+fun f() {
+class A
+::A
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (callable_reference (simple_identifier))))))
+
+================================================================================
+Constructor header preserves main / main-integration-1
+================================================================================
+
+fun f() {
+class A
+[1]
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (collection_literal (integer_literal))))))
+
+================================================================================
+Constructor header preserves main / main-integration-2
+================================================================================
+
+fun f() {
+class A
+catch()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments)))))))
+
+================================================================================
+Constructor header preserves main / main-integration-3
+================================================================================
+
+fun f() {
+class A
+finally()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments)))))))
+
+================================================================================
+Constructor header preserves main / main-integration-4
+================================================================================
+
+fun f() {
+class A
+finally + 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (additive_expression (simple_identifier) (integer_literal))))))
+

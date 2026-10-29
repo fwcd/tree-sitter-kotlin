@@ -22,6 +22,47 @@
  * SOFTWARE.
  */
 
+// tree-sitter 0.24.7 omits CJK/Hangul range interiors and many astral
+// letters from \p{L}. Supplement it with the missing Unicode 13 letter ranges
+// (the Unicode version used by the Java 17 PSI oracle), so complete Unicode
+// identifiers cannot be split into an ASCII keyword and an unexpected suffix.
+const UNICODE_LETTER_SUPPLEMENT =
+  "\\u{3401}-\\u{4dbe}\\u{4e01}-\\u{9ffc}\\u{ac01}-\\u{d7a2}\\u{10920}-\\u{10939}\\u{10980}-\\u{109b7}\\u{109be}-\\u{109bf}" +
+  "\\u{10a00}\\u{10a10}-\\u{10a13}\\u{10a15}-\\u{10a17}\\u{10a19}-\\u{10a35}\\u{10a60}-\\u{10a7c}\\u{10a80}-\\u{10a9c}" +
+  "\\u{10ac0}-\\u{10ac7}\\u{10ac9}-\\u{10ae4}\\u{10b00}-\\u{10b35}\\u{10b40}-\\u{10b55}\\u{10b60}-\\u{10b72}\\u{10b80}-\\u{10b91}" +
+  "\\u{10c00}-\\u{10c48}\\u{10c80}-\\u{10cb2}\\u{10cc0}-\\u{10cf2}\\u{10d00}-\\u{10d23}\\u{10e80}-\\u{10ea9}\\u{10eb0}-\\u{10eb1}" +
+  "\\u{10f00}-\\u{10f1c}\\u{10f27}\\u{10f30}-\\u{10f45}\\u{10fb0}-\\u{10fc4}\\u{10fe0}-\\u{10ff6}\\u{11003}-\\u{11037}" +
+  "\\u{11083}-\\u{110af}\\u{110d0}-\\u{110e8}\\u{11103}-\\u{11126}\\u{11144}\\u{11147}\\u{11150}-\\u{11172}" +
+  "\\u{11176}\\u{11183}-\\u{111b2}\\u{111c1}-\\u{111c4}\\u{111da}\\u{111dc}\\u{11200}-\\u{11211}" +
+  "\\u{11213}-\\u{1122b}\\u{11280}-\\u{11286}\\u{11288}\\u{1128a}-\\u{1128d}\\u{1128f}-\\u{1129d}\\u{1129f}-\\u{112a8}" +
+  "\\u{112b0}-\\u{112de}\\u{11305}-\\u{1130c}\\u{1130f}-\\u{11310}\\u{11313}-\\u{11328}\\u{1132a}-\\u{11330}\\u{11332}-\\u{11333}" +
+  "\\u{11335}-\\u{11339}\\u{1133d}\\u{11350}\\u{1135d}-\\u{11361}\\u{11400}-\\u{11434}\\u{11447}-\\u{1144a}" +
+  "\\u{1145f}-\\u{11461}\\u{11480}-\\u{114af}\\u{114c4}-\\u{114c5}\\u{114c7}\\u{11580}-\\u{115ae}\\u{115d8}-\\u{115db}" +
+  "\\u{11600}-\\u{1162f}\\u{11644}\\u{11680}-\\u{116aa}\\u{116b8}\\u{11700}-\\u{1171a}\\u{11800}-\\u{1182b}" +
+  "\\u{118a0}-\\u{118df}\\u{118ff}-\\u{11906}\\u{11909}\\u{1190c}-\\u{11913}\\u{11915}-\\u{11916}\\u{11918}-\\u{1192f}" +
+  "\\u{1193f}\\u{11941}\\u{119a0}-\\u{119a7}\\u{119aa}-\\u{119d0}\\u{119e1}\\u{119e3}" +
+  "\\u{11a00}\\u{11a0b}-\\u{11a32}\\u{11a3a}\\u{11a50}\\u{11a5c}-\\u{11a89}\\u{11a9d}" +
+  "\\u{11ac0}-\\u{11af8}\\u{11c00}-\\u{11c08}\\u{11c0a}-\\u{11c2e}\\u{11c40}\\u{11c72}-\\u{11c8f}\\u{11d00}-\\u{11d06}" +
+  "\\u{11d08}-\\u{11d09}\\u{11d0b}-\\u{11d30}\\u{11d46}\\u{11d60}-\\u{11d65}\\u{11d67}-\\u{11d68}\\u{11d6a}-\\u{11d89}" +
+  "\\u{11d98}\\u{11ee0}-\\u{11ef2}\\u{11fb0}\\u{12000}-\\u{12399}\\u{12480}-\\u{12543}\\u{13000}-\\u{1342e}" +
+  "\\u{14400}-\\u{14646}\\u{16800}-\\u{16a38}\\u{16a40}-\\u{16a5e}\\u{16ad0}-\\u{16aed}\\u{16b00}-\\u{16b2f}\\u{16b40}-\\u{16b43}" +
+  "\\u{16b63}-\\u{16b77}\\u{16b7d}-\\u{16b8f}\\u{16e40}-\\u{16e7f}\\u{16f00}-\\u{16f4a}\\u{16f50}\\u{16f93}-\\u{16f9f}" +
+  "\\u{16fe0}-\\u{16fe1}\\u{16fe3}\\u{17000}-\\u{187f7}\\u{18800}-\\u{18cd5}\\u{18d00}-\\u{18d08}\\u{1b000}-\\u{1b11e}" +
+  "\\u{1b150}-\\u{1b152}\\u{1b164}-\\u{1b167}\\u{1b170}-\\u{1b2fb}\\u{1bc00}-\\u{1bc6a}\\u{1bc70}-\\u{1bc7c}\\u{1bc80}-\\u{1bc88}" +
+  "\\u{1bc90}-\\u{1bc99}\\u{1d400}-\\u{1d454}\\u{1d456}-\\u{1d49c}\\u{1d49e}-\\u{1d49f}\\u{1d4a2}\\u{1d4a5}-\\u{1d4a6}" +
+  "\\u{1d4a9}-\\u{1d4ac}\\u{1d4ae}-\\u{1d4b9}\\u{1d4bb}\\u{1d4bd}-\\u{1d4c3}\\u{1d4c5}-\\u{1d505}\\u{1d507}-\\u{1d50a}" +
+  "\\u{1d50d}-\\u{1d514}\\u{1d516}-\\u{1d51c}\\u{1d51e}-\\u{1d539}\\u{1d53b}-\\u{1d53e}\\u{1d540}-\\u{1d544}\\u{1d546}" +
+  "\\u{1d54a}-\\u{1d550}\\u{1d552}-\\u{1d6a5}\\u{1d6a8}-\\u{1d6c0}\\u{1d6c2}-\\u{1d6da}\\u{1d6dc}-\\u{1d6fa}\\u{1d6fc}-\\u{1d714}" +
+  "\\u{1d716}-\\u{1d734}\\u{1d736}-\\u{1d74e}\\u{1d750}-\\u{1d76e}\\u{1d770}-\\u{1d788}\\u{1d78a}-\\u{1d7a8}\\u{1d7aa}-\\u{1d7c2}" +
+  "\\u{1d7c4}-\\u{1d7cb}\\u{1e100}-\\u{1e12c}\\u{1e137}-\\u{1e13d}\\u{1e14e}\\u{1e2c0}-\\u{1e2eb}\\u{1e800}-\\u{1e8c4}" +
+  "\\u{1e900}-\\u{1e943}\\u{1e94b}\\u{1ee00}-\\u{1ee03}\\u{1ee05}-\\u{1ee1f}\\u{1ee21}-\\u{1ee22}\\u{1ee24}" +
+  "\\u{1ee27}\\u{1ee29}-\\u{1ee32}\\u{1ee34}-\\u{1ee37}\\u{1ee39}\\u{1ee3b}\\u{1ee42}" +
+  "\\u{1ee47}\\u{1ee49}\\u{1ee4b}\\u{1ee4d}-\\u{1ee4f}\\u{1ee51}-\\u{1ee52}\\u{1ee54}" +
+  "\\u{1ee57}\\u{1ee59}\\u{1ee5b}\\u{1ee5d}\\u{1ee5f}\\u{1ee61}-\\u{1ee62}" +
+  "\\u{1ee64}\\u{1ee67}-\\u{1ee6a}\\u{1ee6c}-\\u{1ee72}\\u{1ee74}-\\u{1ee77}\\u{1ee79}-\\u{1ee7c}\\u{1ee7e}" +
+  "\\u{1ee80}-\\u{1ee89}\\u{1ee8b}-\\u{1ee9b}\\u{1eea1}-\\u{1eea3}\\u{1eea5}-\\u{1eea9}\\u{1eeab}-\\u{1eebb}\\u{20000}-\\u{2a6dd}" +
+  "\\u{2a700}-\\u{2b734}\\u{2b740}-\\u{2b81d}\\u{2b820}-\\u{2cea1}\\u{2ceb0}-\\u{2ebe0}\\u{2f800}-\\u{2fa1d}\\u{30000}-\\u{3134a}";
+
 // Using an adapted version of https://kotlinlang.org/docs/reference/grammar.html
 
 const PREC = {
@@ -65,6 +106,16 @@ module.exports = grammar({
 
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
+    [$._primary_expression, $._callable_reference_name],
+
+    // `context` is a soft keyword: `context(...)` may be a context-receiver
+    // declaration prefix or an ordinary call whose callee is named `context`.
+    // GLR explores both and keeps whichever yields a valid parse.
+    [$.context_receiver, $.simple_identifier],
+
+    // `( name` at statement start: a destructuring target or a parenthesized
+    // expression. Nothing tells them apart until after the ')', so carry both.
+    [$._name_based_destructuring_entry_expr, $._primary_expression],
 
     // @Type(... — `(` after an annotation name is usually constructor args, but
     // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
@@ -166,6 +217,11 @@ module.exports = grammar({
     // Three-way conflict: callable_reference (Foo::bar) starts with simple_identifier
     // which both primary_expression variants can match.
     [$._primary_expression, $._primary_expression_no_trailing_lambda, $.callable_reference],
+    [$._primary_expression, $._primary_expression_no_trailing_lambda, $._callable_reference_name],
+
+    // Inside the callable-reference receiver the parser must choose a
+    // production at `Name <` before it can see whether any `?` follows.
+
 
     // ambiguity between call_suffix and _generic_call_suffix (both can match type_arguments + args)
     [$.call_suffix, $._generic_call_suffix],
@@ -183,6 +239,8 @@ module.exports = grammar({
     $._interpolation_expression_start,
     $._interpolation_identifier_start,
     $._by_delegation_hint,
+    $._primary_constructor_hint,
+    $._callable_reference_quest,
   ],
 
   extras: $ => [
@@ -306,6 +364,7 @@ module.exports = grammar({
     ))),
 
     primary_constructor: $ => seq(
+      optional($._primary_constructor_hint),
       optional(seq(optional($.modifiers), $._primary_constructor_keyword)),
       $._class_parameters
     ),
@@ -456,7 +515,23 @@ module.exports = grammar({
     // Class members
     // ==========
 
-    _class_member_declarations: $ => repeat1(seq($._class_member_declaration, $._semi)),
+    // Separator strictly between members, optional before the closing brace.
+    //
+    // This used to be `repeat1(seq(member, $._semi))`, requiring a newline or
+    // `;` after the *last* member too, so every single-line body failed to
+    // parse: `class C { fun f() {} }`, `class C : Base() { val x = 1 }`,
+    // `object O : Base() { fun f() {} }`.
+    //
+    // Making the separator optional per member — the Kotlin grammar's
+    // `(classMemberDeclaration semis?)*` — is too loose for an LR parser: with
+    // no separator required at all, `companion object` followed by an
+    // identifier is ambiguous between the companion's name and the next
+    // member. This is the shape `statements` already uses successfully.
+    _class_member_declarations: $ => seq(
+      $._class_member_declaration,
+      repeat(seq($._semi, $._class_member_declaration)),
+      optional($._semi),
+    ),
 
     _class_member_declaration: $ => choice(
       $._declaration,
@@ -498,6 +573,18 @@ module.exports = grammar({
       )
     ),
 
+    // Context parameters / receivers (Kotlin 1.6.20+ / 2.2): a `context(...)`
+    // prefix on a callable declaration. Entries are either context parameters
+    // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
+    // enclosing declaration must parse so its body is scored.
+    context_receiver: $ => seq(
+      "context",
+      "(",
+      sep1(choice(seq(optional($.parameter_modifiers), $.parameter), $._type), ","),
+      optional(","),
+      ")"
+    ),
+
     // `public fun Foo.bar() { … }` also parses as an infix expression, because
     // the visibility modifiers are soft keywords in `simple_identifier`. Both
     // readings are complete, so this is the dynamic-precedence decision #278
@@ -522,6 +609,23 @@ module.exports = grammar({
       $.simple_identifier,
       optional(seq(":", $._type))
     )),
+
+    // Statement-position variant of the entry below.
+    //
+    // At statement start `(a)` can be a destructuring target — `(a, b) = pair`
+    // — or an ordinary parenthesized expression — `(a).b()`. The static
+    // precedence used in declaration position resolves that at generate time
+    // and deletes the expression reading, so this variant uses a dynamic
+    // precedence and a declared conflict instead, leaving both readings to
+    // GLR. It is kept separate because declaration position has a *different*
+    // competitor — a parenthesized receiver type, as in `val (A).foo` — that
+    // the static precedence is needed to beat.
+    _name_based_destructuring_entry_expr: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      optional($.binding_pattern_kind),
+      $.simple_identifier,
+      optional(seq(":", $._type)),
+      optional(seq("=", $.simple_identifier))
+    ))),
 
     // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming
     _name_based_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
@@ -560,7 +664,7 @@ module.exports = grammar({
 
     destructuring_declaration: $ => prec.right(seq(
       optional($.modifiers),
-      $.multi_variable_declaration,
+      alias($._multi_variable_declaration_expr, $.multi_variable_declaration),
       optional($.type_constraints),
       "=",
       $._expression,
@@ -583,6 +687,7 @@ module.exports = grammar({
       optional(seq(
         "(",
         $.parameter_with_optional_type,
+        optional(","),
         ")",
         optional(seq(":", $._type)),
         $.function_body
@@ -1008,6 +1113,21 @@ module.exports = grammar({
       "}"
     )),
 
+    _multi_variable_declaration_expr: $ => choice(
+      seq(
+        '(',
+        sep1(alias($._name_based_destructuring_entry_expr, $.variable_declaration), ','),
+        optional(','),
+        ')'
+      ),
+      seq(
+        '[',
+        sep1(alias($._positional_destructuring_entry, $.variable_declaration), ','),
+        optional(','),
+        ']'
+      ),
+    ),
+
     multi_variable_declaration: $ => choice(
       seq(
         '(',
@@ -1027,17 +1147,33 @@ module.exports = grammar({
 
     _lambda_parameter: $ => choice(
       $.variable_declaration,
-      seq($.multi_variable_declaration, optional(seq(":", $._type)))
+      // The statement-position variant: `{ (a).b() }` is a body, not a
+      // destructured parameter, and only the absence of `->` says so.
+      seq(alias($._multi_variable_declaration_expr, $.multi_variable_declaration),
+          optional(seq(":", $._type)))
     ),
 
     anonymous_function: $ => prec.right(seq(
+      optional($.context_receiver),
       optional("suspend"),
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
-      $.function_value_parameters,
+      alias($._anonymous_function_value_parameters, $.function_value_parameters),
       optional(seq(":", $._type)),
       optional($.function_body)
     )),
+
+    _anonymous_function_value_parameters: $ => seq(
+      "(", optional(seq(sep1($._anonymous_function_value_parameter, ","), optional(","))), ")"
+    ),
+
+    _anonymous_function_value_parameter: $ => seq(
+      optional($.parameter_modifiers),
+      alias($._anonymous_parameter, $.parameter),
+      optional(seq("=", $._expression))
+    ),
+
+    _anonymous_parameter: $ => seq($.simple_identifier, optional(seq(":", $._type))),
 
     _function_literal: $ => choice(
       $.lambda_literal,
@@ -1145,6 +1281,7 @@ module.exports = grammar({
       $.simple_identifier,
       ":",
       $._type,
+      optional(","),
       ")",
       $._block,
     ),
@@ -1160,8 +1297,45 @@ module.exports = grammar({
       $._break_at
     ),
 
+    // Kotlin's callableReference takes a receiverType, but reusing the type
+    // rules here is what broke the first attempt: nullable_type pulls in
+    // parenthesized_type and type_modifiers, which puts the whole type grammar
+    // in expression-reachable position and changes how `?` resolves across
+    // safe-call, elvis and nullable types. 39 of 404 corpus tests regressed,
+    // in delegation, comments, destructuring and enums -- nowhere near
+    // callable references.
+    //
+    // So this slot gets its own receiver, admitting only what a callable
+    // reference receiver can actually be: a possibly-qualified name, optional
+    // type arguments, and any number of `?`. No parenthesized types and no
+    // type modifiers, which also keeps `((Int) -> Unit)?::invoke` rejected,
+    // matching the Kotlin parser ("Expecting ')'").
+    //
+    // Hidden, so its children inline and `String::plus` keeps exactly the tree
+    // it has today: (callable_reference (type_identifier) (simple_identifier)).
+    // Just a name. A wider receiver -- qualification and type arguments, as
+    // Kotlin's receiverType allows -- was built and measured first, and it
+    // reshaped 46 real-world files: it flattens `a.b.C::class` into one node
+    // where the Kotlin parser keeps the qualified name as nested
+    // DOT_QUALIFIED_EXPRESSION inside a CLASS_LITERAL_EXPRESSION. Per-file PSI
+    // comparison put 42 of those files in a state where neither the old nor
+    // the new tree matched PSI. The narrow receiver fixes the same real-world
+    // files with no reshaping at all, so the extra reach is not worth it until
+    // the receiver can preserve that nesting.
+    //
+    // Split from the nullable form below so the two are distinct rules and the
+    // ambiguity between them can be declared as a conflict and explored.
+    _callable_reference_name: $ => alias($.simple_identifier, $.type_identifier),
+
+    // Aliased literals rather than $.quest, so this does not share
+    // nullable_type's generated repeat symbol.
+    _callable_reference_nullable: $ => seq(
+      $._callable_reference_name,
+      repeat1(alias($._callable_reference_quest, $.quest))
+    ),
+
     callable_reference: $ => seq(
-      optional(alias($.simple_identifier, $.type_identifier)), // TODO
+      optional(choice($._callable_reference_name, $._callable_reference_nullable)),
       "::",
       choice($.simple_identifier, "class")
     ),
@@ -1210,7 +1384,7 @@ module.exports = grammar({
     // ==========
 
     modifiers: $ => prec.right(
-      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $._modifier)))
+      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $.context_receiver, $._modifier)))
     ),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
@@ -1228,7 +1402,7 @@ module.exports = grammar({
 
     type_modifiers: $ => repeat1($._type_modifier),
 
-    _type_modifier: $ => choice($.annotation, "suspend"),
+    _type_modifier: $ => choice($.annotation, $.context_receiver, "suspend"),
 
     class_modifier: $ => choice(
       "sealed",
@@ -1375,6 +1549,7 @@ module.exports = grammar({
       // Batch 6: structural keywords used as identifiers
       "companion",
       "constructor",
+      "context",
       "init",
       "dynamic",
       "where",
@@ -1405,6 +1580,14 @@ module.exports = grammar({
     // ==========
 
     line_comment: $ => token(seq('//', /.*/)),
+
+    // `multiline_comment` is an external token (src/scanner.c) so that nested
+    // and unterminated comments can be handled. This internal definition
+    // covers the common non-nested, terminated case and gives tree-sitter's
+    // own lexer a fallback for when the external scanner declines a token —
+    // e.g. when scan_automatic_semicolon has skipped a comment to look at the
+    // token behind it and reports "no semicolon here".
+    multiline_comment: _ => token(seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')),
 
     // ==========
     // Separators and operations
@@ -1503,7 +1686,7 @@ module.exports = grammar({
       $._backtick_identifier,
     ),
 
-    _alpha_identifier: $ => /[\p{L}_][\p{L}_\p{Nd}]*/,
+    _alpha_identifier: $ => new RegExp(`[\\p{L}_${UNICODE_LETTER_SUPPLEMENT}][\\p{L}_\\p{Nd}${UNICODE_LETTER_SUPPLEMENT}]*`, 'u'),
 
     _backtick_identifier: $ => /`[^\r\n`]+`/,
 

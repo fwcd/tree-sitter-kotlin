@@ -225,6 +225,10 @@
       "required": true,
       "types": [
         {
+          "type": "context_receiver",
+          "named": true
+        },
+        {
           "type": "function_body",
           "named": true
         },
@@ -868,6 +872,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "quest",
+          "named": true
+        },
         {
           "type": "simple_identifier",
           "named": true
@@ -2024,6 +2032,49 @@
         },
         {
           "type": "value_arguments",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "context_receiver",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "function_type",
+          "named": true
+        },
+        {
+          "type": "not_nullable_type",
+          "named": true
+        },
+        {
+          "type": "nullable_type",
+          "named": true
+        },
+        {
+          "type": "parameter",
+          "named": true
+        },
+        {
+          "type": "parameter_modifiers",
+          "named": true
+        },
+        {
+          "type": "parenthesized_type",
+          "named": true
+        },
+        {
+          "type": "type_modifiers",
+          "named": true
+        },
+        {
+          "type": "user_type",
           "named": true
         }
       ]
@@ -5736,6 +5787,10 @@
           "named": true
         },
         {
+          "type": "context_receiver",
+          "named": true
+        },
+        {
           "type": "function_modifier",
           "named": true
         },
@@ -8712,6 +8767,10 @@
         {
           "type": "annotation",
           "named": true
+        },
+        {
+          "type": "context_receiver",
+          "named": true
         }
       ]
     }
@@ -9981,6 +10040,10 @@
   },
   {
     "type": "constructor",
+    "named": false
+  },
+  {
+    "type": "context",
     "named": false
   },
   {
