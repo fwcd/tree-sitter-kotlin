@@ -5,7 +5,7 @@
   "comparedFixtures": 438,
   "fixtureContentHash": "b8e2bf76935d2c8e688b5eae141a196f0ed7bf129d004b4e1ed83ec7b70ef644",
   "parser": {
-    "src/parser.c": "382ce4de0ba88a7ad3e76e7f04d5c833e681a4f2c6330768a5b6f479322899dd",
+    "src/parser.c": "04bd9e8eec92ea613e27207909f62d5adb958784a0217a296b30e84df1ebc124",
     "src/scanner.c": "2297212d881ccde5eeeb807be41e5e0f504e5e5929783ce41decdbce29a509b6"
   },
   "excluded": [
@@ -64,6 +64,7 @@
     "CollectionLiterals",
     "CommentsBindingInLambda",
     "CommentsBindingInStatementBlock",
+    "Constructors",
     "DocCommentAfterFileAnnotations",
     "DocCommentForFirstDeclaration",
     "DocCommentOnPackageDirectiveLine",
@@ -359,7 +360,13 @@
     "propertyDelegate/TwoProperties",
     "propertyWithConstraints",
     "recovery/InterfaceInExpressionPosition",
+    "recovery/objects/declarations/ConstructorModifiers",
+    "recovery/objects/declarations/EmptyParentheses",
+    "recovery/objects/declarations/Everything",
     "recovery/objects/declarations/FollowedByModifiers",
+    "recovery/objects/declarations/ParametersInParentheses",
+    "recovery/objects/declarations/TypeParametersAndParentheses",
+    "recovery/objects/declarations/TypeParameterss",
     "repeatableAnnotation",
     "repeatableAnnotationClass",
     "repl/replSnippet.repl",
@@ -459,7 +466,6 @@
   ],
   "expectedFailures": [
     "CallsInWhen",
-    "Constructors",
     "DoubleColon",
     "DoubleColonWhitespaces",
     "FunctionCalls",
@@ -489,12 +495,6 @@
     "packages/PackageModifiers",
     "propertyDelegate/PropertyWithInitializer",
     "recovery/binaryExpression/SoftModifierAsInfixFunction",
-    "recovery/objects/declarations/ConstructorModifiers",
-    "recovery/objects/declarations/EmptyParentheses",
-    "recovery/objects/declarations/Everything",
-    "recovery/objects/declarations/ParametersInParentheses",
-    "recovery/objects/declarations/TypeParametersAndParentheses",
-    "recovery/objects/declarations/TypeParameterss",
     "recovery/objects/expressions/Everything",
     "secondaryConstructors/anonymousInitializer"
   ]

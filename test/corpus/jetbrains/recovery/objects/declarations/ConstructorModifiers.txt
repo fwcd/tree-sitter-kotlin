@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: recovery/objects/declarations/ConstructorModifiers
-:error
 ==================
 
 // COMPILATION_ERRORS
@@ -15,3 +14,5 @@ object Foo private () : Bar {
 
 object Foo @[foo] private @[bar()] ()
 ---
+
+(source_file (line_comment) (object_declaration (type_identifier) (primary_constructor (modifiers (visibility_modifier)))) (object_declaration (type_identifier) (primary_constructor (modifiers (visibility_modifier))) (class_body)) (object_declaration (type_identifier) (primary_constructor (modifiers (visibility_modifier))) (delegation_specifier (user_type (type_identifier))) (class_body)) (object_declaration (type_identifier) (primary_constructor (modifiers (annotation (user_type (type_identifier))) (visibility_modifier) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments)))))))
