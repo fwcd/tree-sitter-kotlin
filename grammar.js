@@ -91,10 +91,19 @@ const PREC = {
   RETURN_OR_THROW: 0,
   COMMENT: 0
 };
-const DEC_DIGITS = token(sep1(/[0-9]+/, /_+/));
-const HEX_DIGITS = token(sep1(/[0-9a-fA-F]+/, /_+/));
-const BIN_DIGITS = token(sep1(/[01]+/, /_+/));
-const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), DEC_DIGITS));
+// Digit runs as the Kotlin lexer reads them, not as the spec's valid literals.
+// Kotlin lexes a numeric literal greedily and leaves the rest to semantic
+// diagnostics, so `1_`, `0x`, `0b2` and `0.0E` are each one literal token with
+// no parse error; the compiler then rejects them. This grammar follows the
+// lexer, so these shapes must tokenise rather than break the surrounding file.
+// Underscores may trail, radix digits may be absent, and a binary literal
+// accepts any decimal digit.
+const DEC_DIGITS = token(/[0-9][0-9_]*/);
+const HEX_DIGITS = token(/[0-9a-fA-F_]*/);
+const BIN_DIGITS = token(/[0-9_]*/);
+// The exponent's digits are optional too: `0.0E`, `5E_` and `.0e+F` are all
+// single FLOAT tokens to the Kotlin lexer.
+const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), /[0-9_]*/));
 
 module.exports = grammar({
   name: "kotlin",
@@ -1738,7 +1747,7 @@ module.exports = grammar({
       seq(DEC_DIGITS, /[fF]/)
     )),
 
-    integer_literal: $ => token(seq(optional(/[1-9]/), DEC_DIGITS)),
+    integer_literal: $ => token(DEC_DIGITS),
 
     hex_literal: $ => token(seq("0", /[xX]/, HEX_DIGITS)),
 
@@ -1751,7 +1760,9 @@ module.exports = grammar({
 
     long_literal: $ => seq(
       choice($.integer_literal, $.hex_literal, $.bin_literal),
-      "L"
+      // Kotlin's lexer takes a lowercase `l` as well; the compiler then
+      // reports it, so `1l` is a parsed literal rather than a syntax error.
+      /[lL]/
     ),
 
     boolean_literal: $ => choice("true", "false"),
