@@ -281,6 +281,55 @@ module.exports = grammar({
 
   word: $ => $._alpha_identifier,
 
+  // Hidden rules substituted at their use sites instead of getting a symbol of
+  // their own. `ts_parse_table` is a dense LARGE_STATE_COUNT x SYMBOL_COUNT
+  // array and over 90% of the compiled parser, so every symbol costs about
+  // 16 KB whether or not it is reachable from a given state. None of these
+  // appear in a tree, so removing them changes nothing a consumer can see.
+  //
+  // This list is measured, not derived: inlining is only a win for rules whose
+  // definition does not multiply the states of its callers. Each entry below
+  // was verified to shrink the parser on its own, and most hidden rules are
+  // not here because they grow it -- `_anonymous_function_value_parameters`
+  // alone costs +11%. Do not add a rule without measuring it, and note that a
+  // rule named in `conflicts` cannot be inlined at all.
+  inline: $ => [
+    $._additive_operator,
+    $._as_operator,
+    $._assignment_and_operator,
+    $._binary_expression,
+    $._break_at,
+    $._callable_reference_nullable,
+    $._class_member_declaration,
+    $._continue_at,
+    $._declaration,
+    $._declaration_receiver_type,
+    $._equality_operator,
+    $._function_literal,
+    $._generic_call_expression_no_trailing_lambda,
+    $._in_operator,
+    $._interpolation,
+    $._is_operator,
+    $._lambda_parameter,
+    $._literal_constant,
+    $._loop_statement,
+    $._member_access_operator,
+    $._modifier,
+    $._multi_annotation,
+    $._multiplicative_operator,
+    $._postfix_unary_operator,
+    $._postfix_unary_suffix,
+    $._prefix_unary_operator,
+    $._semi,
+    $._single_annotation,
+    $._super_at,
+    $._this_at,
+    $._type_parameter_modifier,
+    $._type_projection_modifier,
+    $._unary_expression,
+    $._uni_character_literal,
+  ],
+
   rules: {
     // ====================
     // Syntax grammar
