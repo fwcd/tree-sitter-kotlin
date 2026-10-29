@@ -810,7 +810,7 @@ fun foo() {
                     (integer_literal)))))))))))
 
 ================================================================================
-Comment before call parentheses
+Comment before parentheses on a new line does not make a call
 ================================================================================
 
 fun foo() {
@@ -827,15 +827,12 @@ fun foo() {
     (function_value_parameters)
     (function_body
       (statements
-        (call_expression
-          (simple_identifier)
-          (line_comment)
-          (call_suffix
-            (value_arguments
-              (value_argument
-                (integer_literal))
-              (value_argument
-                (integer_literal)))))))))
+        (simple_identifier)
+        (line_comment)
+        (parenthesized_expression
+          (ERROR
+            (integer_literal))
+          (integer_literal))))))
 
 ================================================================================
 Try-catch with second catch on new line
