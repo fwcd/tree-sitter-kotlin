@@ -366,3 +366,345 @@ fun f(m: Map<Int, Int>) = m[
         (simple_identifier)
         (indexing_suffix
           (integer_literal))))))
+
+================================================================================
+Statement beginning with a parenthesized name
+================================================================================
+
+fun f() {
+    (a)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (parenthesized_expression
+          (simple_identifier))))))
+
+================================================================================
+Call on a parenthesized name at statement start
+================================================================================
+
+fun f() {
+    (a).b()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (parenthesized_expression
+              (simple_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Member access on a parenthesized name at statement start
+================================================================================
+
+fun f() {
+    (a).b
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (navigation_expression
+          (parenthesized_expression
+            (simple_identifier))
+          (navigation_suffix
+            (simple_identifier)))))))
+
+================================================================================
+Operator on a parenthesized name at statement start
+================================================================================
+
+fun f() {
+    (a) + 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (additive_expression
+          (parenthesized_expression
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+Lambda body beginning with a parenthesized name
+================================================================================
+
+val g = { (a).b() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (statements
+        (call_expression
+          (navigation_expression
+            (parenthesized_expression
+              (simple_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Nested block beginning with a parenthesized name
+================================================================================
+
+fun f() {
+    if (x) { (a).b() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (statements
+              (call_expression
+                (navigation_expression
+                  (parenthesized_expression
+                    (simple_identifier))
+                  (navigation_suffix
+                    (simple_identifier)))
+                (call_suffix
+                  (value_arguments))))))))))
+
+================================================================================
+Parenthesized names as if/else branches
+================================================================================
+
+fun f() = if (x)
+    (b)
+else
+    (c)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (if_expression
+        condition: (simple_identifier)
+        consequence: (control_structure_body
+          (parenthesized_expression
+            (simple_identifier)))
+        alternative: (control_structure_body
+          (parenthesized_expression
+            (simple_identifier)))))))
+
+================================================================================
+Parenthesized name in a when branch
+================================================================================
+
+fun f() = when {
+    x -> (a).b()
+    else -> 0
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (when_expression
+        (when_entry
+          (when_condition
+            (simple_identifier))
+          (control_structure_body
+            (call_expression
+              (navigation_expression
+                (parenthesized_expression
+                  (simple_identifier))
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (integer_literal)))))))
+
+================================================================================
+Single-name destructuring still parses
+================================================================================
+
+fun f() {
+    val (a) = p
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (multi_variable_declaration
+            (variable_declaration
+              (simple_identifier)))
+          (simple_identifier))))))
+
+================================================================================
+Destructuring with two names still parses
+================================================================================
+
+fun f() {
+    val (a, b) = p
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (multi_variable_declaration
+            (variable_declaration
+              (simple_identifier))
+            (variable_declaration
+              (simple_identifier)))
+          (simple_identifier))))))
+
+================================================================================
+Destructuring in a for loop still parses
+================================================================================
+
+fun f() {
+    for ((k, v) in m) { }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (for_statement
+          (multi_variable_declaration
+            (variable_declaration
+              (simple_identifier))
+            (variable_declaration
+              (simple_identifier)))
+          (simple_identifier)
+          (control_structure_body))))))
+
+================================================================================
+Destructured lambda parameter still parses
+================================================================================
+
+val g = { (a, b) -> a }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (lambda_parameters
+        (multi_variable_declaration
+          (variable_declaration
+            (simple_identifier))
+          (variable_declaration
+            (simple_identifier))))
+      (statements
+        (simple_identifier)))))
+
+================================================================================
+Extension property receiver still parses
+================================================================================
+
+val A.foo: Int get() = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (getter
+      (function_body
+        (integer_literal)))))
+
+================================================================================
+Generic extension property receiver still parses
+================================================================================
+
+val List<Int>.x: Int get() = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))))
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (getter
+      (function_body
+        (integer_literal)))))
