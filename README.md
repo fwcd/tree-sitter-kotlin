@@ -54,7 +54,7 @@ It is also helpful to run the parser on a real Kotlin project's source files.
 
 ## JetBrains Cross-Validation
 
-The project includes tooling to validate tree-sitter-kotlin's parse trees against the [JetBrains Kotlin compiler's PSI reference parser](https://github.com/JetBrains/kotlin/tree/master/compiler/testData/psi). This measures how closely tree-sitter-kotlin reproduces the official parser's AST structure.
+The project includes tooling to validate tree-sitter-kotlin's parse trees against the [JetBrains Kotlin compiler's PSI reference parser](https://github.com/JetBrains/kotlin/tree/9180ce6a7a7d3627f88b424717583f28ddca052d/compiler/psi/psi-impl/testData/psi). This measures how closely tree-sitter-kotlin reproduces the official parser's AST structure.
 
 **Current results:** 74/121 (61.2%) structural match among clean parses.
 
@@ -169,3 +169,9 @@ More documentation on how to create Tree-sitter grammars [can be found here](htt
 
 * [Kotlin Language Server](https://github.com/fwcd/kotlin-language-server) for code completion, diagnostics and more
 * [Kotlin Debug Adapter](https://github.com/fwcd/kotlin-debug-adapter) for JVM debugging support
+
+## Positive JetBrains PSI import
+
+The pinned Kotlin 2.4.21 import contains 447 PSI-clean pairs (374 existing `.kt`, 13 `.kts`, 60 namespaced spec cases). Goldens with `PsiErrorElement` nodes are filtered at import time. Spec metadata is preprocessed using the upstream profile; source/golden hashes and rejection reasons appear in the fixture manifest.
+
+Regenerate with `node tools/vendor-fixtures.js`, then `node tools/vendor-jetbrains-tests.js`. A local Kotlin clone can be supplied using `--source-repo`. The corpus generator uses the parser binding, creates 345 parse-clean CST tests and reports 102 positive grammar gaps under `build/jetbrains-corpus-report.json`. Those gaps remain in the independent PSI fixture set. Seven block/expression contexts require separate adapters.

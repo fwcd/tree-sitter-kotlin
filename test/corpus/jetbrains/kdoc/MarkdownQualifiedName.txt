@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: kdoc/MarkdownQualifiedName
+==================
+
+/**
+ * [A.B.C]
+ * [[System.out]]
+ * [System.in]
+ */
+
+---
+
+(source_file (multiline_comment))

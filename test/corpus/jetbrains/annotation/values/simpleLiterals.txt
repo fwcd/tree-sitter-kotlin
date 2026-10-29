@@ -1,0 +1,70 @@
+==================
+JetBrains PSI: annotation/values/simpleLiterals
+==================
+
+// FILE: Simple.kt
+annotation class Simple(
+    val i: Int,
+    val l: Long,
+    val b: Byte,
+
+    val d: Double,
+    val f: Float,
+
+    val c: Char,
+
+    val b1: Boolean,
+    val b2: Boolean,
+)
+
+// FILE: WithSimple.kt
+@Simple(
+    12,
+    12L,
+    12,
+
+    3.3,
+    3.3F,
+
+    'a',
+
+    true,
+    false
+)
+class WithSimple
+
+// FILE: WithNamedSimple.kt
+@Simple(
+    12,
+    12L,
+    12,
+
+    d = 3.3,
+    f = 3.3F,
+
+    c = 'a',
+
+    b1 = true,
+    b2 = false
+)
+class WithNamedSimple
+
+// FILE: WithSimpleOperations.kt
+@Simple(
+    12 / 6,
+    12L % 5L,
+    12,
+
+    3.3 - 3.0,
+    3.3F * 2.0F,
+
+    'a',
+
+    true && false,
+    false || true,
+)
+class WithSimpleOperations
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)) (value_argument (long_literal (integer_literal))) (value_argument (integer_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (character_literal)) (value_argument (boolean_literal)) (value_argument (boolean_literal)))))) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)) (value_argument (long_literal (integer_literal))) (value_argument (integer_literal)) (value_argument (simple_identifier) (real_literal)) (value_argument (simple_identifier) (real_literal)) (value_argument (simple_identifier) (character_literal)) (value_argument (simple_identifier) (boolean_literal)) (value_argument (simple_identifier) (boolean_literal)))))) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (multiplicative_expression (integer_literal) (integer_literal))) (value_argument (multiplicative_expression (long_literal (integer_literal)) (long_literal (integer_literal)))) (value_argument (integer_literal)) (value_argument (additive_expression (real_literal) (real_literal))) (value_argument (multiplicative_expression (real_literal) (real_literal))) (value_argument (character_literal)) (value_argument (conjunction_expression (boolean_literal) (boolean_literal))) (value_argument (disjunction_expression (boolean_literal) (boolean_literal))))))) (type_identifier)))

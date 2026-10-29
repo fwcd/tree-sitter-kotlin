@@ -1,0 +1,20 @@
+==================
+JetBrains PSI: secondaryConstructors/emptyBody
+==================
+
+// COMPILATION_ERRORS
+
+class A {
+    constructor()
+    fun foo() = 1
+    public constructor()
+    val x = 2
+
+    constructor(): this()
+    constructor(): super(3)
+    val x = 4
+}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (secondary_constructor (function_value_parameters)) (function_declaration (simple_identifier) (function_value_parameters) (function_body (integer_literal))) (secondary_constructor (modifiers (visibility_modifier)) (function_value_parameters)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (secondary_constructor (function_value_parameters) (constructor_delegation_call (value_arguments))) (secondary_constructor (function_value_parameters) (constructor_delegation_call (value_arguments (value_argument (integer_literal))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)))))

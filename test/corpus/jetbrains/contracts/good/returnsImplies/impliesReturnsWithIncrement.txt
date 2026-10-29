@@ -1,0 +1,21 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/impliesReturnsWithIncrement
+==================
+
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+// LANGUAGE: +AllowContractsOnSomeOperators, +ConditionImpliesReturnsContracts
+// ISSUE: KT-79355
+
+import kotlin.contracts.*
+
+operator fun Any?.inc(): Int? {
+    contract {
+        returns() implies (this@inc != null)
+        (this@inc != null) implies returnsNotNull()
+    }
+    return (this as Int) + 1
+}
+
+---
+
+(source_file (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (line_comment) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (function_modifier)) receiver: (receiver_type (nullable_type (user_type (type_identifier)) (quest))) (simple_identifier) (function_value_parameters) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (call_expression (parenthesized_expression (equality_expression (this_expression (type_identifier)) (null_literal))) (call_suffix (value_arguments (value_argument (equality_expression (this_expression (type_identifier)) (null_literal))))))) (simple_identifier) (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (jump_expression (additive_expression (parenthesized_expression (as_expression (this_expression) (user_type (type_identifier)))) (integer_literal)))))))

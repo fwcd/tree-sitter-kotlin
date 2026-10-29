@@ -1,0 +1,67 @@
+==================
+JetBrains PSI: examples/collections/HashMap
+==================
+
+// COMPILATION_ERRORS
+
+open class IEquality {
+  fun equals(other : Any) : Boolean
+    = (this as java.lang.Object).equals(other as java.lang.Object)
+}
+
+open class IHashable : IEquality {
+  val hashCode : Integer
+    get() = (this as java.lang.Object).hashCode()
+
+}
+
+open class IMap<K, V> {
+  fun get(key : K) : V
+  fun set(key : K, value : V) : V
+  fun remove(key : K) : V
+  fun containsKey(key : K) : Boolean
+}
+
+class HashableWrapper(val obj : Any) : IHashable
+  // equals and hashCode implementations are inherited
+
+@[inline] fun Any.hashable() : HashableWrapper = HashableWrapper(this)
+
+open class IHashingStrategy<K> {
+  fun equals(a : K, b : K) : Boolean
+  fun hashCode(a : K) : Integer
+}
+
+class DefaultHashingStrategy<in K : IHashable> : IHashingStrategy<K> {
+  override fun equals(a : K, b : K) : Boolean = a.equals(b)
+  override fun hashCode(a : K) : Integer = a.hashCode
+}
+
+class JavaObjectHashingStrategy<K> : IHashingStrategy<K> {
+  override fun equals(a : K, b : K) : Boolean
+    = a.hashable().equals(b)
+  override fun hashCode(a : K) : Integer
+    = a.hashable().hashCode
+}
+
+class HashMap<K, V> : IMap<K, V> {
+  private @[inline] fun hashCode(a : K) = a.hashable().hashCode
+  private @[inline] fun equals(a : K, b : K) = a.hashable() == b
+
+  // everything else uses these equals() and hashCode()... 
+
+}
+
+class StrategyHashMap<K, V>(hashingStrategy : IHashingStrategy<K>) : IMap<K, V> {
+
+
+  // where !(K : IHashable)
+  //this() : this(JavaObjectHashingStrategy<K>()) {}
+
+  //this() where (K : IHashable) : this(DefaultHashingStrategy<K>()) {}
+  //...
+
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (call_expression (navigation_expression (parenthesized_expression (as_expression (this_expression) (user_type (type_identifier) (type_identifier) (type_identifier)))) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (as_expression (simple_identifier) (user_type (type_identifier) (type_identifier) (type_identifier))))))))))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (delegation_specifier (user_type (type_identifier))) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (call_expression (navigation_expression (parenthesized_expression (as_expression (this_expression) (user_type (type_identifier) (type_identifier) (type_identifier)))) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))))))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))))) (class_declaration (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (delegation_specifier (user_type (type_identifier)))) (line_comment) (function_declaration (modifiers (annotation (user_type (type_identifier)))) receiver: (receiver_type (user_type (type_identifier))) (simple_identifier) (function_value_parameters) (user_type (type_identifier)) (function_body (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (this_expression))))))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier) (user_type (type_identifier)))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (call_expression (navigation_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (navigation_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (navigation_suffix (simple_identifier))))))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))) (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (modifiers (visibility_modifier) (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (navigation_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (navigation_suffix (simple_identifier))))) (function_declaration (modifiers (visibility_modifier) (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (equality_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (simple_identifier)))) (line_comment))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))) (type_projection (user_type (type_identifier)))))) (class_body (line_comment) (line_comment) (line_comment) (line_comment))))

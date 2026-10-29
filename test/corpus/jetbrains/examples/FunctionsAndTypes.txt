@@ -1,0 +1,18 @@
+==================
+JetBrains PSI: examples/FunctionsAndTypes
+==================
+
+// COMPILATION_ERRORS
+
+fun f1(t : T) : X = something(t)
+
+val f1 = {t : T -> something(t)}
+val f1 = {t -> something(t)}
+val f1 = {something(it)}
+
+val f1 :  (T) -> X = {X()}
+
+
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (lambda_literal (lambda_parameters (variable_declaration (simple_identifier) (user_type (type_identifier)))) (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (lambda_literal (lambda_parameters (variable_declaration (simple_identifier))) (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (function_type (function_type_parameters (user_type (type_identifier))) (user_type (type_identifier)))) (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))

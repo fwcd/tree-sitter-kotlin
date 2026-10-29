@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: examples/Color
+==================
+
+enum class Color(val r : Int, val g : Int, val sb : Int) {
+  RED(255, 0, 0),
+  GREEN(0, 255, 0),
+  BLUE(0, 0, 255)
+}
+---
+
+(source_file (class_declaration (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (enum_class_body (enum_entry (simple_identifier) (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)) (value_argument (integer_literal)))) (enum_entry (simple_identifier) (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)) (value_argument (integer_literal)))) (enum_entry (simple_identifier) (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)) (value_argument (integer_literal)))))))

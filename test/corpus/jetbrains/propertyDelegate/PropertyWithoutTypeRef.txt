@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: propertyDelegate/PropertyWithoutTypeRef
+==================
+
+// COMPILATION_ERRORS
+
+val p by A()
+---
+
+(source_file (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (property_delegate (call_expression (simple_identifier) (call_suffix (value_arguments))))))

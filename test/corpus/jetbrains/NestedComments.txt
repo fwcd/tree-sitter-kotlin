@@ -1,5 +1,5 @@
 ==================
-NestedComments
+JetBrains PSI: NestedComments
 ==================
 
 // COMPILATION_ERRORS
@@ -26,24 +26,4 @@ b
 
 ---
 
-(source_file
-  (line_comment)
-  (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
-      (multiline_comment)
-      (statements
-        (simple_identifier)
-        (multiline_comment)
-        (simple_identifier)
-        (multiline_comment)
-        (simple_identifier)
-        (multiline_comment)
-        (simple_identifier)
-        (multiline_comment)
-        (simple_identifier)
-        (multiline_comment)
-        (simple_identifier)
-        (multiline_comment)
-        (simple_identifier)))))
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (multiline_comment) (statements (simple_identifier) (multiline_comment) (simple_identifier) (multiline_comment) (simple_identifier) (multiline_comment) (simple_identifier) (multiline_comment) (simple_identifier) (multiline_comment) (simple_identifier) (multiline_comment) (simple_identifier)))))

@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: examples/collections/IMutableSet
+==================
+
+// COMPILATION_ERRORS
+
+open class IMutableSet<T> : ISet<T>, IMutableIterable<T> {
+  fun add(item : T) : Boolean
+  fun remove(item : T) : Boolean
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))))))

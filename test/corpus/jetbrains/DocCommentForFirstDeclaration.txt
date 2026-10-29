@@ -1,5 +1,5 @@
 ==================
-DocCommentForFirstDeclaration
+JetBrains PSI: DocCommentForFirstDeclaration
 ==================
 
 /**
@@ -8,9 +8,4 @@ DocCommentForFirstDeclaration
 fun foo() {}
 ---
 
-(source_file
-  (multiline_comment)
-  (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body)))
+(source_file (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body)))

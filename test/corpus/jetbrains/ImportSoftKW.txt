@@ -1,5 +1,5 @@
 ==================
-ImportSoftKW
+JetBrains PSI: ImportSoftKW
 ==================
 
 // COMPILATION_ERRORS
@@ -7,14 +7,4 @@ ImportSoftKW
 import import.import.import.import as import
 ---
 
-(source_file
-  (line_comment)
-  (import_list
-    (import_header
-      (identifier
-        (simple_identifier)
-        (simple_identifier)
-        (simple_identifier)
-        (simple_identifier))
-      (import_alias
-        (type_identifier)))))
+(source_file (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier) (simple_identifier)) (import_alias (type_identifier)))))

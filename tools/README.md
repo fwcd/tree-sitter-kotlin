@@ -118,3 +118,9 @@ npm run cross-validate:test
 | `runner.js` | Test runner orchestration |
 | `report.js` | Markdown report generator |
 | `vitest.config.js` | Test configuration (at project root) |
+
+## Positive JetBrains PSI import
+
+The pinned Kotlin 2.4.21 import contains 447 PSI-clean pairs (374 existing `.kt`, 13 `.kts`, 60 namespaced spec cases). Goldens with `PsiErrorElement` nodes are filtered at import time. Spec metadata is preprocessed using the upstream profile; source/golden hashes and rejection reasons appear in the fixture manifest.
+
+Regenerate with `node tools/vendor-fixtures.js`, then `node tools/vendor-jetbrains-tests.js`. A local Kotlin clone can be supplied using `--source-repo`. The corpus generator uses the parser binding, creates 345 parse-clean CST tests and reports 102 positive grammar gaps under `build/jetbrains-corpus-report.json`. Those gaps remain in the independent PSI fixture set. Seven block/expression contexts require separate adapters.

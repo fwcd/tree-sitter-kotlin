@@ -1,0 +1,45 @@
+==================
+JetBrains PSI: kdoc/ExportedKdocSingleLine
+==================
+
+// LANGUAGE: +ExportKDocDocumentationToKlib
+
+/** Class documentation. */
+class Foo constructor(val value: String) {
+    /** Secondary constructor documentation. */
+    constructor(value: Int) : this(value.toString())
+
+    /** Member function documentation. */
+    fun foo() {}
+
+    /** Member property documentation. */
+    val prop: String = ""
+
+    /** Companion object documentation. */
+    companion object {}
+}
+
+/** Type alias documentation. */
+typealias MyString = String
+
+/** Annotation class documentation. */
+annotation class Anno
+
+/** Enum class documentation. */
+enum class Direction {
+    /** Enum value documentation. */
+    SOUTH
+}
+
+/** Top-level object documentation. */
+object Obj
+
+/** Top-level function documentation. */
+fun bar(number: Int) {}
+
+/** Top-level property documentation. */
+val topLevelProp: Int
+    get() = 0
+---
+
+(source_file (line_comment) (multiline_comment) (class_declaration (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (class_body (multiline_comment) (secondary_constructor (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (constructor_delegation_call (value_arguments (value_argument (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))))))) (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (multiline_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (string_literal)) (multiline_comment) (companion_object (class_body)))) (multiline_comment) (type_alias (type_identifier) (user_type (type_identifier))) (class_declaration (modifiers (class_modifier)) (type_identifier)) (class_declaration (type_identifier) (enum_class_body (multiline_comment) (enum_entry (simple_identifier)))) (multiline_comment) (object_declaration (type_identifier)) (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body)) (multiline_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (integer_literal))))

@@ -1,0 +1,27 @@
+==================
+JetBrains PSI: annotation/annotatedTypeConstraint
+==================
+
+// FILE: I1.kt
+interface I1
+
+// FILE: I2.kt
+interface I2
+
+// FILE: Anno1.kt
+@Target(AnnotationTarget.TYPE, AnnotationTarget.TYPE_PARAMETER)
+annotation class Anno1
+
+// FILE: Anno2.kt
+@Target(AnnotationTarget.TYPE, AnnotationTarget.TYPE_PARAMETER)
+annotation class Anno2
+
+// FILE: foo.kt
+@Suppress("ANNOTATION_IN_WHERE_CLAUSE_ERROR")
+fun <@Anno1 T : I1> foo() where @Anno2 T : I2 {
+
+}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier)) (line_comment) (class_declaration (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)) (line_comment) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content))))))) (type_parameters (type_parameter (type_parameter_modifiers (annotation (user_type (type_identifier)))) (type_identifier) (user_type (type_identifier)))) (simple_identifier) (function_value_parameters) (type_constraints (type_constraint (annotation (user_type (type_identifier))) (type_identifier) (user_type (type_identifier)))) (function_body)))

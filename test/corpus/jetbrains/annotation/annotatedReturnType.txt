@@ -1,0 +1,23 @@
+==================
+JetBrains PSI: annotation/annotatedReturnType
+==================
+
+// FILE: TypeAnno.kt
+@Target(AnnotationTarget.TYPE)
+annotation class TypeAnno
+
+// FILE: RegularAnno.kt
+annotation class RegularAnno
+
+// FILE: MyInterface.kt
+interface MyInterface {
+    @RegularAnno
+    val property: @TypeAnno String
+
+    @RegularAnno
+    fun function(@RegularAnno argument: @TypeAnno Int): @TypeAnno Int
+}
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)) (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier)) (line_comment) (class_declaration (type_identifier) (class_body (property_declaration (modifiers (annotation (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier)))) (function_declaration (modifiers (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters (parameter_modifiers (annotation (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier)))) (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier))))))

@@ -1,5 +1,5 @@
 ==================
-typeModifiers2
+JetBrains PSI: typeModifiers2
 ==================
 
 public class TypeModifiers {
@@ -13,61 +13,4 @@ public class TypeModifiers {
 }
 ---
 
-(source_file
-  (class_declaration
-    (modifiers
-      (visibility_modifier))
-    (type_identifier)
-    (class_body
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
-            (function_type_parameters)
-            (user_type
-              (type_identifier))))
-        (postfix_expression
-          (null_literal)))
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (type_modifiers)
-          (function_type
-            (function_type_parameters)
-            (user_type
-              (type_identifier))))
-        (postfix_expression
-          (null_literal)))
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (type_modifiers)
-          (function_type
-            receiver: (receiver_type
-              (user_type
-                (type_identifier)))
-            (function_type_parameters)
-            (user_type
-              (type_identifier))))
-        (postfix_expression
-          (null_literal)))
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (function_type
-            receiver: (receiver_type
-              (parenthesized_type
-                (type_modifiers)
-                (function_type
-                  (function_type_parameters)
-                  (user_type
-                    (type_identifier)))))
-            (function_type_parameters)
-            (user_type
-              (type_identifier))))
-        (postfix_expression
-          (null_literal))))))
+(source_file (class_declaration (modifiers (visibility_modifier)) (type_identifier) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier)))) (postfix_expression (null_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers) (function_type (function_type_parameters) (user_type (type_identifier)))) (postfix_expression (null_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers) (function_type receiver: (receiver_type (user_type (type_identifier))) (function_type_parameters) (user_type (type_identifier)))) (postfix_expression (null_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (function_type receiver: (receiver_type (parenthesized_type (type_modifiers) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_type_parameters) (user_type (type_identifier)))) (postfix_expression (null_literal))))))

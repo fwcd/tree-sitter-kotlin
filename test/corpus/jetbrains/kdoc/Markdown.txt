@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: kdoc/Markdown
+==================
+
+/**
+ * [WikiLink]
+ * \[NotALink]
+ * [[DoubleQuotedLink]]
+ * Just \[ and \]
+ */
+---
+
+(source_file (multiline_comment))

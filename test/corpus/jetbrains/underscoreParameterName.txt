@@ -1,5 +1,5 @@
 ==================
-underscoreParameterName
+JetBrains PSI: underscoreParameterName
 ==================
 
 package test
@@ -11,25 +11,4 @@ class UnderscoreParameterName {
 }
 ---
 
-(source_file
-  (package_header
-    (identifier
-      (simple_identifier)))
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier)
-          (nullable_type
-            (user_type
-              (type_identifier))
-            (quest))))
-      (getter
-        (function_body
-          (null_literal)))
-      (setter
-        (parameter_with_optional_type
-          (simple_identifier))
-        (function_body)))))
+(source_file (package_header (identifier (simple_identifier))) (class_declaration (type_identifier) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (getter (function_body (null_literal))) (setter (parameter_with_optional_type (simple_identifier)) (function_body)))))

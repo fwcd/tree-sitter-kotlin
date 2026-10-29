@@ -1,5 +1,5 @@
 ==================
-delegatedWithInitializer
+JetBrains PSI: delegatedWithInitializer
 ==================
 
 // WITH_STDLIB
@@ -14,33 +14,4 @@ class MyClass {
 
 ---
 
-(source_file
-  (line_comment)
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (companion_object
-        (class_body
-          (property_declaration
-            (modifiers
-              (property_modifier))
-            (binding_pattern_kind)
-            (variable_declaration
-              (simple_identifier))
-            (string_literal
-              (string_content)))))
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier))
-        (property_delegate
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (annotated_lambda
-                (lambda_literal
-                  (statements
-                    (navigation_expression
-                      (simple_identifier)
-                      (navigation_suffix
-                        (simple_identifier)))))))))))))
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (companion_object (class_body (property_declaration (modifiers (property_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (property_delegate (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))))

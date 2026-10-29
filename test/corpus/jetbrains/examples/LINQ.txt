@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: examples/LINQ
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+    l filter {it.x} map {it.foo} aggregate {a, b -> a + b}
+}
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (infix_expression (infix_expression (infix_expression (simple_identifier) (simple_identifier) (lambda_literal (statements (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))) (simple_identifier) (lambda_literal (statements (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))) (simple_identifier) (lambda_literal (lambda_parameters (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))) (statements (additive_expression (simple_identifier) (simple_identifier)))))))))
