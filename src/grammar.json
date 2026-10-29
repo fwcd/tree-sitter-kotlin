@@ -3557,22 +3557,44 @@
             {
               "type": "REPEAT",
               "content": {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SYMBOL",
-                    "name": "label"
-                  },
-                  {
-                    "type": "ALIAS",
-                    "content": {
-                      "type": "SYMBOL",
-                      "name": "_statement_annotation"
-                    },
-                    "named": true,
-                    "value": "annotation"
-                  }
-                ]
+                "type": "SYMBOL",
+                "name": "label"
+              }
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_statement_annotations"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "label"
+              }
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_expression"
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "label"
               }
             },
             {
@@ -3585,16 +3607,55 @@
                 {
                   "type": "SYMBOL",
                   "name": "_loop_statement"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "_expression"
                 }
               ]
             }
           ]
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_annotated_statement"
+          },
+          "named": true,
+          "value": "annotated_expression"
         }
       ]
+    },
+    "_annotated_statement": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_statement_annotations"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "assignment"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_loop_statement"
+            }
+          ]
+        }
+      ]
+    },
+    "_statement_annotations": {
+      "type": "REPEAT1",
+      "content": {
+        "type": "ALIAS",
+        "content": {
+          "type": "SYMBOL",
+          "name": "_statement_annotation"
+        },
+        "named": true,
+        "value": "annotation"
+      }
     },
     "_statement_annotation": {
       "type": "CHOICE",

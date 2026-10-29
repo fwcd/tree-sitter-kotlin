@@ -160,6 +160,10 @@ const TS_TO_PSI = {
 
   // Statements
   statements: null,
+  // An annotated statement. PSI has no composite for it: the ANNOTATION_ENTRY
+  // is attached to the expression itself, so the wrapper is dropped and its
+  // children promoted, which is the shape PSI records.
+  annotated_expression: null,
   multi_variable_declaration: 'DESTRUCTURING_DECLARATION',
   variable_declaration: null,
   binding_pattern_kind: null,
@@ -333,6 +337,7 @@ const WRAPPER_COLLAPSE = {
 /** @type {Set<string>} */
 const ALL_TS_NAMED_NODES = new Set([
   'additive_expression',
+  'annotated_expression',
   'annotated_lambda',
   'annotation',
   'anonymous_function',
