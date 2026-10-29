@@ -2,13 +2,18 @@
   "schemaVersion": 1,
   "fixturesCommit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
   "positiveInventoryPairs": 447,
-  "comparedFixtures": 438,
-  "fixtureContentHash": "b8e2bf76935d2c8e688b5eae141a196f0ed7bf129d004b4e1ed83ec7b70ef644",
+  "comparedFixtures": 436,
+  "fixtureContentHash": "946c62787d7d902c2881055f669ad81602fcee998bd5844f25c194bc329e4354",
   "parser": {
-    "src/parser.c": "6792a828ff3fcbdeb5fb95b9c3b4fb38ddafa47e4e599c6a5cb74cbd46185526",
-    "src/scanner.c": "c13392233443bd3e836efd89c5bd355a81c1abcd62d32f26292fc70a7f5950a5"
+    "src/parser.c": "d785f03bccd203d28c624aab0018b726f8da27f843f6551ac11e275720408c5c",
+    "src/scanner.c": "08bd0f1da5f32d07f019f71a6ed559d9aa4346970ddde176cd731a524b17016c"
   },
   "excluded": [
+    {
+      "id": "companionBlocks/mixOfRegularAndStaticCompanionMethods",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set."
+    },
     {
       "id": "companionBlocks/mixOfRegularAndStaticMethods",
       "policy": "experimental-syntax-v1",
@@ -16,6 +21,11 @@
     },
     {
       "id": "companionBlocks/smoke",
+      "policy": "experimental-syntax-v1",
+      "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set."
+    },
+    {
+      "id": "companionExtension",
       "policy": "experimental-syntax-v1",
       "reason": "CompanionBlocksAndExtensions is experimental syntax outside this grammar's supported feature set."
     },
@@ -118,6 +128,7 @@
     "UnderscoredTypeArgumentsOfCallIllegal",
     "UnderscoredTypeArgumentsOfType",
     "UnderscoredTypeParameters",
+    "WhenWithSubjectVariable",
     "WhenWithSubjectVariable_SoftModifierName",
     "annotatedParameterInEnumConstructor",
     "annotatedParameterInInnerClassConstructor",
@@ -153,12 +164,16 @@
     "annotation/targeted/onAll",
     "annotation/targeted/onField/delegate",
     "annotation/targeted/onField/fqName",
+    "annotation/targeted/onField/inWrongPlace",
     "annotation/targeted/onField/manyInOneAnnotationBlock",
     "annotation/targeted/onField/simpleFieldAnnotation",
     "annotation/targeted/onFile/manyAnnotationBlocks",
     "annotation/targeted/onFile/manyInOneAnnotationBlock",
     "annotation/targeted/onFile/single",
     "annotation/targeted/onFile/withoutFileAnnotationAndPackageDeclaration",
+    "annotation/targeted/onFile/withoutPackage",
+    "annotation/targeted/onFile/withoutPackageWithSimpleAnnotation",
+    "annotation/targeted/onGetSetSparam/inWrongPlace",
     "annotation/targeted/onGetSetSparam/simple",
     "annotation/targeted/onGetSetSparam/twoAnnotationLists",
     "annotation/targeted/onParam/modifiers",
@@ -276,6 +291,7 @@
     "examples/Stack",
     "examples/UnionFind",
     "examples/UpdateOperation",
+    "examples/With",
     "examples/array/MutableArray",
     "examples/collections/ArrayList",
     "examples/collections/HashMap",
@@ -342,6 +358,7 @@
     "objects",
     "operators/untilOperator",
     "operators/untilOperatorDifferentContexts",
+    "packages/PackageModifiers",
     "parameterizedSuspendFunctionType",
     "parameterizedSuspendFunctionTypeComplex",
     "platformTypesRecovery/FunctionsNotPlatform",
@@ -387,6 +404,7 @@
     "script/topLevelPropertiesWithGetSet",
     "sealed",
     "sealedInterface",
+    "secondaryConstructors/anonymousInitializer",
     "secondaryConstructors/basic",
     "secondaryConstructors/emptyBody",
     "secondaryConstructors/enumParsing",
@@ -478,24 +496,14 @@
     "SimpleModifiers",
     "SoftKeywords",
     "SoftKeywordsInTypeArguments",
-    "WhenWithSubjectVariable",
     "annotation/Annotations",
     "annotation/modifiersMigration/newModifiers",
-    "annotation/targeted/onField/inWrongPlace",
-    "annotation/targeted/onFile/withoutPackage",
-    "annotation/targeted/onFile/withoutPackageWithSimpleAnnotation",
-    "annotation/targeted/onGetSetSparam/inWrongPlace",
     "annotation/values/arraysWithNonConstantValue",
-    "companionBlocks/mixOfRegularAndStaticCompanionMethods",
-    "companionExtension",
     "destructuring/danglingAnnotation",
-    "examples/With",
     "examples/util/Comparison",
     "greatSyntacticShift/nullableTypes",
-    "packages/PackageModifiers",
     "propertyDelegate/PropertyWithInitializer",
     "recovery/binaryExpression/SoftModifierAsInfixFunction",
-    "recovery/objects/expressions/Everything",
-    "secondaryConstructors/anonymousInitializer"
+    "recovery/objects/expressions/Everything"
   ]
 }
