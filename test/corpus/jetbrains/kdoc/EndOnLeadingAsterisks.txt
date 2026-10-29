@@ -1,0 +1,9 @@
+==================
+JetBrains PSI: kdoc/EndOnLeadingAsterisks
+==================
+
+/**
+ */
+---
+
+(source_file (multiline_comment))

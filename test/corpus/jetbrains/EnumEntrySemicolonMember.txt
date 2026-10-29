@@ -1,5 +1,5 @@
 ==================
-EnumEntrySemicolonMember
+JetBrains PSI: EnumEntrySemicolonMember
 ==================
 
 enum class My {
@@ -9,13 +9,4 @@ enum class My {
 }
 ---
 
-(source_file
-  (class_declaration
-    (type_identifier)
-    (enum_class_body
-      (enum_entry
-        (simple_identifier))
-      (function_declaration
-        (simple_identifier)
-        (function_value_parameters)
-        (function_body)))))
+(source_file (class_declaration (type_identifier) (enum_class_body (enum_entry (simple_identifier)) (function_declaration (simple_identifier) (function_value_parameters) (function_body)))))

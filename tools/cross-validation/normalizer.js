@@ -272,6 +272,11 @@ function _normalizePsiMulti(node) {
   if (!node) return [];
 
   const name = node.name;
+  if (name === 'SCRIPT') {
+    return node.children.flatMap(child => child.name === 'BLOCK'
+      ? child.children.flatMap(_normalizePsiMulti) : _normalizePsiMulti(child));
+  }
+  if (name === 'SCRIPT_INITIALIZER') return node.children.flatMap(_normalizePsiMulti);
 
   // Skip transparent PSI nodes — promote children
   if (SKIP_PSI_NODES.has(name)) {

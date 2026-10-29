@@ -1,0 +1,70 @@
+==================
+JetBrains PSI: examples/Graph
+==================
+
+// COMPILATION_ERRORS
+
+class Vertex<V>(val data : V)
+
+class Edge<V, E>(val from : V, val data : E, val to : V)
+
+class Graph<V, E> {
+
+  private val mutableEdges = ArrayList<Edge<V, E>>() // type is ArrayList, but I want IMutableList
+/* options:
+    private val edges : IMutableList<Edge<V, E>> = ArrayList<Edge<V, E>>()
+    private val edges : IMutableList<Edge<V, E>> = ArrayList() // not an erasure, but a request to infer parameters
+*/
+
+  private val mutableVertices = HashSet<Vertex<V>>()
+
+  val edges : IList<Edge<V, E>> = mutableEdges;
+  val vertices : ISet<Edge<V, E>> = mutableVertices;
+
+  fun addEdge(from : V, data : E, to : V) {
+    mutableEdges.add(Edge(from, data, to)) // constructor parameters are inferred
+  }
+  fun addVertex(v : V) {
+    mutableEdges.add(Edge(from, data, to)) // constructor parameters are inferred
+  }
+
+  fun neighbours(v : Vertex<V>) = edges.filter{it.from == v}.map{it.to} // type is IIterable<Vertex<V>>
+
+  fun dfs(handler :  (V) -> Unit) {
+    val visited = HashSet<Vertex<V>>()
+    vertices.foreach{dfs(it, visited, handler)}
+
+    fun dfs(current : Vertex<V>, visited : ISet<Vertex<V>>, handler :  (V) -> Unit) {
+      if (!visited.add(current))
+        return
+      handler(current)
+      neighbours(current).foreach{dfs(it, visited, handler)}
+    }
+  }
+
+  public fun traverse(pending : IPushPop<Vertex<V>>, visited : ISet<Vertex<V>>, handler :  (V) -> Unit) {
+    vertices.foreach {
+      if (!visited.add(it))
+        continue
+      pending.push(it)
+      while (!pending.isEmpty) {
+        val current = pending.pop()
+        handler(current);
+        neighbours(current).foreach { n ->
+          if (visited.add(n)) {
+            pending.push(n)
+          }
+        }
+    /* alternative
+        pending->push(neighbours(current).filter{n => !visited[n])})
+        // -> means that if push(x : T) and actual parameter y is IIterable<T>, this compiles into
+          y.foreach{ n => push(n) }
+     */
+      }
+    }
+  }
+}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (class_body (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))) (type_projection (user_type (type_identifier))))))) (value_arguments)))) (line_comment) (multiline_comment) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (value_arguments)))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))) (type_projection (user_type (type_identifier))))))))) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))) (type_projection (user_type (type_identifier))))))))) (simple_identifier)) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (simple_identifier)) (value_argument (simple_identifier))))))))) (line_comment)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (simple_identifier)) (value_argument (simple_identifier))))))))) (line_comment)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body (call_expression (navigation_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (equality_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (simple_identifier))))))) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))) (line_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (function_type (function_type_parameters (user_type (type_identifier))) (user_type (type_identifier))))) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (value_arguments)))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (simple_identifier)) (value_argument (simple_identifier)))))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))))) (parameter (simple_identifier) (function_type (function_type_parameters (user_type (type_identifier))) (user_type (type_identifier))))) (function_body (statements (if_expression condition: (prefix_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier)))))) consequence: (control_structure_body (jump_expression))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (call_expression (navigation_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (simple_identifier)) (value_argument (simple_identifier)))))))))))))))) (function_declaration (modifiers (visibility_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))))) (parameter (simple_identifier) (function_type (function_type_parameters (user_type (type_identifier))) (user_type (type_identifier))))) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (if_expression condition: (prefix_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier)))))) consequence: (control_structure_body (jump_expression))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))) (while_statement (prefix_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (control_structure_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (call_expression (navigation_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (lambda_parameters (variable_declaration (simple_identifier))) (statements (if_expression condition: (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))) consequence: (control_structure_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))))))) (multiline_comment))))))))))))))

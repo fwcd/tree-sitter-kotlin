@@ -1,0 +1,27 @@
+==================
+JetBrains PSI: stringTemplates/RawStringsWithManyQuotes
+==================
+
+fun foo() {
+    """"""
+    """""""
+    """"""""
+    """""""""
+    """"""""""
+
+    """" """
+    """"" """
+
+    """ """"
+    """ """""
+    """ """"""
+    """ """""""
+    """ """"""""
+
+    """" """"
+    """"" """""
+}
+
+---
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal) (string_literal) (string_literal) (string_literal) (string_literal) (string_literal (string_content) (string_content)) (string_literal (string_content) (string_content)) (string_literal (string_content)) (string_literal (string_content)) (string_literal (string_content)) (string_literal (string_content)) (string_literal (string_content)) (string_literal (string_content) (string_content)) (string_literal (string_content) (string_content))))))

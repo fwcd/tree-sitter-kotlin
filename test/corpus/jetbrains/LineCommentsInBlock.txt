@@ -1,5 +1,5 @@
 ==================
-LineCommentsInBlock
+JetBrains PSI: LineCommentsInBlock
 ==================
 
 fun test() {
@@ -17,24 +17,4 @@ fun foo() {}
 
 ---
 
-(source_file
-  (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
-      (line_comment)
-      (statements
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments)))
-        (line_comment)
-        (call_expression
-          (simple_identifier)
-          (call_suffix
-            (value_arguments))))
-      (line_comment)))
-  (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body)))
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (line_comment) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments)))) (line_comment))) (function_declaration (simple_identifier) (function_value_parameters) (function_body)))

@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: kdoc/TextRightAfterLeadAsterisks
+==================
+
+/**
+**test
+ */
+---
+
+(source_file (multiline_comment))

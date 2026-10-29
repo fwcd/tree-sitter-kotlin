@@ -1,5 +1,5 @@
 ==================
-FloatingPointLiteral
+JetBrains PSI: FloatingPointLiteral
 ==================
 
 // COMPILATION_ERRORS
@@ -35,71 +35,4 @@ val array = array<Any>(
 )
 ---
 
-(source_file
-  (line_comment)
-  (property_declaration
-    (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (call_expression
-      (simple_identifier)
-      (call_suffix
-        (type_arguments
-          (type_projection
-            (user_type
-              (type_identifier))))
-        (value_arguments
-          (value_argument
-            (integer_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal))
-          (value_argument
-            (real_literal)))))))
+(source_file (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments (value_argument (integer_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)) (value_argument (real_literal)))))))

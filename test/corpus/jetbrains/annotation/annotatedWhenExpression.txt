@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: annotation/annotatedWhenExpression
+==================
+
+fun main() {
+    when (@Ann "") {
+    }
+}
+
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.EXPRESSION)
+annotation class Ann
+---
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (when_expression (when_subject (prefix_expression (annotation (user_type (type_identifier))) (string_literal))))))) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)))

@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: kdoc/ParamTag
+==================
+
+/**
+ * @param a The description of a.
+ */
+
+---
+
+(source_file (multiline_comment))

@@ -1,0 +1,22 @@
+==================
+JetBrains PSI: annotation/values/classLiterals
+==================
+
+// FILE: ClassLiteral.kt
+import kotlin.reflect.KClass
+
+annotation class ClassLiteral(
+    val c1: KClass<*>,
+    val c2: KClass<*>,
+)
+
+// FILE: WithClassLiteral.kt
+@ClassLiteral(
+    WithClassLiteral::class,
+    Boolean::class,
+)
+class WithClassLiteral
+
+---
+
+(source_file (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier)))) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))) (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))))) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier))))))) (type_identifier)))

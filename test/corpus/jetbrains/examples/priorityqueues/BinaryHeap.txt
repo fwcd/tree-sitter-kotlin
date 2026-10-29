@@ -1,0 +1,111 @@
+==================
+JetBrains PSI: examples/priorityqueues/BinaryHeap
+==================
+
+// COMPILATION_ERRORS
+
+class BinaryHeap<T> : IPriorityQueue<T> {
+  private val data : IMutableList<T>
+  private val compare : Comparison<T>
+
+//  this(data : IIterable<T>, compare : Comparison<T> = naturalOrder<T>) {
+//    this.compare = compare
+//    this.data = ArrayList(data)
+////    siftDown(* this.data.size / 2 .. 0)
+//
+//    for (val i in data.size / 2 .. 0) {
+//      siftDown(i)
+//    }
+//
+//  }
+
+  //this(compare : Comparison<T>) {
+  //  this.compare = compare
+  //  this.data = ArrayList()
+  //}
+  //
+  //this() {
+  //  this.data = ArrayList()
+  //  Assert(T is IComparable<T>)
+  //  this.comparator = naturalOrder<T>
+  //}
+
+  override fun extract() : T {
+    if (this.isEmpty)
+      throw UnderflowException()
+    data.swap(0, data.lastIndex)
+    data.remove(data.lastIndex)
+    siftDown(0)
+  }
+
+  override fun add(item : T) {
+    data.add(item)
+    siftUp(data.lastItem)
+  }
+
+  private fun siftDown(index : Int) {
+    var current = index
+    while (current.left.exists) {
+      var min = current
+      if (current.left.value < min.value) {
+        min = current.left
+      }
+      if (current.right.exists && current.right.value < min.value) {
+        min = current.right
+      }
+      if (min == current) break
+      data.swap(min, current)
+      current = min
+    }
+  }
+
+  private fun siftUp(index : Int) {
+    if (!current.exists) return
+    var current = index
+    while (current.parent.exists) {
+      if (current.value < current.parent.value) {
+        data.swap(current, current.parent)
+        current = current.parent
+      }
+    }
+  }
+
+  val Int.parent : Int
+    get() = (this - 1) / 2
+
+
+  val Int.left : Int
+    get() = this * 2 + 1
+
+
+  val Int.right : Int
+    get() = this * 2 + 2
+
+
+  val Int.value : T = foo.bar()
+    get() = data[this]
+    set(it) {
+      field = it
+    }
+
+
+  val Int.exists : Boolean
+    get() = (this < data.size) && (this >= 0)
+
+  fun <T> T.compareTo(other : T) : Int = compare(this, other)
+
+}
+
+fun IMutableList<T>.swap(a : Int, b : Int) {
+  val t = this[a]
+  this[a] = this[b]
+  this[b] = t
+}
+
+val IList<T>.lastIndex : Int
+  get() = this.size - 1
+
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (line_comment) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (user_type (type_identifier)) (function_body (statements (if_expression condition: (navigation_expression (this_expression) (navigation_suffix (simple_identifier))) consequence: (control_structure_body (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments)))))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (integer_literal)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal)))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))) (function_declaration (modifiers (visibility_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (while_statement (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (control_structure_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (if_expression condition: (comparison_expression (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (if_expression condition: (conjunction_expression (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (comparison_expression (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (if_expression condition: (equality_expression (simple_identifier) (simple_identifier)) consequence: (control_structure_body (jump_expression))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (simple_identifier))))) (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier)))))))) (function_declaration (modifiers (visibility_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (if_expression condition: (prefix_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) consequence: (control_structure_body (jump_expression))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (while_statement (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (control_structure_body (statements (if_expression condition: (comparison_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier)))) consequence: (control_structure_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (assignment (directly_assignable_expression (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))))))))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (multiplicative_expression (parenthesized_expression (additive_expression (this_expression) (integer_literal))) (integer_literal)))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (additive_expression (multiplicative_expression (this_expression) (integer_literal)) (integer_literal)))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (additive_expression (multiplicative_expression (this_expression) (integer_literal)) (integer_literal)))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments)))) (getter (function_body (indexing_expression (simple_identifier) (indexing_suffix (this_expression))))) (setter (parameter_with_optional_type (simple_identifier)) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier))))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (conjunction_expression (parenthesized_expression (comparison_expression (this_expression) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))) (parenthesized_expression (comparison_expression (this_expression) (integer_literal)))))) (function_declaration (type_parameters (type_parameter (type_identifier))) receiver: (receiver_type (user_type (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (this_expression)) (value_argument (simple_identifier))))))))) (function_declaration receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (indexing_expression (this_expression) (indexing_suffix (simple_identifier)))) (assignment (directly_assignable_expression (this_expression) (indexing_suffix (simple_identifier))) (indexing_expression (this_expression) (indexing_suffix (simple_identifier)))) (assignment (directly_assignable_expression (this_expression) (indexing_suffix (simple_identifier))) (simple_identifier))))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (additive_expression (navigation_expression (this_expression) (navigation_suffix (simple_identifier))) (integer_literal)))))

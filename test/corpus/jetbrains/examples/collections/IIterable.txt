@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: examples/collections/IIterable
+==================
+
+// COMPILATION_ERRORS
+
+open class IIterable<out T> {
+  fun iterator() : IIterator<T>
+}
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))))

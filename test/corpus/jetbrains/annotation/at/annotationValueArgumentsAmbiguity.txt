@@ -1,0 +1,17 @@
+==================
+JetBrains PSI: annotation/at/annotationValueArgumentsAmbiguity
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+    @ann ({ it -> it + 1}) // lambda parsed as argument of annotation, and annotated expression is "print(1)"
+    print(1)
+
+    @ann() ({ it -> it + 1}) // lambda in parenthesises annotated, "print(1)" is separated expression
+    print(1)
+}
+
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (prefix_expression (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (lambda_literal (lambda_parameters (variable_declaration (simple_identifier))) (statements (additive_expression (simple_identifier) (integer_literal)))))))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal)))))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments))) (parenthesized_expression (lambda_literal (lambda_parameters (variable_declaration (simple_identifier))) (statements (additive_expression (simple_identifier) (integer_literal))))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal)))))))))

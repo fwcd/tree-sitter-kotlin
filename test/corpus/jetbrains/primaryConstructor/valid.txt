@@ -1,0 +1,25 @@
+==================
+JetBrains PSI: primaryConstructor/valid
+==================
+
+// COMPILATION_ERRORS
+
+class A0
+constructor() {}
+class A1
+private constructor(y: Int) : Base1(), Base2 {
+    val x: Int
+}
+class A2 @private constructor(y: Int)
+
+class A3 @Ann(1) private constructor(y: Int)
+
+class A4 private @Ann(1) constructor(y: Int)
+
+class A5 @Ann private constructor() {}
+
+class A6 @Ann() private constructor() {}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (primary_constructor) (class_body)) (class_declaration (type_identifier) (primary_constructor (modifiers (visibility_modifier)) (class_parameter (simple_identifier) (user_type (type_identifier)))) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (delegation_specifier (user_type (type_identifier))) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))))) (class_declaration (type_identifier) (primary_constructor (modifiers (annotation (user_type (type_identifier)))) (class_parameter (simple_identifier) (user_type (type_identifier))))) (class_declaration (type_identifier) (primary_constructor (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (visibility_modifier)) (class_parameter (simple_identifier) (user_type (type_identifier))))) (class_declaration (type_identifier) (primary_constructor (modifiers (visibility_modifier) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (class_parameter (simple_identifier) (user_type (type_identifier))))) (class_declaration (type_identifier) (primary_constructor (modifiers (annotation (user_type (type_identifier))) (visibility_modifier))) (class_body)) (class_declaration (type_identifier) (primary_constructor (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments))) (visibility_modifier))) (class_body)))

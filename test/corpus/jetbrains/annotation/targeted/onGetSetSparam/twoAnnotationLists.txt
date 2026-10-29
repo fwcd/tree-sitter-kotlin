@@ -1,0 +1,19 @@
+==================
+JetBrains PSI: annotation/targeted/onGetSetSparam/twoAnnotationLists
+==================
+
+// COMPILATION_ERRORS
+
+class A {
+
+    @get:a
+    @set:[b c]
+    @setparam:d
+    var a: Int
+        @e get() = 5
+        @f @g set(@h v) {}
+
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (property_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (modifiers (annotation (user_type (type_identifier)))) (function_body (integer_literal))) (setter (modifiers (annotation (user_type (type_identifier))) (annotation (user_type (type_identifier)))) (parameter_with_optional_type (parameter_modifiers (annotation (user_type (type_identifier)))) (simple_identifier)) (function_body)))))

@@ -1,0 +1,9 @@
+==================
+JetBrains PSI: kdoc/ParamTagAtStart
+==================
+
+/** @param a this is a */
+
+---
+
+(source_file (multiline_comment))

@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/real-literals/p-3/pos/2.4
+==================
+
+val value = 0e
+val value = 00e-
+val value = 000E+
+val value = 0000e+
+val value = 00000000000000000000000000000000000000E
+val value = 34567E+
+val value = 456e-
+val value = 55555e+f
+val value = 666666E-F
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (real_literal)))

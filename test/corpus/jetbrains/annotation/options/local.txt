@@ -1,0 +1,14 @@
+==================
+JetBrains PSI: annotation/options/local
+==================
+
+// COMPILATION_ERRORS
+
+fun foo(): Int {
+    @annotation class Ann
+    @Ann val x = 1
+    return x
+}
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (user_type (type_identifier)) (function_body (statements (class_declaration (modifiers (annotation (user_type (type_identifier)))) (type_identifier)) (property_declaration (modifiers (annotation (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (jump_expression (simple_identifier))))))

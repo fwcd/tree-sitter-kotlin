@@ -1,0 +1,13 @@
+==================
+JetBrains PSI: recovery/InterfaceInExpressionPosition
+==================
+
+// COMPILATION_ERRORS
+// LIBRARY_PLATFORMS: Common
+
+val p = 1 < interface I {
+    fun f() {}
+}
+---
+
+(source_file (line_comment) (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (comparison_expression (integer_literal) (infix_expression (simple_identifier) (simple_identifier) (lambda_literal (statements (function_declaration (simple_identifier) (function_value_parameters) (function_body))))))))

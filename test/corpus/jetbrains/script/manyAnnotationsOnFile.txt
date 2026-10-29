@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: script/manyAnnotationsOnFile
+==================
+
+@file:[ foo]
+@file:[bar baz]
+package bar
+
+---
+
+(source_file (file_annotation (user_type (type_identifier))) (file_annotation (user_type (type_identifier)) (user_type (type_identifier))) (package_header (identifier (simple_identifier))))

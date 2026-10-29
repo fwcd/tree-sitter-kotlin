@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: propertyBackingField/backingFieldComment
+==================
+
+val customGetterOnly: Int /* hasBackingField: true */
+    get() = 1
+
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (multiline_comment) (getter (function_body (integer_literal))))

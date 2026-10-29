@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: script/Shebang
+==================
+
+#!/usr/bin/env kotlin
+
+println(args)
+
+---
+
+(source_file (shebang_line) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))

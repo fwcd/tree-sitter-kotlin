@@ -1,0 +1,30 @@
+==================
+JetBrains PSI: annotation/values/intVarargLiterals
+==================
+
+// FILE: VarArg.kt
+annotation class VarArg(vararg val v: Int) {
+    companion object {
+        const val CONSTANT = 3
+    }
+}
+
+// FILE: One.kt
+@VarArg(1)
+class One
+
+// FILE: Two.kt
+@VarArg(1, 2)
+class Two
+
+// FILE: Three.kt
+@VarArg(1, 2, VarArg.CONSTANT)
+class Three
+
+// FILE: Spread.kt
+@VarArg(*[1, 2, VarArg.CONSTANT, 4])
+class Spread
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (modifiers (parameter_modifier)) (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (class_body (companion_object (class_body (property_declaration (modifiers (property_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)))))) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)))))) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)) (value_argument (integer_literal)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (spread_expression (collection_literal (integer_literal) (integer_literal) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (integer_literal)))))))) (type_identifier)))

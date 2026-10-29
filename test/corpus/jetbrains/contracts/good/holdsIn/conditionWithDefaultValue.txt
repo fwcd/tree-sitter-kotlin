@@ -1,0 +1,17 @@
+==================
+JetBrains PSI: contracts/good/holdsIn/conditionWithDefaultValue
+==================
+
+// LANGUAGE: +HoldsInContracts
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+// ISSUE: KT-79157
+import kotlin.contracts.*
+
+inline fun testDefaultArguments(a: String?, condition: Boolean = a is String, block: () -> Unit) {
+    contract { condition holdsIn block }
+    block()
+}
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (function_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest))) (parameter (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (simple_identifier) (simple_identifier) (simple_identifier))))))) (call_expression (simple_identifier) (call_suffix (value_arguments)))))))

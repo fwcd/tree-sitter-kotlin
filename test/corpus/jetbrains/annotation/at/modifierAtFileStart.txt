@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: annotation/at/modifierAtFileStart
+==================
+
+// COMPILATION_ERRORS
+
+@public class A
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (annotation (user_type (type_identifier)))) (type_identifier)))

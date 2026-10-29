@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: examples/collections/ISized
+==================
+
+// COMPILATION_ERRORS
+
+open class ISized {
+  val size : Int
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))))))

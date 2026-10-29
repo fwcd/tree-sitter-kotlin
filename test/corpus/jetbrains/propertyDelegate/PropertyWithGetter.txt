@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: propertyDelegate/PropertyWithGetter
+==================
+
+// COMPILATION_ERRORS
+
+val p: Int by A()
+  get() = 1
+---
+
+(source_file (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (property_delegate (call_expression (simple_identifier) (call_suffix (value_arguments))))) (getter (function_body (integer_literal))))

@@ -1,0 +1,35 @@
+==================
+JetBrains PSI: examples/collections/IIterator
+==================
+
+// COMPILATION_ERRORS
+
+open class IIterator<out T> {
+  fun next() : T
+  val hasNext : Boolean
+
+  fun toArray(buffer : MutableArray<in T>) : Int { // T is still an in-parameter
+    return fillBuffer(buffer, 0, buffer.size)
+  }
+
+  fun toArray(buffer : MutableArray<in T>, from : Int, length : Int) : Int { // T is still an in-parameter
+    if (from < 0 || from > buffer.lastIndex || length < 0 || length > buffer.size - from) {
+      throw IndexOutOfBoundsException();
+    }
+
+    if (len == 0) return 0
+
+    var count = 0;
+    for (i in from .. from + length - 1) {
+      if (!hasNext)
+        return count
+      buffer[i] = next()
+      count++
+    }
+    return count
+  }
+}
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters) (user_type (type_identifier))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_projection_modifiers (variance_modifier)) (user_type (type_identifier))))))) (user_type (type_identifier)) (function_body (line_comment) (statements (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (integer_literal)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_projection_modifiers (variance_modifier)) (user_type (type_identifier)))))) (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (line_comment) (statements (if_expression condition: (disjunction_expression (disjunction_expression (disjunction_expression (comparison_expression (simple_identifier) (integer_literal)) (comparison_expression (simple_identifier) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))) (comparison_expression (simple_identifier) (integer_literal))) (comparison_expression (simple_identifier) (additive_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (simple_identifier)))) consequence: (control_structure_body (statements (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments))))))) (if_expression condition: (equality_expression (simple_identifier) (integer_literal)) consequence: (control_structure_body (jump_expression (integer_literal)))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (for_statement (variable_declaration (simple_identifier)) (range_expression (simple_identifier) (additive_expression (additive_expression (simple_identifier) (simple_identifier)) (integer_literal))) (control_structure_body (statements (if_expression condition: (prefix_expression (simple_identifier)) consequence: (control_structure_body (jump_expression (simple_identifier)))) (assignment (directly_assignable_expression (simple_identifier) (indexing_suffix (simple_identifier))) (call_expression (simple_identifier) (call_suffix (value_arguments)))) (postfix_expression (simple_identifier))))) (jump_expression (simple_identifier))))))))

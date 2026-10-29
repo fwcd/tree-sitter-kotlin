@@ -1,0 +1,17 @@
+==================
+JetBrains PSI: annotation/targeted/onGetSetSparam/simple
+==================
+
+// COMPILATION_ERRORS
+
+class A {
+
+    @get:An
+    @set:An
+    @setparam:An
+    var a: String = "A"
+
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (property_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (string_literal (string_content))))))

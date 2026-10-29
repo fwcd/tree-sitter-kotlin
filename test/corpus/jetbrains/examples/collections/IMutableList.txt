@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: examples/collections/IMutableList
+==================
+
+// COMPILATION_ERRORS
+
+open class IMutableList<T> : IList<T>, IMutableIterable<T> {
+  fun set(index : Int, value : T) : T
+  fun add(index : Int, value : T)
+  fun remove(index : Int) : T
+  fun mutableIterator() : IMutableIterator<T>
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))) (function_declaration (simple_identifier) (function_value_parameters) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))))

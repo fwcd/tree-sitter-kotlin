@@ -1,5 +1,5 @@
 ==================
-propertyAccessors
+JetBrains PSI: propertyAccessors
 ==================
 
 var privateSetter = 0
@@ -15,39 +15,4 @@ inline val inlineProperty get() = 3
 
 ---
 
-(source_file
-  (property_declaration
-    (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (integer_literal))
-  (setter
-    (modifiers
-      (visibility_modifier)))
-  (property_declaration
-    (modifiers
-      (visibility_modifier))
-    (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (integer_literal))
-  (setter
-    (modifiers
-      (visibility_modifier)))
-  (property_declaration
-    (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (integer_literal))
-  (getter
-    (modifiers
-      (visibility_modifier)))
-  (property_declaration
-    (modifiers
-      (function_modifier))
-    (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (getter
-      (function_body
-        (integer_literal)))))
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (setter (modifiers (visibility_modifier))) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (setter (modifiers (visibility_modifier))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (getter (modifiers (visibility_modifier))) (property_declaration (modifiers (function_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (getter (function_body (integer_literal)))))

@@ -1,5 +1,5 @@
 ==================
-topJvmPackageNameMultifile
+JetBrains PSI: topJvmPackageNameMultifile
 ==================
 
 // LIBRARY_PLATFORMS: JVM
@@ -14,60 +14,4 @@ fun foo() {}
 
 ---
 
-(source_file
-  (line_comment)
-  (file_annotation
-    (constructor_invocation
-      (user_type
-        (type_identifier))
-      (value_arguments
-        (value_argument
-          (string_literal
-            (string_content)))
-        (value_argument
-          (string_literal
-            (string_content)))
-        (value_argument
-          (string_literal
-            (string_content)))
-        (value_argument
-          (string_literal
-            (string_content))))))
-  (file_annotation
-    (constructor_invocation
-      (user_type
-        (type_identifier))
-      (value_arguments
-        (value_argument
-          (string_literal
-            (string_content))))))
-  (file_annotation
-    (user_type
-      (type_identifier)))
-  (file_annotation
-    (constructor_invocation
-      (user_type
-        (type_identifier)
-        (type_identifier)
-        (type_identifier))
-      (value_arguments
-        (value_argument
-          (string_literal
-            (string_content))))))
-  (package_header
-    (identifier
-      (simple_identifier)
-      (simple_identifier)))
-  (function_declaration
-    (modifiers
-      (annotation
-        (constructor_invocation
-          (user_type
-            (type_identifier))
-          (value_arguments
-            (value_argument
-              (string_literal
-                (string_content)))))))
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body)))
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content))) (value_argument (string_literal (string_content))) (value_argument (string_literal (string_content))) (value_argument (string_literal (string_content)))))) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content)))))) (file_annotation (user_type (type_identifier))) (file_annotation (constructor_invocation (user_type (type_identifier) (type_identifier) (type_identifier)) (value_arguments (value_argument (string_literal (string_content)))))) (package_header (identifier (simple_identifier) (simple_identifier))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content))))))) (simple_identifier) (function_value_parameters) (function_body)))
