@@ -18,6 +18,7 @@ enum TokenType {
   INTERPOLATION_IDENTIFIER_START,
   BY_DELEGATION_HINT,
   PRIMARY_CONSTRUCTOR_HINT,
+  CALLABLE_REFERENCE_QUEST,
   COMMENT_CONTINUATION_HINT,
 };
 
@@ -1330,6 +1331,47 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
     // wildcard_import, and a nested comment collapses to zero width.
     if (ret) return ret;
     if (!cursor_clean && !valid_symbols[STRING_CONTENT]) return false;
+  }
+
+  // A `?` in a callable-reference receiver: `String?::plus`.
+  //
+  // The internal lexer takes the longest valid token, and in expression
+  // position `?:` is the elvis operator, so `String?::plus` lexed as elvis
+  // followed by `:` and parsed as an elvis_expression wrapped around an
+  // ERROR. `String??::plus` parsed correctly all along, because the first `?`
+  // cannot begin an elvis there -- the same construct failing or not purely
+  // on what followed the `?`.
+  //
+  // The external scanner runs before the internal lexer, so claiming the `?`
+  // here settles it. Two guards keep that from reaching anything else:
+  // valid_symbols restricts it to the receiver position, and the `?` is only
+  // claimed when a `::` actually follows it, directly or through further
+  // `?`s. Claiming on valid_symbols alone broke safe navigation -- `a?.b` and
+  // a `?` after a newline -- because the receiver position overlaps those.
+  //
+  // mark_end is set straight after the `?`, so the lookahead below inspects
+  // the following characters without lengthening the token.
+  if (valid_symbols[CALLABLE_REFERENCE_QUEST] && lexer->lookahead == '?') {
+    advance(lexer);
+    lexer->mark_end(lexer);
+    // Whitespace is allowed between the `?` and what follows: `a? ::b` and
+    // `X ?? :: x` are both in the JetBrains fixtures. Horizontal only --
+    // crossing a newline here would second-guess statement termination,
+    // which is not this token's job.
+    while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
+    if (lexer->lookahead == '?') {
+      // `??::` — the next `?` is handled by the next scan.
+      lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
+      return true;
+    }
+    if (lexer->lookahead == ':') {
+      advance(lexer);
+      if (lexer->lookahead == ':') {
+        lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
+        return true;
+      }
+    }
+    return false;
   }
 
   // Match dots in import identifiers, refusing dots that would cause

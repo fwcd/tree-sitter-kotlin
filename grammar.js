@@ -100,12 +100,25 @@ module.exports = grammar({
   name: "kotlin",
 
   conflicts: $ => [
+    // See `_type_reference`: bare `dynamic` versus a user type named `dynamic`.
+    [$._dynamic_type, $.simple_identifier],
+
     // Ambiguous when used in an explicit delegation expression,
     // since the '{' could either be interpreted as the class body
     // or as the anonymous function body. Consider the following sequence:
 
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
+    [$._primary_expression, $._callable_reference_name],
+
+    // `context` is a soft keyword: `context(...)` may be a context-receiver
+    // declaration prefix or an ordinary call whose callee is named `context`.
+    // GLR explores both and keeps whichever yields a valid parse.
+    [$.context_receiver, $.simple_identifier],
+
+    // `l@` may begin a labelled expression or, now, a labelled declaration;
+    // which it is only becomes clear at the token after the label.
+    [$.prefix_expression],
 
     // `( name` at statement start: a destructuring target or a parenthesized
     // expression. Nothing tells them apart until after the ')', so carry both.
@@ -130,6 +143,7 @@ module.exports = grammar({
     [$.property_modifier, $.simple_identifier],
     // parameter modifiers as identifiers
     [$.parameter_modifier, $.simple_identifier],
+    [$.modifiers],
     [$.parameter_modifiers],
     [$.type_parameter_modifiers],
 
@@ -211,6 +225,11 @@ module.exports = grammar({
     // Three-way conflict: callable_reference (Foo::bar) starts with simple_identifier
     // which both primary_expression variants can match.
     [$._primary_expression, $._primary_expression_no_trailing_lambda, $.callable_reference],
+    [$._primary_expression, $._primary_expression_no_trailing_lambda, $._callable_reference_name],
+
+    // Inside the callable-reference receiver the parser must choose a
+    // production at `Name <` before it can see whether any `?` follows.
+
 
     // ambiguity between call_suffix and _generic_call_suffix (both can match type_arguments + args)
     [$.call_suffix, $._generic_call_suffix],
@@ -229,6 +248,7 @@ module.exports = grammar({
     $._interpolation_identifier_start,
     $._by_delegation_hint,
     $._primary_constructor_hint,
+    $._callable_reference_quest,
     $._comment_continuation_hint,
   ],
 
@@ -261,13 +281,25 @@ module.exports = grammar({
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),
 
+    // Separator optional, not required. `file_annotation` used to end with a
+    // mandatory `$._semi`, so a second annotation on the same line left the
+    // first without one and the file parsed with a `MISSING _automatic_semicolon`
+    // — no visible ERROR node, so only a binding-level check caught it:
+    //
+    //     @file:JvmMultifileClass @file:JvmName("FlowKt")
+    //
+    // which is how kotlinx-coroutines-core writes it. Unlike the class-body
+    // case in #297 the separator is not needed for disambiguation here: every
+    // file annotation starts with `@file:`, and what can follow one — another
+    // annotation, `package`, `import`, a statement — is distinguishable from
+    // the first token, so the separator can simply be optional.
     file_annotation: $ => seq(
       "@", "file", ":",
       choice(
         seq("[", repeat1($._unescaped_annotation), "]"),
         $._unescaped_annotation
       ),
-      $._semi
+      optional($._semi)
     ),
 
     package_header: $ => seq("package", $.identifier, $._semi),
@@ -347,7 +379,18 @@ module.exports = grammar({
       $._class_parameters
     ),
 
-    class_body: $ => seq("{", optional($._class_member_declarations), "}"),
+    // A body may open with a single stray `;`, which kotlinc accepts:
+    //
+    //     class CancelledParentAttachTest : TestBase() {;
+    //
+    // as kotlinx-coroutines-reactive writes it. `_class_member_declarations`
+    // allows a separator between and after members but not before the first,
+    // so the leading one is spelled out here. It is the literal token rather
+    // than `$._semi`, deliberately: `_semi` is the ASI external token, and
+    // making it valid right after `{` would let the scanner emit one for the
+    // newline that opens every ordinary multi-line body. Two leading `;` stay
+    // an error, as in PSI.
+    class_body: $ => seq("{", optional(";"), optional($._class_member_declarations), "}"),
 
     _class_parameters: $ => seq(
       "(",
@@ -551,6 +594,32 @@ module.exports = grammar({
       )
     ),
 
+    // The receiver of a `fun`/`val` declaration also admits an unparenthesized
+    // function type, but only behind a modifier list: `fun @receiver:A () ->
+    // Unit?.f() {}`. The modifiers are what commit the Kotlin parser to
+    // reading a type — without them `fun () -> Unit.f() {}` is not a receiver
+    // at all, and PSI reports errors for it. Nested function-type receivers
+    // (`A.() -> B`) keep the plain `receiver_type`, which is also what PSI
+    // accepts there.
+    _declaration_receiver_type: $ => choice(
+      $.receiver_type,
+      alias($.annotated_function_type_receiver, $.receiver_type)
+    ),
+
+    annotated_function_type_receiver: $ => seq($.type_modifiers, $.function_type),
+
+    // Context parameters / receivers (Kotlin 1.6.20+ / 2.2): a `context(...)`
+    // prefix on a callable declaration. Entries are either context parameters
+    // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
+    // enclosing declaration must parse so its body is scored.
+    context_receiver: $ => seq(
+      "context",
+      "(",
+      sep1(choice(seq(optional($.parameter_modifiers), $.parameter), $._type), ","),
+      optional(","),
+      ")"
+    ),
+
     // `public fun Foo.bar() { … }` also parses as an infix expression, because
     // the visibility modifiers are soft keywords in `simple_identifier`. Both
     // readings are complete, so this is the dynamic-precedence decision #278
@@ -560,7 +629,7 @@ module.exports = grammar({
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
-      optional(seq(field("receiver", $.receiver_type), optional('.'))),
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       $.simple_identifier,
       $.function_value_parameters,
       optional(seq(":", $._type)),
@@ -612,7 +681,7 @@ module.exports = grammar({
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
-      optional(seq(field("receiver", $.receiver_type), optional('.'))),
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
       optional($.type_constraints),
       optional(choice(
@@ -723,10 +792,20 @@ module.exports = grammar({
       )
     ),
 
+    // `dynamic` is a type in its own right, but a package or class may also be
+    // named `dynamic`, so `dynamic.T` is an ordinary qualified user type. Only
+    // the token after `dynamic` tells the two apart, which is why the bare
+    // alternative alone made `dynamic.T` unparseable: it is a leaf, so nothing
+    // could follow the '.'. Both readings are carried as a GLR conflict, and
+    // `prec.dynamic` prefers the dedicated type whenever a bare `dynamic`
+    // would also parse as a user type — which is how the Kotlin compiler reads
+    // it, and keeps `dynamic` from printing as just another type_identifier.
     _type_reference: $ => prec.left(1, choice(
       $.user_type,
-      "dynamic"
+      $._dynamic_type
     )),
+
+    _dynamic_type: $ => prec.dynamic(1, "dynamic"),
 
     not_nullable_type: $ => seq(
       optional($.type_modifiers),
@@ -796,7 +875,11 @@ module.exports = grammar({
     ),
 
     _statement: $ => choice(
-      $._declaration,
+      // A declaration may carry labels too — `fun f() { l@ val x = 1 }` is
+      // valid Kotlin. Only labels, not the statement-annotation prefix:
+      // annotations on a declaration are already handled by `modifiers`, and
+      // allowing both here would make them ambiguous.
+      seq(optional($.label), $._declaration),
       seq(
         repeat(choice($.label, alias($._statement_annotation, $.annotation))),
         choice(
@@ -828,7 +911,7 @@ module.exports = grammar({
 
     control_structure_body: $ => choice($._block, $._statement),
 
-    _block: $ => prec(PREC.BLOCK, seq("{", optional($.statements), "}")),
+    _block: $ => prec(PREC.BLOCK, seq("{", optional(";"), optional($.statements), "}")),
 
     _loop_statement: $ => choice(
       $.for_statement,
@@ -1040,11 +1123,23 @@ module.exports = grammar({
     parenthesized_expression: $ => seq("(", $._expression, ")"),
 
     // https://kotlinlang.org/spec/syntax-and-grammar.html#grammar-rule-collectionLiteral
+    // `@A([])` is valid Kotlin and the empty case was unparseable, because the
+    // rule required at least one element.
+    //
+    // The elements are optional everywhere a collection literal is allowed,
+    // not only inside an annotation. The Kotlin compiler does reject `[]` in
+    // an expression position, but with UNSUPPORTED_ARRAY_LITERAL_OUTSIDE_OF_
+    // ANNOTATION_ERROR -- a diagnostic about an unsupported feature, raised
+    // after parsing. The Kotlin parser accepts it, and this grammar follows
+    // the parser, so making the rule context-sensitive would diverge from PSI
+    // to enforce something that is not a syntax error.
     collection_literal: $ => seq(
       "[",
-      $._expression,
-      repeat(seq(",", $._expression)),
-      optional(","),
+      optional(seq(
+        $._expression,
+        repeat(seq(",", $._expression)),
+        optional(",")
+      )),
       "]"),
 
     _literal_constant: $ => choice(
@@ -1075,6 +1170,7 @@ module.exports = grammar({
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
       "{",
       optional(seq(optional($.lambda_parameters), "->")),
+      optional(";"),
       optional($.statements),
       "}"
     )),
@@ -1120,6 +1216,7 @@ module.exports = grammar({
     ),
 
     anonymous_function: $ => prec.right(seq(
+      optional($.context_receiver),
       optional("suspend"),
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
@@ -1262,8 +1359,45 @@ module.exports = grammar({
       $._break_at
     ),
 
+    // Kotlin's callableReference takes a receiverType, but reusing the type
+    // rules here is what broke the first attempt: nullable_type pulls in
+    // parenthesized_type and type_modifiers, which puts the whole type grammar
+    // in expression-reachable position and changes how `?` resolves across
+    // safe-call, elvis and nullable types. 39 of 404 corpus tests regressed,
+    // in delegation, comments, destructuring and enums -- nowhere near
+    // callable references.
+    //
+    // So this slot gets its own receiver, admitting only what a callable
+    // reference receiver can actually be: a possibly-qualified name, optional
+    // type arguments, and any number of `?`. No parenthesized types and no
+    // type modifiers, which also keeps `((Int) -> Unit)?::invoke` rejected,
+    // matching the Kotlin parser ("Expecting ')'").
+    //
+    // Hidden, so its children inline and `String::plus` keeps exactly the tree
+    // it has today: (callable_reference (type_identifier) (simple_identifier)).
+    // Just a name. A wider receiver -- qualification and type arguments, as
+    // Kotlin's receiverType allows -- was built and measured first, and it
+    // reshaped 46 real-world files: it flattens `a.b.C::class` into one node
+    // where the Kotlin parser keeps the qualified name as nested
+    // DOT_QUALIFIED_EXPRESSION inside a CLASS_LITERAL_EXPRESSION. Per-file PSI
+    // comparison put 42 of those files in a state where neither the old nor
+    // the new tree matched PSI. The narrow receiver fixes the same real-world
+    // files with no reshaping at all, so the extra reach is not worth it until
+    // the receiver can preserve that nesting.
+    //
+    // Split from the nullable form below so the two are distinct rules and the
+    // ambiguity between them can be declared as a conflict and explored.
+    _callable_reference_name: $ => alias($.simple_identifier, $.type_identifier),
+
+    // Aliased literals rather than $.quest, so this does not share
+    // nullable_type's generated repeat symbol.
+    _callable_reference_nullable: $ => seq(
+      $._callable_reference_name,
+      repeat1(alias($._callable_reference_quest, $.quest))
+    ),
+
     callable_reference: $ => seq(
-      optional(alias($.simple_identifier, $.type_identifier)), // TODO
+      optional(choice($._callable_reference_name, $._callable_reference_nullable)),
       "::",
       choice($.simple_identifier, "class")
     ),
@@ -1311,9 +1445,22 @@ module.exports = grammar({
     // Modifiers
     // ==========
 
-    modifiers: $ => prec.right(
-      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $._modifier)))
-    ),
+    // `$._modifier` deliberately carries no precedence, and the repetition is
+    // held together by the `[$.modifiers]` conflict rather than by
+    // `prec.right`. A precedence resolves an ambiguity by discarding one
+    // reading at table-generation time, and here that discarded the right one:
+    // in `class C(@param:A value: T)`, once the annotation had started a
+    // modifier list, "keep extending the list" always beat "the list ends here
+    // and this soft keyword is the declaration's name", so `value` became a
+    // modifier and the name went MISSING. The declared
+    // `class_modifier`/`simple_identifier` conflict could not help, because the
+    // alternative no longer existed. A conflict carries both readings instead
+    // and keeps the one that parses.
+    modifiers: $ => repeat1(choice(
+      prec.right(PREC.MODIFIERS, $.annotation),
+      prec.right(PREC.MODIFIERS, $.context_receiver),
+      $._modifier
+    )),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
 
@@ -1330,7 +1477,7 @@ module.exports = grammar({
 
     type_modifiers: $ => repeat1($._type_modifier),
 
-    _type_modifier: $ => choice($.annotation, "suspend"),
+    _type_modifier: $ => choice($.annotation, $.context_receiver, "suspend"),
 
     class_modifier: $ => choice(
       "sealed",
@@ -1357,11 +1504,22 @@ module.exports = grammar({
       "out"
     ),
 
-    type_parameter_modifiers: $ => repeat1($._type_parameter_modifier),
+    // A type parameter carries at most one variance modifier, which is the
+    // rule Kotlin itself enforces. Folding `variance_modifier` into a plain
+    // `repeat1` let `class C<out out>` consume both words as modifiers and
+    // then report the parameter's name as missing, rather than reading the
+    // second `out` as the name.
+    type_parameter_modifiers: $ => choice(
+      seq(
+        repeat($._type_parameter_modifier),
+        $.variance_modifier,
+        repeat($._type_parameter_modifier)
+      ),
+      repeat1($._type_parameter_modifier)
+    ),
 
     _type_parameter_modifier: $ => choice(
       $.reification_modifier,
-      $.variance_modifier,
       $.annotation
     ),
 
@@ -1419,7 +1577,9 @@ module.exports = grammar({
     ),
 
     use_site_target: $ => seq(
-      choice("field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
+      // `all` is the use-site target introduced for annotating every
+      // declaration a constructor property generates at once.
+      choice("all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
       ":"
     ),
 
@@ -1477,6 +1637,7 @@ module.exports = grammar({
       // Batch 6: structural keywords used as identifiers
       "companion",
       "constructor",
+      "context",
       "init",
       "dynamic",
       "where",
@@ -1484,8 +1645,12 @@ module.exports = grammar({
       "finally",
       // Batch 7: enum
       "enum",
-      // Batch 8: variance modifiers — skipped, causes new break on SoftKeywordsInTypeArguments.kt
-      // "out", "in" — too ambiguous in type parameter contexts
+      // "out" and "in" are deliberately absent, and listing them here would
+      // be dead weight: keyword extraction already lexes them as
+      // `_alpha_identifier` and only promotes them to keywords in states that
+      // expect one, so `val out = 1` and `class C<out out>` parse as
+      // identifiers without any entry. See `type_parameter_modifiers`, which
+      // is what has to bound the variance slot for that to work.
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),
