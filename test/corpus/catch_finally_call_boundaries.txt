@@ -1,0 +1,2693 @@
+================================================================================
+Separate ordinary call: catch_call__empty
+================================================================================
+
+fun f() {
+    val x = 1
+/**/
+    catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate ordinary call: catch_call__multiline_plain
+================================================================================
+
+fun f() {
+    val x = 1
+/* a
+b */
+    catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate ordinary call: catch_call__no_comment
+================================================================================
+
+fun f() {
+    val x = 1
+    catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate ordinary call: catch_call__plain
+================================================================================
+
+fun f() {
+    val x = 1
+/* c */
+    catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate ordinary call: catch_call__stars
+================================================================================
+
+fun f() {
+    val x = 1
+/*** c ***/
+    catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate ordinary call: finally_call__empty
+================================================================================
+
+fun f() {
+    val x = 1
+/**/
+    finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate ordinary call: finally_call__multiline_plain
+================================================================================
+
+fun f() {
+    val x = 1
+/* a
+b */
+    finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate ordinary call: finally_call__no_comment
+================================================================================
+
+fun f() {
+    val x = 1
+    finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate ordinary call: finally_call__plain
+================================================================================
+
+fun f() {
+    val x = 1
+/* c */
+    finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate ordinary call: finally_call__stars
+================================================================================
+
+fun f() {
+    val x = 1
+/*** c ***/
+    finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|val x = 1|catch(x)
+================================================================================
+
+fun f() {
+val x = 1
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: ordinary|val x = 1|finally { foo() }
+================================================================================
+
+fun f() {
+val x = 1
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|close()|catch(x)
+================================================================================
+
+fun f() {
+close()
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: ordinary|close()|finally { foo() }
+================================================================================
+
+fun f() {
+close()
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|"text"|catch(x)
+================================================================================
+
+fun f() {
+"text"
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: ordinary|"text"|finally { foo() }
+================================================================================
+
+fun f() {
+"text"
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|x = 1|catch(x)
+================================================================================
+
+fun f() {
+x = 1
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: ordinary|x = 1|finally { foo() }
+================================================================================
+
+fun f() {
+x = 1
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|class C|finally { foo() }
+================================================================================
+
+fun f() {
+class C
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|fun local() {}|catch(x)
+================================================================================
+
+fun f() {
+fun local() {}
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: ordinary|fun local() {}|finally { foo() }
+================================================================================
+
+fun f() {
+fun local() {}
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|return x|catch(x)
+================================================================================
+
+fun f() {
+return x
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (jump_expression (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: ordinary|return x|finally { foo() }
+================================================================================
+
+fun f() {
+return x
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (jump_expression (simple_identifier)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: ordinary|try {} finally {}|catch(x)
+================================================================================
+
+fun f() {
+try {} finally {}
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (finally_block)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: ordinary|try {} finally {}|finally { foo() }
+================================================================================
+
+fun f() {
+try {} finally {}
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (finally_block)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|catch (x)
+================================================================================
+
+fun f() {
+val x = 1
+catch (x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|catch/* c */(x)
+================================================================================
+
+fun f() {
+val x = 1
+catch/* c */(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|catch/* a /* b */ c */(x)
+================================================================================
+
+fun f() {
+val x = 1
+catch/* a /* b */ c */(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|catch/* a b */(x)
+================================================================================
+
+fun f() {
+val x = 1
+catch/* a b */(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|(x)
+================================================================================
+
+fun f() {
+val x = 1
+catch
+(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (simple_identifier) (parenthesized_expression (simple_identifier))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1| d */(x)
+================================================================================
+
+fun f() {
+val x = 1
+catch/* c
+ d */(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|finally { foo() }
+================================================================================
+
+fun f() {
+val x = 1
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|finally/* c */{ foo() }
+================================================================================
+
+fun f() {
+val x = 1
+finally/* c */{ foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|finally/* a /* b */ c */{ foo() }
+================================================================================
+
+fun f() {
+val x = 1
+finally/* a /* b */ c */{ foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1|finally/* a b */{ foo() }
+================================================================================
+
+fun f() {
+val x = 1
+finally/* a b */{ foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: keyword-trivia|val x = 1| d */{ foo() }
+================================================================================
+
+fun f() {
+val x = 1
+finally/* c
+ d */{ foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (multiline_comment) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: prefix-sequence|val x = 1|finally { foo() }
+================================================================================
+
+fun f() {
+val x = 1
+
+catch(x)
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate statement category: prefix-sequence|val x = 1|(x)
+================================================================================
+
+fun f() {
+val x = 1
+
+catch
+(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (simple_identifier) (parenthesized_expression (simple_identifier))))))
+
+================================================================================
+Separate statement category: interpolation|val s = "${run { val x = 1|catch(x) }}"
+================================================================================
+
+fun f() {
+val s = "${run { val x = 1
+
+catch(x) }}"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (interpolation_expression_start) (interpolated_expression (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))))))) (interpolation_expression_end)))))))
+
+================================================================================
+Separate statement category: interpolation|val s = "${run { try {}|catch(x) }}"
+================================================================================
+
+fun f() {
+val s = "${run { try {}
+
+finally {}
+catch(x) }}"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (interpolation_expression_start) (interpolated_expression (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (try_expression (finally_block)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))))))) (interpolation_expression_end)))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CRLF|none
+================================================================================
+
+fun f() {
+val x = 1
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CR|none
+================================================================================
+
+fun f() {val x = 1catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|LF|block
+================================================================================
+
+fun f() {
+val x = 1
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CRLF|block
+================================================================================
+
+fun f() {
+val x = 1
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CR|block
+================================================================================
+
+fun f() {val x = 1/**/catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|LF|nested
+================================================================================
+
+fun f() {
+val x = 1
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CRLF|nested
+================================================================================
+
+fun f() {
+val x = 1
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CR|nested
+================================================================================
+
+fun f() {val x = 1/* a /* b */ c */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|LF|NUL
+================================================================================
+
+fun f() {
+val x = 1
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CRLF|NUL
+================================================================================
+
+fun f() {
+val x = 1
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CR|NUL
+================================================================================
+
+fun f() {val x = 1/* a b */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|LF|line
+================================================================================
+
+fun f() {
+val x = 1
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|catch|CRLF|line
+================================================================================
+
+fun f() {
+val x = 1
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CRLF|none
+================================================================================
+
+fun f() {
+val x = 1
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CR|none
+================================================================================
+
+fun f() {val x = 1finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|LF|block
+================================================================================
+
+fun f() {
+val x = 1
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CRLF|block
+================================================================================
+
+fun f() {
+val x = 1
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CR|block
+================================================================================
+
+fun f() {val x = 1/**/finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|LF|nested
+================================================================================
+
+fun f() {
+val x = 1
+/* a /* b */ c */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CRLF|nested
+================================================================================
+
+fun f() {
+val x = 1
+/* a /* b */ c */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CR|nested
+================================================================================
+
+fun f() {val x = 1/* a /* b */ c */finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|LF|NUL
+================================================================================
+
+fun f() {
+val x = 1
+/* a b */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CRLF|NUL
+================================================================================
+
+fun f() {
+val x = 1
+/* a b */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CR|NUL
+================================================================================
+
+fun f() {val x = 1/* a b */finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|LF|line
+================================================================================
+
+fun f() {
+val x = 1
+// comment
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (line_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|val x = 1|finally|CRLF|line
+================================================================================
+
+fun f() {
+val x = 1
+// comment
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (line_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CRLF|none
+================================================================================
+
+fun f() {
+close()
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CR|none
+================================================================================
+
+fun f() {close()catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|LF|block
+================================================================================
+
+fun f() {
+close()
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CRLF|block
+================================================================================
+
+fun f() {
+close()
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CR|block
+================================================================================
+
+fun f() {close()/**/catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|LF|nested
+================================================================================
+
+fun f() {
+close()
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CRLF|nested
+================================================================================
+
+fun f() {
+close()
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CR|nested
+================================================================================
+
+fun f() {close()/* a /* b */ c */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|LF|NUL
+================================================================================
+
+fun f() {
+close()
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CRLF|NUL
+================================================================================
+
+fun f() {
+close()
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CR|NUL
+================================================================================
+
+fun f() {close()/* a b */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|LF|line
+================================================================================
+
+fun f() {
+close()
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|catch|CRLF|line
+================================================================================
+
+fun f() {
+close()
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CRLF|none
+================================================================================
+
+fun f() {
+close()
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CR|none
+================================================================================
+
+fun f() {close()finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|LF|block
+================================================================================
+
+fun f() {
+close()
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CRLF|block
+================================================================================
+
+fun f() {
+close()
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CR|block
+================================================================================
+
+fun f() {close()/**/finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|LF|nested
+================================================================================
+
+fun f() {
+close()
+/* a /* b */ c */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CRLF|nested
+================================================================================
+
+fun f() {
+close()
+/* a /* b */ c */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CR|nested
+================================================================================
+
+fun f() {close()/* a /* b */ c */finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|LF|NUL
+================================================================================
+
+fun f() {
+close()
+/* a b */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CRLF|NUL
+================================================================================
+
+fun f() {
+close()
+/* a b */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CR|NUL
+================================================================================
+
+fun f() {close()/* a b */finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|LF|line
+================================================================================
+
+fun f() {
+close()
+// comment
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (line_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|close()|finally|CRLF|line
+================================================================================
+
+fun f() {
+close()
+// comment
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments))) (line_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CRLF|none
+================================================================================
+
+fun f() {
+"text"
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CR|none
+================================================================================
+
+fun f() {"text"catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|LF|block
+================================================================================
+
+fun f() {
+"text"
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CRLF|block
+================================================================================
+
+fun f() {
+"text"
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CR|block
+================================================================================
+
+fun f() {"text"/**/catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|LF|nested
+================================================================================
+
+fun f() {
+"text"
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CRLF|nested
+================================================================================
+
+fun f() {
+"text"
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CR|nested
+================================================================================
+
+fun f() {"text"/* a /* b */ c */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|LF|NUL
+================================================================================
+
+fun f() {
+"text"
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CRLF|NUL
+================================================================================
+
+fun f() {
+"text"
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CR|NUL
+================================================================================
+
+fun f() {"text"/* a b */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|LF|line
+================================================================================
+
+fun f() {
+"text"
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|catch|CRLF|line
+================================================================================
+
+fun f() {
+"text"
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CRLF|none
+================================================================================
+
+fun f() {
+"text"
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CR|none
+================================================================================
+
+fun f() {"text"finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|LF|block
+================================================================================
+
+fun f() {
+"text"
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CRLF|block
+================================================================================
+
+fun f() {
+"text"
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CR|block
+================================================================================
+
+fun f() {"text"/**/finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|LF|nested
+================================================================================
+
+fun f() {
+"text"
+/* a /* b */ c */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CRLF|nested
+================================================================================
+
+fun f() {
+"text"
+/* a /* b */ c */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CR|nested
+================================================================================
+
+fun f() {"text"/* a /* b */ c */finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|LF|NUL
+================================================================================
+
+fun f() {
+"text"
+/* a b */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CRLF|NUL
+================================================================================
+
+fun f() {
+"text"
+/* a b */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CR|NUL
+================================================================================
+
+fun f() {"text"/* a b */finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|LF|line
+================================================================================
+
+fun f() {
+"text"
+// comment
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (line_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|"text"|finally|CRLF|line
+================================================================================
+
+fun f() {
+"text"
+// comment
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (string_literal (string_content)) (line_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CRLF|none
+================================================================================
+
+fun f() {
+x = 1
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CR|none
+================================================================================
+
+fun f() {x = 1catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|LF|block
+================================================================================
+
+fun f() {
+x = 1
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CRLF|block
+================================================================================
+
+fun f() {
+x = 1
+/**/
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CR|block
+================================================================================
+
+fun f() {x = 1/**/catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|LF|nested
+================================================================================
+
+fun f() {
+x = 1
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CRLF|nested
+================================================================================
+
+fun f() {
+x = 1
+/* a /* b */ c */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CR|nested
+================================================================================
+
+fun f() {x = 1/* a /* b */ c */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|LF|NUL
+================================================================================
+
+fun f() {
+x = 1
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CRLF|NUL
+================================================================================
+
+fun f() {
+x = 1
+/* a b */
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CR|NUL
+================================================================================
+
+fun f() {x = 1/* a b */catch(x)}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|LF|line
+================================================================================
+
+fun f() {
+x = 1
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|catch|CRLF|line
+================================================================================
+
+fun f() {
+x = 1
+// comment
+
+catch(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|finally|CRLF|none
+================================================================================
+
+fun f() {
+x = 1
+
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|finally|CR|none
+================================================================================
+
+fun f() {x = 1finally { foo() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|finally|LF|block
+================================================================================
+
+fun f() {
+x = 1
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Separate calls with ordinary|x = 1|finally|CRLF|block
+================================================================================
+
+fun f() {
+x = 1
+/**/
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (assignment (directly_assignable_expression (simple_identifier)) (integer_literal)) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))
+
+================================================================================
+Preserve real try clauses: catch|LF|none
+================================================================================
+
+fun f() {
+try { foo() } 
+
+ catch(e: E) { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|LF|none
+================================================================================
+
+fun f() {
+try { foo() } 
+
+ finally { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|LF|none
+================================================================================
+
+fun f() {
+try { foo() } 
+
+ catch(e: E) {} 
+
+ catch(f: F) {} 
+
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (simple_identifier) (user_type (type_identifier))) (catch_block (simple_identifier) (user_type (type_identifier))) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|LF|none
+================================================================================
+
+fun f() {
+val x = try { foo() } 
+
+ catch(@Ann e: E,) { bar() } 
+
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|CRLF|none
+================================================================================
+
+fun f() {
+try { foo() } 
+
+ catch(e: E) { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|CRLF|none
+================================================================================
+
+fun f() {
+try { foo() } 
+
+ finally { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|CRLF|none
+================================================================================
+
+fun f() {
+try { foo() } 
+
+ catch(e: E) {} 
+
+ catch(f: F) {} 
+
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (simple_identifier) (user_type (type_identifier))) (catch_block (simple_identifier) (user_type (type_identifier))) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|CRLF|none
+================================================================================
+
+fun f() {
+val x = try { foo() } 
+
+ catch(@Ann e: E,) { bar() } 
+
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|CR|none
+================================================================================
+
+fun f() {try { foo() }  catch(e: E) { bar() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|CR|none
+================================================================================
+
+fun f() {try { foo() }  finally { bar() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|CR|none
+================================================================================
+
+fun f() {try { foo() }  catch(e: E) {}  catch(f: F) {}  finally {}}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (simple_identifier) (user_type (type_identifier))) (catch_block (simple_identifier) (user_type (type_identifier))) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|CR|none
+================================================================================
+
+fun f() {val x = try { foo() }  catch(@Ann e: E,) { bar() }  finally {}}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|LF|block
+================================================================================
+
+fun f() {
+try { foo() } 
+/**/
+ catch(e: E) { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|LF|block
+================================================================================
+
+fun f() {
+try { foo() } 
+/**/
+ finally { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|LF|block
+================================================================================
+
+fun f() {
+try { foo() } 
+/**/
+ catch(e: E) {} 
+/**/
+ catch(f: F) {} 
+/**/
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|LF|block
+================================================================================
+
+fun f() {
+val x = try { foo() } 
+/**/
+ catch(@Ann e: E,) { bar() } 
+/**/
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (multiline_comment) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|CRLF|block
+================================================================================
+
+fun f() {
+try { foo() } 
+/**/
+ catch(e: E) { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|CRLF|block
+================================================================================
+
+fun f() {
+try { foo() } 
+/**/
+ finally { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|CRLF|block
+================================================================================
+
+fun f() {
+try { foo() } 
+/**/
+ catch(e: E) {} 
+/**/
+ catch(f: F) {} 
+/**/
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|CRLF|block
+================================================================================
+
+fun f() {
+val x = try { foo() } 
+/**/
+ catch(@Ann e: E,) { bar() } 
+/**/
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (multiline_comment) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|CR|block
+================================================================================
+
+fun f() {try { foo() } /**/ catch(e: E) { bar() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|CR|block
+================================================================================
+
+fun f() {try { foo() } /**/ finally { bar() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|CR|block
+================================================================================
+
+fun f() {try { foo() } /**/ catch(e: E) {} /**/ catch(f: F) {} /**/ finally {}}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|CR|block
+================================================================================
+
+fun f() {val x = try { foo() } /**/ catch(@Ann e: E,) { bar() } /**/ finally {}}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (multiline_comment) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|LF|nested
+================================================================================
+
+fun f() {
+try { foo() } 
+/* a /* b */ c */
+ catch(e: E) { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|LF|nested
+================================================================================
+
+fun f() {
+try { foo() } 
+/* a /* b */ c */
+ finally { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|LF|nested
+================================================================================
+
+fun f() {
+try { foo() } 
+/* a /* b */ c */
+ catch(e: E) {} 
+/* a /* b */ c */
+ catch(f: F) {} 
+/* a /* b */ c */
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|LF|nested
+================================================================================
+
+fun f() {
+val x = try { foo() } 
+/* a /* b */ c */
+ catch(@Ann e: E,) { bar() } 
+/* a /* b */ c */
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (multiline_comment) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|CRLF|nested
+================================================================================
+
+fun f() {
+try { foo() } 
+/* a /* b */ c */
+ catch(e: E) { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|CRLF|nested
+================================================================================
+
+fun f() {
+try { foo() } 
+/* a /* b */ c */
+ finally { bar() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|CRLF|nested
+================================================================================
+
+fun f() {
+try { foo() } 
+/* a /* b */ c */
+ catch(e: E) {} 
+/* a /* b */ c */
+ catch(f: F) {} 
+/* a /* b */ c */
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (finally_block))))))
+
+================================================================================
+Preserve real try clauses: annotated|CRLF|nested
+================================================================================
+
+fun f() {
+val x = try { foo() } 
+/* a /* b */ c */
+ catch(@Ann e: E,) { bar() } 
+/* a /* b */ c */
+ finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (annotation (user_type (type_identifier))) (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))) (multiline_comment) (finally_block)))))))
+
+================================================================================
+Preserve real try clauses: catch|CR|nested
+================================================================================
+
+fun f() {try { foo() } /* a /* b */ c */ catch(e: E) { bar() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier)) (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: finally|CR|nested
+================================================================================
+
+fun f() {try { foo() } /* a /* b */ c */ finally { bar() }}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (finally_block (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))
+
+================================================================================
+Preserve real try clauses: multiple|CR|nested
+================================================================================
+
+fun f() {try { foo() } /* a /* b */ c */ catch(e: E) {} /* a /* b */ c */ catch(f: F) {} /* a /* b */ c */ finally {}}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (catch_block (simple_identifier) (user_type (type_identifier))) (multiline_comment) (finally_block))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-33
+================================================================================
+
+fun f(){
+class C
+@Ann
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-34
+================================================================================
+
+fun f(){
+class C
+@Ann
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-35
+================================================================================
+
+fun f(){class C@Annfinally { foo() }}
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-39
+================================================================================
+
+fun f(){
+class C
+@Ann /* a /* b */ */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-40
+================================================================================
+
+fun f(){
+class C
+@Ann /* a /* b */ */
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-41
+================================================================================
+
+fun f(){class C@Ann /* a /* b */ */finally { foo() }}
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (multiline_comment) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-45
+================================================================================
+
+fun f(){
+class C
+@Ann @Other
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (annotation (user_type (type_identifier))) (prefix_expression (annotation (user_type (type_identifier))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-46
+================================================================================
+
+fun f(){
+class C
+@Ann @Other
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (annotation (user_type (type_identifier))) (prefix_expression (annotation (user_type (type_identifier))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-47
+================================================================================
+
+fun f(){class C@Ann @Otherfinally { foo() }}
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (annotation (user_type (type_identifier))) (prefix_expression (annotation (user_type (type_identifier))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-51
+================================================================================
+
+fun f(){
+class C
+label@
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (label) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-52
+================================================================================
+
+fun f(){
+class C
+label@
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (label) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-53
+================================================================================
+
+fun f(){class Clabel@finally { foo() }}
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (label) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-57
+================================================================================
+
+fun f(){
+class C
+@Ann label@
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (prefix_expression (label) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-58
+================================================================================
+
+fun f(){
+class C
+@Ann label@
+finally { foo() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (prefix_expression (label) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))))
+
+================================================================================
+Preserve annotation-prefix boundary: prefix-59
+================================================================================
+
+fun f(){class C@Ann label@finally { foo() }}
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (type_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (prefix_expression (label) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))))))
+
+================================================================================
+Malformed finally clause remains a try clause: negative-context-02896
+:error
+================================================================================
+
+fun f() {
+try {} catch(e: E) {} 
+
+ finally()
+}
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Malformed finally clause remains a try clause: negative-context-02900
+:error
+================================================================================
+
+fun f() {
+try {} catch(e: E) {} 
+/**/
+ finally()
+}
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Malformed finally clause remains a try clause: negative-context-02904
+:error
+================================================================================
+
+fun f() {
+try {} catch(e: E) {} 
+/* c */
+ finally()
+}
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Malformed finally clause remains a try clause: negative-context-02908
+:error
+================================================================================
+
+fun f() {
+try {} catch(e: E) {} 
+/*** c ***/
+ finally()
+}
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Malformed finally clause remains a try clause: negative-context-02912
+:error
+================================================================================
+
+fun f() {
+try {} catch(e: E) {} 
+/* a
+b */
+ finally()
+}
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Malformed finally clause remains a try clause: negative-context-02916
+:error
+================================================================================
+
+fun f() {
+try {} catch(e: E) {} 
+/* a /* b */ c */
+ finally()
+}
+
+--------------------------------------------------------------------------------
+
+
+
+================================================================================
+Unicode identifier after a catch block: catché(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catché(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catché(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catché(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch变量(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch变量(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch𐐀(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch𐐀(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch𐐀(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch𐐀(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finallyé(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finallyé(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finallyé(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finallyé(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finally变量(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finally变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finally变量(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finally变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate generic catch and finally calls in a DSL
+================================================================================
+
+fun f() {
+    catch<Throwable> { exception = it }
+    finally { isDone = true }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (annotated_lambda (lambda_literal (statements (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier))))))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (assignment (directly_assignable_expression (simple_identifier)) (boolean_literal)))))))))))
