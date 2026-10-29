@@ -1299,13 +1299,22 @@ module.exports = grammar({
 
     when_subject: $ => seq(
       "(",
-      optional(seq(
-        repeat($.annotation),
-        "val",
-        $.variable_declaration,
-        "="
-      )),
-      $._expression,
+      choice(
+        seq(
+          optional(seq(
+            repeat($.annotation),
+            "val",
+            $.variable_declaration,
+            "="
+          )),
+          $._expression
+        ),
+        // `when (val x: T) {}` — a subject variable with no initializer.
+        // ILLEGAL_DECLARATION_IN_WHEN_SUBJECT is a compiler diagnostic, not a
+        // parse error: PSI builds the PROPERTY and carries on, so the `when`
+        // and everything after it still parse.
+        seq(repeat($.annotation), "val", $.variable_declaration)
+      ),
       ")",
     ),
 

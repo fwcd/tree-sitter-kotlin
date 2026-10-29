@@ -1890,3 +1890,35 @@ Collection literal with elements still parses
                 (integer_literal)
                 (integer_literal)))))))
     (type_identifier)))
+
+================================================================================
+when subject variable without an initializer
+================================================================================
+
+fun f(){when(val x:T){}}
+fun g(){when(val y=1){}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            (variable_declaration
+              (simple_identifier)
+              (user_type
+                (type_identifier))))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal)))))))
