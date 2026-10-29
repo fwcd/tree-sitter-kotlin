@@ -620,3 +620,49 @@ class C(@all:A val x:Int)
         (simple_identifier)
         (user_type
           (type_identifier))))))
+
+================================================================================
+File use-site target among declaration annotations
+================================================================================
+
+@A @file:B
+fun f(){}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (annotation
+        (use_site_target)
+        (user_type
+          (type_identifier))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+================================================================================
+A leading file annotation is still a file annotation
+================================================================================
+
+@file:JvmName("X")
+fun f(){}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))

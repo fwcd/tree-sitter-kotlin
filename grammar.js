@@ -151,6 +151,10 @@ module.exports = grammar({
     // property modifier as identifier
     [$.property_modifier, $.simple_identifier],
     // parameter modifiers as identifiers
+    // `@file:` at the head of a file is a file_annotation; after another
+    // annotation it is an ordinary use-site target on the declaration. The two
+    // readings are identical until the file's shape decides between them.
+    [$.file_annotation, $.use_site_target],
     [$.parameter_modifier, $.simple_identifier],
     [$.modifiers],
     [$.parameter_modifiers],
@@ -304,14 +308,21 @@ module.exports = grammar({
     // file annotation starts with `@file:`, and what can follow one — another
     // annotation, `package`, `import`, a statement — is distinguishable from
     // the first token, so the separator can simply be optional.
-    file_annotation: $ => seq(
+    //
+    // `@file:` is also an ordinary use-site target (see `use_site_target`), so
+    // a leading `@file:A` parses both ways. Both readings are complete, so the
+    // choice is a dynamic precedence: at the head of a file the file
+    // annotation wins, which is what Kotlin's parser does — it only falls back
+    // to the declaration's modifier list once another annotation precedes it,
+    // and there this rule is not reachable.
+    file_annotation: $ => prec.dynamic(1, seq(
       "@", "file", ":",
       choice(
         seq("[", repeat1($._unescaped_annotation), "]"),
         $._unescaped_annotation
       ),
       optional($._semi)
-    ),
+    )),
 
     package_header: $ => seq("package", $.identifier, $._semi),
 
@@ -1612,7 +1623,12 @@ module.exports = grammar({
     use_site_target: $ => seq(
       // `all` is the use-site target introduced for annotating every
       // declaration a constructor property generates at once.
-      choice("all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
+      //
+      // `file` belongs here too. A file annotation only has its own form at
+      // the head of the file; once an ordinary annotation precedes it, as in
+      // `@A @file:B` before a function, Kotlin's parser puts both entries in
+      // the declaration's MODIFIER_LIST.
+      choice("all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate", "file"),
       ":"
     ),
 
