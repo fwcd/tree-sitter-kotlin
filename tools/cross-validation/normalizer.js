@@ -24,18 +24,63 @@ const {
  * @param {Node} node
  * @returns {Node[]}
  */
-function _normalizeTsMulti(node) {
+function _normalizeTsMulti(node, parentName = null) {
   if (!node) return [];
 
   const tsName = node.name;
+
+  // Only a direct identifier under this/super denotes the @label. Identifiers
+  // in user types retain the normal transparent treatment.
+  if (tsName === 'type_identifier' && (parentName === 'this_expression' || parentName === 'super_expression')) {
+    return [new Node('LABEL')];
+  }
+
+  // Preserve annotation ownership on both sides. Detached annotation siblings
+  // must remain distinguishable from an annotated expression.
+  if ((tsName === 'prefix_expression' || tsName === 'annotated_lambda')
+      && node.children.some(child => child.name === 'annotation')) {
+    const children = node.children.flatMap(child => _normalizeTsMulti(child, tsName));
+    // An annotation directly on an anonymous function belongs to FUN's
+    // modifiers in PSI, rather than an ANNOTATED_EXPRESSION around the FUN.
+    if (tsName === 'prefix_expression' && node.children.some(child => child.name === 'anonymous_function')) {
+      const fn = children.find(child => child.name === 'FUN');
+      return [new Node('FUN', children.filter(child => child !== fn).concat(fn.children))];
+    }
+    return [new Node('ANNOTATED_EXPRESSION', children)];
+  }
+
+  if (parentName === 'for_statement' && tsName === 'variable_declaration') {
+    return [new Node('VALUE_PARAMETER', _nestFunctionTypeContexts(
+      node.children.flatMap(child => _normalizeTsMulti(child, tsName)), false))];
+  }
+  if (parentName === 'for_statement' && tsName === 'multi_variable_declaration') {
+    return [new Node('VALUE_PARAMETER', _normalizeTsMulti(node))];
+  }
+
+  // A declaration's context list owns its parameters, including annotations
+  // emitted as parameter_modifiers siblings by the grammar.
+  if (tsName === 'context_receiver') {
+    const entries = []; let modifiers = [];
+    for (const child of node.children) {
+      if (child.name === 'parameter_modifiers') modifiers.push(..._normalizeTsMulti(child, tsName));
+      else {
+        const normalized = _normalizeTsMulti(child, tsName);
+        if (child.name === 'parameter' && modifiers.length) {
+          normalized[0] = new Node('VALUE_PARAMETER', modifiers.concat(normalized[0].children));
+        } else entries.push(...modifiers);
+        modifiers = []; entries.push(...normalized);
+      }
+    }
+    return [new Node('CONTEXT_PARAMETER_LIST', entries.concat(modifiers))];
+  }
 
   // Nodes to skip entirely — transparent: promote children
   if (SKIP_TS_NODES.has(tsName)) {
     const kids = [];
     for (const child of node.children) {
-      kids.push(..._normalizeTsMulti(child));
+      kids.push(..._normalizeTsMulti(child, tsName));
     }
-    return kids;
+    return tsName === 'variable_declaration' ? _nestFunctionTypeContexts(kids, false) : kids;
   }
 
   // Look up mapping
@@ -45,7 +90,7 @@ function _normalizeTsMulti(node) {
   if (psiName === undefined) {
     const kids = [];
     for (const child of node.children) {
-      kids.push(..._normalizeTsMulti(child));
+      kids.push(..._normalizeTsMulti(child, tsName));
     }
     return kids;
   }
@@ -54,7 +99,7 @@ function _normalizeTsMulti(node) {
   if (psiName === null) {
     const kids = [];
     for (const child of node.children) {
-      kids.push(..._normalizeTsMulti(child));
+      kids.push(..._normalizeTsMulti(child, tsName));
     }
     return kids;
   }
@@ -66,48 +111,58 @@ function _normalizeTsMulti(node) {
   // Type annotations on destructuring params (from _lambda_parameter's optional type) appear as
   // siblings after multi_variable_declaration and need to be absorbed into the VALUE_PARAMETER.
   if (tsName === 'lambda_parameters') {
-    const hasDestructuring = node.children.some(c => c.name === 'multi_variable_declaration');
-    if (hasDestructuring) {
-      const result = [];
-      for (const child of node.children) {
-        if (child.name === 'variable_declaration') {
-          // Plain param → empty VALUE_PARAMETER (matches PSI)
-          result.push(new Node('VALUE_PARAMETER'));
-        } else if (child.name === 'multi_variable_declaration') {
-          // Destructuring param → VALUE_PARAMETER > DESTRUCTURING_DECLARATION
-          const normalized = _normalizeTsMulti(child);
-          result.push(new Node('VALUE_PARAMETER', normalized));
-        } else {
-          // Type annotation or other node — absorb into preceding VALUE_PARAMETER
-          const normalized = _normalizeTsMulti(child);
-          if (result.length > 0 && result[result.length - 1].name === 'VALUE_PARAMETER') {
-            const vp = result[result.length - 1];
-            result[result.length - 1] = new Node('VALUE_PARAMETER', vp.children.concat(normalized));
-          } else {
-            result.push(...normalized);
-          }
-        }
-      }
-      return [new Node('VALUE_PARAMETER_LIST', result)];
+    const parameters = []; let current = null;
+    const flush = () => { if (current !== null) parameters.push(new Node('VALUE_PARAMETER', current)); current = null; };
+    for (const child of node.children) {
+      const normalized = _normalizeTsMulti(child, tsName);
+      if (child.name === 'variable_declaration' || child.name === 'multi_variable_declaration') {
+        flush(); current = normalized;
+      } else if (current !== null) current.push(...normalized);
+      else parameters.push(...normalized);
     }
+    flush();
+    return [new Node('VALUE_PARAMETER_LIST', parameters)];
+  }
+
+  if (tsName === 'function_type_parameters') {
+    const parameters = []; let modifiers = [];
+    for (const child of node.children) {
+      const normalized = _normalizeTsMulti(child, tsName);
+      if (child.name === 'type_modifiers') modifiers.push(...normalized);
+      else if (child.name === 'parameter') {
+        parameters.push(new Node('VALUE_PARAMETER', modifiers.concat(normalized[0].children))); modifiers = [];
+      } else if (normalized.length) {
+        parameters.push(new Node('VALUE_PARAMETER', modifiers.concat(normalized))); modifiers = [];
+      }
+    }
+    parameters.push(...modifiers);
+    return parameters.length ? [new Node('VALUE_PARAMETER_LIST', parameters)] : [];
   }
 
   // Normalize children (flattening transparent nodes)
   let children = [];
   for (const child of node.children) {
-    children.push(..._normalizeTsMulti(child));
+    children.push(..._normalizeTsMulti(child, tsName));
   }
 
   // Nest PROPERTY_ACCESSOR inside preceding PROPERTY (all TS nodes)
   children = _nestPropertyAccessors(children);
 
+  // Type modifiers can precede a function_type or sit inside its receiver.
+  // PSI places the context list directly inside FUNCTION_TYPE in both cases.
+  if (['parameter', 'parenthesized_type', 'nullable_type', 'type_projection',
+    'function_type', 'receiver_type'].includes(tsName)
+      || (tsName === 'type_alias' && node.children.some(child => child.name === 'type_modifiers'))) {
+    children = _nestFunctionTypeContexts(children, tsName === 'function_type');
+  }
+
   // --- Special cases ---
 
   // check_expression → IS_EXPRESSION for type tests, BINARY_EXPRESSION for in/!in
   if (tsName === 'check_expression') {
-    const hasTypeTest = node.children.some(c =>
-      c.name === 'type_test' || c.name === 'user_type' || c.name === 'nullable_type'
-    );
+    const types = new Set(['type_test', 'user_type', 'nullable_type', 'function_type',
+      'parenthesized_type', 'not_nullable_type', 'dynamic_type']);
+    const hasTypeTest = node.children.some(c => types.has(c.name));
     if (!hasTypeTest) {
       return [new Node('BINARY_EXPRESSION', children)];
     }
@@ -130,17 +185,31 @@ function _normalizeTsMulti(node) {
     );
     const hasOnlyComments = !hasStatements && !hasNonCommentChildren &&
       node.children.some(c => c.name === 'line_comment' || c.name === 'multiline_comment');
-    if (!hasStatements && hasNonCommentChildren) {
-      // Single-expression body — transparent
-      if (children.length === 1) return [children[0]];
-      if (children.length === 0) return [];
-    }
-    // Comment-only body → produce empty BLOCK (PSI keeps BLOCK with comments)
-    if (hasOnlyComments && children.length === 0) {
-      return [new Node('BLOCK')];
-    }
-    if (children.length === 0) return [];
-    return [new Node('BLOCK', children)];
+    const isLoop = ['for_statement', 'while_statement', 'do_while_statement'].includes(parentName);
+    let body;
+    if (!hasStatements && hasNonCommentChildren) body = children;
+    else if (hasStatements || hasOnlyComments || (isLoop && node.children.length === 0)) body = [new Node('BLOCK', children)];
+    else body = children.length ? [new Node('BLOCK', children)] : [];
+    return isLoop ? [new Node('BODY', body)] : body;
+  }
+
+  if ((tsName === 'property_declaration' || tsName === 'destructuring_declaration')
+      && node.children.some(child => child.name === 'multi_variable_declaration')) {
+    return [new Node('DESTRUCTURING_DECLARATION', children.flatMap(child =>
+      child.name === 'DESTRUCTURING_DECLARATION' ? child.children : [child]))];
+  }
+
+  // ::class has no named member identifier; ::member does. Keep the PSI class
+  // literal node instead of comparing it as a callable reference.
+  if (tsName === 'callable_reference' && !node.children.some(child => child.name === 'simple_identifier')) {
+    return [new Node('CLASS_LITERAL_EXPRESSION', children)];
+  }
+  // Qualified ::class can use navigation_expression instead. The grammar's
+  // anonymous `class` selector is the only suffix with no named selector.
+  const lastChild = node.children[node.children.length - 1];
+  if (tsName === 'navigation_expression' && lastChild?.name === 'navigation_suffix'
+      && lastChild.children.length === 0) {
+    return [new Node('CLASS_LITERAL_EXPRESSION', children)];
   }
 
   // Empty DOT_QUALIFIED_EXPRESSION → drop
@@ -257,6 +326,21 @@ function normalizeTs(node) {
   return results[0];
 }
 
+function _nestFunctionTypeContexts(children, insideFunctionType) {
+  const result = [];
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i], next = children[i + 1];
+    if (child.name === 'CONTEXT_PARAMETER_LIST' && next?.name === 'FUNCTION_TYPE') {
+      result.push(new Node('FUNCTION_TYPE', [child, ...next.children])); i++;
+    } else if (insideFunctionType && child.name === 'FUNCTION_TYPE_RECEIVER'
+        && child.children.some(entry => entry.name === 'CONTEXT_PARAMETER_LIST')) {
+      result.push(...child.children.filter(entry => entry.name === 'CONTEXT_PARAMETER_LIST'));
+      result.push(new Node('FUNCTION_TYPE_RECEIVER', child.children.filter(entry => entry.name !== 'CONTEXT_PARAMETER_LIST')));
+    } else result.push(child);
+  }
+  return result;
+}
+
 
 // ---------------------------------------------------------------------------
 // PSI normalizer
@@ -272,6 +356,9 @@ function _normalizePsiMulti(node) {
   if (!node) return [];
 
   const name = node.name;
+  // Tree-sitter represents KDoc as a comment, without PSI's documentation AST.
+  // Remove that AST before testing whether an import/package list is empty.
+  if (name.startsWith('KDOC_')) return [];
   if (name === 'SCRIPT') {
     return node.children.flatMap(child => child.name === 'BLOCK'
       ? child.children.flatMap(_normalizePsiMulti) : _normalizePsiMulti(child));

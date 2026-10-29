@@ -42,9 +42,8 @@ const TS_TO_PSI = {
   function_body: 'BLOCK',
   function_value_parameters: 'VALUE_PARAMETER_LIST',
   parameter: 'VALUE_PARAMETER',
-  // One node covers both spellings: PSI splits them into CONTEXT_PARAMETER_LIST
-  // (named, `context(a: A)`, Kotlin 2.2) and CONTEXT_RECEIVER_LIST (bare types,
-  // the deprecated 1.6.20 form). The named form is the current syntax.
+  // The pinned PSI uses CONTEXT_PARAMETER_LIST for named parameters and bare
+  // receivers; their entries differ and are handled by the normalizer.
   context_receiver: 'CONTEXT_PARAMETER_LIST',
   parameter_with_optional_type: 'VALUE_PARAMETER',
   getter: 'PROPERTY_ACCESSOR',
@@ -53,7 +52,7 @@ const TS_TO_PSI = {
 
   // Properties
   property_declaration: 'PROPERTY',
-  destructuring_declaration: 'PROPERTY',
+  destructuring_declaration: 'DESTRUCTURING_DECLARATION',
   property_delegate: 'PROPERTY_DELEGATE',
 
   // Types
@@ -129,7 +128,7 @@ const TS_TO_PSI = {
   this_expression: 'THIS_EXPRESSION',
   super_expression: 'SUPER_EXPRESSION',
   directly_assignable_expression: null,
-  assignment: null,
+  assignment: 'BINARY_EXPRESSION',
 
   // Binary / Unary
   additive_expression: 'BINARY_EXPRESSION',
@@ -232,7 +231,6 @@ const SKIP_TS_NODES = new Set([
   'when_condition',
   'jump_expression',
   'directly_assignable_expression',
-  'assignment',
   'annotated_lambda',
   'statements',
   'variable_declaration',
@@ -288,7 +286,6 @@ const SKIP_PSI_NODES = new Set([
   'VALUE_ARGUMENT_NAME',
 
   // Annotated expression — PSI wraps annotated expressions
-  'ANNOTATED_EXPRESSION',
   'ANNOTATION',
 
   // Enum-specific wrappers
@@ -307,12 +304,8 @@ const SKIP_PSI_NODES = new Set([
   // KDOC_SECTION — documentation nodes
   'KDOC_SECTION',
 
-  // CLASS_LITERAL_EXPRESSION — tree-sitter handles ::class differently
-  'CLASS_LITERAL_EXPRESSION',
-
-  // CONTEXT_RECEIVER, CONTEXT_PARAMETER_LIST — newer Kotlin features
+  // Receiver entries are transparent; preserve the containing parameter list.
   'CONTEXT_RECEIVER',
-  'CONTEXT_PARAMETER_LIST',
 
   // INTERSECTION_TYPE — newer Kotlin type features
   'INTERSECTION_TYPE',
@@ -496,6 +489,7 @@ const ALL_PSI_COMPOSITE_NODES = new Set([
   'BINARY_EXPRESSION',
   'BINARY_WITH_TYPE',
   'BLOCK',
+  'BODY',
   'BOOLEAN_CONSTANT',
   'CALLABLE_REFERENCE_EXPRESSION',
   'CALL_EXPRESSION',
