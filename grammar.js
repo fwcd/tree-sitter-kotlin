@@ -994,11 +994,23 @@ module.exports = grammar({
     parenthesized_expression: $ => seq("(", $._expression, ")"),
 
     // https://kotlinlang.org/spec/syntax-and-grammar.html#grammar-rule-collectionLiteral
+    // `@A([])` is valid Kotlin and the empty case was unparseable, because the
+    // rule required at least one element.
+    //
+    // The elements are optional everywhere a collection literal is allowed,
+    // not only inside an annotation. The Kotlin compiler does reject `[]` in
+    // an expression position, but with UNSUPPORTED_ARRAY_LITERAL_OUTSIDE_OF_
+    // ANNOTATION_ERROR -- a diagnostic about an unsupported feature, raised
+    // after parsing. The Kotlin parser accepts it, and this grammar follows
+    // the parser, so making the rule context-sensitive would diverge from PSI
+    // to enforce something that is not a syntax error.
     collection_literal: $ => seq(
       "[",
-      $._expression,
-      repeat(seq(",", $._expression)),
-      optional(","),
+      optional(seq(
+        $._expression,
+        repeat(seq(",", $._expression)),
+        optional(",")
+      )),
       "]"),
 
     _literal_constant: $ => choice(
