@@ -3583,3 +3583,722 @@ class A
           (type_identifier)
           (class_body))))))
 
+================================================================================
+Primary constructor / modifier-abstract
+================================================================================
+
+actual class A
+abstract actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (inheritance_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-actual
+================================================================================
+
+actual class A
+actual actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-annotation
+================================================================================
+
+actual class A
+annotation actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-const
+================================================================================
+
+actual class A
+const actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (property_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-crossinline
+================================================================================
+
+actual class A
+crossinline actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (parameter_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-data
+================================================================================
+
+actual class A
+data actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-expect
+================================================================================
+
+actual class A
+expect actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-external
+================================================================================
+
+actual class A
+external actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-final
+================================================================================
+
+actual class A
+final actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (inheritance_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-infix
+================================================================================
+
+actual class A
+infix actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-inline
+================================================================================
+
+actual class A
+inline actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-inner
+================================================================================
+
+actual class A
+inner actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-internal
+================================================================================
+
+actual class A
+internal actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-lateinit
+================================================================================
+
+actual class A
+lateinit actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (member_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-noinline
+================================================================================
+
+actual class A
+noinline actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (parameter_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-open
+================================================================================
+
+actual class A
+open actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (inheritance_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-operator
+================================================================================
+
+actual class A
+operator actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-override
+================================================================================
+
+actual class A
+override actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (member_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-private
+================================================================================
+
+actual class A
+private actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-protected
+================================================================================
+
+actual class A
+protected actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-public
+================================================================================
+
+actual class A
+public actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-sealed
+================================================================================
+
+actual class A
+sealed actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-suspend
+================================================================================
+
+actual class A
+suspend actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-tailrec
+================================================================================
+
+actual class A
+tailrec actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (function_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-value
+================================================================================
+
+actual class A
+value actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (class_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / modifier-vararg
+================================================================================
+
+actual class A
+vararg actual constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (parameter_modifier)
+        (platform_modifier))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / use-site-group-0
+================================================================================
+
+actual class A
+actual @field:[A B(")")] constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (use_site_target)
+          (user_type
+            (type_identifier))
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / use-site-group-1
+================================================================================
+
+actual class A
+actual @param:[A B] constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (use_site_target)
+          (user_type
+            (type_identifier))
+          (user_type
+            (type_identifier))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Primary constructor / use-site-group-2
+================================================================================
+
+actual class A
+actual @param:A(")") constructor(x: Int) {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (platform_modifier))
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (platform_modifier)
+        (annotation
+          (use_site_target)
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content)))))))
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+

@@ -607,8 +607,7 @@ static bool constructor_modifier(const char *word) {
     "public", "private", "protected", "internal", "actual", "expect",
     "final", "open", "abstract", "sealed", "const", "override", "lateinit",
     "tailrec", "operator", "infix", "inline", "external", "suspend", "data",
-    "inner", "enum", "annotation", "companion", "noinline", "crossinline",
-    "reified", "vararg", "out", "in"
+    "inner", "value", "annotation", "noinline", "crossinline", "vararg"
   };
   for (unsigned i = 0; i < sizeof(words) / sizeof(words[0]); i++)
     if (strcmp(word, words[i]) == 0) return true;
@@ -699,7 +698,12 @@ static bool constructor_annotation(TSLexer *lexer) {
       char ignored[32]; constructor_word(lexer, ignored, sizeof(ignored));
     }
     if (!constructor_trivia(lexer, &newline)) return false;
-    if (lexer->lookahead == ':') { advance(lexer); continue; } // use-site target
+    if (lexer->lookahead == ':') {
+      advance(lexer); // use-site target
+      if (!constructor_trivia(lexer, &newline)) return false;
+      if (lexer->lookahead == '[') return constructor_balanced(lexer, ']');
+      continue;
+    }
     if (lexer->lookahead == '.') { advance(lexer); continue; }
     break;
   }
