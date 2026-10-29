@@ -113,6 +113,10 @@ module.exports = grammar({
     // GLR explores both and keeps whichever yields a valid parse.
     [$.context_receiver, $.simple_identifier],
 
+    // `l@` may begin a labelled expression or, now, a labelled declaration;
+    // which it is only becomes clear at the token after the label.
+    [$.prefix_expression],
+
     // `( name` at statement start: a destructuring target or a parenthesized
     // expression. Nothing tells them apart until after the ')', so carry both.
     [$._name_based_destructuring_entry_expr, $._primary_expression],
@@ -856,7 +860,11 @@ module.exports = grammar({
     ),
 
     _statement: $ => choice(
-      $._declaration,
+      // A declaration may carry labels too — `fun f() { l@ val x = 1 }` is
+      // valid Kotlin. Only labels, not the statement-annotation prefix:
+      // annotations on a declaration are already handled by `modifiers`, and
+      // allowing both here would make them ambiguous.
+      seq(optional($.label), $._declaration),
       seq(
         repeat(choice($.label, alias($._statement_annotation, $.annotation))),
         choice(

@@ -3382,8 +3382,25 @@
       "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "_declaration"
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "label"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_declaration"
+            }
+          ]
         },
         {
           "type": "SEQ",
@@ -8045,6 +8062,9 @@
     [
       "context_receiver",
       "simple_identifier"
+    ],
+    [
+      "prefix_expression"
     ],
     [
       "_name_based_destructuring_entry_expr",
