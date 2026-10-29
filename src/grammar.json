@@ -6790,7 +6790,7 @@
           },
           {
             "type": "SYMBOL",
-            "name": "_modifier"
+            "name": "parameter_modifier"
           }
         ]
       }
@@ -8167,10 +8167,6 @@
     [
       "function_modifier",
       "simple_identifier"
-    ],
-    [
-      "_type_modifier",
-      "function_modifier"
     ],
     [
       "_type_modifier",
