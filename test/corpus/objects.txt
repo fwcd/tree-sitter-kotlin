@@ -119,3 +119,85 @@ class Second {}
   (class_declaration
     (type_identifier)
     (class_body)))
+
+================================================================================
+Object with empty parentheses
+================================================================================
+
+object C()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (primary_constructor)))
+
+================================================================================
+Object with type parameters and constructor parameters
+================================================================================
+
+object C<T>(x:Int){}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Object with constructor parameters
+================================================================================
+
+object C(x:Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Object with type parameters and empty parentheses
+================================================================================
+
+object C<T>()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor)))
+
+================================================================================
+Object with type parameters
+================================================================================
+
+object C<T>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))))

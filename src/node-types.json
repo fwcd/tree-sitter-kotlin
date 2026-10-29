@@ -6276,7 +6276,15 @@
           "named": true
         },
         {
+          "type": "primary_constructor",
+          "named": true
+        },
+        {
           "type": "type_identifier",
+          "named": true
+        },
+        {
+          "type": "type_parameters",
           "named": true
         }
       ]

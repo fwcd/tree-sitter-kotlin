@@ -741,6 +741,8 @@ module.exports = grammar({
       optional($.modifiers),
       "object",
       alias($.simple_identifier, $.type_identifier),
+      optional($.type_parameters),
+      optional($.primary_constructor),
       optional(seq(":", $._delegation_specifiers)),
       optional($.class_body)
     ))),
