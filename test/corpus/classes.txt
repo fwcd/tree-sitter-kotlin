@@ -1165,3 +1165,231 @@ class Second {}
   (class_declaration
     (type_identifier)
     (class_body)))
+
+================================================================================
+Single-line class body after a supertype constructor call
+================================================================================
+
+class C : Base() { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Single-line class body without a supertype
+================================================================================
+
+class C { val x = 1 }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal)))))
+
+================================================================================
+Single-line object declaration body
+================================================================================
+
+object O : Base() { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Single-line class body with several supertypes
+================================================================================
+
+class C : Base(), I { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Single-line class body after interface delegation
+================================================================================
+
+class C : I by d { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Single-line object expression body
+================================================================================
+
+val o = object : Base() { fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments)))
+      (class_body
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
+
+================================================================================
+Single-line body with a named companion object
+================================================================================
+
+class C { companion object Foo { val x = 1 } }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_object
+        (type_identifier)
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal)))))))
+
+================================================================================
+Single-line body with semicolon-separated members
+================================================================================
+
+class C : Base() { val x = 1; fun f() {}; }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal))
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Single-line interface body
+================================================================================
+
+interface I { fun f() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
+
+================================================================================
+Nested single-line class bodies
+================================================================================
+
+class C : Base() { class D : Base() { fun f() {} } }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier))
+        (value_arguments)))
+    (class_body
+      (class_declaration
+        (type_identifier)
+        (delegation_specifier
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments)))
+        (class_body
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body)))))))
