@@ -21,6 +21,14 @@ const {
 // ---------------------------------------------------------------------------
 
 describe('mapping coverage', () => {
+  it('retains assignment, destructuring and annotated-expression ownership nodes', () => {
+    expect(TS_TO_PSI.assignment).toBe('BINARY_EXPRESSION');
+    expect(SKIP_TS_NODES.has('assignment')).toBe(false);
+    expect(TS_TO_PSI.destructuring_declaration).toBe('DESTRUCTURING_DECLARATION');
+    expect(SKIP_PSI_NODES.has('ANNOTATED_EXPRESSION')).toBe(false);
+    expect(SKIP_PSI_NODES.has('CONTEXT_PARAMETER_LIST')).toBe(false);
+    expect(ALL_PSI_COMPOSITE_NODES.has('BODY')).toBe(true);
+  });
   it('all TS named nodes are in TS_TO_PSI mapping', () => {
     for (const tsName of ALL_TS_NAMED_NODES) {
       expect(TS_TO_PSI).toHaveProperty(tsName);
