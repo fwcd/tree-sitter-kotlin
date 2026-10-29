@@ -6036,19 +6036,8 @@
                       "type": "SEQ",
                       "members": [
                         {
-                          "type": "REPEAT",
-                          "content": {
-                            "type": "SYMBOL",
-                            "name": "annotation"
-                          }
-                        },
-                        {
-                          "type": "STRING",
-                          "value": "val"
-                        },
-                        {
                           "type": "SYMBOL",
-                          "name": "variable_declaration"
+                          "name": "_when_subject_variable"
                         },
                         {
                           "type": "STRING",
@@ -6068,30 +6057,76 @@
               ]
             },
             {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SYMBOL",
-                    "name": "annotation"
-                  }
-                },
-                {
-                  "type": "STRING",
-                  "value": "val"
-                },
-                {
-                  "type": "SYMBOL",
-                  "name": "variable_declaration"
-                }
-              ]
+              "type": "SYMBOL",
+              "name": "_when_subject_variable"
             }
           ]
         },
         {
           "type": "STRING",
           "value": ")"
+        }
+      ]
+    },
+    "_when_subject_variable": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "annotation"
+          }
+        },
+        {
+          "type": "STRING",
+          "value": "val"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "FIELD",
+                  "name": "receiver",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_declaration_receiver_type"
+                  }
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": "."
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "variable_declaration"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "multi_variable_declaration"
+            }
+          ]
         }
       ]
     },
@@ -8187,7 +8222,7 @@
     ],
     [
       "prefix_expression",
-      "when_subject"
+      "_when_subject_variable"
     ],
     [
       "prefix_expression",

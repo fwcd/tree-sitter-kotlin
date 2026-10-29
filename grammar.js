@@ -185,7 +185,7 @@ module.exports = grammar({
     // _statement_annotation vs annotation (in prefix_expression and modifiers):
     // both parse @Identifier but route through different rules.
     [$._statement_annotation, $.annotation],
-    [$.prefix_expression, $.when_subject],
+    [$.prefix_expression, $._when_subject_variable],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
     [$.call_expression, $._generic_call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
@@ -1367,21 +1367,27 @@ module.exports = grammar({
       "(",
       choice(
         seq(
-          optional(seq(
-            repeat($.annotation),
-            "val",
-            $.variable_declaration,
-            "="
-          )),
+          optional(seq($._when_subject_variable, "=")),
           $._expression
         ),
         // `when (val x: T) {}` — a subject variable with no initializer.
         // ILLEGAL_DECLARATION_IN_WHEN_SUBJECT is a compiler diagnostic, not a
         // parse error: PSI builds the PROPERTY and carries on, so the `when`
         // and everything after it still parse.
-        seq(repeat($.annotation), "val", $.variable_declaration)
+        $._when_subject_variable
       ),
       ")",
+    ),
+
+    // Kotlin's parser reads a full property declaration here and lets the
+    // compiler object, so the subject variable can destructure or carry a
+    // receiver just like any other `val`: `when (val (a, b) = foo) {}`,
+    // `when (val T.x = foo) {}`.
+    _when_subject_variable: $ => seq(
+      repeat($.annotation),
+      "val",
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
+      choice($.variable_declaration, $.multi_variable_declaration)
     ),
 
     when_expression: $ => seq(

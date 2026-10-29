@@ -1946,3 +1946,40 @@ fun f(){a.{b}()}
                   (simple_identifier)))))
           (call_suffix
             (value_arguments)))))))
+
+================================================================================
+when subject variable that destructures or has a receiver
+================================================================================
+
+fun f(){ when (val (a, b) = foo) {} }
+fun g(){ when (val T.x = foo) {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            (multi_variable_declaration
+              (variable_declaration
+                (simple_identifier))
+              (variable_declaration
+                (simple_identifier)))
+            (simple_identifier))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            receiver: (receiver_type
+              (user_type
+                (type_identifier)))
+            (variable_declaration
+              (simple_identifier))
+            (simple_identifier)))))))

@@ -9515,7 +9515,18 @@
   {
     "type": "when_subject",
     "named": true,
-    "fields": {},
+    "fields": {
+      "receiver": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "receiver_type",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": false,
@@ -9614,6 +9625,10 @@
         },
         {
           "type": "long_literal",
+          "named": true
+        },
+        {
+          "type": "multi_variable_declaration",
           "named": true
         },
         {

@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: WhenWithSubjectVariable
-:error
 ==================
 
 // COMPILATION_ERRORS
@@ -21,3 +20,5 @@ fun test() {
 }
 
 ---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (when_expression (when_subject (variable_declaration (simple_identifier)) (simple_identifier))) (when_expression (when_subject (variable_declaration (simple_identifier) (user_type (type_identifier))))) (when_expression (when_subject (variable_declaration (simple_identifier) (user_type (type_identifier))) (simple_identifier))) (when_expression (when_subject (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))) (simple_identifier))) (when_expression (when_subject (multi_variable_declaration (variable_declaration (simple_identifier) (user_type (type_identifier))) (variable_declaration (simple_identifier))) (simple_identifier))) (when_expression (when_subject (multi_variable_declaration (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (simple_identifier))) (when_expression (when_subject (multi_variable_declaration (variable_declaration (simple_identifier) (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (simple_identifier))) (when_expression (when_subject receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier)) (simple_identifier))) (when_expression (when_subject receiver: (receiver_type (user_type (type_identifier))) (variable_declaration (simple_identifier) (user_type (type_identifier))) (simple_identifier))) (when_expression (when_subject (annotation (user_type (type_identifier))) (variable_declaration (simple_identifier)) (simple_identifier))) (when_expression (when_subject (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier))) (simple_identifier))) (when_expression (when_subject (variable_declaration (simple_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (simple_identifier))))))))
