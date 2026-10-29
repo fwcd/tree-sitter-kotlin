@@ -1,0 +1,41 @@
+==================
+JetBrains PSI: NewLinesValidOperations
+==================
+
+// COMPILATION_ERRORS
+
+fun test() {
+    val str = ""
+
+    str
+
+        .length
+
+    str
+
+        ?.length
+
+    str
+
+        as String
+
+    str
+
+        as? String
+
+    str
+
+        ?: foo
+
+    true
+
+        || false
+
+
+    false
+
+        && true
+}
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (as_expression (simple_identifier) (user_type (type_identifier))) (as_expression (simple_identifier) (user_type (type_identifier))) (elvis_expression (simple_identifier) (simple_identifier)) (disjunction_expression (boolean_literal) (boolean_literal)) (conjunction_expression (boolean_literal) (boolean_literal))))))

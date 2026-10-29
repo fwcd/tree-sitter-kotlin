@@ -8,7 +8,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
+const { parseFiles, parseOne } = require('./ts-driver');
+const { listFixtureNames, fixturePaths } = require('./fixture-files');
 const { parseTreeSitter } = require('./parser-ts');
 const { parsePsi } = require('./parser-psi');
 const { normalizeTs, normalizePsi } = require('./normalizer');
@@ -56,43 +57,13 @@ class FileResult {
  * @param {string} filePath - Absolute path to the .kt file.
  * @returns {{ output: string, hasErrors: boolean } | null}
  */
-function _runTreeSitterParse(filePath) {
-  try {
-    // Use npx to invoke tree-sitter parse.
-    const output = execFileSync('npx', ['tree-sitter', 'parse', filePath], {
-      cwd: REPO_ROOT,
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 30000,
-    });
-
-    const hasErrors = /\(ERROR/.test(output) || /\(MISSING/.test(output);
-    return { output, hasErrors };
-  } catch (err) {
-    // tree-sitter parse returns non-zero exit code on parse errors
-    // but still produces output on stdout/stderr
-    if (err.stdout) {
-      const output = err.stdout.toString();
-      const hasErrors = /\(ERROR/.test(output) || /\(MISSING/.test(output);
-      return { output, hasErrors };
-    }
-    return null;
-  }
-}
+function _runTreeSitterParse(filePath) { return parseOne(filePath); }
 
 /**
  * Get all .kt fixture files (sorted by basename).
  * @returns {string[]} Array of absolute paths.
  */
-function _getFixtureFiles() {
-  if (!fs.existsSync(FIXTURES_DIR)) {
-    return [];
-  }
-  return fs.readdirSync(FIXTURES_DIR)
-    .filter(f => f.endsWith('.kt'))
-    .sort()
-    .map(f => path.join(FIXTURES_DIR, f));
-}
+function _getFixtureFiles() { return listFixtureNames(FIXTURES_DIR).map(name => fixturePaths(name, FIXTURES_DIR).ktFile); }
 
 // ---------------------------------------------------------------------------
 // runAll
@@ -104,10 +75,11 @@ function _getFixtureFiles() {
  */
 function runAll() {
   const files = _getFixtureFiles();
+  const parsed = parseFiles(files);
   const results = [];
 
   for (const ktFile of files) {
-    const basename = path.basename(ktFile, '.kt');
+    const basename = path.relative(FIXTURES_DIR, ktFile).split(path.sep).join('/').replace(/\.kts?$/, '');
 
     // Find corresponding PSI .txt file
     const psiFile = path.join(FIXTURES_DIR, basename + '.txt');
@@ -124,7 +96,7 @@ function runAll() {
 
     try {
       // 1. Run tree-sitter parse
-      const tsResult = _runTreeSitterParse(ktFile);
+      const tsResult = parsed.get(ktFile);
 
       if (!tsResult) {
         results.push(new FileResult(
@@ -171,13 +143,7 @@ function runAll() {
         null,
       ));
     } catch (err) {
-      results.push(new FileResult(
-        basename,
-        Status.TS_PARSE_ERROR,
-        null,
-        null,
-        err.message,
-      ));
+      throw new Error(`PSI comparison failed for ${basename}: ${err.message}`);
     }
   }
 
@@ -190,8 +156,7 @@ function runAll() {
  * @returns {{ tsTree: import('./models').Node|null, psiTree: import('./models').Node|null, tsNorm: import('./models').Node|null, psiNorm: import('./models').Node|null, result: FileResult }}
  */
 function runOne(name) {
-  const ktFile = path.join(FIXTURES_DIR, name + '.kt');
-  const psiFile = path.join(FIXTURES_DIR, name + '.txt');
+  const { ktFile, psiFile } = fixturePaths(name, FIXTURES_DIR);
 
   if (!fs.existsSync(ktFile)) {
     throw new Error(`Fixture not found: ${ktFile}`);

@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: script/Import
+==================
+
+import aaa.bbb.Ccc
+import ddd.*
+
+fun foo() = 1
+
+---
+
+(source_file (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier))) (import_header (identifier (simple_identifier)) (wildcard_import))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (integer_literal))))

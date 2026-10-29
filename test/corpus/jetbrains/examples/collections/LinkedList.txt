@@ -1,0 +1,82 @@
+==================
+JetBrains PSI: examples/collections/LinkedList
+==================
+
+// COMPILATION_ERRORS
+
+class LinkedList<T> : IMutableList<T> {
+  private class Item(var value : Item) {
+    var next : Item
+    var previous : Item
+  }
+
+  private var head : Item = null
+  private var tail : Item = null
+  override var size get private set
+
+  override fun add(index : Int, value : T) {
+    size++
+    checkIndex(index)
+    val newItem = Item(value)
+    if (index == 0) {
+      newItem.next = head
+      head = newItem
+      if (tail === null) {
+        tail = head
+      }
+    } else {
+      var insertAfter = itemAt(index)
+      newItem.next = insertAfter.next
+      insertAfter.next = newItem
+      if (tail === insertAfter) {
+        tail = newItem
+      }
+    }
+  }
+
+  private fun checkIndex(index : Int) {
+    if (index !in 0..size-1) {
+      throw IndexOutOfBoundsException(index)
+    }
+  }
+
+  override fun remove(index : Int) : T {
+    checkIndex(index)
+    val item = itemAt(index)
+    if (item === head) {
+      head = item.next
+      if (head === null)
+        tail= null
+    } else {
+      item.previous.next = item.next
+      if (item.next === null) {
+        item.next.previous = item.previous
+      } else {
+        tail = tail.previous
+      }
+    }
+    size--
+    return item.value
+  }
+
+  override fun set(index : Int, value : T) : T {
+    checkIndex(index)
+    val item = itemAt(index)
+    val result = item.value
+    item.value = value
+    return result
+  }
+
+  private fun itemAt(index : Int) {
+    var result = head
+    for (i in 1..index) {
+      result = result.next
+    }
+    return result
+  }
+
+  override fun mutableIterator() : IMutableIterator<T>
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (class_declaration (modifiers (visibility_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))))) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (null_literal)) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (null_literal)) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (getter) (setter (modifiers (visibility_modifier)))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (postfix_expression (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))) (if_expression condition: (equality_expression (simple_identifier) (integer_literal)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier) (navigation_suffix (simple_identifier))) (simple_identifier)) (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier)) (if_expression condition: (equality_expression (simple_identifier) (null_literal)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier))))))) alternative: (control_structure_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))) (assignment (directly_assignable_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (assignment (directly_assignable_expression (simple_identifier) (navigation_suffix (simple_identifier))) (simple_identifier)) (if_expression condition: (equality_expression (simple_identifier) (simple_identifier)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier))))))))))) (function_declaration (modifiers (visibility_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (if_expression condition: (check_expression (simple_identifier) (range_expression (integer_literal) (additive_expression (simple_identifier) (integer_literal)))) consequence: (control_structure_body (statements (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))) (if_expression condition: (equality_expression (simple_identifier) (simple_identifier)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (if_expression condition: (equality_expression (simple_identifier) (null_literal)) consequence: (control_structure_body (assignment (directly_assignable_expression (simple_identifier)) (null_literal)))))) alternative: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier) (navigation_suffix (simple_identifier)) (navigation_suffix (simple_identifier))) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (if_expression condition: (equality_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (null_literal)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier) (navigation_suffix (simple_identifier)) (navigation_suffix (simple_identifier))) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))) alternative: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))) (postfix_expression (simple_identifier)) (jump_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (assignment (directly_assignable_expression (simple_identifier) (navigation_suffix (simple_identifier))) (simple_identifier)) (jump_expression (simple_identifier))))) (function_declaration (modifiers (visibility_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (for_statement (variable_declaration (simple_identifier)) (range_expression (integer_literal) (simple_identifier)) (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (jump_expression (simple_identifier))))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))))

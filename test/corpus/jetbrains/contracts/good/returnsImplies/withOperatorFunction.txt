@@ -1,0 +1,19 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/withOperatorFunction
+==================
+
+// LANGUAGE: +ConditionImpliesReturnsContracts, +AllowContractsOnSomeOperators
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+
+import kotlin.contracts.*
+
+operator fun Int?.invoke(): String? {
+    contract {
+        (this@invoke != null) implies (returnsNotNull())
+    }
+    return ""
+}
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (function_modifier)) receiver: (receiver_type (nullable_type (user_type (type_identifier)) (quest))) (simple_identifier) (function_value_parameters) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (parenthesized_expression (equality_expression (this_expression (type_identifier)) (null_literal))) (simple_identifier) (parenthesized_expression (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))) (jump_expression (string_literal))))))

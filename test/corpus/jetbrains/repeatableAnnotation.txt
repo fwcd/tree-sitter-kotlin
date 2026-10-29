@@ -1,5 +1,5 @@
 ==================
-repeatableAnnotation
+JetBrains PSI: repeatableAnnotation
 ==================
 
 class RepeatableAnnotation {
@@ -20,71 +20,4 @@ class RepeatableAnnotation {
 annotation class MyRepeatableAnnotation(val index: Int)
 ---
 
-(source_file
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (class_declaration
-        (modifiers
-          (annotation
-            (constructor_invocation
-              (user_type
-                (type_identifier))
-              (value_arguments
-                (value_argument
-                  (integer_literal))))))
-        (type_identifier))
-      (class_declaration
-        (modifiers
-          (annotation
-            (constructor_invocation
-              (user_type
-                (type_identifier))
-              (value_arguments
-                (value_argument
-                  (integer_literal)))))
-          (annotation
-            (constructor_invocation
-              (user_type
-                (type_identifier))
-              (value_arguments
-                (value_argument
-                  (integer_literal))))))
-        (type_identifier))
-      (class_declaration
-        (modifiers
-          (annotation
-            (constructor_invocation
-              (user_type
-                (type_identifier))
-              (value_arguments
-                (value_argument
-                  (integer_literal)))))
-          (annotation
-            (constructor_invocation
-              (user_type
-                (type_identifier))
-              (value_arguments
-                (value_argument
-                  (integer_literal)))))
-          (annotation
-            (constructor_invocation
-              (user_type
-                (type_identifier))
-              (value_arguments
-                (value_argument
-                  (integer_literal))))))
-        (type_identifier))))
-  (class_declaration
-    (modifiers
-      (annotation
-        (user_type
-          (type_identifier)))
-      (class_modifier))
-    (type_identifier)
-    (primary_constructor
-      (class_parameter
-        (binding_pattern_kind)
-        (simple_identifier)
-        (user_type
-          (type_identifier))))))
+(source_file (class_declaration (type_identifier) (class_body (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (type_identifier)) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (type_identifier)) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (type_identifier)))) (class_declaration (modifiers (annotation (user_type (type_identifier))) (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))))

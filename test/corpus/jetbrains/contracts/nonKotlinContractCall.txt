@@ -1,0 +1,33 @@
+==================
+JetBrains PSI: contracts/nonKotlinContractCall
+==================
+
+// FILE: MyBuilder.kt
+class MyBuilder {
+    fun contract(contract: String) {
+        contract.length
+    }
+
+    fun nonContract(contract: String) {
+        contract.length
+    }
+}
+
+// FILE: main.kt
+fun test_1() {
+    MyBuilder().apply {
+        contract("test")
+        this@apply.contract("")
+    }
+}
+
+fun test_2() {
+    MyBuilder().apply {
+        nonContract("test")
+        this@apply.contract("")
+    }
+}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))) (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (navigation_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content)))))) (call_expression (navigation_expression (this_expression (type_identifier)) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (string_literal))))))))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (navigation_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content)))))) (call_expression (navigation_expression (this_expression (type_identifier)) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (string_literal))))))))))))))

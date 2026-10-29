@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: functionReceivers/FunctionsWithFunctionReceiversAnnotations
+==================
+
+// COMPILATION_ERRORS
+
+fun (@[a] T<T>.(A<B>) -> Unit).foo()
+fun (@[a] T<T>.(A<B>) ->  C<D, E>).foo();
+fun @[a] (@[a] T<T>.(A<B>) -> R).foo() {}
+fun <A, B> @[a] (() -> Unit).foo()
+@[a] fun <A, B> @[a] ((A, B) -> Unit).foo()
+
+---
+
+(source_file (line_comment) (function_declaration receiver: (receiver_type (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (function_type_parameters (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters)) (function_declaration receiver: (receiver_type (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (function_type_parameters (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))) (type_projection (user_type (type_identifier)))))))) (simple_identifier) (function_value_parameters)) (function_declaration receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (function_type_parameters (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (parenthesized_type (function_type (function_type_parameters) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters)) (function_declaration (modifiers (annotation (user_type (type_identifier)))) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (parenthesized_type (function_type (function_type_parameters (user_type (type_identifier)) (user_type (type_identifier))) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters)))

@@ -1,5 +1,5 @@
 ==================
-ExtensionsWithQNReceiver
+JetBrains PSI: ExtensionsWithQNReceiver
 ==================
 
 // COMPILATION_ERRORS
@@ -10,34 +10,4 @@ fun java.util.Map<*,*>.size() : Int = 1
 
 ---
 
-(source_file
-  (line_comment)
-  (property_declaration
-    (binding_pattern_kind)
-    receiver: (receiver_type
-      (user_type
-        (type_identifier)
-        (type_identifier)
-        (type_identifier)
-        (type_arguments
-          (type_projection)
-          (type_projection))))
-    (variable_declaration
-      (simple_identifier)
-      (user_type
-        (type_identifier))))
-  (function_declaration
-    receiver: (receiver_type
-      (user_type
-        (type_identifier)
-        (type_identifier)
-        (type_identifier)
-        (type_arguments
-          (type_projection)
-          (type_projection))))
-    (simple_identifier)
-    (function_value_parameters)
-    (user_type
-      (type_identifier))
-    (function_body
-      (integer_literal))))
+(source_file (line_comment) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier) (type_identifier) (type_identifier) (type_arguments (type_projection) (type_projection)))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (function_declaration receiver: (receiver_type (user_type (type_identifier) (type_identifier) (type_identifier) (type_arguments (type_projection) (type_projection)))) (simple_identifier) (function_value_parameters) (user_type (type_identifier)) (function_body (integer_literal))))

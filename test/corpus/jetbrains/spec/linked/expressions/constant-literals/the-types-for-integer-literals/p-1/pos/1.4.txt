@@ -1,0 +1,9 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/the-types-for-integer-literals/p-1/pos/1.4
+==================
+
+val value = 0xL
+val value = 0XL
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (hex_literal))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (long_literal (hex_literal))))

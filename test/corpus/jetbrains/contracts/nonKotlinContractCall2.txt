@@ -1,0 +1,19 @@
+==================
+JetBrains PSI: contracts/nonKotlinContractCall2
+==================
+
+// FILE: Test.kt
+class Test
+
+// FILE: main.kt
+fun testBuilder(id: String = "", lambda: Test.() -> Unit) = Test()
+
+fun test() {
+    contract(testBuilder {})
+}
+
+fun contract(test: Test) {}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier)) (line_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (string_literal) (parameter (simple_identifier) (function_type receiver: (receiver_type (user_type (type_identifier))) (function_type_parameters) (user_type (type_identifier))))) (function_body (call_expression (simple_identifier) (call_suffix (value_arguments))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal))))))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body)))

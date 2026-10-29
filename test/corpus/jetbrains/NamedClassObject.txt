@@ -1,5 +1,5 @@
 ==================
-NamedClassObject
+JetBrains PSI: NamedClassObject
 ==================
 
 // COMPILATION_ERRORS
@@ -18,18 +18,4 @@ class A {
 
 ---
 
-(source_file
-  (line_comment)
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (companion_object
-        (type_identifier))
-      (companion_object
-        (type_identifier))
-      (companion_object
-        (type_identifier)
-        (class_body))
-      (companion_object)
-      (object_declaration
-        (type_identifier)))))
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (companion_object (type_identifier)) (companion_object (type_identifier)) (companion_object (type_identifier) (class_body)) (companion_object) (object_declaration (type_identifier)))))

@@ -1,5 +1,5 @@
 ==================
-EnumCommas
+JetBrains PSI: EnumCommas
 ==================
 
 enum class Color {
@@ -11,15 +11,4 @@ enum class Color {
 }
 ---
 
-(source_file
-  (class_declaration
-    (type_identifier)
-    (enum_class_body
-      (enum_entry
-        (simple_identifier))
-      (enum_entry
-        (simple_identifier))
-      (enum_entry
-        (simple_identifier))
-      (enum_entry
-        (simple_identifier)))))
+(source_file (class_declaration (type_identifier) (enum_class_body (enum_entry (simple_identifier)) (enum_entry (simple_identifier)) (enum_entry (simple_identifier)) (enum_entry (simple_identifier)))))

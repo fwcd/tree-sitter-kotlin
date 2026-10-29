@@ -1,0 +1,27 @@
+==================
+JetBrains PSI: destructuring/shortNameBasedDestructuringWithRenaming
+==================
+
+// LANGUAGE: +NameBasedDestructuring +DeprecateNameMismatchInShortDestructuringWithParentheses +EnableNameBasedDestructuringShortForm
+
+data class Box(val first: String)
+
+fun declaration(x: Box) {
+    if (true) { val (aa = first) = x }
+    if (true) { val (aa: String = first) = x }
+}
+
+fun loop(x: List<Box>) {
+    for ((aa = first) in x) {}
+    for ((aa: String = first) in x) {}
+}
+
+fun lambda() {
+    fun foo(f: (Box) -> Unit) {}
+
+    foo { (aa = first) -> }
+    foo { (aa: String = first) -> }
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (class_modifier)) (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (property_declaration (binding_pattern_kind) (multi_variable_declaration (variable_declaration (simple_identifier) (simple_identifier))) (simple_identifier))))) (if_expression condition: (boolean_literal) consequence: (control_structure_body (statements (property_declaration (binding_pattern_kind) (multi_variable_declaration (variable_declaration (simple_identifier) (user_type (type_identifier)) (simple_identifier))) (simple_identifier)))))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body (statements (for_statement (multi_variable_declaration (variable_declaration (simple_identifier) (simple_identifier))) (simple_identifier) (control_structure_body)) (for_statement (multi_variable_declaration (variable_declaration (simple_identifier) (user_type (type_identifier)) (simple_identifier))) (simple_identifier) (control_structure_body))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (function_type (function_type_parameters (user_type (type_identifier))) (user_type (type_identifier))))) (function_body)) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (lambda_parameters (multi_variable_declaration (variable_declaration (simple_identifier) (simple_identifier)))))))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (lambda_parameters (multi_variable_declaration (variable_declaration (simple_identifier) (user_type (type_identifier)) (simple_identifier))))))))))))

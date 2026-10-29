@@ -1,0 +1,47 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/trickyCases
+==================
+
+import kotlin.contracts.*
+
+@OptIn(ExperimentalContracts::class)
+fun test1(x: String?): Any? {
+    contract {
+        returnsNotNull() implies (x != null)
+    }
+
+    return x
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test2(x: String?): Any? {
+    contract {
+        returns(true) implies (x != null)
+    }
+
+    return if(x != null) true else false
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test3(x: Any?): Any? {
+    contract {
+        returnsNotNull() implies (x != null)
+    }
+    return if(true) x else null
+}
+
+@OptIn(ExperimentalContracts::class)
+fun test4(x: Any?): Any? {
+    contract {
+        returnsNotNull() implies (x != null)
+    }
+    return if(x != null) {
+        if (true) x else false
+    } else {
+        null
+    }
+}
+
+---
+
+(source_file (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (equality_expression (simple_identifier) (null_literal))))))))) (jump_expression (simple_identifier))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (boolean_literal))))) (simple_identifier) (parenthesized_expression (equality_expression (simple_identifier) (null_literal))))))))) (jump_expression (if_expression condition: (equality_expression (simple_identifier) (null_literal)) consequence: (control_structure_body (boolean_literal)) alternative: (control_structure_body (boolean_literal))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (equality_expression (simple_identifier) (null_literal))))))))) (jump_expression (if_expression condition: (boolean_literal) consequence: (control_structure_body (simple_identifier)) alternative: (control_structure_body (null_literal))))))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (equality_expression (simple_identifier) (null_literal))))))))) (jump_expression (if_expression condition: (equality_expression (simple_identifier) (null_literal)) consequence: (control_structure_body (statements (if_expression condition: (boolean_literal) consequence: (control_structure_body (simple_identifier)) alternative: (control_structure_body (boolean_literal))))) alternative: (control_structure_body (statements (null_literal)))))))))

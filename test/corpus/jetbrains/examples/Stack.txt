@@ -1,0 +1,22 @@
+==================
+JetBrains PSI: examples/Stack
+==================
+
+// COMPILATION_ERRORS
+
+class Stack<T> : IPushPop<T> {
+  private val data = ArrayList<T>();
+
+  override fun push(item : T) {
+    data.add(item) // Problem: I would like to write push(...) = data.add(...), but the types do not match
+  }
+
+  override fun pop() = data.removeLast()
+
+  override val isEmpty
+    get() = data.isEmpty
+
+}
+---
+
+(source_file (line_comment) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (simple_identifier) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments)))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))) (line_comment)))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))))

@@ -1,5 +1,5 @@
 ==================
-dataObject
+JetBrains PSI: dataObject
 ==================
 
 // FILE: DataObject.kt
@@ -7,9 +7,4 @@ data object DataObject
 
 ---
 
-(source_file
-  (line_comment)
-  (object_declaration
-    (modifiers
-      (class_modifier))
-    (type_identifier)))
+(source_file (line_comment) (object_declaration (modifiers (class_modifier)) (type_identifier)))

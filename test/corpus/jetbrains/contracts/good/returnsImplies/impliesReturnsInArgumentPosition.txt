@@ -1,0 +1,34 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/impliesReturnsInArgumentPosition
+==================
+
+// LANGUAGE: +ConditionImpliesReturnsContracts
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+// ISSUE: KT-79277, KT-79526
+import kotlin.contracts.*
+
+fun notNullIfNotNull(encoded: String?): Boolean? {
+    contract {
+        (encoded != null) implies (returnsNotNull())
+    }
+    return encoded != null
+}
+
+fun String?.notNullIfNull(): Boolean? {
+    contract {
+        (this@notNullIfNull == null) implies returnsNotNull()
+    }
+    return this !== null
+}
+
+val String?.notNullIfNull: Boolean?
+    get() {
+        contract {
+            (this@notNullIfNull == null) implies returnsNotNull()
+        }
+        return this !== null
+    }
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (parenthesized_expression (equality_expression (simple_identifier) (null_literal))) (simple_identifier) (parenthesized_expression (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))) (jump_expression (equality_expression (simple_identifier) (null_literal)))))) (function_declaration receiver: (receiver_type (nullable_type (user_type (type_identifier)) (quest))) (simple_identifier) (function_value_parameters) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (parenthesized_expression (equality_expression (this_expression (type_identifier)) (null_literal))) (simple_identifier) (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (jump_expression (equality_expression (this_expression) (null_literal)))))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (nullable_type (user_type (type_identifier)) (quest))) (variable_declaration (simple_identifier) (nullable_type (user_type (type_identifier)) (quest)))) (getter (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (parenthesized_expression (equality_expression (this_expression (type_identifier)) (null_literal))) (simple_identifier) (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (jump_expression (equality_expression (this_expression) (null_literal)))))))

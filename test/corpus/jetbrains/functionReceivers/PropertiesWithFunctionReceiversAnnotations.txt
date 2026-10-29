@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: functionReceivers/PropertiesWithFunctionReceiversAnnotations
+==================
+
+// COMPILATION_ERRORS
+
+val (@[a] T<T>.(A<B>) -> Unit).foo: P
+val (@[a] T<T>.(A<B>) ->  C<D, E>).foo: P
+val @[a] (@[a] T<T>.(A<B>) -> R).foo: P
+val <A, B> @[a] (() -> Unit).foo: P
+@[a] val <A, B> @[a] ((A, B) -> Unit).foo: P
+
+---
+
+(source_file (line_comment) (property_declaration (binding_pattern_kind) receiver: (receiver_type (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (function_type_parameters (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (user_type (type_identifier))))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (function_type_parameters (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))) (type_projection (user_type (type_identifier)))))))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (property_declaration (binding_pattern_kind) receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (parenthesized_type (type_modifiers (annotation (user_type (type_identifier)))) (function_type receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (function_type_parameters (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (user_type (type_identifier))))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (property_declaration (binding_pattern_kind) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (parenthesized_type (function_type (function_type_parameters) (user_type (type_identifier))))) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (property_declaration (modifiers (annotation (user_type (type_identifier)))) (binding_pattern_kind) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (parenthesized_type (function_type (function_type_parameters (user_type (type_identifier)) (user_type (type_identifier))) (user_type (type_identifier))))) (variable_declaration (simple_identifier) (user_type (type_identifier)))))

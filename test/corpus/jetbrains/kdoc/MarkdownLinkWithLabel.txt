@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: kdoc/MarkdownLinkWithLabel
+==================
+
+/**
+ * [foo][bar]
+ */
+
+---
+
+(source_file (multiline_comment))

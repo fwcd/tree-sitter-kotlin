@@ -1,0 +1,26 @@
+==================
+JetBrains PSI: contextParameters/trailingComma
+==================
+
+context(s: String,)
+fun foo() {}
+
+context(
+    s: String,
+    t: Int,
+)
+fun foo() {}
+
+context(s: String,)
+val foo: String get() = ""
+
+context(
+    s: String,
+    t: Int,
+)
+val foo: String get() = ""
+// LANGUAGE: +ContextParameters
+
+---
+
+(source_file (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (string_literal)))) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier))))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (string_literal)))) (line_comment))

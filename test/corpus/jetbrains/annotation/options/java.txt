@@ -1,0 +1,20 @@
+==================
+JetBrains PSI: annotation/options/java
+==================
+
+// COMPILATION_ERRORS
+
+import java.lang.annotation.*
+
+annotation 
+@java.lang.annotation.Retention(RetentionPolicy.CLASS) 
+class my
+
+annotation 
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR)
+class my1
+
+---
+
+(source_file (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier)) (wildcard_import))) (simple_identifier) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier) (type_identifier) (type_identifier) (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))) (type_identifier)) (simple_identifier) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))) (type_identifier)))

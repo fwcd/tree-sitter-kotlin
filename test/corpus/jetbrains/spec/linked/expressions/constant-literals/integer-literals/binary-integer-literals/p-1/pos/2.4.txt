@@ -1,0 +1,18 @@
+==================
+JetBrains PSI: spec/linked/expressions/constant-literals/integer-literals/binary-integer-literals/p-1/pos/2.4
+==================
+
+val value = _____0b0_1_0_1_0_0
+val value = _0B1_______0_______1_______0
+val value = _0_0B1_0_1_0_1_0_0_1
+val value = _0B000000000
+val value = _0000000000b
+val value = _0_9b
+val value = ____________0b
+val value = _0_b_0
+val value = _b_0
+val value = _b
+val value = _b_
+---
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (simple_identifier)))

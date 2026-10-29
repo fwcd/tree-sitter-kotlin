@@ -1,0 +1,9 @@
+==================
+JetBrains PSI: packages/PackageModifiers
+:error
+==================
+
+// COMPILATION_ERRORS
+
+public @[a] package name
+---

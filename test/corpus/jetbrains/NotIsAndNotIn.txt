@@ -1,5 +1,5 @@
 ==================
-NotIsAndNotIn
+JetBrains PSI: NotIsAndNotIn
 ==================
 
 // COMPILATION_ERRORS
@@ -12,31 +12,4 @@ fun test() {
 }
 ---
 
-(source_file
-  (line_comment)
-  (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
-      (statements
-        (check_expression
-          (simple_identifier)
-          (user_type
-            (type_identifier)))
-        (check_expression
-          (simple_identifier)
-          (simple_identifier))
-        (prefix_expression
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments
-                (value_argument
-                  (simple_identifier))))))
-        (prefix_expression
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments
-                (value_argument
-                  (simple_identifier))))))))))
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (simple_identifier)) (prefix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))) (prefix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))))))))

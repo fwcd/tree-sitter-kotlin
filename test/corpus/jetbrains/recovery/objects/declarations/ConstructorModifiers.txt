@@ -1,0 +1,17 @@
+==================
+JetBrains PSI: recovery/objects/declarations/ConstructorModifiers
+:error
+==================
+
+// COMPILATION_ERRORS
+
+object Foo private ()
+
+object Foo private () {}
+
+object Foo private () : Bar {
+
+}
+
+object Foo @[foo] private @[bar()] ()
+---

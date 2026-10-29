@@ -1,0 +1,42 @@
+==================
+JetBrains PSI: escapedNames
+==================
+
+// LANGUAGE: +ContextParameters +NestedTypeAliases
+package `one two`.`three four`
+
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.TYPEALIAS, AnnotationTarget.CLASS, AnnotationTarget.PROPERTY)
+annotation class `Annotation Class`
+
+@`Annotation Class`
+class `Top Level Class`<`Type Parameter` : `Top Level Object`.`Member Level Interface`> {
+    context(`context name`: `Member Level TypeAlias`<`Type Parameter`>)
+    fun `Top Level Object`.`Member Level Interface`.`member function`(`parameter name`: `Top Level Class`<`Type Parameter`>) {}
+    var `Member Level TypeAlias`<`Type Parameter`>.`member property`: `Top Level Class`<`Type Parameter`>? get() = null
+        set(value) {}
+
+    @`Annotation Class`
+    typealias `Member Level TypeAlias`<T> = `Top Level Class`<T>
+
+    constructor(`parameter name`: `Top Level Object`)
+}
+
+typealias `Top Level TypeAlias`<`Type Parameter`> = `Top Level Class`<`Type Parameter`>
+
+interface `Top Level Interface`
+
+object `Top Level Object` : `Top Level Interface` {
+    interface `Member Level Interface` {
+
+    }
+}
+
+@`Annotation Class`
+enum class `Enum Class` {
+    @`Annotation Class`
+    `Enum Entry`;
+}
+
+---
+
+(source_file (line_comment) (package_header (identifier (simple_identifier) (simple_identifier))) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)) (class_declaration (modifiers (annotation (user_type (type_identifier)))) (type_identifier) (type_parameters (type_parameter (type_identifier) (user_type (type_identifier) (type_identifier)))) (class_body (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))) receiver: (receiver_type (user_type (type_identifier) (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body)) (property_declaration (binding_pattern_kind) receiver: (receiver_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (variable_declaration (simple_identifier) (nullable_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))) (quest))) (getter (function_body (null_literal)))) (setter (parameter_with_optional_type (simple_identifier)) (function_body)) (type_alias (modifiers (annotation (user_type (type_identifier)))) (type_identifier) (type_parameters (type_parameter (type_identifier))) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (secondary_constructor (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))))))) (type_alias (type_identifier) (type_parameters (type_parameter (type_identifier))) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_declaration (type_identifier)) (object_declaration (type_identifier) (delegation_specifier (user_type (type_identifier))) (class_body (class_declaration (type_identifier) (class_body)))) (class_declaration (modifiers (annotation (user_type (type_identifier)))) (type_identifier) (enum_class_body (enum_entry (modifiers (annotation (user_type (type_identifier)))) (simple_identifier)))))

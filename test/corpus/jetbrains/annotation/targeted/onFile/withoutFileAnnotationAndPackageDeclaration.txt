@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: annotation/targeted/onFile/withoutFileAnnotationAndPackageDeclaration
+==================
+
+@ann fun foo(): String? = null
+
+annotation class ann
+
+---
+
+(source_file (function_declaration (modifiers (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters) (nullable_type (user_type (type_identifier)) (quest)) (function_body (null_literal))) (class_declaration (modifiers (class_modifier)) (type_identifier)))

@@ -1,0 +1,15 @@
+==================
+JetBrains PSI: annotation/values/deprecated
+==================
+
+// FILE: Simple.kt
+@Deprecated("Deprecated", ReplaceWith("NewClass", "foo.bar.baz.NewClass"), DeprecationLevel.HIDDEN)
+class Simple
+
+// FILE: Qualified.kt
+@kotlin.Deprecated("Deprecated", kotlin.ReplaceWith("NewClass", "foo.bar.baz.NewClass"), level = kotlin.DeprecationLevel.HIDDEN)
+class Qualified
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content))) (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content))) (value_argument (string_literal (string_content))))))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))) (type_identifier)) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier) (type_identifier)) (value_arguments (value_argument (string_literal (string_content))) (value_argument (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (string_literal (string_content))) (value_argument (string_literal (string_content))))))) (value_argument (simple_identifier) (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier)))))))) (type_identifier)))

@@ -1,0 +1,21 @@
+==================
+JetBrains PSI: annotation/list/basic
+==================
+
+// COMPILATION_ERRORS
+
+@[abc("") cde]
+class A {
+    @[ abc
+    cde]
+    @[private]
+    fun foo() {
+        @[data inline] class Local {}
+
+        @[suppress("a")] (1 + @[abc] 3)
+    }
+}
+
+---
+
+(source_file (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal)))) (user_type (type_identifier)))) (type_identifier) (class_body (function_declaration (modifiers (annotation (user_type (type_identifier)) (user_type (type_identifier))) (annotation (user_type (type_identifier)))) (simple_identifier) (function_value_parameters) (function_body (statements (class_declaration (modifiers (annotation (user_type (type_identifier)) (user_type (type_identifier)))) (type_identifier) (class_body)) (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content)))))) (parenthesized_expression (additive_expression (integer_literal) (prefix_expression (annotation (user_type (type_identifier))) (integer_literal))))))))))

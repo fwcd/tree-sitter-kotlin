@@ -1,0 +1,22 @@
+==================
+JetBrains PSI: annotation/options/annotationAsArg
+==================
+
+class Annotation(val x: Int) {
+    fun baz() {}
+    fun bar() = x
+}
+
+fun foo(annotation: Annotation): Int {
+    if (annotation.bar() == 0) {
+        annotation.baz()
+        return 0
+    }
+    else {
+        return -1
+    }
+}
+
+---
+
+(source_file (class_declaration (type_identifier) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)))) (class_body (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (simple_identifier) (function_value_parameters) (function_body (simple_identifier))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (statements (if_expression condition: (equality_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (integer_literal)) consequence: (control_structure_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (jump_expression (integer_literal)))) alternative: (control_structure_body (statements (jump_expression (prefix_expression (integer_literal))))))))))
