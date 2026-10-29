@@ -255,3 +255,48 @@ fun foo() {
         (multiplicative_expression
           (simple_identifier)
           (integer_literal))))))
+
+================================================================================
+Soft keyword as a class parameter name after an annotation
+================================================================================
+
+class C(@param:A value:T)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (modifiers
+          (annotation
+            (use_site_target)
+            (user_type
+              (type_identifier))))
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
+
+================================================================================
+Modifiers still bind as modifiers before a class parameter name
+================================================================================
+
+class C(@A private val open:Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (modifiers
+          (annotation
+            (user_type
+              (type_identifier)))
+          (visibility_modifier))
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))

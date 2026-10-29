@@ -136,6 +136,7 @@ module.exports = grammar({
     [$.property_modifier, $.simple_identifier],
     // parameter modifiers as identifiers
     [$.parameter_modifier, $.simple_identifier],
+    [$.modifiers],
     [$.parameter_modifiers],
     [$.type_parameter_modifiers],
 
@@ -561,6 +562,20 @@ module.exports = grammar({
       )
     ),
 
+    // The receiver of a `fun`/`val` declaration also admits an unparenthesized
+    // function type, but only behind a modifier list: `fun @receiver:A () ->
+    // Unit?.f() {}`. The modifiers are what commit the Kotlin parser to
+    // reading a type — without them `fun () -> Unit.f() {}` is not a receiver
+    // at all, and PSI reports errors for it. Nested function-type receivers
+    // (`A.() -> B`) keep the plain `receiver_type`, which is also what PSI
+    // accepts there.
+    _declaration_receiver_type: $ => choice(
+      $.receiver_type,
+      alias($.annotated_function_type_receiver, $.receiver_type)
+    ),
+
+    annotated_function_type_receiver: $ => seq($.type_modifiers, $.function_type),
+
     // Context parameters / receivers (Kotlin 1.6.20+ / 2.2): a `context(...)`
     // prefix on a callable declaration. Entries are either context parameters
     // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
@@ -582,7 +597,7 @@ module.exports = grammar({
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
-      optional(seq(field("receiver", $.receiver_type), optional('.'))),
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       $.simple_identifier,
       $.function_value_parameters,
       optional(seq(":", $._type)),
@@ -634,7 +649,7 @@ module.exports = grammar({
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
-      optional(seq(field("receiver", $.receiver_type), optional('.'))),
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
       optional($.type_constraints),
       optional(choice(
@@ -1062,11 +1077,23 @@ module.exports = grammar({
     parenthesized_expression: $ => seq("(", $._expression, ")"),
 
     // https://kotlinlang.org/spec/syntax-and-grammar.html#grammar-rule-collectionLiteral
+    // `@A([])` is valid Kotlin and the empty case was unparseable, because the
+    // rule required at least one element.
+    //
+    // The elements are optional everywhere a collection literal is allowed,
+    // not only inside an annotation. The Kotlin compiler does reject `[]` in
+    // an expression position, but with UNSUPPORTED_ARRAY_LITERAL_OUTSIDE_OF_
+    // ANNOTATION_ERROR -- a diagnostic about an unsupported feature, raised
+    // after parsing. The Kotlin parser accepts it, and this grammar follows
+    // the parser, so making the rule context-sensitive would diverge from PSI
+    // to enforce something that is not a syntax error.
     collection_literal: $ => seq(
       "[",
-      $._expression,
-      repeat(seq(",", $._expression)),
-      optional(","),
+      optional(seq(
+        $._expression,
+        repeat(seq(",", $._expression)),
+        optional(",")
+      )),
       "]"),
 
     _literal_constant: $ => choice(
@@ -1371,9 +1398,22 @@ module.exports = grammar({
     // Modifiers
     // ==========
 
-    modifiers: $ => prec.right(
-      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $.context_receiver, $._modifier)))
-    ),
+    // `$._modifier` deliberately carries no precedence, and the repetition is
+    // held together by the `[$.modifiers]` conflict rather than by
+    // `prec.right`. A precedence resolves an ambiguity by discarding one
+    // reading at table-generation time, and here that discarded the right one:
+    // in `class C(@param:A value: T)`, once the annotation had started a
+    // modifier list, "keep extending the list" always beat "the list ends here
+    // and this soft keyword is the declaration's name", so `value` became a
+    // modifier and the name went MISSING. The declared
+    // `class_modifier`/`simple_identifier` conflict could not help, because the
+    // alternative no longer existed. A conflict carries both readings instead
+    // and keeps the one that parses.
+    modifiers: $ => repeat1(choice(
+      prec.right(PREC.MODIFIERS, $.annotation),
+      prec.right(PREC.MODIFIERS, $.context_receiver),
+      $._modifier
+    )),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
 
@@ -1479,7 +1519,9 @@ module.exports = grammar({
     ),
 
     use_site_target: $ => seq(
-      choice("field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
+      // `all` is the use-site target introduced for annotating every
+      // declaration a constructor property generates at once.
+      choice("all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
       ":"
     ),
 

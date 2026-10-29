@@ -1831,3 +1831,62 @@ val f = ((Int) -> Unit)?::invoke
 
 --------------------------------------------------------------------------------
 
+================================================================================
+Empty collection literal in an annotation argument
+================================================================================
+
+@A([]) class C
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (collection_literal))))))
+    (type_identifier)))
+
+
+================================================================================
+Empty collection literal in an expression
+================================================================================
+
+fun f(){ [] }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (collection_literal)))))
+
+
+================================================================================
+Collection literal with elements still parses
+================================================================================
+
+@A([1, 2,]) class C
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (collection_literal
+                (integer_literal)
+                (integer_literal)))))))
+    (type_identifier)))
