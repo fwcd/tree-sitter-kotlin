@@ -594,3 +594,66 @@ fun dynamic.foo()
     receiver: (receiver_type)
     (simple_identifier)
     (function_value_parameters)))
+
+================================================================================
+Variance keyword as a type parameter name
+================================================================================
+
+class C<out out>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier)))))
+
+================================================================================
+Variance keywords naming each other
+================================================================================
+
+class C<in out, out in>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier))
+      (type_parameter
+        (type_parameter_modifiers
+          (variance_modifier))
+        (type_identifier)))))
+
+================================================================================
+Variance alongside other type parameter modifiers
+================================================================================
+
+class C<reified out T, @Ann out U>
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_parameter_modifiers
+          (reification_modifier)
+          (variance_modifier))
+        (type_identifier))
+      (type_parameter
+        (type_parameter_modifiers
+          (annotation
+            (user_type
+              (type_identifier)))
+          (variance_modifier))
+        (type_identifier)))))

@@ -6822,11 +6822,39 @@
       ]
     },
     "type_parameter_modifiers": {
-      "type": "REPEAT1",
-      "content": {
-        "type": "SYMBOL",
-        "name": "_type_parameter_modifier"
-      }
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_type_parameter_modifier"
+              }
+            },
+            {
+              "type": "SYMBOL",
+              "name": "variance_modifier"
+            },
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_type_parameter_modifier"
+              }
+            }
+          ]
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_type_parameter_modifier"
+          }
+        }
+      ]
     },
     "_type_parameter_modifier": {
       "type": "CHOICE",
@@ -6834,10 +6862,6 @@
         {
           "type": "SYMBOL",
           "name": "reification_modifier"
-        },
-        {
-          "type": "SYMBOL",
-          "name": "variance_modifier"
         },
         {
           "type": "SYMBOL",

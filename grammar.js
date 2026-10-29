@@ -1502,11 +1502,22 @@ module.exports = grammar({
       "out"
     ),
 
-    type_parameter_modifiers: $ => repeat1($._type_parameter_modifier),
+    // A type parameter carries at most one variance modifier, which is the
+    // rule Kotlin itself enforces. Folding `variance_modifier` into a plain
+    // `repeat1` let `class C<out out>` consume both words as modifiers and
+    // then report the parameter's name as missing, rather than reading the
+    // second `out` as the name.
+    type_parameter_modifiers: $ => choice(
+      seq(
+        repeat($._type_parameter_modifier),
+        $.variance_modifier,
+        repeat($._type_parameter_modifier)
+      ),
+      repeat1($._type_parameter_modifier)
+    ),
 
     _type_parameter_modifier: $ => choice(
       $.reification_modifier,
-      $.variance_modifier,
       $.annotation
     ),
 
@@ -1632,8 +1643,12 @@ module.exports = grammar({
       "finally",
       // Batch 7: enum
       "enum",
-      // Batch 8: variance modifiers — skipped, causes new break on SoftKeywordsInTypeArguments.kt
-      // "out", "in" — too ambiguous in type parameter contexts
+      // "out" and "in" are deliberately absent, and listing them here would
+      // be dead weight: keyword extraction already lexes them as
+      // `_alpha_identifier` and only promotes them to keywords in states that
+      // expect one, so `val out = 1` and `class C<out out>` parse as
+      // identifiers without any entry. See `type_parameter_modifiers`, which
+      // is what has to bound the variance slot for that to work.
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),
