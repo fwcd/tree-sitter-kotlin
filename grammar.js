@@ -507,6 +507,20 @@ module.exports = grammar({
       )
     ),
 
+    // The receiver of a `fun`/`val` declaration also admits an unparenthesized
+    // function type, but only behind a modifier list: `fun @receiver:A () ->
+    // Unit?.f() {}`. The modifiers are what commit the Kotlin parser to
+    // reading a type — without them `fun () -> Unit.f() {}` is not a receiver
+    // at all, and PSI reports errors for it. Nested function-type receivers
+    // (`A.() -> B`) keep the plain `receiver_type`, which is also what PSI
+    // accepts there.
+    _declaration_receiver_type: $ => choice(
+      $.receiver_type,
+      alias($.annotated_function_type_receiver, $.receiver_type)
+    ),
+
+    annotated_function_type_receiver: $ => seq($.type_modifiers, $.function_type),
+
     // `public fun Foo.bar() { … }` also parses as an infix expression, because
     // the visibility modifiers are soft keywords in `simple_identifier`. Both
     // readings are complete, so this is the dynamic-precedence decision #278
@@ -516,7 +530,7 @@ module.exports = grammar({
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
-      optional(seq(field("receiver", $.receiver_type), optional('.'))),
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       $.simple_identifier,
       $.function_value_parameters,
       optional(seq(":", $._type)),
@@ -568,7 +582,7 @@ module.exports = grammar({
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
-      optional(seq(field("receiver", $.receiver_type), optional('.'))),
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
       optional($.type_constraints),
       optional(choice(
