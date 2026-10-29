@@ -1541,7 +1541,16 @@ module.exports = grammar({
 
     _type_parameter_modifier: $ => choice(
       $.reification_modifier,
-      $.annotation
+      $.annotation,
+      // Kotlin's parser accepts any modifier on a type parameter and reports
+      // WRONG_MODIFIER_TARGET afterwards; JetBrains builds a flat MODIFIER_LIST
+      // on the TYPE_PARAMETER, so `class C<abstract T>` has to parse.
+      //
+      // Variance stays out of this list on purpose: `type_parameter_modifiers`
+      // bounds the variance slot to one so that `class C<out out>` reads the
+      // second `out` as the parameter's name, and folding it in here would
+      // unbound it again.
+      $._modifier
     ),
 
     function_modifier: $ => choice(
