@@ -66,6 +66,10 @@ module.exports = grammar({
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
 
+    // `( name` at statement start: a destructuring target or a parenthesized
+    // expression. Nothing tells them apart until after the ')', so carry both.
+    [$._name_based_destructuring_entry_expr, $._primary_expression],
+
     // @Type(... — `(` after an annotation name is usually constructor args, but
     // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
     // conflict below, with prec.dynamic on _annotation_constructor_invocation
@@ -444,7 +448,23 @@ module.exports = grammar({
     // Class members
     // ==========
 
-    _class_member_declarations: $ => repeat1(seq($._class_member_declaration, $._semi)),
+    // Separator strictly between members, optional before the closing brace.
+    //
+    // This used to be `repeat1(seq(member, $._semi))`, requiring a newline or
+    // `;` after the *last* member too, so every single-line body failed to
+    // parse: `class C { fun f() {} }`, `class C : Base() { val x = 1 }`,
+    // `object O : Base() { fun f() {} }`.
+    //
+    // Making the separator optional per member — the Kotlin grammar's
+    // `(classMemberDeclaration semis?)*` — is too loose for an LR parser: with
+    // no separator required at all, `companion object` followed by an
+    // identifier is ambiguous between the companion's name and the next
+    // member. This is the shape `statements` already uses successfully.
+    _class_member_declarations: $ => seq(
+      $._class_member_declaration,
+      repeat(seq($._semi, $._class_member_declaration)),
+      optional($._semi),
+    ),
 
     _class_member_declaration: $ => choice(
       $._declaration,
@@ -511,6 +531,23 @@ module.exports = grammar({
       optional(seq(":", $._type))
     )),
 
+    // Statement-position variant of the entry below.
+    //
+    // At statement start `(a)` can be a destructuring target — `(a, b) = pair`
+    // — or an ordinary parenthesized expression — `(a).b()`. The static
+    // precedence used in declaration position resolves that at generate time
+    // and deletes the expression reading, so this variant uses a dynamic
+    // precedence and a declared conflict instead, leaving both readings to
+    // GLR. It is kept separate because declaration position has a *different*
+    // competitor — a parenthesized receiver type, as in `val (A).foo` — that
+    // the static precedence is needed to beat.
+    _name_based_destructuring_entry_expr: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      optional($.binding_pattern_kind),
+      $.simple_identifier,
+      optional(seq(":", $._type)),
+      optional(seq("=", $.simple_identifier))
+    ))),
+
     // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming
     _name_based_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
       optional($.binding_pattern_kind),
@@ -548,7 +585,7 @@ module.exports = grammar({
 
     destructuring_declaration: $ => prec.right(seq(
       optional($.modifiers),
-      $.multi_variable_declaration,
+      alias($._multi_variable_declaration_expr, $.multi_variable_declaration),
       optional($.type_constraints),
       "=",
       $._expression,
@@ -996,6 +1033,21 @@ module.exports = grammar({
       "}"
     )),
 
+    _multi_variable_declaration_expr: $ => choice(
+      seq(
+        '(',
+        sep1(alias($._name_based_destructuring_entry_expr, $.variable_declaration), ','),
+        optional(','),
+        ')'
+      ),
+      seq(
+        '[',
+        sep1(alias($._positional_destructuring_entry, $.variable_declaration), ','),
+        optional(','),
+        ']'
+      ),
+    ),
+
     multi_variable_declaration: $ => choice(
       seq(
         '(',
@@ -1015,7 +1067,10 @@ module.exports = grammar({
 
     _lambda_parameter: $ => choice(
       $.variable_declaration,
-      seq($.multi_variable_declaration, optional(seq(":", $._type)))
+      // The statement-position variant: `{ (a).b() }` is a body, not a
+      // destructured parameter, and only the absence of `->` says so.
+      seq(alias($._multi_variable_declaration_expr, $.multi_variable_declaration),
+          optional(seq(":", $._type)))
     ),
 
     anonymous_function: $ => prec.right(seq(

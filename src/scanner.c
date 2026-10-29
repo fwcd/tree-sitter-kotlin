@@ -463,6 +463,16 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
+// After scan_for_word has matched "catch" or "finally", peek past optional
+// whitespace and comments for the character a real clause must open with:
+// '(' for `catch (e: E)`, '{' for `finally { }`. Anything else means the word
+// was an ordinary identifier — `catch<Throwable> { }` is a generic call, and
+// the statement before it has already ended.
+static bool followed_by(TSLexer *lexer, int32_t expected) {
+  if (!skip_whitespace_and_comments(lexer)) return false;
+  return lexer->lookahead == expected;
+}
+
 // Check if the current position has a visibility modifier (public, private,
 // protected, internal) followed by horizontal whitespace and "constructor".
 // Uses skip() — safe to call speculatively since no token boundary is changed.
@@ -540,9 +550,16 @@ static bool check_annotation_then_constructor(TSLexer *lexer) {
 // nothing is added to the pending token.
 static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
   switch (lexer->lookahead) {
-    case '.': case ',': case ':': case '*': case '%':
-    case '>': case '<': case '=': case '{': case '[':
-    case '(': case '?': case '|': case '&': case '/':
+    // '(' and '[' are absent, and ':' is handled separately: a call's '(',
+    // an index's '[' and a callable reference's '::' each begin a new
+    // statement. Matches the non-comment path above.
+    case '.': case ',': case '*': case '%':
+    case '>': case '<': case '=': case '{':
+    case '?': case '|': case '&': case '/':
+      return false;
+    case ':':
+      skip(lexer);
+      if (lexer->lookahead == ':') return true;
       return false;
     case '!':
       skip(lexer);
@@ -656,24 +673,50 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
     }
   }
 
+  // Characters that continue the previous expression across a newline.
+  //
+  // '(' and '[' are deliberately absent. Kotlin requires a call's '(' and an
+  // index's '[' to sit on the same line as what they apply to, so a line
+  // starting with one begins a new statement:
+  //
+  //     ftp.close()
+  //     (ftp.executor as ExecutorService).awaitTermination(1, SECONDS)
+  //
+  // is two statements, not `close()(...)`. Treating them as continuations
+  // merged the lines with no error node at all.
+  //
+  // '{' stays: `foo()` followed by `{ … }` on the next line is a trailing
+  // lambda, which is one expression — confirmed against the Kotlin PSI, as
+  // was every other character in this set.
+  //
+  // '<' stays: a line may open with type arguments that continue the previous
+  // construct — `is T` then `<X>` is one type, which the Kotlin PSI confirms.
   switch (lexer->lookahead) {
       case ',':
       case '.':
-      case ':':
       case '*':
       case '%':
       case '>':
       case '<':
       case '=':
       case '{':
-      case '[':
-      case '(':
       case '?':
       case '|':
       case '&':
         // Decided from lookahead alone, so the cursor never moved past it and
         // e.g. scan_import_dot can still claim the '.'.
         *cursor_clean = true;
+        return false;
+
+      // ':' continues the previous construct — `class A` then `: B()` is one
+      // declaration — but '::' opens a callable reference, which starts a new
+      // statement:
+      //
+      //     suspend fun g() {}
+      //     ::g.use()
+      case ':':
+        skip(lexer);
+        if (lexer->lookahead == ':') return true;
         return false;
 
       // Handle `/` — could be division, line comment, or block comment.
@@ -768,14 +811,24 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
             // #274 is fixed only for the non-nested, NUL-free case below.
             while (iswspace(lexer->lookahead)) skip(lexer);
             switch (lexer->lookahead) {
-              case '.': case ',': case ':': case '*': case '%':
-              case '>': case '<': case '=': case '{': case '[':
-              case '(': case '?': case '|': case '&': case '/':
+              // Same set as asi_after_comment: '(', '[' and '::' start a new
+              // statement, so they are not continuations here either.
+              case '.': case ',': case '*': case '%':
+              case '>': case '<': case '=': case '{':
+              case '?': case '|': case '&': case '/':
                 // A continuation operator needs no further lookahead, so the
                 // end can be marked without probing. It is not the comment's
                 // real end: the whitespace skip above already moved
                 // token_start here, so the node is zero-width (see NOTE).
                 lexer->mark_end(lexer);
+                lexer->result_symbol = MULTILINE_COMMENT;
+                return true;
+              case ':':
+                lexer->mark_end(lexer);
+                skip(lexer);
+                // '::' opens a callable reference: leave result_symbol alone
+                // so the semicolon stands.
+                if (lexer->lookahead == ':') return true;
                 lexer->result_symbol = MULTILINE_COMMENT;
                 return true;
               case '!': case 'e': case 'a': case 'w':
@@ -901,24 +954,16 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
           // Can't reliably check 'catch' now. Just insert ASI.
           return true;
         }
-        // Not in constructor context — check for 'catch'
+        // Not in constructor context — check for 'catch'. A real catch clause
+        // opens with '('; `catch<T> { }` is a call to a function named catch.
         if (!scan_for_word(lexer, "atch", 4)) return true;
-        // Same follower requirement as the comment path in asi_after_comment:
-        // only a parameter list makes this a catch_block. A bare `catch` word
-        // is an ordinary identifier, and Kotlin puts the newline *after* an
-        // infix operator (`simpleIdentifier NL* rangeExpression`), never before
-        // it, so the statement really did end at the line break. A bare '/'
-        // means division, which is likewise not a catch_block.
-        if (!skip_whitespace_and_comments(lexer)) return true;
-        return lexer->lookahead != '(';
+        return !followed_by(lexer, '(');
 
-      // Don't insert a semicolon before finally (continues try_expression)
+      // Don't insert a semicolon before finally (continues try_expression).
+      // As with catch, only when a real clause follows.
       case 'f':
         if (!scan_for_word(lexer, "inally", 6)) return true;
-        // Same as `catch` above: only a following block makes this a
-        // finally_block rather than an identifier.
-        if (!skip_whitespace_and_comments(lexer)) return true;
-        return lexer->lookahead != '{';
+        return !followed_by(lexer, '{');
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier
