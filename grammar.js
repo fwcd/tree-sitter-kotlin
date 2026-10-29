@@ -444,7 +444,23 @@ module.exports = grammar({
     // Class members
     // ==========
 
-    _class_member_declarations: $ => repeat1(seq($._class_member_declaration, $._semi)),
+    // Separator strictly between members, optional before the closing brace.
+    //
+    // This used to be `repeat1(seq(member, $._semi))`, requiring a newline or
+    // `;` after the *last* member too, so every single-line body failed to
+    // parse: `class C { fun f() {} }`, `class C : Base() { val x = 1 }`,
+    // `object O : Base() { fun f() {} }`.
+    //
+    // Making the separator optional per member — the Kotlin grammar's
+    // `(classMemberDeclaration semis?)*` — is too loose for an LR parser: with
+    // no separator required at all, `companion object` followed by an
+    // identifier is ambiguous between the companion's name and the next
+    // member. This is the shape `statements` already uses successfully.
+    _class_member_declarations: $ => seq(
+      $._class_member_declaration,
+      repeat(seq($._semi, $._class_member_declaration)),
+      optional($._semi),
+    ),
 
     _class_member_declaration: $ => choice(
       $._declaration,
