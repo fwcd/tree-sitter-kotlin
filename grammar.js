@@ -107,6 +107,11 @@ module.exports = grammar({
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
 
+    // `context` is a soft keyword: `context(...)` may be a context-receiver
+    // declaration prefix or an ordinary call whose callee is named `context`.
+    // GLR explores both and keeps whichever yields a valid parse.
+    [$.context_receiver, $.simple_identifier],
+
     // `( name` at statement start: a destructuring target or a parenthesized
     // expression. Nothing tells them apart until after the ')', so carry both.
     [$._name_based_destructuring_entry_expr, $._primary_expression],
@@ -563,6 +568,18 @@ module.exports = grammar({
     ),
 
     annotated_function_type_receiver: $ => seq($.type_modifiers, $.function_type),
+
+    // Context parameters / receivers (Kotlin 1.6.20+ / 2.2): a `context(...)`
+    // prefix on a callable declaration. Entries are either context parameters
+    // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
+    // enclosing declaration must parse so its body is scored.
+    context_receiver: $ => seq(
+      "context",
+      "(",
+      sep1(choice(seq(optional($.parameter_modifiers), $.parameter), $._type), ","),
+      optional(","),
+      ")"
+    ),
 
     // `public fun Foo.bar() { … }` also parses as an infix expression, because
     // the visibility modifiers are soft keywords in `simple_identifier`. Both
@@ -1145,6 +1162,7 @@ module.exports = grammar({
     ),
 
     anonymous_function: $ => prec.right(seq(
+      optional($.context_receiver),
       optional("suspend"),
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
@@ -1336,8 +1354,20 @@ module.exports = grammar({
     // Modifiers
     // ==========
 
+    // `$._modifier` deliberately carries no precedence, and the repetition is
+    // held together by the `[$.modifiers]` conflict rather than by
+    // `prec.right`. A precedence resolves an ambiguity by discarding one
+    // reading at table-generation time, and here that discarded the right one:
+    // in `class C(@param:A value: T)`, once the annotation had started a
+    // modifier list, "keep extending the list" always beat "the list ends here
+    // and this soft keyword is the declaration's name", so `value` became a
+    // modifier and the name went MISSING. The declared
+    // `class_modifier`/`simple_identifier` conflict could not help, because the
+    // alternative no longer existed. A conflict carries both readings instead
+    // and keeps the one that parses.
     modifiers: $ => repeat1(choice(
       prec.right(PREC.MODIFIERS, $.annotation),
+      prec.right(PREC.MODIFIERS, $.context_receiver),
       $._modifier
     )),
 
@@ -1356,7 +1386,7 @@ module.exports = grammar({
 
     type_modifiers: $ => repeat1($._type_modifier),
 
-    _type_modifier: $ => choice($.annotation, "suspend"),
+    _type_modifier: $ => choice($.annotation, $.context_receiver, "suspend"),
 
     class_modifier: $ => choice(
       "sealed",
@@ -1505,6 +1535,7 @@ module.exports = grammar({
       // Batch 6: structural keywords used as identifiers
       "companion",
       "constructor",
+      "context",
       "init",
       "dynamic",
       "where",
