@@ -7535,29 +7535,8 @@
                       {
                         "type": "TOKEN",
                         "content": {
-                          "type": "SEQ",
-                          "members": [
-                            {
-                              "type": "PATTERN",
-                              "value": "[0-9]+"
-                            },
-                            {
-                              "type": "REPEAT",
-                              "content": {
-                                "type": "SEQ",
-                                "members": [
-                                  {
-                                    "type": "PATTERN",
-                                    "value": "_+"
-                                  },
-                                  {
-                                    "type": "PATTERN",
-                                    "value": "[0-9]+"
-                                  }
-                                ]
-                              }
-                            }
-                          ]
+                          "type": "PATTERN",
+                          "value": "[0-9][0-9_]*"
                         }
                       },
                       {
@@ -7582,32 +7561,8 @@
                               ]
                             },
                             {
-                              "type": "TOKEN",
-                              "content": {
-                                "type": "SEQ",
-                                "members": [
-                                  {
-                                    "type": "PATTERN",
-                                    "value": "[0-9]+"
-                                  },
-                                  {
-                                    "type": "REPEAT",
-                                    "content": {
-                                      "type": "SEQ",
-                                      "members": [
-                                        {
-                                          "type": "PATTERN",
-                                          "value": "_+"
-                                        },
-                                        {
-                                          "type": "PATTERN",
-                                          "value": "[0-9]+"
-                                        }
-                                      ]
-                                    }
-                                  }
-                                ]
-                              }
+                              "type": "PATTERN",
+                              "value": "[0-9_]*"
                             }
                           ]
                         }
@@ -7623,29 +7578,8 @@
                           {
                             "type": "TOKEN",
                             "content": {
-                              "type": "SEQ",
-                              "members": [
-                                {
-                                  "type": "PATTERN",
-                                  "value": "[0-9]+"
-                                },
-                                {
-                                  "type": "REPEAT",
-                                  "content": {
-                                    "type": "SEQ",
-                                    "members": [
-                                      {
-                                        "type": "PATTERN",
-                                        "value": "_+"
-                                      },
-                                      {
-                                        "type": "PATTERN",
-                                        "value": "[0-9]+"
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
+                              "type": "PATTERN",
+                              "value": "[0-9][0-9_]*"
                             }
                           },
                           {
@@ -7660,29 +7594,8 @@
                       {
                         "type": "TOKEN",
                         "content": {
-                          "type": "SEQ",
-                          "members": [
-                            {
-                              "type": "PATTERN",
-                              "value": "[0-9]+"
-                            },
-                            {
-                              "type": "REPEAT",
-                              "content": {
-                                "type": "SEQ",
-                                "members": [
-                                  {
-                                    "type": "PATTERN",
-                                    "value": "_+"
-                                  },
-                                  {
-                                    "type": "PATTERN",
-                                    "value": "[0-9]+"
-                                  }
-                                ]
-                              }
-                            }
-                          ]
+                          "type": "PATTERN",
+                          "value": "[0-9][0-9_]*"
                         }
                       },
                       {
@@ -7710,32 +7623,8 @@
                                   ]
                                 },
                                 {
-                                  "type": "TOKEN",
-                                  "content": {
-                                    "type": "SEQ",
-                                    "members": [
-                                      {
-                                        "type": "PATTERN",
-                                        "value": "[0-9]+"
-                                      },
-                                      {
-                                        "type": "REPEAT",
-                                        "content": {
-                                          "type": "SEQ",
-                                          "members": [
-                                            {
-                                              "type": "PATTERN",
-                                              "value": "_+"
-                                            },
-                                            {
-                                              "type": "PATTERN",
-                                              "value": "[0-9]+"
-                                            }
-                                          ]
-                                        }
-                                      }
-                                    ]
-                                  }
+                                  "type": "PATTERN",
+                                  "value": "[0-9_]*"
                                 }
                               ]
                             }
@@ -7769,29 +7658,8 @@
               {
                 "type": "TOKEN",
                 "content": {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "PATTERN",
-                      "value": "[0-9]+"
-                    },
-                    {
-                      "type": "REPEAT",
-                      "content": {
-                        "type": "SEQ",
-                        "members": [
-                          {
-                            "type": "PATTERN",
-                            "value": "_+"
-                          },
-                          {
-                            "type": "PATTERN",
-                            "value": "[0-9]+"
-                          }
-                        ]
-                      }
-                    }
-                  ]
+                  "type": "PATTERN",
+                  "value": "[0-9][0-9_]*"
                 }
               },
               {
@@ -7806,49 +7674,11 @@
     "integer_literal": {
       "type": "TOKEN",
       "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "PATTERN",
-                "value": "[1-9]"
-              },
-              {
-                "type": "BLANK"
-              }
-            ]
-          },
-          {
-            "type": "TOKEN",
-            "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "PATTERN",
-                  "value": "[0-9]+"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "PATTERN",
-                        "value": "_+"
-                      },
-                      {
-                        "type": "PATTERN",
-                        "value": "[0-9]+"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-          }
-        ]
+        "type": "TOKEN",
+        "content": {
+          "type": "PATTERN",
+          "value": "[0-9][0-9_]*"
+        }
       }
     },
     "hex_literal": {
@@ -7867,29 +7697,8 @@
           {
             "type": "TOKEN",
             "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "PATTERN",
-                  "value": "[0-9a-fA-F]+"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "PATTERN",
-                        "value": "_+"
-                      },
-                      {
-                        "type": "PATTERN",
-                        "value": "[0-9a-fA-F]+"
-                      }
-                    ]
-                  }
-                }
-              ]
+              "type": "PATTERN",
+              "value": "[0-9a-fA-F_]*"
             }
           }
         ]
@@ -7911,29 +7720,8 @@
           {
             "type": "TOKEN",
             "content": {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "PATTERN",
-                  "value": "[01]+"
-                },
-                {
-                  "type": "REPEAT",
-                  "content": {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "PATTERN",
-                        "value": "_+"
-                      },
-                      {
-                        "type": "PATTERN",
-                        "value": "[01]+"
-                      }
-                    ]
-                  }
-                }
-              ]
+              "type": "PATTERN",
+              "value": "[0-9_]*"
             }
           }
         ]
@@ -7986,8 +7774,8 @@
           ]
         },
         {
-          "type": "STRING",
-          "value": "L"
+          "type": "PATTERN",
+          "value": "[lL]"
         }
       ]
     },

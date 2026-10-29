@@ -605,3 +605,166 @@ val x = $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
       (interpolated_expression
         (integer_literal))
       (interpolation_expression_end))))
+
+================================================================================
+Decimal literal with a trailing underscore and a lowercase long suffix
+================================================================================
+
+val a = 1_
+val b = 1l
+val c = 1_L
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (long_literal
+      (integer_literal)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (long_literal
+      (integer_literal))))
+
+================================================================================
+Hexadecimal and binary literals with no digits
+================================================================================
+
+val a = 0x
+val b = 0x_L
+val c = 0b
+val d = 0bl
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (hex_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (long_literal
+      (hex_literal)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (bin_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (long_literal
+      (bin_literal))))
+
+================================================================================
+Binary literal with non-binary digits
+================================================================================
+
+val a = 0b200000000L
+val b = 0b1234567890
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (long_literal
+      (bin_literal)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (bin_literal)))
+
+================================================================================
+Real literals with an incomplete exponent
+================================================================================
+
+val a = 0.0E
+val b = 5E_
+val c = .0e+F
+val d = 0e
+val e = 0F
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (real_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (real_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (real_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (real_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (real_literal)))
+
+================================================================================
+Member access and ranges on numeric literals are unaffected
+================================================================================
+
+val a = 0.e
+val b = 1..2
+val c = 1.toString()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (integer_literal)
+      (navigation_suffix
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (range_expression
+      (integer_literal)
+      (integer_literal)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (navigation_expression
+        (integer_literal)
+        (navigation_suffix
+          (simple_identifier)))
+      (call_suffix
+        (value_arguments)))))
