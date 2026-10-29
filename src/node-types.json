@@ -1205,6 +1205,10 @@
       "required": true,
       "types": [
         {
+          "type": "annotation",
+          "named": true
+        },
+        {
           "type": "class_body",
           "named": true
         },
@@ -1626,6 +1630,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "annotation",
+          "named": true
+        },
         {
           "type": "class_body",
           "named": true
@@ -6197,6 +6205,10 @@
       "required": true,
       "types": [
         {
+          "type": "annotation",
+          "named": true
+        },
+        {
           "type": "class_body",
           "named": true
         },
@@ -6223,6 +6235,10 @@
       "multiple": true,
       "required": false,
       "types": [
+        {
+          "type": "annotation",
+          "named": true
+        },
         {
           "type": "class_body",
           "named": true

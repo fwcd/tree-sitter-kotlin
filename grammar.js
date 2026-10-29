@@ -66,10 +66,10 @@ module.exports = grammar({
     // Member access operator '::' conflicts with callable reference
     [$._primary_expression, $.callable_reference],
 
-    // @Type(... — in Kotlin, ( after annotation name is always constructor args.
-    // Resolved via prec(1) on _annotation_constructor_invocation so the parser
-    // always shifts (consuming '(' as value_arguments) rather than reducing
-    // (completing user_type). Scoped to annotations only.
+    // @Type(... — `(` after an annotation name is usually constructor args, but
+    // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
+    // conflict below, with prec.dynamic on _annotation_constructor_invocation
+    // preferring constructor args when both readings parse.
 
     // "expect" as a plaform modifier conflicts with expect as an identifier
     [$.platform_modifier, $.simple_identifier],
@@ -144,6 +144,11 @@ module.exports = grammar({
 
     // ambiguity between type modifiers before an @
     [$.type_modifiers],
+    // `@A (` : annotation arguments, or (in a type) `@A` followed by a function type
+    [$._annotation_constructor_invocation, $._unescaped_annotation],
+    // `: @A Base()` : the annotation competes with a type modifier on the
+    // supertype. Same resolution as above — let GLR carry both readings.
+    [$._annotated_delegation_specifier, $._type_modifier],
     // ambiguity between associating type modifiers
     [$.not_nullable_type],
 
@@ -314,8 +319,7 @@ module.exports = grammar({
     ),
 
     _delegation_specifiers: $ => prec.left(sep1(
-      $.delegation_specifier,
-      // $._annotated_delegation_specifier, // TODO: Annotations cause ambiguities with type modifiers
+      $._annotated_delegation_specifier,
       ","
     )),
 
@@ -332,12 +336,26 @@ module.exports = grammar({
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
 
-    // Annotation-scoped variant with prec(1) to resolve the shift/reduce
-    // conflict at `user_type • (` — always shift (consume `(` as constructor
-    // args). This matches Kotlin semantics where `(` after an annotation name
-    // is always constructor arguments. Scoped here rather than on the shared
-    // constructor_invocation to avoid changing delegation_specifier behavior.
-    _annotation_constructor_invocation: $ => prec(1, seq($.user_type, $.value_arguments)),
+    // Annotation-scoped variant. `user_type • (` has two readings and we keep
+    // both as a GLR conflict instead of deciding in the lexer.
+    //
+    // Where both readings parse, prec.dynamic(1) picks constructor arguments.
+    // That is the reading an annotation with arguments needs, and it is what
+    // keeps a parenthesised expression after one from being swallowed:
+    //
+    //     @Suppress("UNCHECKED_CAST")
+    //     (x as String).length      // annotation takes ("UNCHECKED_CAST"),
+    //                               // (x as String) stays an expression
+    //
+    // Where only one reading parses, GLR keeps that one and the preference
+    // never comes up — in a type, `@A () -> Unit` only parses with `(` opening
+    // a function type, which is also how kotlinc reads it. In statement
+    // position `@Anno (x)` has no constructor-args reading that completes, so
+    // it lands on a bare annotation followed by `(x)`.
+    //
+    // Scoped to annotations rather than put on the shared constructor_invocation,
+    // so ordinary constructor calls are unaffected.
+    _annotation_constructor_invocation: $ => prec.dynamic(1, seq($.user_type, $.value_arguments)),
 
     _annotated_delegation_specifier: $ => seq(repeat($.annotation), $.delegation_specifier),
 
@@ -468,7 +486,12 @@ module.exports = grammar({
       )
     ),
 
-    function_declaration: $ => prec.right(seq( // TODO
+    // `public fun Foo.bar() { … }` also parses as an infix expression, because
+    // the visibility modifiers are soft keywords in `simple_identifier`. Both
+    // readings are complete, so this is the dynamic-precedence decision #278
+    // made for `class` and `object` (issue #277); at the time `fun` was not
+    // reachable that way, and the GLR conflict on annotations made it so.
+    function_declaration: $ => prec.dynamic(1, prec.right(seq( // TODO
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
@@ -478,7 +501,7 @@ module.exports = grammar({
       optional(seq(":", $._type)),
       optional($.type_constraints),
       optional($.function_body)
-    )),
+    ))),
 
     function_body: $ => choice($._block, seq("=", $._expression)),
 
