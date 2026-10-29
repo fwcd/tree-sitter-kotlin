@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: Constructors
-:error
 ==================
 
 // COMPILATION_ERRORS
@@ -13,3 +12,5 @@ protected class foo private () : Bar
 private class foo<T>() : Bar
 internal class foo<T> private () : Bar
 ---
+
+(source_file (line_comment) (class_declaration (type_identifier) (class_body)) (class_declaration (modifiers (visibility_modifier)) (type_identifier) (primary_constructor) (delegation_specifier (user_type (type_identifier)))) (class_declaration (modifiers (visibility_modifier)) (type_identifier) (primary_constructor (modifiers (visibility_modifier))) (delegation_specifier (user_type (type_identifier)))) (class_declaration (modifiers (visibility_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier))) (primary_constructor) (delegation_specifier (user_type (type_identifier)))) (class_declaration (modifiers (visibility_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier))) (primary_constructor (modifiers (visibility_modifier))) (delegation_specifier (user_type (type_identifier)))))
