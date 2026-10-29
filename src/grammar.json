@@ -7766,6 +7766,10 @@
   "extras": [
     {
       "type": "SYMBOL",
+      "name": "_comment_continuation_hint"
+    },
+    {
+      "type": "SYMBOL",
       "name": "line_comment"
     },
     {
@@ -8054,6 +8058,10 @@
     {
       "type": "SYMBOL",
       "name": "_primary_constructor_hint"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_comment_continuation_hint"
     }
   ],
   "inline": [],

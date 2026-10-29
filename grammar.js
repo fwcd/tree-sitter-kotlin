@@ -229,9 +229,11 @@ module.exports = grammar({
     $._interpolation_identifier_start,
     $._by_delegation_hint,
     $._primary_constructor_hint,
+    $._comment_continuation_hint,
   ],
 
   extras: $ => [
+    $._comment_continuation_hint,
     $.line_comment,
     $.multiline_comment,
     /\s+/ // Whitespace

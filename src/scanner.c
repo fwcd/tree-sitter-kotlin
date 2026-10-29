@@ -18,6 +18,7 @@ enum TokenType {
   INTERPOLATION_IDENTIFIER_START,
   BY_DELEGATION_HINT,
   PRIMARY_CONSTRUCTOR_HINT,
+  COMMENT_CONTINUATION_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -75,11 +76,21 @@ typedef char Delimiter;
 //   PREFIX_LEN_MAX), or PREFIX_LEN_UNREPRESENTABLE for a longer prefix.
 typedef Array(Delimiter) Stack;
 
+// Offsets count UTF-8 bytes from the start of the producing scan. TSLexer
+// owns absolute/included-range positions; replay uses the normal comment lexer.
+typedef struct {
+  bool pending;
+  uint32_t start_byte;
+  uint32_t end_byte;
+  bool semi_owed;
+} PendingComment;
+
 typedef struct {
   Stack strings;
   // A comment is an extra token. Preserve a class-header line break while
   // emitting that comment, until the constructor/ASI decision can be made.
   bool constructor_newline;
+  PendingComment comment;
 } Scanner;
 
 static inline void stack_push(Stack *stack, char chr, bool triple, uint16_t prefix_len) {
@@ -100,6 +111,18 @@ static inline bool stack_pop(Stack *stack) {
 static inline void skip(TSLexer *lexer) { lexer->advance(lexer, true); }
 
 static inline void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
+
+static unsigned utf8_width(int32_t c) {
+  return c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4;
+}
+
+static void advance_counted(TSLexer *lexer, uint32_t *bytes, bool whitespace) {
+  if (bytes) {
+    unsigned width = utf8_width(lexer->lookahead);
+    *bytes = *bytes <= UINT32_MAX - width ? *bytes + width : UINT32_MAX;
+  }
+  lexer->advance(lexer, whitespace);
+}
 
 // Scanner functions
 
@@ -331,11 +354,11 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
 }
 
 
-static bool scan_multiline_comment(TSLexer *lexer, bool *newline) {
+static bool scan_multiline_comment(TSLexer *lexer, bool *newline, uint32_t *bytes) {
   if (lexer->lookahead != '/') return false;
-  advance(lexer);
+  advance_counted(lexer, bytes, false);
   if (lexer->lookahead != '*') return false;
-  advance(lexer);
+  advance_counted(lexer, bytes, false);
 
   bool after_star = false;
   unsigned nesting_depth = 1;
@@ -344,11 +367,11 @@ static bool scan_multiline_comment(TSLexer *lexer, bool *newline) {
       *newline = true;
     switch (lexer->lookahead) {
       case '*':
-        advance(lexer);
+        advance_counted(lexer, bytes, false);
         after_star = true;
         break;
       case '/':
-        advance(lexer);
+        advance_counted(lexer, bytes, false);
         if (after_star) {
           after_star = false;
           nesting_depth -= 1;
@@ -361,7 +384,7 @@ static bool scan_multiline_comment(TSLexer *lexer, bool *newline) {
           after_star = false;
           if (lexer->lookahead == '*') {
             nesting_depth += 1;
-            advance(lexer);
+            advance_counted(lexer, bytes, false);
           }
         }
         break;
@@ -382,15 +405,15 @@ static bool scan_multiline_comment(TSLexer *lexer, bool *newline) {
         // the scanner forever on inputs such as "/*\0" -> a parse-time hang (DoS).
         // fallthrough
       default:
-        advance(lexer);
+        advance_counted(lexer, bytes, false);
         after_star = false;
         break;
     }
   }
 }
 
-static bool scan_whitespace_and_comments(TSLexer *lexer) {
-  while (iswspace(lexer->lookahead)) skip(lexer);
+static bool scan_whitespace_and_comments(TSLexer *lexer, uint32_t *bytes) {
+  while (iswspace(lexer->lookahead)) advance_counted(lexer, bytes, true);
   return true;
 }
 
@@ -737,7 +760,7 @@ static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
   // also leaves class bodies/delegation clauses after comments available to
   // the ordinary lexer when there is no explicit constructor.
   if (lexer->lookahead == '/') {
-    if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, &newline)) {
+    if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, &newline, NULL)) {
       scanner->constructor_newline = newline;
       return true;
     }
@@ -781,10 +804,12 @@ static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
   bool continuation = first == '(' || first == '{' || first == '<' ||
     first == '.' || first == '?' || first == ',' || first == '*' ||
     first == '%' || first == '>' || first == '=' || first == '|' || first == '&' ||
-    strcmp(first_word, "as") == 0 || strcmp(first_word, "where") == 0 ||
+    strcmp(first_word, "as") == 0 ||
     (valid_symbols[BY_DELEGATION_HINT] && strcmp(first_word, "by") == 0);
   // Match main's class-header boundaries: :: and [ start a statement, while
   // a lone colon continues delegation. Bare ( can still open a constructor.
+  if (strcmp(first_word, "where") == 0)
+    continuation = constructor_trivia(lexer, &newline) && lexer->lookahead != '(';
   if (first == ':') { advance(lexer); continuation = lexer->lookahead != ':'; }
   if (strcmp(first_word, "finally") == 0) {
     continuation = constructor_trivia(lexer, &newline) && lexer->lookahead == '{';
@@ -833,7 +858,9 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       if (scan_for_word(lexer, "s", 1)) return false;
       return true;
     case 'w':
-      if (scan_for_word(lexer, "here", 4)) return false;
+      if (scan_for_word(lexer, "here", 4)) {
+        return !skip_whitespace_and_comments(lexer) || lexer->lookahead == '(';
+      }
       return true;
     case 'c':
       if (scan_for_word(lexer, "atch", 4)) {
@@ -862,6 +889,55 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
   }
 }
 
+// Like asi_after_comment, but advance-only: the pending comment must be
+// re-read at its original position, with no keyword/comment text skipped away.
+static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_symbols) {
+  bool newline = false;
+  if (!constructor_trivia(lexer, &newline)) return !lexer->eof(lexer);
+  switch (lexer->lookahead) {
+    case '.': case ',': case '*': case '%': case '>': case '<': case '=':
+    case '{': case '?': case '|': case '&': return true;
+    case ':': advance(lexer); return lexer->lookahead != ':';
+    case '!': advance(lexer); return lexer->lookahead == '=';
+    default: break;
+  }
+  char word[32] = {0};
+  if (!constructor_word(lexer, word, sizeof(word))) return false;
+  if (strcmp(word, "as") == 0) return true;
+  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
+  if (strcmp(word, "where") == 0) {
+    return constructor_trivia(lexer, &newline) && lexer->lookahead != '(';
+  }
+  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) {
+    char follower = word[0] == 'c' ? '(' : '{';
+    return constructor_trivia(lexer, &newline) && lexer->lookahead == follower;
+  }
+  if (strcmp(word, "else") == 0) {
+    if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
+    advance(lexer);
+    return lexer->lookahead != '>';
+  }
+  return false;
+}
+
+static bool resume_pending_comment(Scanner *scanner, TSLexer *lexer,
+                                    const bool *valid_symbols) {
+  if (scanner->comment.semi_owed) {
+    if (!valid_symbols[AUTOMATIC_SEMICOLON]) return false;
+    lexer->mark_end(lexer);
+    lexer->result_symbol = AUTOMATIC_SEMICOLON;
+    scanner->comment.semi_owed = false;
+    return true;
+  }
+  if (!valid_symbols[MULTILINE_COMMENT]) return false;
+  uint32_t length = scanner->comment.end_byte - scanner->comment.start_byte;
+  uint32_t consumed = 0;
+  while (iswspace(lexer->lookahead)) skip(lexer);
+  bool matched = scan_multiline_comment(lexer, NULL, &consumed);
+  scanner->comment = (PendingComment){0};
+  return matched && consumed == length;
+}
+
 // `cursor_clean` is an out-param for the `return false` case only. Most of the
 // keyword probes below skip over source text to make their decision, and skip()
 // drags token_start with it, so on a false return the caller can no longer lex a
@@ -870,11 +946,12 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
 // only by the handful of returns that are provably still at the first
 // non-whitespace character. Skipping *whitespace* is safe (that is what skip() is
 // for); skipping comment or keyword text is not.
-static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
+static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols,
                                      bool *cursor_clean) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
   lexer->mark_end(lexer);
 
+  uint32_t prefix_bytes = 0;
   bool sameline = true;
   for (;;) {
     if (lexer->eof(lexer)) return true;
@@ -888,27 +965,27 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
     if (!iswspace(lexer->lookahead)) break;
 
     if (lexer->lookahead == '\n') {
-      skip(lexer);
+      advance_counted(lexer, &prefix_bytes, true);
       sameline = false;
       break;
     }
 
     if (lexer->lookahead == '\r') {
-      skip(lexer);
+      advance_counted(lexer, &prefix_bytes, true);
 
-      if (lexer->lookahead == '\n') skip(lexer);
+      if (lexer->lookahead == '\n') advance_counted(lexer, &prefix_bytes, true);
 
       sameline = false;
       break;
     }
 
-    skip(lexer);
+    advance_counted(lexer, &prefix_bytes, true);
   }
 
   // Skip whitespace and comments. Unreachable today (the helper only skips
   // whitespace and always succeeds); left dirty deliberately, so that if it
   // ever does skip comments the conservative answer is already in place.
-  if (!scan_whitespace_and_comments(lexer))
+  if (!scan_whitespace_and_comments(lexer, &prefix_bytes))
     return false;
 
   if (sameline) {
@@ -1008,27 +1085,28 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
           // mark_end once a token is produced, and throws the whole scan away
           // if we return false.
           advance(lexer); // '*'
+          uint32_t comment_bytes = 2; // Opening /* already consumed.
           unsigned nesting_depth = 1;
           bool nested = false;
           bool has_nul = false;
           while (nesting_depth > 0 && !lexer->eof(lexer)) {
             if (lexer->lookahead == '*') {
-              advance(lexer);
+              advance_counted(lexer, &comment_bytes, false);
               if (lexer->lookahead == '/') {
-                advance(lexer);
+                advance_counted(lexer, &comment_bytes, false);
                 nesting_depth--;
               }
             } else if (lexer->lookahead == '/') {
-              advance(lexer);
+              advance_counted(lexer, &comment_bytes, false);
               if (lexer->lookahead == '*') {
-                advance(lexer);
+                advance_counted(lexer, &comment_bytes, false);
                 nesting_depth++;
                 nested = true;
               }
             } else {
               // A literal NUL is comment content, not EOF — see #279.
               if (lexer->lookahead == 0) has_nul = true;
-              advance(lexer);
+              advance_counted(lexer, &comment_bytes, false);
             }
           }
           if (nesting_depth > 0) {
@@ -1038,80 +1116,18 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
             return true;
           }
           if (nested || has_nul) {
-            // Two shapes the internal `multiline_comment` token cannot match:
-            // a nested comment (a regex cannot recurse) and one containing a
-            // NUL (the internal lexer stops there, see #279). The fallback is
-            // unavailable, so this scanner has to produce the token itself —
-            // which means mark_end must be committed *before* any keyword
-            // lookahead moves the cursor. Committing it unconditionally would
-            // pin the token end past the comment even when no continuation
-            // follows, fusing the two statements, so mark_end is called only
-            // in the branches that need it.
-            //
-            // NOTE: both definitions of `multiline_comment` share one symbol
-            // id, so the internal token silently truncates a nested comment at
-            // its first `*/`. Anything added below must therefore keep
-            // producing the token here rather than deferring to the fallback
-            // with `return false`.
-            //
-            // This path still carries the #274 symptom and is deliberately
-            // out of scope. The `skip()` loop below drags token_start onto the
-            // follower, so the outcome depends on which arm runs:
-            //   - an arm that calls mark_end pins the token there, so a
-            //     continuation follower yields a zero-width multiline_comment;
-            //   - the same arms with a non-continuation follower leave
-            //     result_symbol as AUTOMATIC_SEMICOLON, and the comment text
-            //     becomes that zero-width token's padding, so the node vanishes
-            //     from the tree with no ERROR reported;
-            //   - `default` (and `b` outside a delegation context) never calls
-            //     mark_end, so the semicolon lands in front of the comment and
-            //     scan_multiline_comment emits it correctly on the next call.
-            // #274 is fixed only for the non-nested, NUL-free case below.
-            while (iswspace(lexer->lookahead)) skip(lexer);
-            switch (lexer->lookahead) {
-              // Same set as asi_after_comment: '(', '[' and '::' start a new
-              // statement, so they are not continuations here either.
-              case '.': case ',': case '*': case '%':
-              case '>': case '<': case '=': case '{':
-              case '?': case '|': case '&': case '/':
-                // A continuation operator needs no further lookahead, so the
-                // end can be marked without probing. It is not the comment's
-                // real end: the whitespace skip above already moved
-                // token_start here, so the node is zero-width (see NOTE).
-                lexer->mark_end(lexer);
-                lexer->result_symbol = MULTILINE_COMMENT;
-                return true;
-              case ':':
-                lexer->mark_end(lexer);
-                skip(lexer);
-                // '::' opens a callable reference: leave result_symbol alone
-                // so the semicolon stands.
-                if (lexer->lookahead == ':') return true;
-                lexer->result_symbol = MULTILINE_COMMENT;
-                return true;
-              case '!': case 'e': case 'a': case 'w':
-                // May or may not begin a continuation, and finding out moves
-                // the cursor past it, so mark the end first (again zero-width,
-                // see NOTE).
-                lexer->mark_end(lexer);
-                if (!asi_after_comment(lexer, valid_symbols)) {
-                  lexer->result_symbol = MULTILINE_COMMENT;
-                }
-                return true;
-              case 'b':
-                if (!valid_symbols[BY_DELEGATION_HINT]) return true;
-                lexer->mark_end(lexer);
-                if (!asi_after_comment(lexer, valid_symbols)) {
-                  lexer->result_symbol = MULTILINE_COMMENT;
-                }
-                return true;
-              default:
-                // Not a continuation. mark_end is still at the position before
-                // the comment, so this is a zero-width semicolon in front of
-                // it and scan_multiline_comment produces the comment on the
-                // next call.
-                return true;
+            if (continuation_after_block_comment(lexer, valid_symbols) &&
+                valid_symbols[COMMENT_CONTINUATION_HINT] &&
+                !valid_symbols[STRING_CONTENT] &&
+                prefix_bytes <= UINT32_MAX - comment_bytes) {
+              scanner->comment = (PendingComment){true, prefix_bytes,
+                prefix_bytes + comment_bytes, false};
+              lexer->result_symbol = COMMENT_CONTINUATION_HINT;
             }
+            // A non-continuation retains the hidden ASI at the original mark.
+            // A continuation emits a hidden extra there, without ending the
+            // expression; the next scan emits the normal extra comment.
+            return true;
           }
           // Skip any whitespace and further comments after this block comment.
           // A bare '/' (division) after comments is a continuation operator.
@@ -1161,7 +1177,8 @@ static bool scan_automatic_semicolon(TSLexer *lexer, const bool *valid_symbols,
 
       // Don't insert a semicolon before a where
       case 'w':
-        return !scan_for_word(lexer, "here", 4);
+        if (!scan_for_word(lexer, "here", 4)) return true;
+        return !skip_whitespace_and_comments(lexer) || lexer->lookahead == '(';
 
       // Don't insert a semicolon before `instanceof`, or before `internal`
       // when followed by `constructor` in a class declaration context.
@@ -1283,6 +1300,10 @@ static bool scan_import_dot(TSLexer *lexer) {
 
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
+  // Pending work takes priority over constructor, ASI, string and
+  // interpolation paths. No other branch may consume its source as padding.
+  if (scanner->comment.pending)
+    return resume_pending_comment(scanner, lexer, valid_symbols);
   if (valid_symbols[PRIMARY_CONSTRUCTOR_HINT] && !valid_symbols[STRING_CONTENT])
     return scan_primary_constructor_hint(scanner, lexer, valid_symbols);
   scanner->constructor_newline = false;
@@ -1292,7 +1313,7 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   // never emits it; it's used only as a context flag in scan_automatic_semicolon.
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
     bool cursor_clean = false;
-    bool ret = scan_automatic_semicolon(lexer, valid_symbols, &cursor_clean);
+    bool ret = scan_automatic_semicolon(scanner, lexer, valid_symbols, &cursor_clean);
     // If we fail to find an automatic semicolon, it's still possible that we may
     // want to lex a string or comment later -- but only if the ASI scan left the
     // cursor at the first non-whitespace character. Once it has skipped over
@@ -1351,7 +1372,7 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
     return true;
   }
 
-  if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, NULL)) {
+  if (valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, NULL, NULL)) {
     return true;
   }
 
@@ -1371,19 +1392,58 @@ void tree_sitter_kotlin_external_scanner_destroy(void *payload) {
   ts_free(scanner);
 }
 
+// Ordinary states keep their existing byte-for-byte encoding. A pending
+// comment uses an explicit header and 11 bits per string frame (10 prefix
+// bits plus the raw/triple bit), preserving the existing 512-frame capacity.
+#define PENDING_HEADER_BYTES 11
+#define PENDING_FRAME_BITS 11
+#define MAX_STRING_FRAMES (TREE_SITTER_SERIALIZATION_BUFFER_SIZE / 2)
+_Static_assert(PENDING_HEADER_BYTES + (MAX_STRING_FRAMES * PENDING_FRAME_BITS + 7) / 8
+               <= TREE_SITTER_SERIALIZATION_BUFFER_SIZE,
+               "pending comment and maximum string stack must fit serialization");
+
+static void write_u32(char *buffer, uint32_t value) {
+  for (unsigned i = 0; i < 4; i++) buffer[i] = (char)(value >> (8 * i));
+}
+
+static uint32_t read_u32(const char *buffer) {
+  uint32_t value = 0;
+  for (unsigned i = 0; i < 4; i++) value |= (uint32_t)(uint8_t)buffer[i] << (8 * i);
+  return value;
+}
+
 unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buffer) {
   Scanner *scanner = payload;
   Stack *stack = &scanner->strings;
   unsigned n = stack->size;
-  if (n > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) {
-    n = TREE_SITTER_SERIALIZATION_BUFFER_SIZE;
+  if (n > TREE_SITTER_SERIALIZATION_BUFFER_SIZE || n % 2) return 0;
+  if (scanner->comment.pending) {
+    unsigned frames = n / 2;
+    unsigned length = PENDING_HEADER_BYTES + (frames * PENDING_FRAME_BITS + 7) / 8;
+    memset(buffer, 0, length);
+    // A legacy delimiter has low bits 2/3, so low bits 0 plus bit 3
+    // unambiguously identify this format, including an empty string stack.
+    buffer[0] = 8 | (scanner->constructor_newline ? 4 : 0) |
+      (scanner->comment.semi_owed ? 16 : 0);
+    buffer[1] = (char)frames;
+    buffer[2] = (char)(frames >> 8);
+    write_u32(buffer + 3, scanner->comment.start_byte);
+    write_u32(buffer + 7, scanner->comment.end_byte);
+    for (unsigned i = 0; i < frames; i++) {
+      uint8_t delimiter = (uint8_t)stack->contents[2 * i];
+      unsigned value = ((delimiter >> PREFIX_HI_SHIFT) << 8) |
+        (uint8_t)stack->contents[2 * i + 1] |
+        ((delimiter & 1) << 10);
+      for (unsigned bit = 0; bit < PENDING_FRAME_BITS; bit++) {
+        unsigned position = i * PENDING_FRAME_BITS + bit;
+        if (value & (1u << bit))
+          buffer[PENDING_HEADER_BYTES + position / 8] |= (char)(1u << (position % 8));
+      }
+    }
+    return length;
   }
   if (n > 0) {
-    // it's an undefined behavior to memcpy 0 bytes
     memcpy(buffer, stack->contents, n);
-    // Delimiters are 34/35, leaving bit 2 unused even at the 512-string
-    // nesting limit. Borrow it only in the serialized first delimiter;
-    // deserialization clears it before any string operation.
     if (scanner->constructor_newline) buffer[0] |= 4;
   } else if (scanner->constructor_newline) {
     buffer[0] = 4;
@@ -1395,15 +1455,36 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
 void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *buffer, unsigned length) {
   Scanner *scanner = payload;
   Stack *stack = &scanner->strings;
-  scanner->constructor_newline = length > 0 && (buffer[0] & 4) != 0;
-  // Stack entries are 2 bytes each (delimiter + prefix_len).
-  // Discard corrupted state with odd length.
-  if (length > 0 && length % 2 == 0) {
-    array_reserve(stack, length);
-    memcpy(stack->contents, buffer, length);
-    stack->contents[0] &= (Delimiter)~4;
-    stack->size = length;
-  } else {
-    array_clear(stack);
+  array_clear(stack);
+  scanner->constructor_newline = false;
+  scanner->comment = (PendingComment){0};
+  if (!length || length > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) return;
+  uint8_t flags = (uint8_t)buffer[0];
+  if ((flags & 3) == 0 && (flags & 8)) {
+    if (length < PENDING_HEADER_BYTES || (flags & ~28u)) return;
+    unsigned frames = (uint8_t)buffer[1] | ((unsigned)(uint8_t)buffer[2] << 8);
+    if (frames > MAX_STRING_FRAMES ||
+        length != PENDING_HEADER_BYTES + (frames * PENDING_FRAME_BITS + 7) / 8) return;
+    uint32_t start = read_u32(buffer + 3), end = read_u32(buffer + 7);
+    if (end < start || end - start < 4) return;
+    for (unsigned i = 0; i < frames; i++) {
+      unsigned value = 0;
+      for (unsigned bit = 0; bit < PENDING_FRAME_BITS; bit++) {
+        unsigned position = i * PENDING_FRAME_BITS + bit;
+        if ((uint8_t)buffer[PENDING_HEADER_BYTES + position / 8] & (1u << (position % 8)))
+          value |= 1u << bit;
+      }
+      stack_push(stack, '"', (value & 1024) != 0, (uint16_t)(value & 1023));
+    }
+    scanner->constructor_newline = (flags & 4) != 0;
+    scanner->comment = (PendingComment){true, start, end, (flags & 16) != 0};
+    return;
   }
+  if (length == 1 && flags == 4) { scanner->constructor_newline = true; return; }
+  if (length % 2) return;
+  array_reserve(stack, length);
+  memcpy(stack->contents, buffer, length);
+  stack->contents[0] &= (Delimiter)~4;
+  stack->size = length;
+  scanner->constructor_newline = (flags & 4) != 0;
 }
