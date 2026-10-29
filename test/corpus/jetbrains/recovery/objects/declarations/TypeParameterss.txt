@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: recovery/objects/declarations/TypeParameterss
-:error
 ==================
 
 // COMPILATION_ERRORS
@@ -13,3 +12,5 @@ object Foo<T, R> : Bar {
 
 }
 ---
+
+(source_file (line_comment) (object_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier)))) (object_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (class_body)) (object_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier))) (class_body)))
