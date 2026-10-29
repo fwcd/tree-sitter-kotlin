@@ -20,6 +20,7 @@ enum TokenType {
   PRIMARY_CONSTRUCTOR_HINT,
   CALLABLE_REFERENCE_QUEST,
   COMMENT_CONTINUATION_HINT,
+  TRY_CLAUSE_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -497,9 +498,10 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
-// After scan_for_word has matched "catch" or "finally", peek past optional
-// whitespace and comments for the character a real clause must open with:
-// '(' for `catch (e: E)`, '{' for `finally { }`. Anything else means the word
+// After a word has matched, peek past optional
+// whitespace and comments for a following character. For catch/finally,
+// callers first require TRY_CLAUSE_HINT; a follower alone cannot distinguish
+// a real clause from a call to a soft-keyword identifier. Anything else means the word
 // was an ordinary identifier — `catch<Throwable> { }` is a generic call, and
 // the statement before it has already ended.
 static bool followed_by(TSLexer *lexer, int32_t expected) {
@@ -813,7 +815,7 @@ static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
     continuation = constructor_trivia(lexer, &newline) && lexer->lookahead != '(';
   if (first == ':') { advance(lexer); continuation = lexer->lookahead != ':'; }
   if (strcmp(first_word, "finally") == 0) {
-    continuation = constructor_trivia(lexer, &newline) && lexer->lookahead == '{';
+    continuation = valid_symbols[TRY_CLAUSE_HINT];
   }
   if (first == '!') { advance(lexer); continuation = lexer->lookahead == '='; }
   if (strcmp(first_word, "else") == 0) {
@@ -867,27 +869,15 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       }
       return true;
     case 'c':
-      if (scan_for_word(lexer, "atch", 4)) {
-        // `catch` only continues a try_expression when its parameter list
-        // follows; a bare `catch` word is an ordinary identifier, so the
-        // statement really did end at the line break. A bare '/' means
-        // division, which is likewise not a catch_block.
-        if (!skip_whitespace_and_comments(lexer)) return true;
-        return lexer->lookahead != '(';
-      }
-      return true;
+      return !(valid_symbols[TRY_CLAUSE_HINT] &&
+               scan_for_word(lexer, "atch", 4));
     case 'b':
       if (valid_symbols[BY_DELEGATION_HINT] &&
           scan_for_word(lexer, "y", 1)) return false;
       return true;
     case 'f':
-      if (scan_for_word(lexer, "inally", 6)) {
-        // Same as `catch` above: only a following block makes this a
-        // finally_block rather than an identifier.
-        if (!skip_whitespace_and_comments(lexer)) return true;
-        return lexer->lookahead != '{';
-      }
-      return true;
+      return !(valid_symbols[TRY_CLAUSE_HINT] &&
+               scan_for_word(lexer, "inally", 6));
     default:
       return true;
   }
@@ -913,8 +903,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_s
     return constructor_trivia(lexer, &newline) && lexer->lookahead != '(';
   }
   if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) {
-    char follower = word[0] == 'c' ? '(' : '{';
-    return constructor_trivia(lexer, &newline) && lexer->lookahead == follower;
+    return valid_symbols[TRY_CLAUSE_HINT];
   }
   if (strcmp(word, "else") == 0) {
     if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
@@ -1235,16 +1224,16 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
           // Can't reliably check 'catch' now. Just insert ASI.
           return true;
         }
-        // Not in constructor context — check for 'catch'. A real catch clause
-        // opens with '('; `catch<T> { }` is a call to a function named catch.
-        if (!scan_for_word(lexer, "atch", 4)) return true;
-        return !followed_by(lexer, '(');
+        // In a try-clause slot this keyword belongs to that construct,
+        // including malformed clauses. Outside it, `catch(x)` is a call.
+        return !(valid_symbols[TRY_CLAUSE_HINT] &&
+                 scan_for_word(lexer, "atch", 4));
 
       // Don't insert a semicolon before finally (continues try_expression).
       // As with catch, only when a real clause follows.
       case 'f':
-        if (!scan_for_word(lexer, "inally", 6)) return true;
-        return !followed_by(lexer, '{');
+        return !(valid_symbols[TRY_CLAUSE_HINT] &&
+                 scan_for_word(lexer, "inally", 6));
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier
@@ -1313,6 +1302,8 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   if (valid_symbols[PRIMARY_CONSTRUCTOR_HINT] && !valid_symbols[STRING_CONTENT])
     return scan_primary_constructor_hint(scanner, lexer, valid_symbols);
   scanner->constructor_newline = false;
+  // TRY_CLAUSE_HINT is optional before catch/finally and is never emitted.
+  // Its validity identifies clause positions without changing keyword nodes.
   // BY_DELEGATION_HINT is declared in the grammar (optional, before `by` in
   // explicit_delegation and property_delegate) purely so it appears in
   // valid_symbols when the parser is in a delegation context. The scanner
