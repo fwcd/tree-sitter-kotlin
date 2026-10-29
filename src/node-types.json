@@ -4174,6 +4174,10 @@
           "named": true
         },
         {
+          "type": "binding_pattern_kind",
+          "named": true
+        },
+        {
           "type": "boolean_literal",
           "named": true
         },

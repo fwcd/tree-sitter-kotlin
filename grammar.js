@@ -593,9 +593,15 @@ module.exports = grammar({
       ")"
     ),
 
+    // Kotlin's parser accepts a value parameter with no explicit type, and
+    // `val`/`var` on a function parameter; both are reported later as
+    // diagnostics (VALUE_PARAMETER_WITHOUT_EXPLICIT_TYPE,
+    // VAL_OR_VAR_ON_FUN_PARAMETER) rather than as syntax errors. PSI still
+    // builds an ordinary VALUE_PARAMETER, so the grammar does too.
     _function_value_parameter: $ => seq(
       optional($.parameter_modifiers),
-      $.parameter,
+      optional($.binding_pattern_kind),
+      alias($._optionally_typed_parameter, $.parameter),
       optional(seq("=", $._expression))
     ),
 
@@ -1247,11 +1253,11 @@ module.exports = grammar({
 
     _anonymous_function_value_parameter: $ => seq(
       optional($.parameter_modifiers),
-      alias($._anonymous_parameter, $.parameter),
+      alias($._optionally_typed_parameter, $.parameter),
       optional(seq("=", $._expression))
     ),
 
-    _anonymous_parameter: $ => seq($.simple_identifier, optional(seq(":", $._type))),
+    _optionally_typed_parameter: $ => seq($.simple_identifier, optional(seq(":", $._type))),
 
     _function_literal: $ => choice(
       $.lambda_literal,

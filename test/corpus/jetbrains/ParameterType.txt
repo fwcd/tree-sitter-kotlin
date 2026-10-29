@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: ParameterType
-:error
 ==================
 
 // COMPILATION_ERRORS
@@ -30,3 +29,5 @@ val a: (a: A) -> Unit
 
 class A(a: Int)
 ---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier)) (integer_literal)) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (simple_identifier)))))) (parameter (simple_identifier))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter_modifiers (annotation (user_type (type_identifier)))) (parameter (simple_identifier))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier))))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (anonymous_function (function_value_parameters (parameter (simple_identifier))) (function_body))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (anonymous_function (function_value_parameters (parameter (simple_identifier)) (integer_literal)) (function_body))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (anonymous_function (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (function_type (function_type_parameters (user_type (type_identifier))) (user_type (type_identifier))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (function_type (function_type_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))))) (class_declaration (type_identifier) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier))))))

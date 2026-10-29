@@ -5,7 +5,7 @@
   "comparedFixtures": 438,
   "fixtureContentHash": "b8e2bf76935d2c8e688b5eae141a196f0ed7bf129d004b4e1ed83ec7b70ef644",
   "parser": {
-    "src/parser.c": "04bd9e8eec92ea613e27207909f62d5adb958784a0217a296b30e84df1ebc124",
+    "src/parser.c": "d33f3e8b601c548226f020f6fbe27ddccac19dd877089c9c46e1f98683fd57fc",
     "src/scanner.c": "ccc5cbf3646f63402bcfd4ab68a8c21319d5a50643067089d06c87097dcb68bd"
   },
   "excluded": [
@@ -104,6 +104,7 @@
     "NewlinesInParentheses",
     "NotIsAndNotIn",
     "ObjectLiteralAsStatement",
+    "ParameterType",
     "PropertyInvokes",
     "QuotedIdentifiers",
     "SemicolonAfterIf",
@@ -339,6 +340,7 @@
     "newLabels/oldSyntaxExpressions",
     "objects",
     "operators/untilOperator",
+    "operators/untilOperatorDifferentContexts",
     "parameterizedSuspendFunctionType",
     "parameterizedSuspendFunctionTypeComplex",
     "platformTypesRecovery/FunctionsNotPlatform",
@@ -472,7 +474,6 @@
     "FunctionExpressions",
     "FunctionsWithoutName",
     "LocalDeclarations",
-    "ParameterType",
     "SimpleModifiers",
     "SoftKeywords",
     "SoftKeywordsInTypeArguments",
@@ -491,7 +492,6 @@
     "examples/With",
     "examples/util/Comparison",
     "greatSyntacticShift/nullableTypes",
-    "operators/untilOperatorDifferentContexts",
     "packages/PackageModifiers",
     "propertyDelegate/PropertyWithInitializer",
     "recovery/binaryExpression/SoftModifierAsInfixFunction",
