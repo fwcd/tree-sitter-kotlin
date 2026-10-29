@@ -470,3 +470,58 @@ typealias Foo = (Int, String,) -> Unit
           (type_identifier)))
       (user_type
         (type_identifier)))))
+
+================================================================================
+Annotated unparenthesized function type as a declaration receiver
+================================================================================
+
+fun @receiver:A () -> Unit?.f(){}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    receiver: (receiver_type
+      (type_modifiers
+        (annotation
+          (use_site_target)
+          (user_type
+            (type_identifier))))
+      (function_type
+        (function_type_parameters)
+        (nullable_type
+          (user_type
+            (type_identifier))
+          (quest))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+================================================================================
+Type modifiers stay outside a nested function type
+================================================================================
+
+val x: @A Foo.() -> Bar = TODO()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (type_modifiers
+        (annotation
+          (user_type
+            (type_identifier))))
+      (function_type
+        receiver: (receiver_type
+          (user_type
+            (type_identifier)))
+        (function_type_parameters)
+        (user_type
+          (type_identifier))))
+    (call_expression
+      (simple_identifier)
+      (call_suffix
+        (value_arguments)))))
