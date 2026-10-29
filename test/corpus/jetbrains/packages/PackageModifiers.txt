@@ -1,9 +1,10 @@
 ==================
 JetBrains PSI: packages/PackageModifiers
-:error
 ==================
 
 // COMPILATION_ERRORS
 
 public @[a] package name
 ---
+
+(source_file (line_comment) (package_header (modifiers (visibility_modifier) (annotation (user_type (type_identifier)))) (identifier (simple_identifier))))

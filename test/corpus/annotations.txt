@@ -620,3 +620,94 @@ class C(@all:A val x:Int)
         (simple_identifier)
         (user_type
           (type_identifier))))))
+
+================================================================================
+File use-site target among declaration annotations
+================================================================================
+
+@A @file:B
+fun f(){}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (annotation
+        (use_site_target)
+        (user_type
+          (type_identifier))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+================================================================================
+A leading file annotation is still a file annotation
+================================================================================
+
+@file:JvmName("X")
+fun f(){}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+================================================================================
+Targeted annotation before a package directive
+================================================================================
+
+@field:A package p
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (use_site_target)
+    (user_type
+      (type_identifier)))
+  (package_header
+    (identifier
+      (simple_identifier))))
+
+================================================================================
+Modifiers on a package directive
+================================================================================
+
+public @[A] package p
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (package_header
+    (modifiers
+      (visibility_modifier)
+      (annotation
+        (user_type
+          (type_identifier))))
+    (identifier
+      (simple_identifier))))
+
+================================================================================
+An untargeted annotation alone before a package directive is an error
+:error
+================================================================================
+
+@A package p
+
+--------------------------------------------------------------------------------
+

@@ -151,6 +151,17 @@ module.exports = grammar({
     // property modifier as identifier
     [$.property_modifier, $.simple_identifier],
     // parameter modifiers as identifiers
+    // `@file:` at the head of a file is a file_annotation; after another
+    // annotation it is an ordinary use-site target on the declaration. The two
+    // readings are identical until the file's shape decides between them.
+    [$.file_annotation, $.use_site_target],
+    // Before `package` a targeted annotation is a file annotation; elsewhere
+    // the same `@target:` prefix belongs to a declaration annotation.
+    [$.use_site_target, $.non_file_annotation_target],
+    // A modifier before `package` may belong to the package directive's own
+    // modifier list or to a declaration that follows; `@` after it is the
+    // first token that could tell them apart, and it does not.
+    [$.package_modifiers, $.modifiers],
     [$.parameter_modifier, $.simple_identifier],
     [$.modifiers],
     [$.parameter_modifiers],
@@ -174,7 +185,7 @@ module.exports = grammar({
     // _statement_annotation vs annotation (in prefix_expression and modifiers):
     // both parse @Identifier but route through different rules.
     [$._statement_annotation, $.annotation],
-    [$.prefix_expression, $.when_subject],
+    [$.prefix_expression, $._when_subject_variable],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
     [$.call_expression, $._generic_call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
@@ -302,16 +313,58 @@ module.exports = grammar({
     // file annotation starts with `@file:`, and what can follow one — another
     // annotation, `package`, `import`, a statement — is distinguishable from
     // the first token, so the separator can simply be optional.
-    file_annotation: $ => seq(
-      "@", "file", ":",
-      choice(
-        seq("[", repeat1($._unescaped_annotation), "]"),
-        $._unescaped_annotation
-      ),
-      optional($._semi)
+    //
+    // `@file:` is also an ordinary use-site target (see `use_site_target`), so
+    // a leading `@file:A` parses both ways. Both readings are complete, so the
+    // choice is a dynamic precedence: at the head of a file the file
+    // annotation wins, which is what Kotlin's parser does — it only falls back
+    // to the declaration's modifier list once another annotation precedes it,
+    // and there this rule is not reachable.
+    file_annotation: $ => choice(
+      prec.dynamic(1, seq(
+        "@", "file", ":",
+        $._file_annotation_body,
+        optional($._semi)
+      )),
+      // `@field:A package p`. Before the package directive Kotlin's parser
+      // puts a targeted annotation in the file annotation list whatever the
+      // target is — but only there. The same `@field:A` in front of a
+      // declaration belongs to that declaration, which PSI confirms:
+      // `@field:A val y = 1` is a PROPERTY with a MODIFIER_LIST, while
+      // `@field:A package p` is a FILE_ANNOTATION_LIST. So this reading is
+      // given a negative dynamic precedence and survives only where the
+      // declaration reading cannot complete, which is exactly the package
+      // case. Only `@file:` keeps the bare spelling, so its tree is unchanged.
+      prec.dynamic(-1, seq(
+        "@",
+        alias($.non_file_annotation_target, $.use_site_target),
+        $._file_annotation_body,
+        optional($._semi)
+      ))
     ),
 
-    package_header: $ => seq("package", $.identifier, $._semi),
+    _file_annotation_body: $ => choice(
+      seq("[", repeat1($._unescaped_annotation), "]"),
+      $._unescaped_annotation
+    ),
+
+    // `public @[A] package p`. Unlike a targeted annotation, which becomes a
+    // file annotation, modifiers before `package` are part of the package
+    // directive itself: PSI puts them in a MODIFIER_LIST inside
+    // PACKAGE_DIRECTIVE. The compiler then reports the wrong target.
+    //
+    // The list has to begin with a real modifier. An annotation on its own in
+    // front of `package` is not a modifier list and not valid Kotlin: PSI
+    // reports `Expecting "file:" prefix for file annotations` for both
+    // `@A package p` and `@[A] package p`, while `public package p`,
+    // `public @A package p` and `public @[A] package p` are all clean. Those
+    // two therefore stay errors here.
+    package_header: $ => seq(
+      optional(alias($.package_modifiers, $.modifiers)),
+      "package", $.identifier, $._semi
+    ),
+
+    package_modifiers: $ => seq($._modifier, repeat(choice($.annotation, $._modifier))),
 
     import_list: $ => repeat1($.import_header),
 
@@ -577,7 +630,11 @@ module.exports = grammar({
       $.secondary_constructor
     ),
 
-    anonymous_initializer: $ => seq("init", $._block),
+    // `class C { private init {} }`. The compiler rejects the modifier with
+    // WRONG_MODIFIER_TARGET, but Kotlin's parser reads it: PSI builds a
+    // CLASS_INITIALIZER with a MODIFIER_LIST, so the rest of the class body
+    // still parses.
+    anonymous_initializer: $ => seq(optional($.modifiers), "init", $._block),
 
     companion_object: $ => seq(
       optional($.modifiers),
@@ -1077,6 +1134,10 @@ module.exports = grammar({
       choice(
         $.simple_identifier,
         $.parenthesized_expression,
+        // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
+        // compiler diagnostic; Kotlin's parser reads the lambda and PSI
+        // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
+        $.lambda_literal,
         "class"
       )
     ),
@@ -1305,14 +1366,29 @@ module.exports = grammar({
 
     when_subject: $ => seq(
       "(",
-      optional(seq(
-        repeat($.annotation),
-        "val",
-        $.variable_declaration,
-        "="
-      )),
-      $._expression,
+      choice(
+        seq(
+          optional(seq($._when_subject_variable, "=")),
+          $._expression
+        ),
+        // `when (val x: T) {}` — a subject variable with no initializer.
+        // ILLEGAL_DECLARATION_IN_WHEN_SUBJECT is a compiler diagnostic, not a
+        // parse error: PSI builds the PROPERTY and carries on, so the `when`
+        // and everything after it still parse.
+        $._when_subject_variable
+      ),
       ")",
+    ),
+
+    // Kotlin's parser reads a full property declaration here and lets the
+    // compiler object, so the subject variable can destructure or carry a
+    // receiver just like any other `val`: `when (val (a, b) = foo) {}`,
+    // `when (val T.x = foo) {}`.
+    _when_subject_variable: $ => seq(
+      repeat($.annotation),
+      "val",
+      optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
+      choice($.variable_declaration, $.multi_variable_declaration)
     ),
 
     when_expression: $ => seq(
@@ -1609,9 +1685,23 @@ module.exports = grammar({
     use_site_target: $ => seq(
       // `all` is the use-site target introduced for annotating every
       // declaration a constructor property generates at once.
-      choice("all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
+      //
+      // `file` belongs here too. A file annotation only has its own form at
+      // the head of the file; once an ordinary annotation precedes it, as in
+      // `@A @file:B` before a function, Kotlin's parser puts both entries in
+      // the declaration's MODIFIER_LIST.
+      choice($._use_site_target_name, "file"),
       ":"
     ),
+
+    _use_site_target_name: $ => choice(
+      "all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate"
+    ),
+
+    // Only ever used through an alias to `use_site_target`, so that a file
+    // annotation can carry a non-`file` target without `@file:` itself
+    // gaining a child it never had.
+    non_file_annotation_target: $ => seq($._use_site_target_name, ":"),
 
     _unescaped_annotation: $ => choice(
       alias($._annotation_constructor_invocation, $.constructor_invocation),

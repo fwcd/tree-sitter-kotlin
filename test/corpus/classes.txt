@@ -1749,3 +1749,18 @@ class C private ()
     (primary_constructor
       (modifiers
         (visibility_modifier)))))
+================================================================================
+Modifier on an anonymous initializer
+================================================================================
+
+class C{private init{}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (anonymous_initializer
+        (modifiers
+          (visibility_modifier))))))
