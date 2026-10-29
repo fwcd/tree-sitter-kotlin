@@ -89,6 +89,7 @@ module.exports = grammar({
     [$.property_modifier, $.simple_identifier],
     // parameter modifiers as identifiers
     [$.parameter_modifier, $.simple_identifier],
+    [$.modifiers],
     [$.parameter_modifiers],
     [$.type_parameter_modifiers],
 
@@ -1264,9 +1265,10 @@ module.exports = grammar({
     // Modifiers
     // ==========
 
-    modifiers: $ => prec.right(
-      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $._modifier)))
-    ),
+    modifiers: $ => repeat1(choice(
+      prec.right(PREC.MODIFIERS, $.annotation),
+      $._modifier
+    )),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
 
