@@ -873,6 +873,10 @@
       "required": false,
       "types": [
         {
+          "type": "quest",
+          "named": true
+        },
+        {
           "type": "simple_identifier",
           "named": true
         },
