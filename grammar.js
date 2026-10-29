@@ -1068,6 +1068,10 @@ module.exports = grammar({
       choice(
         $.simple_identifier,
         $.parenthesized_expression,
+        // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
+        // compiler diagnostic; Kotlin's parser reads the lambda and PSI
+        // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
+        $.lambda_literal,
         "class"
       )
     ),

@@ -6195,6 +6195,10 @@
       "required": false,
       "types": [
         {
+          "type": "lambda_literal",
+          "named": true
+        },
+        {
           "type": "parenthesized_expression",
           "named": true
         },

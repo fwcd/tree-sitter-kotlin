@@ -1922,3 +1922,27 @@ fun g(){when(val y=1){}}
             (variable_declaration
               (simple_identifier))
             (integer_literal)))))))
+
+================================================================================
+Lambda as a dot selector
+================================================================================
+
+fun f(){a.{b}()}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (lambda_literal
+                (statements
+                  (simple_identifier)))))
+          (call_suffix
+            (value_arguments)))))))
