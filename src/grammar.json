@@ -2981,10 +2981,18 @@
             "name": "user_type"
           },
           {
-            "type": "STRING",
-            "value": "dynamic"
+            "type": "SYMBOL",
+            "name": "_dynamic_type"
           }
         ]
+      }
+    },
+    "_dynamic_type": {
+      "type": "PREC_DYNAMIC",
+      "value": 1,
+      "content": {
+        "type": "STRING",
+        "value": "dynamic"
       }
     },
     "not_nullable_type": {
@@ -8051,6 +8059,10 @@
     }
   ],
   "conflicts": [
+    [
+      "_dynamic_type",
+      "simple_identifier"
+    ],
     [
       "_primary_expression",
       "callable_reference"

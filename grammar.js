@@ -100,6 +100,9 @@ module.exports = grammar({
   name: "kotlin",
 
   conflicts: $ => [
+    // See `_type_reference`: bare `dynamic` versus a user type named `dynamic`.
+    [$._dynamic_type, $.simple_identifier],
+
     // Ambiguous when used in an explicit delegation expression,
     // since the '{' could either be interpreted as the class body
     // or as the anonymous function body. Consider the following sequence:
@@ -787,10 +790,20 @@ module.exports = grammar({
       )
     ),
 
+    // `dynamic` is a type in its own right, but a package or class may also be
+    // named `dynamic`, so `dynamic.T` is an ordinary qualified user type. Only
+    // the token after `dynamic` tells the two apart, which is why the bare
+    // alternative alone made `dynamic.T` unparseable: it is a leaf, so nothing
+    // could follow the '.'. Both readings are carried as a GLR conflict, and
+    // `prec.dynamic` prefers the dedicated type whenever a bare `dynamic`
+    // would also parse as a user type — which is how the Kotlin compiler reads
+    // it, and keeps `dynamic` from printing as just another type_identifier.
     _type_reference: $ => prec.left(1, choice(
       $.user_type,
-      "dynamic"
+      $._dynamic_type
     )),
+
+    _dynamic_type: $ => prec.dynamic(1, "dynamic"),
 
     not_nullable_type: $ => seq(
       optional($.type_modifiers),
