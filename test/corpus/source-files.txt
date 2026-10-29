@@ -142,3 +142,119 @@ class MyClass
   (multiline_comment)
   (class_declaration
     (type_identifier)))
+
+================================================================================
+Two file annotations on one line
+================================================================================
+
+@file:JvmMultifileClass @file:JvmName("FlowKt")
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (user_type
+      (type_identifier)))
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content)))))))
+
+================================================================================
+File annotations on one line, then package and import
+================================================================================
+
+@file:JvmMultifileClass @file:JvmName("FlowKt")
+
+package kotlinx.coroutines.flow
+
+import kotlin.jvm.*
+
+val x = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (user_type
+      (type_identifier)))
+  (file_annotation
+    (constructor_invocation
+      (user_type
+        (type_identifier))
+      (value_arguments
+        (value_argument
+          (string_literal
+            (string_content))))))
+  (package_header
+    (identifier
+      (simple_identifier)
+      (simple_identifier)
+      (simple_identifier)))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))
+      (wildcard_import)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Bracketed and plain file annotations on one line
+================================================================================
+
+@file:[A B] @file:C
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (user_type
+      (type_identifier))
+    (user_type
+      (type_identifier)))
+  (file_annotation
+    (user_type
+      (type_identifier))))
+
+================================================================================
+File annotation and package on one line
+================================================================================
+
+@file:A package p
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (user_type
+      (type_identifier)))
+  (package_header
+    (identifier
+      (simple_identifier))))
+
+================================================================================
+File annotation and declaration on one line
+================================================================================
+
+@file:A val x = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (file_annotation
+    (user_type
+      (type_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))

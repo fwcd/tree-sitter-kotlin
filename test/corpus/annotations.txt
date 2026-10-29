@@ -596,3 +596,27 @@ fun f() {
         (parenthesized_expression
           (string_literal
             (string_content)))))))
+
+
+================================================================================
+Annotation with the all use-site target
+================================================================================
+
+class C(@all:A val x:Int)
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (modifiers
+          (annotation
+            (use_site_target)
+            (user_type
+              (type_identifier))))
+        (binding_pattern_kind)
+        (simple_identifier)
+        (user_type
+          (type_identifier))))))
