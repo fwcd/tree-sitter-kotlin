@@ -201,3 +201,22 @@ object C<T>
     (type_parameters
       (type_parameter
         (type_identifier)))))
+
+================================================================================
+Object with a modified constructor and a supertype
+================================================================================
+
+object C private():T{}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)))
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body)))
