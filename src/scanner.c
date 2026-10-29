@@ -626,6 +626,14 @@ static bool constructor_word_char(int32_t c) {
   return !constructor_space(c);
 }
 
+// C-locale iswalnum can miss Unicode identifier suffixes. A context keyword
+// probe must not turn catché/finallyé into a clause; only wholly ASCII words
+// with a complete identifier boundary qualify. This probe emits no identifier.
+static bool scan_try_clause_keyword(TSLexer *lexer, const char *suffix, unsigned length) {
+  return scan_for_word(lexer, suffix, length) &&
+    !constructor_word_char(lexer->lookahead);
+}
+
 static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity) {
   unsigned length = 0;
   bool ascii = true;
@@ -870,14 +878,14 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       return true;
     case 'c':
       return !(valid_symbols[TRY_CLAUSE_HINT] &&
-               scan_for_word(lexer, "atch", 4));
+               scan_try_clause_keyword(lexer, "atch", 4));
     case 'b':
       if (valid_symbols[BY_DELEGATION_HINT] &&
           scan_for_word(lexer, "y", 1)) return false;
       return true;
     case 'f':
       return !(valid_symbols[TRY_CLAUSE_HINT] &&
-               scan_for_word(lexer, "inally", 6));
+               scan_try_clause_keyword(lexer, "inally", 6));
     default:
       return true;
   }
@@ -1227,13 +1235,13 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
         // In a try-clause slot this keyword belongs to that construct,
         // including malformed clauses. Outside it, `catch(x)` is a call.
         return !(valid_symbols[TRY_CLAUSE_HINT] &&
-                 scan_for_word(lexer, "atch", 4));
+                 scan_try_clause_keyword(lexer, "atch", 4));
 
       // Don't insert a semicolon before finally (continues try_expression).
       // As with catch, only when a real clause follows.
       case 'f':
         return !(valid_symbols[TRY_CLAUSE_HINT] &&
-                 scan_for_word(lexer, "inally", 6));
+                 scan_try_clause_keyword(lexer, "inally", 6));
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier

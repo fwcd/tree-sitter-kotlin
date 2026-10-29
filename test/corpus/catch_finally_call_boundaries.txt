@@ -2538,3 +2538,156 @@ try {} catch(e: E) {}
 --------------------------------------------------------------------------------
 
 
+
+================================================================================
+Unicode identifier after a catch block: catché(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catché(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catché(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catché(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch变量(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch变量(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch𐐀(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch𐐀(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: catch𐐀(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+catch𐐀(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finallyé(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finallyé(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finallyé(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finallyé(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finally变量(x)|LF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finally变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Unicode identifier after a catch block: finally变量(x)|CRLF
+================================================================================
+
+fun f() {
+try {} catch(e: E) {}
+
+finally变量(x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (try_expression (catch_block (simple_identifier) (user_type (type_identifier)))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))
+
+================================================================================
+Separate generic catch and finally calls in a DSL
+================================================================================
+
+fun f() {
+    catch<Throwable> { exception = it }
+    finally { isDone = true }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (annotated_lambda (lambda_literal (statements (assignment (directly_assignable_expression (simple_identifier)) (simple_identifier))))))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (assignment (directly_assignable_expression (simple_identifier)) (boolean_literal)))))))))))
