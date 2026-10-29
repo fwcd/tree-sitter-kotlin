@@ -568,7 +568,11 @@ module.exports = grammar({
       $.secondary_constructor
     ),
 
-    anonymous_initializer: $ => seq("init", $._block),
+    // `class C { private init {} }`. The compiler rejects the modifier with
+    // WRONG_MODIFIER_TARGET, but Kotlin's parser reads it: PSI builds a
+    // CLASS_INITIALIZER with a MODIFIER_LIST, so the rest of the class body
+    // still parses.
+    anonymous_initializer: $ => seq(optional($.modifiers), "init", $._block),
 
     companion_object: $ => seq(
       optional($.modifiers),

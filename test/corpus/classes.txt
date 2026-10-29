@@ -1734,3 +1734,19 @@ val o = object : B() {;
           (simple_identifier)
           (function_value_parameters)
           (function_body))))))
+
+================================================================================
+Modifier on an anonymous initializer
+================================================================================
+
+class C{private init{}}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (anonymous_initializer
+        (modifiers
+          (visibility_modifier))))))
