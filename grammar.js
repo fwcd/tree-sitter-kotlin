@@ -100,6 +100,9 @@ module.exports = grammar({
   name: "kotlin",
 
   conflicts: $ => [
+    // See `_type_reference`: bare `dynamic` versus a user type named `dynamic`.
+    [$._dynamic_type, $.simple_identifier],
+
     // Ambiguous when used in an explicit delegation expression,
     // since the '{' could either be interpreted as the class body
     // or as the anonymous function body. Consider the following sequence:
@@ -112,6 +115,10 @@ module.exports = grammar({
     // declaration prefix or an ordinary call whose callee is named `context`.
     // GLR explores both and keeps whichever yields a valid parse.
     [$.context_receiver, $.simple_identifier],
+
+    // `l@` may begin a labelled expression or, now, a labelled declaration;
+    // which it is only becomes clear at the token after the label.
+    [$.prefix_expression],
 
     // `( name` at statement start: a destructuring target or a parenthesized
     // expression. Nothing tells them apart until after the ')', so carry both.
@@ -783,10 +790,20 @@ module.exports = grammar({
       )
     ),
 
+    // `dynamic` is a type in its own right, but a package or class may also be
+    // named `dynamic`, so `dynamic.T` is an ordinary qualified user type. Only
+    // the token after `dynamic` tells the two apart, which is why the bare
+    // alternative alone made `dynamic.T` unparseable: it is a leaf, so nothing
+    // could follow the '.'. Both readings are carried as a GLR conflict, and
+    // `prec.dynamic` prefers the dedicated type whenever a bare `dynamic`
+    // would also parse as a user type — which is how the Kotlin compiler reads
+    // it, and keeps `dynamic` from printing as just another type_identifier.
     _type_reference: $ => prec.left(1, choice(
       $.user_type,
-      "dynamic"
+      $._dynamic_type
     )),
+
+    _dynamic_type: $ => prec.dynamic(1, "dynamic"),
 
     not_nullable_type: $ => seq(
       optional($.type_modifiers),
@@ -856,7 +873,11 @@ module.exports = grammar({
     ),
 
     _statement: $ => choice(
-      $._declaration,
+      // A declaration may carry labels too — `fun f() { l@ val x = 1 }` is
+      // valid Kotlin. Only labels, not the statement-annotation prefix:
+      // annotations on a declaration are already handled by `modifiers`, and
+      // allowing both here would make them ambiguous.
+      seq(optional($.label), $._declaration),
       seq(
         repeat(choice($.label, alias($._statement_annotation, $.annotation))),
         choice(
@@ -1481,11 +1502,22 @@ module.exports = grammar({
       "out"
     ),
 
-    type_parameter_modifiers: $ => repeat1($._type_parameter_modifier),
+    // A type parameter carries at most one variance modifier, which is the
+    // rule Kotlin itself enforces. Folding `variance_modifier` into a plain
+    // `repeat1` let `class C<out out>` consume both words as modifiers and
+    // then report the parameter's name as missing, rather than reading the
+    // second `out` as the name.
+    type_parameter_modifiers: $ => choice(
+      seq(
+        repeat($._type_parameter_modifier),
+        $.variance_modifier,
+        repeat($._type_parameter_modifier)
+      ),
+      repeat1($._type_parameter_modifier)
+    ),
 
     _type_parameter_modifier: $ => choice(
       $.reification_modifier,
-      $.variance_modifier,
       $.annotation
     ),
 
@@ -1611,8 +1643,12 @@ module.exports = grammar({
       "finally",
       // Batch 7: enum
       "enum",
-      // Batch 8: variance modifiers — skipped, causes new break on SoftKeywordsInTypeArguments.kt
-      // "out", "in" — too ambiguous in type parameter contexts
+      // "out" and "in" are deliberately absent, and listing them here would
+      // be dead weight: keyword extraction already lexes them as
+      // `_alpha_identifier` and only promotes them to keywords in states that
+      // expect one, so `val out = 1` and `class C<out out>` parse as
+      // identifiers without any entry. See `type_parameter_modifiers`, which
+      // is what has to bound the variance slot for that to work.
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),

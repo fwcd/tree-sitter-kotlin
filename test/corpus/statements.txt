@@ -978,6 +978,96 @@ fun foo(e: Any) {
               (integer_literal))))))))
 
 ================================================================================
+Label before a property declaration
+================================================================================
+
+fun f() {
+    l@ val x = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (label)
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+Label before a local function declaration
+================================================================================
+
+fun f() {
+    l@ fun g() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (label)
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
+
+================================================================================
+Label before a loop still parses
+================================================================================
+
+fun f() {
+    l@ while (true) {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (label)
+        (while_statement
+          (boolean_literal)
+          (control_structure_body))))))
+
+================================================================================
+Label before an expression still parses
+================================================================================
+
+fun f() {
+    val x = l@ 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (prefix_expression
+            (label)
+            (integer_literal)))))))
+
+================================================================================
 Call to a function named where after a newline
 ================================================================================
 
