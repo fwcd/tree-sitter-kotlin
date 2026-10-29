@@ -7770,6 +7770,10 @@
       "required": false,
       "types": [
         {
+          "type": "function_type",
+          "named": true
+        },
+        {
           "type": "nullable_type",
           "named": true
         },
@@ -9992,6 +9996,10 @@
   },
   {
     "type": "actual",
+    "named": false
+  },
+  {
+    "type": "all",
     "named": false
   },
   {
