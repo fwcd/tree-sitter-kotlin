@@ -11,11 +11,12 @@ fun ProblemReporter.report() {
 
 (source_file
   (function_declaration
-    (context_receiver
-      (parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier))))
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
     (receiver_type
       (user_type
         (type_identifier)))
@@ -39,9 +40,10 @@ fun compute(): Int = 1
 
 (source_file
   (function_declaration
-    (context_receiver
-      (user_type
-        (type_identifier)))
+    (modifiers
+      (context_receiver
+        (user_type
+          (type_identifier))))
     (simple_identifier)
     (function_value_parameters)
     (user_type
@@ -60,15 +62,16 @@ fun run() {}
 
 (source_file
   (function_declaration
-    (context_receiver
-      (parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier)))
-      (parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier))))
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
     (simple_identifier)
     (function_value_parameters)
     (function_body)))
@@ -85,11 +88,12 @@ val current: Int
 
 (source_file
   (property_declaration
-    (context_receiver
-      (parameter
-        (simple_identifier)
-        (user_type
-          (type_identifier))))
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
     (binding_pattern_kind)
     (variable_declaration
       (simple_identifier)
@@ -113,10 +117,11 @@ fun register(block: context(Scope) () -> Unit) {}
     (function_value_parameters
       (parameter
         (simple_identifier)
-        (function_type
+        (type_modifiers
           (context_receiver
             (user_type
-              (type_identifier)))
+              (type_identifier))))
+        (function_type
           (function_type_parameters)
           (user_type
             (type_identifier)))))
@@ -161,3 +166,233 @@ fun f() {
               (simple_identifier)))
           (call_suffix
             (value_arguments)))))))
+
+================================================================================
+Context list after an annotation
+================================================================================
+
+@Ann context(a: A) fun f() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (annotation
+        (user_type
+          (type_identifier)))
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+================================================================================
+Context list after a visibility modifier
+================================================================================
+
+public context(a: A) fun f() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+================================================================================
+Context list on a secondary constructor
+================================================================================
+
+class C {
+    context(a: A)
+    constructor(x: Int) : this()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (secondary_constructor
+        (modifiers
+          (context_receiver
+            (parameter
+              (simple_identifier)
+              (user_type
+                (type_identifier)))))
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (constructor_delegation_call
+          (value_arguments))))))
+
+================================================================================
+Context list on a getter
+================================================================================
+
+val p: Int
+    context(a: A)
+    get() = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (getter
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (function_body
+      (integer_literal))))
+
+================================================================================
+Context list on an object declaration
+================================================================================
+
+context(a: A)
+object O
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (object_declaration
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (type_identifier)))
+
+================================================================================
+Context list on a typealias
+================================================================================
+
+context(a: A)
+typealias T = Int
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (type_alias
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (type_identifier)
+    (user_type
+      (type_identifier))))
+
+================================================================================
+Annotated context parameter
+================================================================================
+
+context(@Ann c: String)
+fun f() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (context_receiver
+        (parameter_modifiers
+          (annotation
+            (user_type
+              (type_identifier))))
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))
+
+================================================================================
+Context list on an anonymous function
+================================================================================
+
+val t = context(a: A) fun () { }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (anonymous_function
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (function_value_parameters)
+      (function_body))))
+
+================================================================================
+Context list on a fun interface
+================================================================================
+
+context(a: A)
+fun interface Foo { fun g() }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (type_identifier)
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)))))
+
+================================================================================
+Context receivers on a class
+================================================================================
+
+context(A, B)
+class Foo
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (modifiers
+      (context_receiver
+        (user_type
+          (type_identifier))
+        (user_type
+          (type_identifier))))
+    (type_identifier)))

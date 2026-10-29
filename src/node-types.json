@@ -225,6 +225,10 @@
       "required": true,
       "types": [
         {
+          "type": "context_receiver",
+          "named": true
+        },
+        {
           "type": "function_body",
           "named": true
         },
@@ -2051,6 +2055,10 @@
         },
         {
           "type": "parameter",
+          "named": true
+        },
+        {
+          "type": "parameter_modifiers",
           "named": true
         },
         {
@@ -3993,10 +4001,6 @@
       "required": true,
       "types": [
         {
-          "type": "context_receiver",
-          "named": true
-        },
-        {
           "type": "function_body",
           "named": true
         },
@@ -4071,10 +4075,6 @@
       "multiple": true,
       "required": true,
       "types": [
-        {
-          "type": "context_receiver",
-          "named": true
-        },
         {
           "type": "function_type",
           "named": true
@@ -5783,6 +5783,10 @@
           "named": true
         },
         {
+          "type": "context_receiver",
+          "named": true
+        },
+        {
           "type": "function_modifier",
           "named": true
         },
@@ -7086,10 +7090,6 @@
         },
         {
           "type": "conjunction_expression",
-          "named": true
-        },
-        {
-          "type": "context_receiver",
           "named": true
         },
         {
@@ -8762,6 +8762,10 @@
       "types": [
         {
           "type": "annotation",
+          "named": true
+        },
+        {
+          "type": "context_receiver",
           "named": true
         }
       ]

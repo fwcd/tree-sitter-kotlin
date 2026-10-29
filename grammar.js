@@ -514,7 +514,8 @@ module.exports = grammar({
     context_receiver: $ => seq(
       "context",
       "(",
-      optional(seq(sep1(choice($.parameter, $._type), ","), optional(","))),
+      sep1(choice(seq(optional($.parameter_modifiers), $.parameter), $._type), ","),
+      optional(","),
       ")"
     ),
 
@@ -524,7 +525,6 @@ module.exports = grammar({
     // made for `class` and `object` (issue #277); at the time `fun` was not
     // reachable that way, and the GLR conflict on annotations made it so.
     function_declaration: $ => prec.dynamic(1, prec.right(seq( // TODO
-      optional($.context_receiver),
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
@@ -560,7 +560,6 @@ module.exports = grammar({
     )),
 
     property_declaration: $ => prec.right(seq(
-      optional($.context_receiver),
       optional($.modifiers),
       $.binding_pattern_kind,
       optional($.type_parameters),
@@ -715,8 +714,6 @@ module.exports = grammar({
     _type_projection_modifier: $ => $.variance_modifier,
 
     function_type: $ => seq(
-      // Context parameters may prefix a function type: `context(C) () -> Unit`.
-      optional($.context_receiver),
       optional(seq(field("receiver", $.receiver_type), ".")),
       $.function_type_parameters,
       "->",
@@ -1055,6 +1052,7 @@ module.exports = grammar({
     ),
 
     anonymous_function: $ => prec.right(seq(
+      optional($.context_receiver),
       optional("suspend"),
       "fun",
       optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
@@ -1234,7 +1232,7 @@ module.exports = grammar({
     // ==========
 
     modifiers: $ => prec.right(
-      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $._modifier)))
+      repeat1(prec.right(PREC.MODIFIERS, choice($.annotation, $.context_receiver, $._modifier)))
     ),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
@@ -1252,7 +1250,7 @@ module.exports = grammar({
 
     type_modifiers: $ => repeat1($._type_modifier),
 
-    _type_modifier: $ => choice($.annotation, "suspend"),
+    _type_modifier: $ => choice($.annotation, $.context_receiver, "suspend"),
 
     class_modifier: $ => choice(
       "sealed",
