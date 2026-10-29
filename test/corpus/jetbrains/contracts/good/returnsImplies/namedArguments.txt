@@ -1,0 +1,19 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/namedArguments
+==================
+
+import kotlin.contracts.*
+
+@OptIn(ExperimentalContracts::class)
+fun foo(x: Any, y: Any) {
+    contract {
+        returns() implies (x is Int && y is String)
+    }
+    if (x !is Int || y !is String) {
+        throw IllegalStateException()
+    }
+}
+
+---
+
+(source_file (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))))))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (conjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier))))))))))) (if_expression condition: (disjunction_expression (check_expression (simple_identifier) (user_type (type_identifier))) (check_expression (simple_identifier) (user_type (type_identifier)))) consequence: (control_structure_body (statements (jump_expression (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))

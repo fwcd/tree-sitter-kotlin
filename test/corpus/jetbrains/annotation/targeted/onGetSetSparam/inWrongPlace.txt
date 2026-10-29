@@ -1,0 +1,37 @@
+==================
+JetBrains PSI: annotation/targeted/onGetSetSparam/inWrongPlace
+==================
+
+// COMPILATION_ERRORS
+
+@get:Deprecated
+@set:Deprecated
+@setparam:Deprecated
+
+@get:Deprecated
+@set:Deprecated
+@setparam:Deprecated
+package boo
+
+@get:Deprecated
+@set:Deprecated
+@setparam:Deprecated
+class A
+
+@get:Deprecated
+@set:Deprecated
+@setparam:Deprecated
+interface I
+
+@get:Deprecated
+@set:Deprecated
+@setparam:Deprecated
+fun a()
+
+@get:Deprecated
+@set:Deprecated
+@setparam:Deprecated
+fun b()
+---
+
+(source_file (line_comment) (file_annotation (use_site_target) (user_type (type_identifier))) (file_annotation (use_site_target) (user_type (type_identifier))) (file_annotation (use_site_target) (user_type (type_identifier))) (file_annotation (use_site_target) (user_type (type_identifier))) (file_annotation (use_site_target) (user_type (type_identifier))) (file_annotation (use_site_target) (user_type (type_identifier))) (package_header (identifier (simple_identifier))) (class_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (type_identifier)) (class_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (type_identifier)) (function_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (simple_identifier) (function_value_parameters)) (function_declaration (modifiers (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (simple_identifier) (function_value_parameters)))

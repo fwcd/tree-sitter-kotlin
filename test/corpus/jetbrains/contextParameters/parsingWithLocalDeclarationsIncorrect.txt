@@ -1,0 +1,28 @@
+==================
+JetBrains PSI: contextParameters/parsingWithLocalDeclarationsIncorrect
+==================
+
+// LANGUAGE: +ContextParameters
+// ISSUE: KT-80853, KT-81521
+// COMPILATION_ERRORS
+
+import kotlin.reflect.KClass
+
+fun test() {
+    // Other modifiers
+
+    suspend context(fun() {}) {
+        contextFun()
+    }
+
+    context(fun() {}) suspend {
+        contextFun()
+    }
+}
+
+context(x: Any)
+fun contextFun() {}
+
+---
+
+(source_file (line_comment) (line_comment) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier)))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (line_comment) (statements (infix_expression (simple_identifier) (simple_identifier) (call_expression (parenthesized_expression (anonymous_function (function_value_parameters) (function_body))) (call_suffix (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (anonymous_function (function_value_parameters) (function_body)))))) (simple_identifier) (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)))

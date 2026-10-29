@@ -1,0 +1,22 @@
+==================
+JetBrains PSI: examples/collections/IMutableIterator
+==================
+
+// COMPILATION_ERRORS
+
+open class IMutableIterator<out T> : IIterator<T> {
+  fun remove() : T
+
+/*
+  Considerations:
+    pro: why not + non iteration breaking
+    con: counter-intuitive for, e.g., TreeSet
+
+
+  fun addBefore(item : T) : Boolean
+  fun addAfter(item : T) : Boolean
+*/
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (class_body (function_declaration (simple_identifier) (function_value_parameters) (user_type (type_identifier))) (multiline_comment))))

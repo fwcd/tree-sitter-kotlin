@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: kdoc/ReturnWithBrackets
+==================
+
+/**
+ * @return This is not a reference
+ * @return[x] This is a reference
+ */
+
+---
+
+(source_file (multiline_comment))

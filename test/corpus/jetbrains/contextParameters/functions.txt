@@ -1,0 +1,21 @@
+==================
+JetBrains PSI: contextParameters/functions
+==================
+
+// COMPILATION_ERRORS
+
+context(param1: String, another: List<Int>)
+fun simple() {
+
+}
+
+context(parameter1: @Anno("1" + "2") String, parameter2: List<@Anno("str") Int>)
+fun annotated() {
+
+}
+
+context(@Ann c: String)
+fun annotatedParameter() {}
+---
+
+(source_file (line_comment) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (additive_expression (string_literal (string_content)) (string_literal (string_content)))))))) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content))))))) (user_type (type_identifier)))))))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (modifiers (context_receiver (parameter_modifiers (annotation (user_type (type_identifier)))) (parameter (simple_identifier) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)))

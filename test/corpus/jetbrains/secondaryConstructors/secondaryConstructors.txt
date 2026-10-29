@@ -1,0 +1,37 @@
+==================
+JetBrains PSI: secondaryConstructors/secondaryConstructors
+==================
+
+// LIBRARY_PLATFORMS: JVM
+package test
+
+import java.io.Serializable
+
+class SecondaryConstructors(x: Boolean) {
+    init {
+    }
+
+    @anno constructor(x: String) : this(x == "abc") {
+    }
+
+    init {
+    }
+
+    private constructor(x: Int) : this(x < 0) {
+    }
+
+    inner class Inner<T : String, G : Int> where G : Serializable {
+        constructor(x: T, g: G) {
+        }
+    }
+
+    class Nested {
+        @anno constructor(z: Int) {}
+        internal constructor() {}
+    }
+}
+
+annotation class anno
+---
+
+(source_file (line_comment) (package_header (identifier (simple_identifier))) (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier)))) (class_declaration (type_identifier) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier)))) (class_body (anonymous_initializer) (secondary_constructor (modifiers (annotation (user_type (type_identifier)))) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (constructor_delegation_call (value_arguments (value_argument (equality_expression (simple_identifier) (string_literal (string_content))))))) (anonymous_initializer) (secondary_constructor (modifiers (visibility_modifier)) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (constructor_delegation_call (value_arguments (value_argument (comparison_expression (simple_identifier) (integer_literal)))))) (class_declaration (modifiers (class_modifier)) (type_identifier) (type_parameters (type_parameter (type_identifier) (user_type (type_identifier))) (type_parameter (type_identifier) (user_type (type_identifier)))) (type_constraints (type_constraint (type_identifier) (user_type (type_identifier)))) (class_body (secondary_constructor (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier))))))) (class_declaration (type_identifier) (class_body (secondary_constructor (modifiers (annotation (user_type (type_identifier)))) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))))) (secondary_constructor (modifiers (visibility_modifier)) (function_value_parameters)))))) (class_declaration (modifiers (class_modifier)) (type_identifier)))

@@ -1,0 +1,29 @@
+==================
+JetBrains PSI: kdoc/CodeSpanWithLineBreaks
+==================
+
+/**
+ * ``
+ * foo
+ * bar
+ * baz
+ * ``
+ */
+fun foo() {}
+
+/**
+ * `foo bar
+ * baz`
+ */
+fun foo1() {}
+
+/**
+ * `foo bar
+ *
+ * baz`
+ */
+fun foo2() {}
+
+---
+
+(source_file (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (multiline_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body)))

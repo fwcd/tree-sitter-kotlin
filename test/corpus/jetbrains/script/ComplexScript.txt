@@ -1,0 +1,20 @@
+==================
+JetBrains PSI: script/ComplexScript
+==================
+
+fun die(message: String) {
+    System.err.println(message)
+    System.exit(1)
+}
+
+if (args.length == 0) {
+    die("Need arguments")
+}
+
+for (arg in args) {
+    println(arg)
+}
+
+---
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier))))) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (integer_literal)))))))) (if_expression condition: (equality_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (integer_literal)) consequence: (control_structure_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content))))))))) (for_statement (variable_declaration (simple_identifier)) (simple_identifier) (control_structure_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))

@@ -1,0 +1,24 @@
+==================
+JetBrains PSI: examples/With
+==================
+
+// COMPILATION_ERRORS
+
+inline fun <T> with(receiver : T, body :  T.() -> Unit) = receiver.body()
+
+fun example() {
+
+  with(java.lang.System.out) {
+    println("foo");
+    print("bar");
+  }
+
+  System.out.{
+    println("foo");
+    print("bar");
+  }()
+
+}
+---
+
+(source_file (line_comment) (function_declaration (modifiers (function_modifier)) (type_parameters (type_parameter (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (function_type receiver: (receiver_type (user_type (type_identifier))) (function_type_parameters) (user_type (type_identifier))))) (function_body (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (navigation_expression (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))) (navigation_suffix (simple_identifier))))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content)))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content))))))))))) (call_expression (navigation_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (navigation_suffix (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content)))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (string_literal (string_content)))))))))) (call_suffix (value_arguments)))))))

@@ -1,0 +1,10 @@
+==================
+JetBrains PSI: propertyDelegate/GetterInSameLine
+==================
+
+// COMPILATION_ERRORS
+
+val a by A(); get() = 1;
+---
+
+(source_file (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (property_delegate (call_expression (simple_identifier) (call_suffix (value_arguments))))) (getter (function_body (integer_literal))))

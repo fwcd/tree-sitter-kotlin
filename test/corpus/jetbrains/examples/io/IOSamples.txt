@@ -1,0 +1,71 @@
+==================
+JetBrains PSI: examples/io/IOSamples
+==================
+
+// COMPILATION_ERRORS
+
+open class IAdder<in T> {
+  fun add(item : T) : Boolean
+}
+
+open class ICloseable {
+  fun close()
+}
+
+abstract class JavaCloseableWrapper(closeable : java.io.Closeable) : ICloseable(closeable)
+
+fun <T> streamCopy(from : IIterable<T>, to : IAdder<T>) {
+  for (item in from) t.add(item)
+}
+
+class FileInput : IIterator<Byte>, JavaCloseableWrapper {
+  private val stream : InputStream
+  private var next : Int
+  private var nextUsed = false
+
+  //this(file : File) : JavaCloseableWrapper(stream) { // implicitly throws IOException
+  //  stream = FileInputStream(file) // throws IOException
+  //}
+
+  override fun next() {
+    if (!nextUsed) {
+      nextUsed = true
+      return next as Byte
+    }
+    return
+  }
+  
+  override val hasNext
+    get() { // implicitly throws IOException
+      if (nextUsed && next != -1) {
+        nextUsed = false
+        next = stream.read() // throws IOException
+      }
+      return next != -1        
+    }
+
+}
+
+class FileOutput : IAdder<Byte>, JavaCloseableWrapper {
+  private val stream : OutputStream
+
+  //this(file : File) : JavaCloseableWrapper(stream) {
+  //  stream = FileOutputStream(file)
+  //}
+
+  override fun add(item : Byte) {
+    stream.write(item)
+  }
+}
+
+fun example() { // this does not rethrow, no appropriate parameters given
+
+  val f1 : File //= ...
+  val f2 : File //= ...
+
+  streamCopy(FileInput(f1), f2) // throws IOException, you must catch or rethrow explicitly
+
+}
+---
+
+(source_file (line_comment) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (type_parameters (type_parameter (type_parameter_modifiers (variance_modifier)) (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier))))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (class_body (function_declaration (simple_identifier) (function_value_parameters)))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier) (type_identifier) (type_identifier)))) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (simple_identifier)))))) (function_declaration (type_parameters (type_parameter (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))))) (function_body (statements (for_statement (variable_declaration (simple_identifier)) (simple_identifier) (control_structure_body (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))) (class_declaration (type_identifier) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (delegation_specifier (user_type (type_identifier))) (class_body (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (boolean_literal)) (line_comment) (line_comment) (line_comment) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (statements (if_expression condition: (prefix_expression (simple_identifier)) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (boolean_literal)) (jump_expression (as_expression (simple_identifier) (user_type (type_identifier))))))) (jump_expression)))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (line_comment) (statements (if_expression condition: (conjunction_expression (simple_identifier) (equality_expression (simple_identifier) (prefix_expression (integer_literal)))) consequence: (control_structure_body (statements (assignment (directly_assignable_expression (simple_identifier)) (boolean_literal)) (assignment (directly_assignable_expression (simple_identifier)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments)))) (line_comment)))) (jump_expression (equality_expression (simple_identifier) (prefix_expression (integer_literal))))))))) (class_declaration (type_identifier) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (delegation_specifier (user_type (type_identifier))) (class_body (property_declaration (modifiers (visibility_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (line_comment) (line_comment) (line_comment) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments (value_argument (simple_identifier)))))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (line_comment) (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (line_comment) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)))))) (value_argument (simple_identifier))))) (line_comment)))))

@@ -1,0 +1,34 @@
+==================
+JetBrains PSI: annotation/annotationsOnNullableTypes
+==================
+
+// COMPILATION_ERRORS
+
+fun foo(i: @a Int?) {}
+
+fun foo(l: List<@a Int?>) {}
+
+fun @a Int?.bar() {}
+
+val baz: @a Int?
+
+
+fun foo1(i: @b(1) Int?) {}
+
+fun foo1(l: List<@b(1) Int?>) {}
+
+fun @b(1) Int?.bar1() {}
+
+val baz1: @b(1) Int?
+
+
+fun foo2(i: @[a b(1)] Int?) {}
+
+fun foo2(l: List<@[a b(1)] Int?>) {}
+
+fun @[a b(1)] Int?.bar2() {}
+
+val baz2: @[a b(1)] Int?
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (nullable_type (user_type (type_identifier)) (quest)))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_modifiers (annotation (user_type (type_identifier)))) (nullable_type (user_type (type_identifier)) (quest))))))) (function_body)) (function_declaration receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (nullable_type (user_type (type_identifier)) (quest))) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (nullable_type (user_type (type_identifier)) (quest)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest)))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest))))))) (function_body)) (function_declaration receiver: (receiver_type (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest))) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)) (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest)))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_modifiers (annotation (user_type (type_identifier)) (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest))))))) (function_body)) (function_declaration receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)) (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest))) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)) (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal)))))) (nullable_type (user_type (type_identifier)) (quest)))))

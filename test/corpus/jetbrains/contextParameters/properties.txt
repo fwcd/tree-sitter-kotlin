@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: contextParameters/properties
+==================
+
+// COMPILATION_ERRORS
+
+context(param1: String, another: List<Int>)
+val simple: Int get() = 0
+
+context(parameter1: @Anno("1" + "2") String, parameter2: List<@Anno("str") Int>)
+val annotated: String
+    get() = "str"
+
+---
+
+(source_file (line_comment) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier))) (getter (function_body (integer_literal)))) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (additive_expression (string_literal (string_content)) (string_literal (string_content)))))))) (user_type (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content))))))) (user_type (type_identifier)))))))) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))) (getter (function_body (string_literal (string_content)))))

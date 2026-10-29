@@ -1,0 +1,14 @@
+==================
+JetBrains PSI: annotation/targeted/onFile/withoutPackageWithSimpleAnnotation
+==================
+
+// COMPILATION_ERRORS
+
+@file:foo
+@foo @bar
+@file: baz
+fun foo() {}
+
+---
+
+(source_file (line_comment) (file_annotation (user_type (type_identifier))) (function_declaration (modifiers (annotation (user_type (type_identifier))) (annotation (user_type (type_identifier))) (annotation (use_site_target) (user_type (type_identifier)))) (simple_identifier) (function_value_parameters) (function_body)))

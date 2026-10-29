@@ -1,0 +1,19 @@
+==================
+JetBrains PSI: DynamicTypes
+==================
+
+// COMPILATION_ERRORS
+
+fun foo(
+        p1: dynamic,
+        p2: @a dynamic,
+        p3: foo.dynamic,
+        p4: dynamic.foo,
+        p5: dynamic<T>,
+        p6: Foo<dynamic>,
+        p7: dynamic?,
+        p8: (dynamic) -> dynamic
+): dynamic
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier)) (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier))))) (parameter (simple_identifier) (user_type (type_identifier) (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_identifier))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))) (parameter (simple_identifier) (nullable_type (quest))) (parameter (simple_identifier) (function_type (function_type_parameters))))))

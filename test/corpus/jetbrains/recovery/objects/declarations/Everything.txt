@@ -1,0 +1,12 @@
+==================
+JetBrains PSI: recovery/objects/declarations/Everything
+==================
+
+// COMPILATION_ERRORS
+
+object Foo<T, R> private (x: Int, y: Int) : Bar, Baz {
+    fun foo() {}
+}
+---
+
+(source_file (line_comment) (object_declaration (type_identifier) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier))) (primary_constructor (modifiers (visibility_modifier)) (class_parameter (simple_identifier) (user_type (type_identifier))) (class_parameter (simple_identifier) (user_type (type_identifier)))) (delegation_specifier (user_type (type_identifier))) (delegation_specifier (user_type (type_identifier))) (class_body (function_declaration (simple_identifier) (function_value_parameters) (function_body)))))

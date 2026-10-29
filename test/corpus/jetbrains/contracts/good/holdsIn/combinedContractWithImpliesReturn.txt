@@ -1,0 +1,19 @@
+==================
+JetBrains PSI: contracts/good/holdsIn/combinedContractWithImpliesReturn
+==================
+
+// LANGUAGE: +HoldsInContracts, +ConditionImpliesReturnsContracts
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+import kotlin.contracts.*
+
+inline fun <R> holdsInAndImpliesReturn(condition: Boolean, x: Any?, block: () -> R): String? {
+    contract {
+        condition holdsIn block
+        (x is String) implies returnsNotNull()
+    }
+    return ""
+}
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (function_modifier)) (type_parameters (type_parameter (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (nullable_type (user_type (type_identifier)) (quest))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (simple_identifier) (simple_identifier) (simple_identifier)) (infix_expression (parenthesized_expression (check_expression (simple_identifier) (user_type (type_identifier)))) (simple_identifier) (call_expression (simple_identifier) (call_suffix (value_arguments))))))))) (jump_expression (string_literal))))))

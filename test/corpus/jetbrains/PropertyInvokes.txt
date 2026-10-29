@@ -1,5 +1,5 @@
 ==================
-PropertyInvokes
+JetBrains PSI: PropertyInvokes
 ==================
 
 // COMPILATION_ERRORS
@@ -13,30 +13,4 @@ fun foo() {
 }
 ---
 
-(source_file
-  (line_comment)
-  (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
-      (statements
-        (navigation_expression
-          (integer_literal)
-          (navigation_suffix
-            (simple_identifier)))
-        (navigation_expression
-          (integer_literal)
-          (navigation_suffix
-            (simple_identifier)))
-        (navigation_expression
-          (integer_literal)
-          (navigation_suffix
-            (simple_identifier)))
-        (navigation_expression
-          (integer_literal)
-          (navigation_suffix
-            (simple_identifier)))
-        (navigation_expression
-          (integer_literal)
-          (navigation_suffix
-            (simple_identifier)))))))
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (integer_literal) (navigation_suffix (simple_identifier))) (navigation_expression (integer_literal) (navigation_suffix (simple_identifier))) (navigation_expression (integer_literal) (navigation_suffix (simple_identifier))) (navigation_expression (integer_literal) (navigation_suffix (simple_identifier))) (navigation_expression (integer_literal) (navigation_suffix (simple_identifier)))))))

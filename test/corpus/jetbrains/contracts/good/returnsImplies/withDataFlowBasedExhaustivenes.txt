@@ -1,0 +1,25 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/withDataFlowBasedExhaustivenes
+==================
+
+// LANGUAGE: +ConditionImpliesReturnsContracts, +DataFlowBasedExhaustiveness
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+// ISSUE: KT-79271
+import kotlin.contracts.*
+
+sealed interface Variants {
+    data object A : Variants
+    data object B : Variants
+    fun foo(){}
+}
+
+fun ensureA(v: Variants): Variants? {
+    contract {
+        (v is Variants.A) implies (returnsNotNull())
+    }
+    return v as Variants.A
+}
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (class_declaration (modifiers (class_modifier)) (type_identifier) (class_body (object_declaration (modifiers (class_modifier)) (type_identifier) (delegation_specifier (user_type (type_identifier)))) (object_declaration (modifiers (class_modifier)) (type_identifier) (delegation_specifier (user_type (type_identifier)))) (function_declaration (simple_identifier) (function_value_parameters) (function_body)))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (nullable_type (user_type (type_identifier)) (quest)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (parenthesized_expression (check_expression (simple_identifier) (user_type (type_identifier) (type_identifier)))) (simple_identifier) (parenthesized_expression (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))) (jump_expression (as_expression (simple_identifier) (user_type (type_identifier) (type_identifier))))))))

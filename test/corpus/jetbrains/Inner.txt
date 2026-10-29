@@ -1,5 +1,5 @@
 ==================
-Inner
+JetBrains PSI: Inner
 ==================
 
 class Outer {
@@ -8,11 +8,4 @@ class Outer {
 
 ---
 
-(source_file
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (class_declaration
-        (modifiers
-          (class_modifier))
-        (type_identifier)))))
+(source_file (class_declaration (type_identifier) (class_body (class_declaration (modifiers (class_modifier)) (type_identifier)))))

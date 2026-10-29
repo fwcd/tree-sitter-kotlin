@@ -1,0 +1,38 @@
+==================
+JetBrains PSI: contracts/good/holdsIn/combinedContractWithCallInPlace
+==================
+
+// LANGUAGE: +HoldsInContracts
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.*
+
+inline fun <R> holdsInExactlyOnce(condition: Boolean, block: () -> R) {
+    contract {
+        condition holdsIn block
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    block()
+}
+
+inline fun <R> holdsInAtLeastOnce(condition: Boolean, block: () -> R) {
+    contract {
+        condition holdsIn block
+        callsInPlace(block, InvocationKind.AT_LEAST_ONCE)
+    }
+    block()
+}
+
+inline fun <R> holdsInWithTwoCallInPlace(condition: Boolean, block: () -> R, block2: ()-> R) {
+    contract {
+        condition holdsIn block
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+        callsInPlace(block2, InvocationKind.AT_LEAST_ONCE)
+    }
+    block()
+    block2()
+}
+
+---
+
+(source_file (line_comment) (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier))) (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (function_modifier)) (type_parameters (type_parameter (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (simple_identifier) (simple_identifier) (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))) (call_expression (simple_identifier) (call_suffix (value_arguments)))))) (function_declaration (modifiers (function_modifier)) (type_parameters (type_parameter (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (simple_identifier) (simple_identifier) (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))) (call_expression (simple_identifier) (call_suffix (value_arguments)))))) (function_declaration (modifiers (function_modifier)) (type_parameters (type_parameter (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier)))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier))))) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (simple_identifier) (simple_identifier) (simple_identifier)) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier)) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))))))))) (call_expression (simple_identifier) (call_suffix (value_arguments))) (call_expression (simple_identifier) (call_suffix (value_arguments)))))))

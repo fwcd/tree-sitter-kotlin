@@ -1,0 +1,22 @@
+==================
+JetBrains PSI: contracts/good/returnsImplies/withDestructuringDeclaration
+==================
+
+@file:OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
+// LANGUAGE: +AllowContractsOnSomeOperators, +ConditionImpliesReturnsContracts
+// ISSUE: KT-79220
+import kotlin.contracts.*
+
+class PairList<T>(val items: List<T>)
+
+operator fun <T> PairList<T>?.component1(): T {
+    contract {
+        (this@component1!= null) implies (returnsNotNull())
+    }
+    @Suppress("UNCHECKED_CAST")
+    return true as T
+}
+
+---
+
+(source_file (file_annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (callable_reference (type_identifier)))))) (line_comment) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (primary_constructor (class_parameter (binding_pattern_kind) (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))))) (function_declaration (modifiers (function_modifier)) (type_parameters (type_parameter (type_identifier))) receiver: (receiver_type (nullable_type (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier))))) (quest))) (simple_identifier) (function_value_parameters) (user_type (type_identifier)) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (parenthesized_expression (equality_expression (this_expression (type_identifier)) (null_literal))) (simple_identifier) (parenthesized_expression (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))) (prefix_expression (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content)))))) (jump_expression (as_expression (boolean_literal) (user_type (type_identifier)))))))))

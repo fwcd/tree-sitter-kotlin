@@ -1,0 +1,34 @@
+==================
+JetBrains PSI: newLabels/basic
+==================
+
+// COMPILATION_ERRORS
+
+fun foo() {
+    x1.filter b@ {
+        return 1
+    }
+    c@ {
+        return 2
+    }
+
+    loop1@ for (i in 1..100) {
+        return 4
+    }
+
+    loop2@ for (i in 1..100) {
+        return@loop2 4
+        return@loop2 5
+    }
+
+    label1@ val x = 1
+
+    1 + label3@ 3 + 4
+
+    l1@ foo bar l2@ baz // binary expression
+
+    return (a@ 1)
+}
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (annotated_lambda (label) (lambda_literal (statements (jump_expression (integer_literal))))))) (prefix_expression (label) (lambda_literal (statements (jump_expression (integer_literal))))) (label) (for_statement (variable_declaration (simple_identifier)) (range_expression (integer_literal) (integer_literal)) (control_structure_body (statements (jump_expression (integer_literal))))) (label) (for_statement (variable_declaration (simple_identifier)) (range_expression (integer_literal) (integer_literal)) (control_structure_body (statements (jump_expression (label) (integer_literal)) (jump_expression (label) (integer_literal))))) (label) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (additive_expression (integer_literal) (prefix_expression (label) (additive_expression (integer_literal) (integer_literal)))) (prefix_expression (label) (infix_expression (simple_identifier) (simple_identifier) (prefix_expression (label) (simple_identifier)))) (line_comment) (jump_expression (parenthesized_expression (prefix_expression (label) (integer_literal))))))))

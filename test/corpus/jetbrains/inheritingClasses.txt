@@ -1,0 +1,54 @@
+==================
+JetBrains PSI: inheritingClasses
+==================
+
+// LIBRARY_PLATFORMS: JVM, Common
+package a
+
+class InheritingClasses {
+    abstract class A(override val c: Int = 1) : C {
+        open fun of() = 3
+        abstract fun af(): Int
+        open val op = 4
+        abstract val ap: Int
+    }
+
+    open class B : A(2) {
+        override fun of() = 4
+        override fun af() = 5
+        override val op = 5
+        override val ap = 5
+    }
+
+    interface C {
+        val c: Int
+    }
+
+    interface D<T> : C {
+        override val c: Int
+    }
+
+    interface E
+    class G : B(), C, D<Int>, E
+
+
+    class InheritAny {
+        interface SomeTrait
+        interface SomeTrait2
+
+        class ImplicitAny
+
+        class ExplicitAny : Any()
+
+        class OnlyTrait : SomeTrait
+        class OnlyTraits : SomeTrait, SomeTrait2
+
+        class TraitWithExplicitAny : Any(), SomeTrait
+        class TraitsWithExplicitAny : SomeTrait2, Any(), SomeTrait
+    }
+
+    abstract class InheritFunctionType : ((Int, String) -> Int)
+}
+---
+
+(source_file (line_comment) (package_header (identifier (simple_identifier))) (class_declaration (type_identifier) (class_body (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (primary_constructor (class_parameter (modifiers (member_modifier)) (binding_pattern_kind) (simple_identifier) (user_type (type_identifier)) (integer_literal))) (delegation_specifier (user_type (type_identifier))) (class_body (function_declaration (modifiers (inheritance_modifier)) (simple_identifier) (function_value_parameters) (function_body (integer_literal))) (function_declaration (modifiers (inheritance_modifier)) (simple_identifier) (function_value_parameters) (user_type (type_identifier))) (property_declaration (modifiers (inheritance_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (modifiers (inheritance_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (integer_literal))))) (class_body (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (integer_literal))) (function_declaration (modifiers (member_modifier)) (simple_identifier) (function_value_parameters) (function_body (integer_literal))) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)) (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier)) (integer_literal)))) (class_declaration (type_identifier) (class_body (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))))) (class_declaration (type_identifier) (type_parameters (type_parameter (type_identifier))) (delegation_specifier (user_type (type_identifier))) (class_body (property_declaration (modifiers (member_modifier)) (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier)))))) (class_declaration (type_identifier)) (class_declaration (type_identifier) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (delegation_specifier (user_type (type_identifier))) (delegation_specifier (user_type (type_identifier) (type_arguments (type_projection (user_type (type_identifier)))))) (delegation_specifier (user_type (type_identifier)))) (class_declaration (type_identifier) (class_body (class_declaration (type_identifier)) (class_declaration (type_identifier)) (class_declaration (type_identifier)) (class_declaration (type_identifier) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments)))) (class_declaration (type_identifier) (delegation_specifier (user_type (type_identifier)))) (class_declaration (type_identifier) (delegation_specifier (user_type (type_identifier))) (delegation_specifier (user_type (type_identifier)))) (class_declaration (type_identifier) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (delegation_specifier (user_type (type_identifier)))) (class_declaration (type_identifier) (delegation_specifier (user_type (type_identifier))) (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))) (delegation_specifier (user_type (type_identifier)))))) (class_declaration (modifiers (inheritance_modifier)) (type_identifier) (delegation_specifier (function_type (function_type_parameters (user_type (type_identifier)) (user_type (type_identifier))) (user_type (type_identifier))))))))

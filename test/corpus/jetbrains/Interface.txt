@@ -1,5 +1,5 @@
 ==================
-Interface
+JetBrains PSI: Interface
 ==================
 
 // COMPILATION_ERRORS
@@ -11,15 +11,4 @@ interface Foo {
 
 ---
 
-(source_file
-  (line_comment)
-  (class_declaration
-    (type_identifier)
-    (class_body
-      (function_declaration
-        (simple_identifier)
-        (function_value_parameters))
-      (property_declaration
-        (binding_pattern_kind)
-        (variable_declaration
-          (simple_identifier))))))
+(source_file (line_comment) (class_declaration (type_identifier) (class_body (function_declaration (simple_identifier) (function_value_parameters)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier))))))

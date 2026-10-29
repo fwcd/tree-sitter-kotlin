@@ -1,0 +1,19 @@
+==================
+JetBrains PSI: contracts/operator
+==================
+
+// Currently forbidden, see KT-77175
+// LANGUAGE: +AllowContractsOnSomeOperators
+
+import kotlin.contracts.*
+
+@OptIn(ExperimentalContracts::class)
+operator fun Boolean.plus(x: Boolean): Boolean {
+    @Suppress("CONTRACT_NOT_ALLOWED")
+    contract { returns() implies (x) }
+    return x
+}
+
+---
+
+(source_file (line_comment) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier)) (wildcard_import))) (function_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (callable_reference (type_identifier)))))) (function_modifier)) receiver: (receiver_type (user_type (type_identifier))) (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (user_type (type_identifier)) (function_body (statements (prefix_expression (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (string_literal (string_content)))))) (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal (statements (infix_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (simple_identifier) (parenthesized_expression (simple_identifier))))))))) (jump_expression (simple_identifier))))))

@@ -1,0 +1,16 @@
+==================
+JetBrains PSI: recovery/objects/declarations/ParametersInParentheses
+==================
+
+// COMPILATION_ERRORS
+
+object Foo(a: Int, b: String)
+
+object Foo(a: Int, b: String) {}
+
+object Foo(a: Int, b: String) : Bar {
+
+}
+---
+
+(source_file (line_comment) (object_declaration (type_identifier) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier))) (class_parameter (simple_identifier) (user_type (type_identifier))))) (object_declaration (type_identifier) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier))) (class_parameter (simple_identifier) (user_type (type_identifier)))) (class_body)) (object_declaration (type_identifier) (primary_constructor (class_parameter (simple_identifier) (user_type (type_identifier))) (class_parameter (simple_identifier) (user_type (type_identifier)))) (delegation_specifier (user_type (type_identifier))) (class_body)))

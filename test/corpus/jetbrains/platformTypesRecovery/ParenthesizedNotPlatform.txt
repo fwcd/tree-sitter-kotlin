@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: platformTypesRecovery/ParenthesizedNotPlatform
+==================
+
+// COMPILATION_ERRORS
+
+fun foo(f: (Mutable)) {}
+fun foo(f: Array<(out)>) {}
+---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (parenthesized_type (user_type (type_identifier))))) (function_body)) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (parenthesized_type (user_type (type_identifier)))))))) (function_body)))

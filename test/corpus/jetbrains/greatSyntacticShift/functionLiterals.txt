@@ -1,0 +1,28 @@
+==================
+JetBrains PSI: greatSyntacticShift/functionLiterals
+==================
+
+// COMPILATION_ERRORS
+
+class Foo
+class Bar
+
+fun a(vararg a : Any) = a
+
+fun test() {
+a(1
+, {}
+, { -> 1}
+, {1}
+, {x}
+, {-> 1}
+, {x -> 1}
+, {x, y -> 1}
+, {x -> 1}
+, {(x)}
+)
+}
+
+---
+
+(source_file (line_comment) (class_declaration (type_identifier)) (class_declaration (type_identifier)) (function_declaration (simple_identifier) (function_value_parameters (parameter_modifiers (parameter_modifier)) (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (simple_identifier))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal)) (value_argument (lambda_literal)) (value_argument (lambda_literal (statements (integer_literal)))) (value_argument (lambda_literal (statements (integer_literal)))) (value_argument (lambda_literal (statements (simple_identifier)))) (value_argument (lambda_literal (statements (integer_literal)))) (value_argument (lambda_literal (lambda_parameters (variable_declaration (simple_identifier))) (statements (integer_literal)))) (value_argument (lambda_literal (lambda_parameters (variable_declaration (simple_identifier)) (variable_declaration (simple_identifier))) (statements (integer_literal)))) (value_argument (lambda_literal (lambda_parameters (variable_declaration (simple_identifier))) (statements (integer_literal)))) (value_argument (lambda_literal (statements (parenthesized_expression (simple_identifier))))))))))))

@@ -1,0 +1,8 @@
+==================
+JetBrains PSI: kdoc/EndRightAfterText
+==================
+
+/**text*/
+---
+
+(source_file (multiline_comment))

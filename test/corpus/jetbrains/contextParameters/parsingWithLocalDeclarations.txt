@@ -1,0 +1,57 @@
+==================
+JetBrains PSI: contextParameters/parsingWithLocalDeclarations
+==================
+
+// LANGUAGE: +ContextParameters
+// ISSUE: KT-80853, KT-81521
+
+import kotlin.reflect.KClass
+
+fun test() {
+    // Class reference
+
+    context(String::class) {
+        contextFun()
+    }
+
+    // Anonymous function
+
+    context(fun() {}) {
+        contextFun()
+    }
+
+    // Mixed with other arguments
+
+    context(1, fun() {}) {
+        contextFun2()
+    }
+
+    context(fun() {}, 3) {
+        contextFun3()
+    }
+
+    context(Int::class, fun() {}) {
+        contextFun4()
+    }
+
+    // Recursion
+
+    context(context(fun () = "str") { contextFun() }) { contextFun() }
+
+    context(context(Int::class) { contextFun() }) { contextFun() }
+}
+
+context(x: Any)
+fun contextFun() {}
+
+context(x: Int, y: () -> Unit)
+fun contextFun2() {}
+
+context(x: () -> Unit, y: Int)
+fun contextFun3() {}
+
+context(x: KClass<*>, y: () -> Unit)
+fun contextFun4() {}
+---
+
+(source_file (line_comment) (line_comment) (import_list (import_header (identifier (simple_identifier) (simple_identifier) (simple_identifier)))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (line_comment) (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (callable_reference (type_identifier)))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (anonymous_function (function_value_parameters) (function_body)))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (integer_literal)) (value_argument (anonymous_function (function_value_parameters) (function_body)))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (anonymous_function (function_value_parameters) (function_body))) (value_argument (integer_literal))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (callable_reference (type_identifier))) (value_argument (anonymous_function (function_value_parameters) (function_body)))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))) (line_comment) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (anonymous_function (function_value_parameters) (function_body (string_literal (string_content)))))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))) (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (callable_reference (type_identifier)))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))) (annotated_lambda (lambda_literal (statements (call_expression (simple_identifier) (call_suffix (value_arguments))))))))))) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier)))))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier)))) (parameter (simple_identifier) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection)))) (parameter (simple_identifier) (function_type (function_type_parameters) (user_type (type_identifier)))))) (simple_identifier) (function_value_parameters) (function_body)))

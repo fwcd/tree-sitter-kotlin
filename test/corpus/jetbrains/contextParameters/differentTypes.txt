@@ -1,0 +1,39 @@
+==================
+JetBrains PSI: contextParameters/differentTypes
+==================
+
+// LANGUAGE: +ContextParameters
+// FILE: Foo.kt
+class Foo {
+    context(@Anno _: @Anno suspend () -> Unit, _: suspend String.() -> Int)
+    fun contextParameter() {
+
+    }
+
+    context(@Anno _: @Anno suspend () -> Unit, _: suspend String.() -> Int)
+    val contextParameter2 get() = 0
+
+    context(_: @Anno A & Any, _: B & Any)
+    fun <A, B, C> (C & Any).dnnF() {
+
+    }
+
+    context(_: @Anno A & Any, _: B & Any)
+    val <A, B, C> (C & Any).dnnP get() = 0
+
+    context(@Anno _: @Anno suspend context(Int) () -> Unit, _: suspend context(String) () -> Boolean)
+    val contextParameter3 get() = 0
+
+    context(@Anno _: @Anno suspend context(Int) () -> Unit, _: suspend context(String) () -> Boolean)
+    fun contextParameter4() {}
+
+    val returnType: @Anno suspend context(Int) () -> Unit get() = {}
+}
+
+// FILE: A.kt
+@Target(AnnotationTarget.TYPE, AnnotationTarget.VALUE_PARAMETER)
+annotation class Anno
+
+---
+
+(source_file (line_comment) (line_comment) (class_declaration (type_identifier) (class_body (function_declaration (modifiers (context_receiver (parameter_modifiers (annotation (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers) (function_type receiver: (receiver_type (user_type (type_identifier))) (function_type_parameters) (user_type (type_identifier)))))) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (modifiers (context_receiver (parameter_modifiers (annotation (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers) (function_type receiver: (receiver_type (user_type (type_identifier))) (function_type_parameters) (user_type (type_identifier)))))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (getter (function_body (integer_literal)))) (function_declaration (modifiers (context_receiver (parameter (simple_identifier) (not_nullable_type (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier)) (user_type (type_identifier)))) (parameter (simple_identifier) (not_nullable_type (user_type (type_identifier)) (user_type (type_identifier)))))) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier)) (type_parameter (type_identifier))) receiver: (receiver_type (parenthesized_type (not_nullable_type (user_type (type_identifier)) (user_type (type_identifier))))) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (modifiers (context_receiver (parameter (simple_identifier) (not_nullable_type (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier)) (user_type (type_identifier)))) (parameter (simple_identifier) (not_nullable_type (user_type (type_identifier)) (user_type (type_identifier)))))) (binding_pattern_kind) (type_parameters (type_parameter (type_identifier)) (type_parameter (type_identifier)) (type_parameter (type_identifier))) receiver: (receiver_type (parenthesized_type (not_nullable_type (user_type (type_identifier)) (user_type (type_identifier))))) (variable_declaration (simple_identifier)) (getter (function_body (integer_literal)))) (property_declaration (modifiers (context_receiver (parameter_modifiers (annotation (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier))) (context_receiver (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers (context_receiver (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))))) (binding_pattern_kind) (variable_declaration (simple_identifier)) (getter (function_body (integer_literal)))) (function_declaration (modifiers (context_receiver (parameter_modifiers (annotation (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers (annotation (user_type (type_identifier))) (context_receiver (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (parameter (simple_identifier) (type_modifiers (context_receiver (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))))) (simple_identifier) (function_value_parameters) (function_body)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (type_modifiers (annotation (user_type (type_identifier))) (context_receiver (user_type (type_identifier)))) (function_type (function_type_parameters) (user_type (type_identifier)))) (getter (function_body (lambda_literal)))))) (line_comment) (class_declaration (modifiers (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (value_argument (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))))))) (class_modifier)) (type_identifier)))

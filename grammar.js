@@ -437,9 +437,16 @@ module.exports = grammar({
       )
     ))),
 
+    // The `constructor` keyword is optional even when modifiers are present.
+    // `class C private ()` is accepted by Kotlin's parser, which builds a
+    // PRIMARY_CONSTRUCTOR with a MODIFIER_LIST and no keyword; the compiler
+    // then reports MISSING_CONSTRUCTOR_KEYWORD. Previously the modifiers were
+    // only reachable together with the keyword, so the whole declaration
+    // became an ERROR node.
     primary_constructor: $ => seq(
       optional($._primary_constructor_hint),
-      optional(seq(optional($.modifiers), $._primary_constructor_keyword)),
+      optional($.modifiers),
+      optional($._primary_constructor_keyword),
       $._class_parameters
     ),
 
@@ -811,6 +818,8 @@ module.exports = grammar({
       optional($.modifiers),
       "object",
       alias($.simple_identifier, $.type_identifier),
+      optional($.type_parameters),
+      optional($.primary_constructor),
       optional(seq(":", $._delegation_specifiers)),
       optional($.class_body)
     ))),

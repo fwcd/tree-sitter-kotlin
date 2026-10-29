@@ -1,0 +1,11 @@
+==================
+JetBrains PSI: kdoc/SeeLink
+==================
+
+/**
+ * @see Foo.bar
+ */
+
+---
+
+(source_file (multiline_comment))

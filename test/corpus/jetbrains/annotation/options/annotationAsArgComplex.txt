@@ -1,0 +1,17 @@
+==================
+JetBrains PSI: annotation/options/annotationAsArgComplex
+==================
+
+class Annotation {
+    fun setProblemGroup() {}
+    fun getQuickFixes() = 0
+}
+
+fun registerQuickFix(annotation: Annotation) {
+    annotation.setProblemGroup()
+    val fixes = annotation.getQuickFixes()
+}
+
+---
+
+(source_file (class_declaration (type_identifier) (class_body (function_declaration (simple_identifier) (function_value_parameters) (function_body)) (function_declaration (simple_identifier) (function_value_parameters) (function_body (integer_literal))))) (function_declaration (simple_identifier) (function_value_parameters (parameter (simple_identifier) (user_type (type_identifier)))) (function_body (statements (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))))))))
