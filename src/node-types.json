@@ -8851,11 +8851,43 @@
           "named": true
         },
         {
+          "type": "class_modifier",
+          "named": true
+        },
+        {
+          "type": "function_modifier",
+          "named": true
+        },
+        {
+          "type": "inheritance_modifier",
+          "named": true
+        },
+        {
+          "type": "member_modifier",
+          "named": true
+        },
+        {
+          "type": "parameter_modifier",
+          "named": true
+        },
+        {
+          "type": "platform_modifier",
+          "named": true
+        },
+        {
+          "type": "property_modifier",
+          "named": true
+        },
+        {
           "type": "reification_modifier",
           "named": true
         },
         {
           "type": "variance_modifier",
+          "named": true
+        },
+        {
+          "type": "visibility_modifier",
           "named": true
         }
       ]
