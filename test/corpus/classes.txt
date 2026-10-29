@@ -1734,3 +1734,18 @@ val o = object : B() {;
           (simple_identifier)
           (function_value_parameters)
           (function_body))))))
+
+================================================================================
+Primary constructor with a modifier and no constructor keyword
+================================================================================
+
+class C private ()
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (modifiers
+        (visibility_modifier)))))
