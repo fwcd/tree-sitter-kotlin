@@ -6,7 +6,7 @@
   "fixtureContentHash": "b8e2bf76935d2c8e688b5eae141a196f0ed7bf129d004b4e1ed83ec7b70ef644",
   "parser": {
     "src/parser.c": "ae451c4884cce48e198be20aa4839b615141f8a726d0f19eb270353f98a16de8",
-    "src/scanner.c": "2297212d881ccde5eeeb807be41e5e0f504e5e5929783ce41decdbce29a509b6"
+    "src/scanner.c": "ccc5cbf3646f63402bcfd4ab68a8c21319d5a50643067089d06c87097dcb68bd"
   },
   "excluded": [
     {
