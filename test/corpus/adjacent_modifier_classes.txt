@@ -154,3 +154,213 @@ private final class Third {}
       (inheritance_modifier))
     (type_identifier)
     (class_body)))
+
+
+================================================================================
+Modifier-led functions are not infix expressions
+================================================================================
+
+/*
+ */
+/**
+ */
+public abstract class Engine(
+) : Base {
+    /**
+     */
+    init {
+        mon.sub(Starting) {
+            if (!info.first) {
+            }
+        }
+        mon.sub(Started) {
+            if (info.first) {
+            }
+        }
+    }
+    override suspend fun connectors(): List<Cfg> {
+    }
+}
+private suspend fun Ctx.verify() {
+    if (hs.size > 1) {
+    }
+}
+private class Info {
+}
+@OptIn(API::class)
+private fun App.installA() {
+    icp(Pipe.Fallback) {
+    }
+    icp(Pipe.Call) {
+    }
+}
+private fun App.installB() {
+    sp.icp(phase) { subject ->
+        if (subject !is Out) {
+        }
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (multiline_comment)
+  (multiline_comment)
+  (class_declaration
+    (modifiers
+      (visibility_modifier)
+      (inheritance_modifier))
+    (type_identifier)
+    (primary_constructor)
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (multiline_comment)
+      (anonymous_initializer
+        (statements
+          (call_expression
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier)))
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier)))
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (if_expression
+                      condition: (prefix_expression
+                        (navigation_expression
+                          (simple_identifier)
+                          (navigation_suffix
+                            (simple_identifier))))
+                      consequence: (control_structure_body)))))))
+          (call_expression
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier)))
+            (call_suffix
+              (value_arguments
+                (value_argument
+                  (simple_identifier)))
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (if_expression
+                      condition: (navigation_expression
+                        (simple_identifier)
+                        (navigation_suffix
+                          (simple_identifier)))
+                      consequence: (control_structure_body)))))))))
+      (function_declaration
+        (modifiers
+          (member_modifier)
+          (function_modifier))
+        (simple_identifier)
+        (function_value_parameters)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))))
+        (function_body))))
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (function_modifier))
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (comparison_expression
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier)))
+            (integer_literal))
+          consequence: (control_structure_body)))))
+  (class_declaration
+    (modifiers
+      (visibility_modifier))
+    (type_identifier)
+    (class_body))
+  (function_declaration
+    (modifiers
+      (annotation
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (callable_reference
+                (type_identifier))))))
+      (visibility_modifier))
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))))
+            (annotated_lambda
+              (lambda_literal))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))))
+            (annotated_lambda
+              (lambda_literal)))))))
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (simple_identifier)))
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (variable_declaration
+                    (simple_identifier)))
+                (statements
+                  (if_expression
+                    condition: (check_expression
+                      (simple_identifier)
+                      (user_type
+                        (type_identifier)))
+                    consequence: (control_structure_body)))))))))))

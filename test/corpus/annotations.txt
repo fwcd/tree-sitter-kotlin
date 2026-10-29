@@ -375,3 +375,224 @@ val x = 1
     (binding_pattern_kind)
     (variable_declaration (simple_identifier))
     (integer_literal)))
+
+==================
+Annotated function type
+==================
+
+fun f(content: @Composable () -> Unit) {}
+val g: (@Composable () -> Unit)? = null
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (user_type (type_identifier))))
+        (function_type
+          (function_type_parameters)
+          (user_type (type_identifier)))))
+    (function_body))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (nullable_type
+        (parenthesized_type
+          (type_modifiers
+            (annotation
+              (user_type (type_identifier))))
+          (function_type
+            (function_type_parameters)
+            (user_type (type_identifier))))
+        (quest)))
+    (null_literal)))
+
+==================
+Annotated function type with parameters
+==================
+
+fun f(content: @Composable (Int) -> Unit) {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (user_type (type_identifier))))
+        (function_type
+          (function_type_parameters
+            (user_type (type_identifier)))
+          (user_type (type_identifier)))))
+    (function_body)))
+
+==================
+Type annotation with arguments before a function type
+==================
+
+fun f(content: @Composable() (Int) -> Unit) {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (constructor_invocation
+              (user_type (type_identifier))
+              (value_arguments))))
+        (function_type
+          (function_type_parameters
+            (user_type (type_identifier)))
+          (user_type (type_identifier)))))
+    (function_body)))
+
+==================
+Type annotation with arguments after whitespace
+==================
+
+fun f(name: @Named ("x") String) {}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (type_modifiers
+          (annotation
+            (constructor_invocation
+              (user_type (type_identifier))
+              (value_arguments
+                (value_argument
+                  (string_literal (string_content)))))))
+        (user_type (type_identifier))))
+    (function_body)))
+
+================================================================================
+Annotation on its own line before a parenthesized expression
+================================================================================
+
+fun h() {
+    @Anno
+    (1 + 2)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (annotation
+          (user_type
+            (type_identifier)))
+        (parenthesized_expression
+          (additive_expression
+            (integer_literal)
+            (integer_literal)))))))
+
+================================================================================
+Annotation with arguments keeps them, and the next parenthesis starts an expression
+================================================================================
+
+fun f(x: Any) {
+    @Suppress("UNCHECKED_CAST")
+    (x as String).length
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (statements
+        (annotation
+          (constructor_invocation
+            (user_type
+              (type_identifier))
+            (value_arguments
+              (value_argument
+                (string_literal
+                  (string_content))))))
+        (navigation_expression
+          (parenthesized_expression
+            (as_expression
+              (simple_identifier)
+              (user_type
+                (type_identifier))))
+          (navigation_suffix
+            (simple_identifier)))))))
+
+================================================================================
+Annotation then a parenthesized expression on one line
+================================================================================
+
+fun f(x: Int) {
+    @Anno (x)
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (statements
+        (annotation
+          (user_type
+            (type_identifier)))
+        (parenthesized_expression
+          (simple_identifier))))))
+
+================================================================================
+Annotation then a parenthesized string on one line
+================================================================================
+
+fun f() {
+    @Anno ("s")
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (annotation
+          (user_type
+            (type_identifier)))
+        (parenthesized_expression
+          (string_literal
+            (string_content)))))))
