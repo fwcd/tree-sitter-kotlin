@@ -272,13 +272,25 @@ module.exports = grammar({
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),
 
+    // Separator optional, not required. `file_annotation` used to end with a
+    // mandatory `$._semi`, so a second annotation on the same line left the
+    // first without one and the file parsed with a `MISSING _automatic_semicolon`
+    // — no visible ERROR node, so only a binding-level check caught it:
+    //
+    //     @file:JvmMultifileClass @file:JvmName("FlowKt")
+    //
+    // which is how kotlinx-coroutines-core writes it. Unlike the class-body
+    // case in #297 the separator is not needed for disambiguation here: every
+    // file annotation starts with `@file:`, and what can follow one — another
+    // annotation, `package`, `import`, a statement — is distinguishable from
+    // the first token, so the separator can simply be optional.
     file_annotation: $ => seq(
       "@", "file", ":",
       choice(
         seq("[", repeat1($._unescaped_annotation), "]"),
         $._unescaped_annotation
       ),
-      $._semi
+      optional($._semi)
     ),
 
     package_header: $ => seq("package", $.identifier, $._semi),
