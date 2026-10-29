@@ -116,8 +116,8 @@ module.exports = grammar({
     // since the '{' could either be interpreted as the class body
     // or as the anonymous function body. Consider the following sequence:
 
-    // Member access operator '::' conflicts with callable reference
-    [$._primary_expression, $.callable_reference],
+    // Member access operator '::' conflicts with callable reference. The name
+    // rule subsumes `callable_reference` itself, so only this entry is needed.
     [$._primary_expression, $._callable_reference_name],
 
     // `context` is a soft keyword: `context(...)` may be a context-receiver
@@ -242,9 +242,9 @@ module.exports = grammar({
     // as a trailing lambda instead of class_body.
     [$._expression, $._expression_no_trailing_lambda],
     [$._primary_expression, $._primary_expression_no_trailing_lambda],
-    // Three-way conflict: callable_reference (Foo::bar) starts with simple_identifier
-    // which both primary_expression variants can match.
-    [$._primary_expression, $._primary_expression_no_trailing_lambda, $.callable_reference],
+    // Three-way conflict: a callable reference (Foo::bar) starts with the name
+    // alone, which both primary_expression variants can match. Carrying the
+    // name rule here covers the whole `callable_reference` reading with it.
     [$._primary_expression, $._primary_expression_no_trailing_lambda, $._callable_reference_name],
 
     // Inside the callable-reference receiver the parser must choose a
