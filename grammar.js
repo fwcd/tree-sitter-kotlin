@@ -1472,7 +1472,8 @@ module.exports = grammar({
         seq($.when_condition, repeat1(seq(",", $.when_condition)), optional(",")),
         // optional guard condition and optional trailing comma
         seq($.when_condition, optional($.guard_condition), optional(",")),
-        "else"
+        // `else if <expr> ->` is a guarded else branch (Kotlin 2.1)
+        seq("else", optional($.guard_condition))
       ),
       "->",
       $.control_structure_body,
