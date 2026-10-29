@@ -1372,7 +1372,9 @@ module.exports = grammar({
     ),
 
     use_site_target: $ => seq(
-      choice("field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
+      // `all` is the use-site target introduced for annotating every
+      // declaration a constructor property generates at once.
+      choice("all", "field", "property", "get", "set", "receiver", "param", "setparam", "delegate"),
       ":"
     ),
 

@@ -9936,6 +9936,10 @@
     "named": false
   },
   {
+    "type": "all",
+    "named": false
+  },
+  {
     "type": "annotation",
     "named": false
   },

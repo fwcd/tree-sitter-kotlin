@@ -6570,6 +6570,10 @@
           "members": [
             {
               "type": "STRING",
+              "value": "all"
+            },
+            {
+              "type": "STRING",
               "value": "field"
             },
             {
