@@ -125,6 +125,10 @@ module.exports = grammar({
     // GLR explores both and keeps whichever yields a valid parse.
     [$.context_receiver, $.simple_identifier],
 
+    // Adjacent imports group into one import_list even when imports
+    // interleave with statements (Kotlin scripts).
+    [$.import_list],
+
     // `l@` may begin a labelled expression or, now, a labelled declaration;
     // which it is only becomes clear at the token after the label.
     [$.prefix_expression],
@@ -345,8 +349,13 @@ module.exports = grammar({
       optional($.shebang_line),
       repeat($.file_annotation),
       optional($.package_header),
-      optional($.import_list),
-      repeat(seq($._statement, $._semi))
+      // Kotlin scripts may place imports after statements, so import lists
+      // and statements interleave. The `[import_list]` conflict lets GLR
+      // group a run of adjacent imports into one import_list.
+      repeat(choice(
+        $.import_list,
+        seq($._statement, $._semi)
+      ))
     ),
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),
