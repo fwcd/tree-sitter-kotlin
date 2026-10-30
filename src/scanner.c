@@ -846,6 +846,16 @@ static bool brace_starts_statement(bool in_delegate, const bool *valid_symbols) 
          !valid_symbols[STRING_CONTENT];
 }
 
+// A supertype reads its constructor arguments across a newline (KotlinParsing:
+// parseDelegationSpecifier has no newline check), unlike a call: `: Base<T>\n(args)` is one
+// supertype entry, in a class header and an object literal alike. The parser expects `by` after
+// a supertype and after a property's name or type, where a backing field may follow instead;
+// that tells the supertype apart (`val x: T` then `(a).b()` stays two statements).
+static bool paren_continues_supertype(const bool *valid_symbols) {
+  return valid_symbols[BY_DELEGATION_HINT] && !valid_symbols[BACKING_FIELD_HINT] &&
+         !valid_symbols[STRING_CONTENT];
+}
+
 static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
                                           const bool *valid_symbols) {
   bool newline = scanner->constructor_newline;
@@ -972,11 +982,13 @@ static bool call_prefix_continues(TSLexer *lexer, const bool *valid_symbols) {
 static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
   if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
   switch (lexer->lookahead) {
-    // '(' and '[' are absent, and ':' is handled separately: a call's '(',
+    // '[' is absent, and '(' and ':' are handled separately: a call's '(',
     // an index's '[' and a callable reference's '::' each begin a new
-    // statement. Matches the non-comment path above.
+    // statement, but a supertype's '(' does not. Matches the non-comment path above.
     case '{':
       return brace_starts_statement(in_delegate, valid_symbols);
+    case '(':
+      return !paren_continues_supertype(valid_symbols);
     case '.': case ',': case '*': case '%':
     case '>': case '<': case '=':
     case '?': case '|': case '&': case '/':
@@ -1037,6 +1049,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, bool in_delegate, c
   if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return call_prefix_continues(lexer, valid_symbols);
   switch (lexer->lookahead) {
     case '{': return !brace_starts_statement(in_delegate, valid_symbols);
+    case '(': return paren_continues_supertype(valid_symbols);
     case '.': case ',': case '*': case '%': case '>': case '<': case '=':
     case '?': case '|': case '&': return true;
     case ':': advance(lexer); return lexer->lookahead != ':';
@@ -1162,7 +1175,8 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   //     (ftp.executor as ExecutorService).awaitTermination(1, SECONDS)
   //
   // is two statements, not `close()(...)`. Treating them as continuations
-  // merged the lines with no error node at all.
+  // merged the lines with no error node at all. The exception is a supertype's
+  // argument list (see paren_continues_supertype).
   //
   // '{' stays: `foo()` followed by `{ … }` on the next line is a trailing
   // lambda, which is one expression — confirmed against the Kotlin PSI, as
@@ -1173,6 +1187,11 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   switch (lexer->lookahead) {
       case '{':
         if (brace_starts_statement(scanner->in_delegate, valid_symbols)) return true;
+        *cursor_clean = true;
+        return false;
+
+      case '(':
+        if (!paren_continues_supertype(valid_symbols)) return true;
         *cursor_clean = true;
         return false;
 
