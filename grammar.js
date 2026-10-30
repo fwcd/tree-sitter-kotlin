@@ -613,7 +613,7 @@ module.exports = grammar({
     // Classes
     // ==========
 
-    class_declaration: $ => prec.dynamic(1, prec.right(choice(
+    class_declaration: $ => prec.right(choice(
       seq(
         optional($.modifiers),
         choice("class", seq(optional("fun"), "interface")),
@@ -634,7 +634,7 @@ module.exports = grammar({
         optional($.type_constraints),
         optional($.enum_class_body)
       )
-    ))),
+    )),
 
     // The `constructor` keyword is optional even when modifiers are present.
     // `class C private ()` is accepted by Kotlin's parser, which builds a
@@ -962,12 +962,12 @@ module.exports = grammar({
       ")"
     ),
 
-    // `public fun Foo.bar() { … }` also parses as an infix expression, because
-    // the visibility modifiers are soft keywords in `simple_identifier`. Both
-    // readings are complete, so this is the dynamic-precedence decision #278
-    // made for `class` and `object` (issue #277); at the time `fun` was not
-    // reachable that way, and the GLR conflict on annotations made it so.
-    function_declaration: $ => prec.dynamic(1, prec.right(seq( // TODO
+    // `public fun Foo.bar() { … }` once had a complete second reading as an infix
+    // expression over soft-keyword modifiers (#277). With the hard keywords
+    // reserved, `fun`, `class` and `object` are never identifiers, and an
+    // object expression always has a body, so no expression spans a
+    // declaration and the dynamic precedence of #278/#280 has nothing to decide.
+    function_declaration: $ => prec.right(seq( // TODO
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
@@ -977,7 +977,7 @@ module.exports = grammar({
       optional(seq(":", $._type)),
       optional($.type_constraints),
       optional($.function_body)
-    ))),
+    )),
 
     function_body: $ => choice($._block, seq("=", $._expression)),
 
@@ -1128,7 +1128,7 @@ module.exports = grammar({
 
     parameter: $ => seq($.simple_identifier, ":", $._type),
 
-    object_declaration: $ => prec.dynamic(1, prec.right(seq(
+    object_declaration: $ => prec.right(seq(
       optional($.modifiers),
       "object",
       alias($.simple_identifier, $.type_identifier),
@@ -1136,7 +1136,7 @@ module.exports = grammar({
       optional($.primary_constructor),
       optional(seq(":", $._delegation_specifiers)),
       optional($.class_body)
-    ))),
+    )),
 
     secondary_constructor: $ => seq(
       optional($.modifiers),
