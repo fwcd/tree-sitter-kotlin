@@ -813,22 +813,38 @@ module.exports = grammar({
       optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
       optional($.type_constraints),
+      // One optional tail, not two. An initializer (or delegate) and the
+      // accessors used to be two independent `optional(...)` positions in a
+      // row; this admits exactly the same four combinations -- nothing, an
+      // initializer, accessors, or an initializer followed by accessors --
+      // from a single decision point.
+      //
+      // The pair of positions was expensive out of all proportion to what it
+      // expressed: merging them removes 596 large parse states and 2,720 KiB
+      // of src/parser.c. This rule's tail is a hot spot, for the same reason
+      // #323 found: `property_declaration` is reachable from almost
+      // everywhere, so every extra decision point here is paid for across the
+      // whole table. Keep it to one position.
+      //
+      // Also note there is no `optional(';')` here: a semicolon between a
+      // property and its accessors -- `val x: Int; get() = 42` -- is already
+      // consumed by the `_semi` separator that `class_body` and `source_file`
+      // apply between members (#323).
       optional(choice(
-        seq("=", $._expression),
-        $.property_delegate
-      )),
-      // No `optional(';')` here. A semicolon between a property and its
-      // accessors -- `val x: Int; get() = 42` -- is already consumed by the
-      // `_semi` separator that `class_body` and `source_file` apply between
-      // members, so a second optional semicolon inside the rule matched
-      // nothing the separator did not already match. It was not free: it sat
-      // directly in front of the accessor tail, and the extra decision point
-      // cost 453 large parse states, 2,120 KiB of src/parser.c. Keep the
-      // semicolon in the member separator, not here.
-      optional(choice(
-        seq($.getter, optional($.setter)),
-        seq($.setter, optional($.getter)),
+        seq(
+          choice(seq("=", $._expression), $.property_delegate),
+          optional($._property_accessors)
+        ),
+        $._property_accessors
       ))
+    )),
+
+    // `prec.right` so a lone getter does not reduce ambiguously against the
+    // getter-then-setter reading; `property_declaration`'s own `prec.right`
+    // used to supply that while the pair was written inline.
+    _property_accessors: $ => prec.right(choice(
+      seq($.getter, optional($.setter)),
+      seq($.setter, optional($.getter))
     )),
 
     property_delegate: $ => seq(optional($._by_delegation_hint), "by", $._expression),
