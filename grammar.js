@@ -135,6 +135,13 @@ const BINARY_FORMS = ($, e, infixName = $.simple_identifier) => ({
   disjunction_expression: prec.left(PREC.DISJUNCTION, seq(e, "||", e)),
 });
 
+// Kotlin's hard keywords, `typeof` included: never an identifier or a label unless escaped.
+const HARD_KEYWORDS = [
+  'as', 'break', 'class', 'continue', 'do', 'else', 'false', 'for', 'fun', 'if', 'in', 'interface',
+  'is', 'null', 'object', 'package', 'return', 'super', 'this', 'throw', 'true', 'try', 'typealias',
+  'typeof', 'val', 'var', 'when', 'while',
+];
+
 // Soft keywords and modifiers that are identifiers wherever no rule takes them as keywords.
 const SOFT_KEYWORD_IDENTIFIERS = [
   "expect",
@@ -397,6 +404,10 @@ module.exports = grammar({
     // Never produced: valid after a modifier word of a declaration's modifiers, so that a line break
     // before the declaration keyword inserts no semicolon (see MODIFIER_HINT in the scanner).
     $._modifier_hint,
+    // Never produced, and the scanner never looks at it: it only guards `typeof`, see `reserved`.
+    $._reserved_word_guard,
+    // `` `if`@ ``: a backtick-quoted identifier with `@` right after it, see `label`.
+    $._quoted_label,
   ],
 
   extras: $ => [
@@ -413,37 +424,10 @@ module.exports = grammar({
   // wherever the keyword is not valid, and GLR can prefer such a reading without any ERROR node:
   // `@A sealed interface X<T> { ... }` became an annotated infix call `sealed interface X` with type arguments
   // and a trailing lambda, because the generic call carries a higher dynamic precedence than the declaration.
-  // `typeof` is reserved by Kotlin too but no rule uses it, and a reserved word must be a token of the grammar.
+  // `typeof` is reserved by Kotlin too but no rule uses it, and a reserved word must be a token of the grammar:
+  // `source_file` takes it behind `_reserved_word_guard`, which the scanner never produces.
   reserved: {
-    global: _ => [
-      'as',
-      'break',
-      'class',
-      'continue',
-      'do',
-      'else',
-      'false',
-      'for',
-      'fun',
-      'if',
-      'in',
-      'interface',
-      'is',
-      'null',
-      'object',
-      'package',
-      'return',
-      'super',
-      'this',
-      'throw',
-      'true',
-      'try',
-      'typealias',
-      'val',
-      'var',
-      'when',
-      'while',
-    ],
+    global: _ => HARD_KEYWORDS,
   },
 
   // Hidden rules substituted at their use sites instead of getting a symbol of
@@ -505,6 +489,7 @@ module.exports = grammar({
 
     // start
     source_file: $ => seq(
+      optional(seq($._reserved_word_guard, 'typeof')),
       optional($.shebang_line),
       repeat($.file_annotation),
       optional($.package_header),
@@ -1322,10 +1307,14 @@ module.exports = grammar({
       $._multi_annotation
     ),
 
-    label: $ => token(seq(
-      /[a-zA-Z_][a-zA-Z_0-9]*/,
-      "@"
-    )),
+    // A label is an identifier with `@` right after it, one token as in Kotlin's lexer: as an
+    // identifier followed by `@` the parser could not tell `x foo@{ }` from an infix call. The word
+    // pattern leaves out the hard keywords, so `class@` is no label, and the scanner reads the
+    // escaped form, so `` `if`@ `` is one.
+    label: $ => choice(
+      token(seq(wordExcept(HARD_KEYWORDS), "@")),
+      $._quoted_label
+    ),
 
     // The body of an `if`, `else`, loop or `when` entry is an expression in Kotlin's parser
     // (parseControlStructureBody -> parseBlockLevelExpression), where a modifier word is an
@@ -1481,6 +1470,8 @@ module.exports = grammar({
         $._member_access_operator,
         choice(
           seq($.simple_identifier, optional($._expression_end_hint)),
+          // `ArrayList.this`: Kotlin's selector is an atomic expression, so a reserved `this` is one.
+          $.this_expression,
           $.parenthesized_expression,
           // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
           // compiler diagnostic; Kotlin's parser reads the lambda and PSI
@@ -2278,6 +2269,26 @@ module.exports = grammar({
 
   }
 });
+
+// An ASCII identifier other than `words`, built from their trie: at each prefix, either stop (when
+// the prefix is no word), or go on with a character no word continues with, or follow a word.
+function wordExcept(words) {
+  const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
+  const rest = letters + '0123456789';
+  const trie = {};
+  for (const word of words) {
+    let node = trie;
+    for (const char of word) node = node[char] ??= {};
+    node[''] = true;
+  }
+  const suffix = (node, depth) => {
+    const next = Object.keys(node).filter(key => key !== '');
+    const others = [...(depth === 0 ? letters : rest)].filter(char => !next.includes(char)).join('');
+    const body = `(${[`[${others}][${rest}]*`, ...next.map(char => char + suffix(node[char], depth + 1))].join('|')})`;
+    return depth > 0 && !node[''] ? `${body}?` : body;
+  };
+  return new RegExp(suffix(trie, 0));
+}
 
 function sep1(rule, separator) {
   return seq(rule, repeat(seq(separator, rule)));

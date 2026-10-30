@@ -2410,3 +2410,24 @@ fun f(x: Int) = when (x) {
               (simple_identifier)
               (call_suffix
                 (value_arguments)))))))))
+
+================================================================================
+this as a selector
+================================================================================
+
+val r = ArrayList.this.size
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (navigation_expression
+        (simple_identifier)
+        (navigation_suffix
+          (this_expression)))
+      (navigation_suffix
+        (simple_identifier)))))

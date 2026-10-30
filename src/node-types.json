@@ -6429,6 +6429,10 @@
           "named": true
         },
         {
+          "type": "this_expression",
+          "named": true
+        },
+        {
           "type": "type_arguments",
           "named": true
         }
@@ -10623,6 +10627,10 @@
   },
   {
     "type": "typealias",
+    "named": false
+  },
+  {
+    "type": "typeof",
     "named": false
   },
   {
