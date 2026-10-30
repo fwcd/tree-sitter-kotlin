@@ -277,32 +277,16 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
       return true;
     }
     if (lexer->lookahead == '\\') {
-      // if we see a \, then this might possibly escape a dollar sign
-      // in which case, we should not defer to the interpolation
       advance(lexer);
-      // this dollar sign is escaped, so it must be content.
-      // we consume it here so we don't enter the dollar sign case above,
-      // which leaves the possibility that it is an interpolation 
-      if (lexer->lookahead == '$') {
-        advance(lexer);
-        // however this leaves an edgecase where an escaped dollar sign could
-        // appear at the end of a string (e.g "aa\$") which isn't handled
-        // correctly; if we were at the end of the string, terminate properly
-        if (lexer->lookahead == end_char) {
-          if (!stack_pop(stack)) return false;
-          advance(lexer);
-          lexer->mark_end(lexer);
-          lexer->result_symbol = STRING_END;
-          return true;
-        }
-      } else if (is_triple && lexer->lookahead == end_char) {
-        // In triple-quoted strings, `\` is NOT an escape character. So `\"` is
-        // also literal backslash + quote, and the `"` might be the start of
-        // the closing `"""`. Don't advance past it (at the end of the while
-        // loop). Let the next iteration handle it.
-        has_content = true;
-        continue;
-      }
+      has_content = true;
+      // In a triple-quoted (raw) string `\` is an ordinary character: the next one is
+      // examined as usual, so `"""\$"""` is a backslash and a dollar, and the `"` of `\"`
+      // may start the closing `"""`.
+      if (is_triple) continue;
+      // Otherwise the escaped character is content, whatever it is: `\$` is no
+      // interpolation, `\"` no string end, `\\` no new escape.
+      if (!lexer->eof(lexer)) advance(lexer);
+      continue;
     } else if (lexer->lookahead == end_char) {
       if (is_triple) {
         lexer->mark_end(lexer);

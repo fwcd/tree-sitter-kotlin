@@ -138,7 +138,8 @@ More string interpolation
     (string_content))
   (string_literal
     (string_content))
-  (string_literal))
+  (string_literal
+    (string_content)))
 
 ================================================================================
 Empty interpolation is an error
@@ -768,3 +769,57 @@ val c = 1.toString()
           (simple_identifier)))
       (call_suffix
         (value_arguments)))))
+
+================================================================================
+Escapes next to a dollar sign
+================================================================================
+
+val a = "say \"\$\""
+val b = "\\\\wsl\$\\"
+val c = "\$${d.e}"
+val f = """\$"""
+val g = """\$h"""
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)
+      (interpolation_expression_start)
+      (interpolated_expression
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (simple_identifier))))
+      (interpolation_expression_end)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)
+      (string_content)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)
+      (interpolation_identifier_start)
+      (interpolated_identifier))))
