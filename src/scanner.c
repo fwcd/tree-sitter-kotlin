@@ -522,56 +522,29 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
-// Check if the current position has a visibility modifier (public, private,
-// protected, internal) followed by horizontal whitespace and "constructor".
-// Uses skip() — safe to call speculatively since no token boundary is changed.
-static bool check_modifier_then_constructor(TSLexer *lexer) {
-  // Buffer the first word to identify the modifier
-  char word[20];
-  unsigned len = 0;
-  while (is_word_char(lexer->lookahead) && len < 19) {
-    word[len++] = (char)lexer->lookahead;
-    skip(lexer);
-  }
-  word[len] = '\0';
+// Check if the current position has a visibility modifier (public, private, protected,
+// internal) followed by horizontal whitespace and `next`: `private constructor(...)` of a
+// primary constructor, or `val x: Any` / newline / `private field: Int = 1` of a backing field.
+// The modifier is read whole as ASCII (constructor_word), so a non-ASCII word is none of them.
+static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity);
 
+static bool check_visibility_then(TSLexer *lexer, const char *next, unsigned next_len) {
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word))) return false;
   if (strcmp(word, "public") != 0 && strcmp(word, "private") != 0 &&
       strcmp(word, "protected") != 0 && strcmp(word, "internal") != 0) {
     return false;
   }
-
-  // Skip horizontal whitespace (not newlines)
   while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
-
-  return check_word(lexer, "constructor", 11);
+  return check_word(lexer, next, next_len);
 }
 
-// Check if the current position has a visibility modifier followed by
-// horizontal whitespace and "field" -- `val x: Any` / newline / `private
-// field: Int = 1`. Uses skip(), so it is safe to call speculatively.
-static bool check_modifier_then_field(TSLexer *lexer) {
-  char word[20];
-  unsigned len = 0;
-  while (is_word_char(lexer->lookahead) && len < 19) {
-    word[len++] = (char)lexer->lookahead;
-    skip(lexer);
-  }
-  word[len] = '\0';
-
-  if (strcmp(word, "public") != 0 && strcmp(word, "private") != 0 &&
-      strcmp(word, "protected") != 0 && strcmp(word, "internal") != 0) {
-    return false;
-  }
-
-  while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
-
-  return check_word(lexer, "field", 5);
-}
-
-// Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar,
-// @Bar(x=1)) and optional visibility modifier, then check for 'constructor'.
-// All characters are consumed with skip() so nothing affects token boundaries.
-static bool check_annotation_then_constructor(TSLexer *lexer) {
+// Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar, @Bar(x=1)) and an
+// optional visibility modifier, then check for `next`: `constructor` of a primary constructor,
+// or `field` of an explicit backing field, whose annotations Kotlin's parser puts in the
+// BACKING_FIELD's MODIFIER_LIST. All characters are consumed with skip() so nothing affects
+// token boundaries.
+static bool check_annotations_then(TSLexer *lexer, const char *next, unsigned next_len) {
   // Skip one or more '@annotation' sequences
   while (lexer->lookahead == '@') {
     skip(lexer); // skip '@'
@@ -604,56 +577,15 @@ static bool check_annotation_then_constructor(TSLexer *lexer) {
         }
       }
     }
-    // Skip whitespace and newlines between annotations or before constructor
+    // Skip whitespace and newlines between annotations or before the keyword
     while (iswspace(lexer->lookahead)) skip(lexer);
   }
-  // Allow an optional visibility modifier before 'constructor'
-  if (is_word_char(lexer->lookahead) && lexer->lookahead != 'c') {
-    return check_modifier_then_constructor(lexer);
+  // Allow an optional visibility modifier before the keyword
+  if (is_word_char(lexer->lookahead) && lexer->lookahead != next[0]) {
+    return check_visibility_then(lexer, next, next_len);
   }
-  // Check directly for 'constructor'
-  return check_word(lexer, "constructor", 11);
+  return check_word(lexer, next, next_len);
 }
-
-// The same walk for an explicit backing field: `val x: Any` / newline /
-// `@Ann field: Int = 1`. Annotations on a backing field are accepted by
-// Kotlin's parser, which puts them in the BACKING_FIELD's MODIFIER_LIST.
-static bool check_annotation_then_field(TSLexer *lexer) {
-  while (lexer->lookahead == '@') {
-    skip(lexer);
-    if (!is_word_char(lexer->lookahead)) return false;
-    while (is_word_char(lexer->lookahead)) skip(lexer);
-    while (lexer->lookahead == '.') {
-      skip(lexer);
-      if (!is_word_char(lexer->lookahead)) break;
-      while (is_word_char(lexer->lookahead)) skip(lexer);
-    }
-    if (lexer->lookahead == '(') {
-      unsigned depth = 1;
-      skip(lexer);
-      while (depth > 0 && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
-        if (lexer->lookahead == '"') {
-          skip(lexer);
-          while (lexer->lookahead != '"' && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
-            if (lexer->lookahead == '\\') skip(lexer);
-            skip(lexer);
-          }
-          if (lexer->lookahead == '"') skip(lexer);
-        } else {
-          if (lexer->lookahead == '(') depth++;
-          else if (lexer->lookahead == ')') depth--;
-          skip(lexer);
-        }
-      }
-    }
-    while (iswspace(lexer->lookahead)) skip(lexer);
-  }
-  if (is_word_char(lexer->lookahead) && lexer->lookahead != 'f') {
-    return check_modifier_then_field(lexer);
-  }
-  return check_word(lexer, "field", 5);
-}
-
 
 // Probe only while the grammar can start a primary constructor. The hidden
 // hint commits that alternative before trivia/modifiers are lexed, so every
@@ -700,14 +632,24 @@ static bool constructor_word_char(int32_t c) {
   return !constructor_space(c);
 }
 
-// C-locale iswalnum can miss Unicode identifier suffixes. A context keyword
-// probe must not turn catché/finallyé into a clause; only wholly ASCII words
-// with a complete identifier boundary qualify. This probe emits no identifier.
-static bool scan_try_clause_keyword(TSLexer *lexer, const char *suffix, unsigned length) {
-  return scan_for_word(lexer, suffix, length) &&
-    !constructor_word_char(lexer->lookahead);
+// `constructor` as a whole word: the PRIMARY_CONSTRUCTOR_KEYWORD token, which the internal lexer
+// cannot produce. False when it does not match, with the characters read so far advanced past.
+static bool scan_constructor_keyword(TSLexer *lexer) {
+  static const char keyword[] = "constructor";
+  for (unsigned i = 0; i < sizeof(keyword) - 1; i++) {
+    if (lexer->lookahead != keyword[i]) return false;
+    advance(lexer);
+  }
+  if (constructor_word_char(lexer->lookahead)) return false;
+  lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
+  lexer->mark_end(lexer);
+  return true;
 }
 
+// Read a whole word with advance(); true when it is ASCII and fits `capacity` with its NUL. C-locale
+// iswalnum can miss Unicode identifier suffixes, and a keyword probe must not turn catché or
+// finallyé into a clause; only wholly ASCII words with a complete identifier boundary qualify.
+// This probe emits no identifier.
 static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity) {
   unsigned length = 0;
   bool ascii = true;
@@ -799,6 +741,16 @@ static bool constructor_balanced(TSLexer *lexer, char close) {
   return ok;
 }
 
+// A backtick-quoted name, read with advance(); false when the input ends before its closing
+// backtick.
+static bool constructor_quoted_name(TSLexer *lexer) {
+  advance(lexer);
+  while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
+  if (lexer->eof(lexer)) return false;
+  advance(lexer);
+  return true;
+}
+
 static bool constructor_annotation(TSLexer *lexer) {
   advance(lexer); // @
   bool newline = false;
@@ -807,10 +759,7 @@ static bool constructor_annotation(TSLexer *lexer) {
   for (;;) {
     if (!constructor_trivia(lexer, &newline)) return false;
     if (lexer->lookahead == '`') {
-      advance(lexer);
-      while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
-      if (lexer->eof(lexer)) return false;
-      advance(lexer);
+      if (!constructor_quoted_name(lexer)) return false;
     } else {
       if (!constructor_word_char(lexer->lookahead)) return false;
       char ignored[32]; constructor_word(lexer, ignored, sizeof(ignored));
@@ -966,10 +915,7 @@ static bool trailing_lambda_follows(TSLexer *lexer, char leading_word[32]) {
   }
   if (lexer->lookahead == '{') return true;
   if (lexer->lookahead == '`') {
-    advance(lexer);
-    while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
-    if (lexer->eof(lexer)) return false;
-    advance(lexer);
+    if (!constructor_quoted_name(lexer)) return false;
   } else {
     if (!constructor_word_char(lexer->lookahead)) return false;
     bool ascii = constructor_word(lexer, leading_word, 32);
@@ -980,30 +926,77 @@ static bool trailing_lambda_follows(TSLexer *lexer, char leading_word[32]) {
   return constructor_trivia(lexer, &newline) && lexer->lookahead == '{';
 }
 
+// The words that continue the statement before a line break, read whole by constructor_word,
+// with the lexer right after the word. Every path that decides a line break by its next word
+// asks here, so the decisions cannot drift apart. Reads with advance() only, as the probe of
+// continuation_after_block_comment requires.
+//
+// - `as` is a cast of the expression before it.
+// - `by` delegates, only where BY_DELEGATION_HINT is valid: elsewhere it is an identifier.
+// - `where` continues a declaration only when a type constraint follows; `where()` is a call
+//   to a function named where, and the statement before it has already ended.
+// - `catch` and `finally` continue a try only in its clause slot (TRY_CLAUSE_HINT), including
+//   malformed clauses; outside it, `catch(x)` is a call.
+// - `field` continues a property that can still take an explicit backing field
+//   (BACKING_FIELD_HINT), and ends the statement everywhere else: a variable may be named
+//   `field`, so `var field = 0` followed by `field = 2` must stay two statements.
+// - `else` continues an if, unless `->` follows: a when entry's `else ->`.
+static bool word_continues_statement(const char *word, TSLexer *lexer, const bool *valid_symbols) {
+  if (strcmp(word, "as") == 0) return true;
+  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
+  bool newline = false;
+  if (strcmp(word, "where") == 0) return where_type_constraint_follows(lexer, &newline);
+  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) return valid_symbols[TRY_CLAUSE_HINT];
+  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
+  if (strcmp(word, "else") == 0) {
+    if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
+    advance(lexer);
+    return lexer->lookahead != '>';
+  }
+  return false;
+}
+
+// At the first character of the next line: does the line break before it end the statement?
+// A word answers by word_continues_statement; anything else that reaches here ends it. Most
+// lines start with a word, so one whose first letter starts none of the continuing words
+// (`as`, `by`, `catch`, `else`, `field`, `finally`, `where`) ends the statement unread.
+static bool semicolon_before_word(TSLexer *lexer, const bool *valid_symbols) {
+  switch (lexer->lookahead) {
+    case 'a': case 'b': case 'c': case 'e': case 'f': case 'w': break;
+    default: return true;
+  }
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word))) return true;
+  return !word_continues_statement(word, lexer, valid_symbols);
+}
+
 static bool call_prefix_continues(TSLexer *lexer, const bool *valid_symbols) {
   char word[32] = {0};
   if (trailing_lambda_follows(lexer, word)) return true;
   // A failed label probe must retain ordinary keyword continuations.
-  if (strcmp(word, "as") == 0) return true;
-  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
-  if (strcmp(word, "where") == 0) {
-    bool newline = false; return where_type_constraint_follows(lexer, &newline);
-  }
-  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) return valid_symbols[TRY_CLAUSE_HINT];
-  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
-  if (strcmp(word, "else") == 0) return !followed_by_arrow(lexer);
-  return false;
+  return word_continues_statement(word, lexer, valid_symbols);
+}
+
+// A call may still take a trailing lambda (CALL_LAMBDA_HINT) and the next line starts with a
+// word, an annotation or a backtick: call_prefix_continues decides.
+static bool call_lambda_prefix_at(TSLexer *lexer, const bool *valid_symbols) {
+  return valid_symbols[CALL_LAMBDA_HINT] &&
+         (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`');
+}
+
+// The line before ended in a modifier word (MODIFIER_HINT) and the next one starts with a letter
+// or `@`: semicolon_after_modifier_line decides. A primary constructor's modifiers (`class C
+// private` with `constructor(...)` on the next line) take the PRIMARY_CONSTRUCTOR_KEYWORD paths.
+static bool modifier_line_at(TSLexer *lexer, const bool *valid_symbols) {
+  return valid_symbols[MODIFIER_HINT] && !valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+         !valid_symbols[STRING_CONTENT] && (iswalpha(lexer->lookahead) || lexer->lookahead == '@');
 }
 
 static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symbols);
 
 static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
-  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
-  if (valid_symbols[MODIFIER_HINT] && !valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-      !valid_symbols[STRING_CONTENT] &&
-      (iswalpha(lexer->lookahead) || lexer->lookahead == '@')) {
-    return semicolon_after_modifier_line(lexer, valid_symbols);
-  }
+  if (call_lambda_prefix_at(lexer, valid_symbols)) return !call_prefix_continues(lexer, valid_symbols);
+  if (modifier_line_at(lexer, valid_symbols)) return semicolon_after_modifier_line(lexer, valid_symbols);
   switch (lexer->lookahead) {
     // '[' is absent, and '(' and ':' are handled separately: a call's '(',
     // an index's '[' and a callable reference's '::' each begin a new
@@ -1027,43 +1020,8 @@ static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *vali
     case '-':
       skip(lexer);
       return lexer->lookahead != '>';
-    case 'e':
-      if (scan_for_word(lexer, "lse", 3)) {
-        if (followed_by_arrow(lexer)) return true;
-        return false;
-      }
-      return true;
-    case 'a':
-      if (scan_for_word(lexer, "s", 1)) return false;
-      return true;
-    case 'w':
-      if (scan_for_word(lexer, "here", 4)) {
-        // Like `catch` and `finally`: `where` only continues a declaration
-        // when a type constraint follows. `where()` is a call to a function
-        // named where, and the statement before it has already ended.
-        bool newline = false;
-        return !where_type_constraint_follows(lexer, &newline);
-      }
-      return true;
-    case 'c':
-      return !(valid_symbols[TRY_CLAUSE_HINT] &&
-               scan_try_clause_keyword(lexer, "atch", 4));
-    case 'b':
-      if (valid_symbols[BY_DELEGATION_HINT] &&
-          scan_for_word(lexer, "y", 1)) return false;
-      return true;
-    case 'f':
-      // `field` continues a property that can still take an explicit backing
-      // field, and ends the statement everywhere else -- a variable may be
-      // named `field`, so `var field = 0` followed by `field = 2` must stay two
-      // statements. The hint is only valid in the one grammar position where a
-      // backing field may follow, which is what tells the two apart.
-      if (valid_symbols[BACKING_FIELD_HINT] &&
-          scan_try_clause_keyword(lexer, "ield", 4)) return false;
-      return !(valid_symbols[TRY_CLAUSE_HINT] &&
-               scan_try_clause_keyword(lexer, "inally", 6));
     default:
-      return true;
+      return semicolon_before_word(lexer, valid_symbols);
   }
 }
 
@@ -1072,7 +1030,7 @@ static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *vali
 static bool continuation_after_block_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
   bool newline = false;
   if (!constructor_trivia(lexer, &newline)) return !lexer->eof(lexer);
-  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return call_prefix_continues(lexer, valid_symbols);
+  if (call_lambda_prefix_at(lexer, valid_symbols)) return call_prefix_continues(lexer, valid_symbols);
   switch (lexer->lookahead) {
     case '{': return !brace_starts_statement(in_delegate, valid_symbols);
     case '(': return paren_continues_supertype(valid_symbols);
@@ -1085,21 +1043,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, bool in_delegate, c
   }
   char word[32] = {0};
   if (!constructor_word(lexer, word, sizeof(word))) return false;
-  if (strcmp(word, "as") == 0) return true;
-  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
-  if (strcmp(word, "where") == 0) {
-    return where_type_constraint_follows(lexer, &newline);
-  }
-  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) {
-    return valid_symbols[TRY_CLAUSE_HINT];
-  }
-  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
-  if (strcmp(word, "else") == 0) {
-    if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
-    advance(lexer);
-    return lexer->lookahead != '>';
-  }
-  return false;
+  return word_continues_statement(word, lexer, valid_symbols);
 }
 
 static bool resume_pending_comment(Scanner *scanner, TSLexer *lexer,
@@ -1176,8 +1120,8 @@ static bool semicolon_before_else(TSLexer *lexer) {
 // declaration first, takes every modifier word and annotation across line breaks, and keeps them
 // when a declaration keyword follows (parseLocalDeclaration), so `private` alone on a line before
 // `fun x()` is a modifier and no semicolon ends it. Otherwise the modifier word was an expression
-// statement (`open` alone, then `foo()`). A word that is no modifier gets the decisions the switch
-// in scan_automatic_semicolon makes for words, which cannot read it again. Words are read whole
+// statement (`open` alone, then `foo()`). A word that is no modifier gets word_continues_statement,
+// as the switch in scan_automatic_semicolon cannot read it again. Words are read whole
 // with constructor_word, so one with a non-ASCII character is no keyword whatever the host's
 // locale (`Ŧun` is not `fun`); a false answer leaves the cursor dirty.
 //
@@ -1203,17 +1147,7 @@ static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symb
     if (!skip_whitespace_and_comments(lexer)) return true;
   }
   if (after_modifier) return true;
-  if (strcmp(word, "by") == 0) return !valid_symbols[BY_DELEGATION_HINT];
-  if (strcmp(word, "else") == 0) return followed_by_arrow(lexer);
-  if (strcmp(word, "as") == 0) return false;
-  if (strcmp(word, "where") == 0) {
-    bool newline = false;
-    return !where_type_constraint_follows(lexer, &newline);
-  }
-  if (strcmp(word, "field") == 0) return !valid_symbols[BACKING_FIELD_HINT];
-  bool is_catch = strcmp(word, "catch") == 0;
-  if (is_catch || strcmp(word, "finally") == 0) return !valid_symbols[TRY_CLAUSE_HINT];
-  return true;
+  return !word_continues_statement(word, lexer, valid_symbols);
 }
 
 static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols,
@@ -1296,14 +1230,8 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     }
   }
 
-  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
-  // A primary constructor's modifiers (`class C private` with `constructor(...)` on the next
-  // line) take the PRIMARY_CONSTRUCTOR_KEYWORD cases of the switch.
-  if (valid_symbols[MODIFIER_HINT] && !valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-      !valid_symbols[STRING_CONTENT] &&
-      (iswalpha(lexer->lookahead) || lexer->lookahead == '@')) {
-    return semicolon_after_modifier_line(lexer, valid_symbols);
-  }
+  if (call_lambda_prefix_at(lexer, valid_symbols)) return !call_prefix_continues(lexer, valid_symbols);
+  if (modifier_line_at(lexer, valid_symbols)) return semicolon_after_modifier_line(lexer, valid_symbols);
 
   // Characters that continue the previous expression across a newline.
   //
@@ -1471,60 +1399,20 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
         skip(lexer);
         return lexer->lookahead != '=';
 
-      // Don't insert a semicolon before 'by' in delegation contexts.
-      // Gated on BY_DELEGATION_HINT so `by` remains a usable soft-keyword
-      // identifier in non-delegation positions.
-      case 'b':
-        return !(valid_symbols[BY_DELEGATION_HINT] &&
-                 scan_for_word(lexer, "y", 1));
-
-      // Don't insert a semicolon before an else, unless it's
-      // followed by "->" (a when-entry's else, not an if-else).
-      case 'e':
-        if (!scan_for_word(lexer, "lse", 3)) return true;
-        return followed_by_arrow(lexer);
-
-      // Cast continuation outside a primary-constructor context.
-      case 'a':
-        return !scan_for_word(lexer, "s", 1);
-
-      // Don't insert a semicolon before a where
-      case 'w': {
-        if (!scan_for_word(lexer, "here", 4)) return true;
-        bool newline = false;
-        return !where_type_constraint_follows(lexer, &newline);
-      }
-
-      // Don't insert a semicolon before `instanceof`, or before `internal`
-      // when followed by `constructor` in a class declaration context.
+      // A visibility modifier (`internal`, `public`, `private`, `protected`) on the next line
+      // before `constructor` in a class declaration, or before `field` of an explicit backing
+      // field, continues the declaration. No other word starting with `i` or `p` continues a
+      // statement (Kotlin has no `instanceof`; it uses `is`).
       case 'i':
-        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-            !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_constructor(lexer)) {
-          return false;
-        }
-        if (valid_symbols[BACKING_FIELD_HINT] &&
-            !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_field(lexer)) {
-          return false;
-        }
-        // Note: lexer has advanced past the word. For "instanceof", scan_for_word
-        // can no longer match. But since "instanceof" is not a Kotlin keyword
-        // (Kotlin uses "is"), this is acceptable — ASI is inserted, which is
-        // the correct behavior for any non-constructor identifier.
-        return true;
-
-      // Don't insert a semicolon before `public/private/protected constructor`
-      // in class declaration context.
       case 'p':
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_constructor(lexer)) {
+            check_visibility_then(lexer, "constructor", 11)) {
           return false;
         }
         if (valid_symbols[BACKING_FIELD_HINT] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_field(lexer)) {
+            check_visibility_then(lexer, "field", 5)) {
           return false;
         }
         return true;
@@ -1536,54 +1424,27 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       // Guard against error recovery mode where all symbols are valid.
       // Instead of suppressing ASI, we emit the constructor keyword directly
       // since it's an external token and the internal lexer won't match it.
+      // If `constructor` does not match, characters were advanced past and
+      // `catch` can no longer be read: the automatic semicolon goes in.
       case 'c':
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT]) {
-          const char *kw = "constructor";
-          bool matched = true;
-          for (unsigned i = 0; i < 11; i++) {
-            if (lexer->lookahead != kw[i]) { matched = false; break; }
-            advance(lexer);
-          }
-          if (matched && !constructor_word_char(lexer->lookahead)) {
-            lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
-            lexer->mark_end(lexer);
-            return true;
-          }
-          // If constructor didn't match, we've advanced past some chars.
-          // Can't reliably check 'catch' now. Just insert ASI.
+          scan_constructor_keyword(lexer);
           return true;
         }
-        // In a try-clause slot this keyword belongs to that construct,
-        // including malformed clauses. Outside it, `catch(x)` is a call.
-        return !(valid_symbols[TRY_CLAUSE_HINT] &&
-                 scan_try_clause_keyword(lexer, "atch", 4));
-
-      // Don't insert a semicolon before finally (continues try_expression).
-      // As with catch, only when a real clause follows.
-      //
-      // `field` is the other word starting with 'f' that can continue a
-      // statement: an explicit backing field sits inside the property it
-      // belongs to, usually on the next line. It is gated on the hint for the
-      // same reason `by` is gated -- a variable may be named `field`, so
-      // `var field = 0` followed by `field = 2` has to stay two statements.
-      case 'f':
-        if (valid_symbols[BACKING_FIELD_HINT] &&
-            scan_try_clause_keyword(lexer, "ield", 4)) return false;
-        return !(valid_symbols[TRY_CLAUSE_HINT] &&
-                 scan_try_clause_keyword(lexer, "inally", 6));
+        return semicolon_before_word(lexer, valid_symbols);
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier
       case '@':
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_annotation_then_constructor(lexer)) {
+            check_annotations_then(lexer, "constructor", 11)) {
           return false;
         }
         if (valid_symbols[BACKING_FIELD_HINT] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_annotation_then_field(lexer)) {
+            check_annotations_then(lexer, "field", 5)) {
           return false;
         }
         return true;
@@ -1593,8 +1454,9 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
         lexer->mark_end(lexer);
         return !semicolon_before_else(lexer);
 
+      // `as`, `by`, `else`, `where`, `catch`, `finally` and `field`: see word_continues_statement.
       default:
-        return true;
+        return semicolon_before_word(lexer, valid_symbols);
   }
 }
 
@@ -1775,19 +1637,7 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   // (the cross-newline case is handled inside scan_automatic_semicolon)
   if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] && !valid_symbols[STRING_CONTENT]) {
     while (iswspace(lexer->lookahead)) skip(lexer);
-    if (lexer->lookahead == 'c') {
-      const char *kw = "constructor";
-      bool matched = true;
-      for (unsigned i = 0; i < 11; i++) {
-        if (lexer->lookahead != kw[i]) { matched = false; break; }
-        advance(lexer);
-      }
-      if (matched && !constructor_word_char(lexer->lookahead)) {
-        lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
-        lexer->mark_end(lexer);
-        return true;
-      }
-    }
+    if (scan_constructor_keyword(lexer)) return true;
   }
 
   // content, end, or interpolation start
