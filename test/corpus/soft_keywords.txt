@@ -862,3 +862,68 @@ class C : where
         (simple_identifier)
         (function_value_parameters)
         (function_body)))))
+
+================================================================================
+qualified where as a statement before a lambda on the next line
+================================================================================
+
+fun f() {
+    op()
+    obj.where
+    { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (simple_identifier)))
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+callable reference to where as a statement before a lambda on the next line
+================================================================================
+
+fun f() {
+    op()
+    obj::where
+    { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (callable_reference
+          (type_identifier)
+          (simple_identifier))
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))

@@ -272,7 +272,7 @@ module.exports = grammar({
     $._comment_continuation_hint,
     $._try_clause_hint,
     $._backing_field_hint,
-    $._identifier_expression_hint,
+    $._expression_end_hint,
   ],
 
   extras: $ => [
@@ -589,18 +589,31 @@ module.exports = grammar({
 
     // Expression variant that doesn't allow call expressions with trailing lambdas.
     // This is used in explicit_delegation to prevent ambiguity with class_body.
+    // Member access goes through the variant below, so the hint can follow it.
     _expression_no_trailing_lambda: $ => choice(
-      $._unary_expression,
+      $.postfix_expression,
+      $.indexing_expression,
+      $.prefix_expression,
+      $.as_expression,
+      $.spread_expression,
       $._binary_expression,
       $._primary_expression_no_trailing_lambda
     ),
 
     _primary_expression_no_trailing_lambda: $ => choice(
       $.parenthesized_expression,
-      $.simple_identifier,
+      // The hint is valid after the delegate as well, which cancels the end
+      // hint, so the class body on the next line stays attached.
+      seq(
+        choice(
+          $.simple_identifier,
+          alias($._navigation_expression_no_trailing_lambda, $.navigation_expression)
+        ),
+        optional($._by_delegation_hint)
+      ),
+      $.callable_reference,
       $._literal_constant,
       $.string_literal,
-      $.callable_reference,
       alias($.call_expression_no_trailing_lambda, $.call_expression),
       alias($._generic_call_expression_no_trailing_lambda, $.call_expression),
       $._function_literal,
@@ -613,6 +626,13 @@ module.exports = grammar({
       $.try_expression,
       $.jump_expression
     ),
+
+    _navigation_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, seq(
+      $._expression_no_trailing_lambda,
+      alias($._navigation_suffix_no_trailing_lambda, $.navigation_suffix)
+    )),
+
+    _navigation_suffix_no_trailing_lambda: $ => seq($._member_access_operator, $.simple_identifier),
 
     // Call expression that only allows value_arguments, not trailing lambdas
     call_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, seq(
@@ -1245,13 +1265,13 @@ module.exports = grammar({
       optional($.type_arguments),
       $._member_access_operator,
       choice(
-        $.simple_identifier,
+        seq($.simple_identifier, optional($._expression_end_hint)),
         $.parenthesized_expression,
         // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
         // compiler diagnostic; Kotlin's parser reads the lambda and PSI
         // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
         $.lambda_literal,
-        "class"
+        seq("class", optional($._expression_end_hint))
       )
     ),
 
@@ -1301,14 +1321,11 @@ module.exports = grammar({
 
     _primary_expression: $ => choice(
       $.parenthesized_expression,
-      // The hint is never produced. Its validity tells the scanner that a
-      // bare identifier expression just ended, so a lambda on the next line
-      // is a new statement as in Kotlin's parser. Type names and the
-      // delegation chain above do not carry it.
-      seq($.simple_identifier, optional($._identifier_expression_hint)),
+      // Never produced. Tells the scanner that a `{` on the next line starts a
+      // new statement, as in Kotlin. Member access names carry it too.
+      seq(choice($.simple_identifier, $.callable_reference), optional($._expression_end_hint)),
       $._literal_constant,
       $.string_literal,
-      $.callable_reference,
       $.call_expression,
       alias($._generic_call_expression, $.call_expression),
       $._function_literal,

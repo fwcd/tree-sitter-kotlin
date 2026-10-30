@@ -1915,3 +1915,25 @@ class C { val field = 1 }
         (variable_declaration
           (simple_identifier))
         (integer_literal)))))
+
+================================================================================
+Class with explicit delegation to a postfix expression member
+================================================================================
+
+class A : I by a!!.b { }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (navigation_expression
+          (postfix_expression
+            (simple_identifier))
+          (navigation_suffix
+            (simple_identifier)))))
+    (class_body)))

@@ -22,7 +22,7 @@ enum TokenType {
   COMMENT_CONTINUATION_HINT,
   TRY_CLAUSE_HINT,
   BACKING_FIELD_HINT,
-  IDENTIFIER_EXPRESSION_HINT,
+  EXPRESSION_END_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -810,13 +810,7 @@ static bool constructor_annotation(TSLexer *lexer) {
   return true;
 }
 
-// After `where` has been consumed, decide whether a type-constraint clause
-// follows: optional annotations, then a plain, Unicode or backtick-quoted type
-// parameter name, then a single `:`. Anything else means `where` is an
-// ordinary identifier (`where?.let`, `where = x`, `where()`, a `where@` label,
-// or a bare `where` statement before an annotated declaration) and the
-// statement before it has already ended. Advance-only: every caller has
-// already marked the token end.
+// Advance-only: every caller has already marked the token end.
 static bool where_type_constraint_follows(TSLexer *lexer, bool *newline) {
   if (!constructor_trivia(lexer, newline)) return false;
   while (lexer->lookahead == '@') {
@@ -837,6 +831,14 @@ static bool where_type_constraint_follows(TSLexer *lexer, bool *newline) {
   if (lexer->lookahead != ':') return false;
   advance(lexer);
   return lexer->lookahead != ':';
+}
+
+// Kotlin attaches a `{` on the next line to a call, never to a name. The hint
+// is never produced, only its validity carries the context.
+static bool brace_starts_statement(const bool *valid_symbols) {
+  return valid_symbols[EXPRESSION_END_HINT] &&
+         !valid_symbols[BY_DELEGATION_HINT] &&
+         !valid_symbols[STRING_CONTENT];
 }
 
 static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
@@ -929,7 +931,7 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
     // an index's '[' and a callable reference's '::' each begin a new
     // statement. Matches the non-comment path above.
     case '{':
-      return valid_symbols[IDENTIFIER_EXPRESSION_HINT] && !valid_symbols[STRING_CONTENT];
+      return brace_starts_statement(valid_symbols);
     case '.': case ',': case '*': case '%':
     case '>': case '<': case '=':
     case '?': case '|': case '&': case '/':
@@ -953,6 +955,9 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       return true;
     case 'w':
       if (scan_for_word(lexer, "here", 4)) {
+        // Like `catch` and `finally`: `where` only continues a declaration
+        // when a type constraint follows. `where()` is a call to a function
+        // named where, and the statement before it has already ended.
         bool newline = false;
         return !where_type_constraint_follows(lexer, &newline);
       }
@@ -985,7 +990,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_s
   bool newline = false;
   if (!constructor_trivia(lexer, &newline)) return !lexer->eof(lexer);
   switch (lexer->lookahead) {
-    case '{': return !(valid_symbols[IDENTIFIER_EXPRESSION_HINT] && !valid_symbols[STRING_CONTENT]);
+    case '{': return !brace_starts_statement(valid_symbols);
     case '.': case ',': case '*': case '%': case '>': case '<': case '=':
     case '?': case '|': case '&': return true;
     case ':': advance(lexer); return lexer->lookahead != ':';
@@ -1118,10 +1123,8 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   // '<' stays: a line may open with type arguments that continue the previous
   // construct — `is T` then `<X>` is one type, which the Kotlin PSI confirms.
   switch (lexer->lookahead) {
-      // Kotlin attaches a next-line lambda to a call's `()` but not to a bare
-      // identifier. The grammar flags a bare identifier expression for us.
       case '{':
-        if (valid_symbols[IDENTIFIER_EXPRESSION_HINT] && !valid_symbols[STRING_CONTENT]) return true;
+        if (brace_starts_statement(valid_symbols)) return true;
         *cursor_clean = true;
         return false;
 
@@ -1272,7 +1275,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       case 'a':
         return !scan_for_word(lexer, "s", 1);
 
-      // Don't insert a semicolon before a where type-constraint clause
+      // Don't insert a semicolon before a where
       case 'w': {
         if (!scan_for_word(lexer, "here", 4)) return true;
         bool newline = false;
@@ -1432,7 +1435,8 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   // TRY_CLAUSE_HINT is optional before catch/finally and is never emitted.
   // Its validity identifies clause positions without changing keyword nodes.
   // BY_DELEGATION_HINT is declared in the grammar (optional, before `by` in
-  // explicit_delegation and property_delegate) purely so it appears in
+  // explicit_delegation and property_delegate, and after the delegate's name in
+  // explicit_delegation) purely so it appears in
   // valid_symbols when the parser is in a delegation context. The scanner
   // never emits it; it's used only as a context flag in scan_automatic_semicolon.
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
