@@ -297,6 +297,63 @@ val anon = fun() { assert(true) }
                   (boolean_literal))))))))))
 
 ==================
+Named function where an expression starts
+==================
+
+fun f() {
+    if (c) fun g() {}
+    x = 1 < fun <T> g() = 1
+    run(fun g() {})
+    @A fun h() {}
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (simple_identifier)
+              (function_value_parameters)
+              (function_body))))
+        (assignment
+          (directly_assignable_expression
+            (simple_identifier))
+          (comparison_expression
+            (integer_literal)
+            (anonymous_function
+              (type_parameters
+                (type_parameter
+                  (type_identifier)))
+              (simple_identifier)
+              (function_value_parameters)
+              (function_body
+                (integer_literal)))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (anonymous_function
+                  (simple_identifier)
+                  (function_value_parameters)
+                  (function_body))))))
+        (function_declaration
+          (modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
+
+==================
 Anonymous suspend function with body
 ==================
 

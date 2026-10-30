@@ -1696,22 +1696,19 @@ module.exports = grammar({
           optional(seq(":", $._type)))
     ),
 
-    anonymous_function: $ => prec.right(seq(
-      optional($.context_receiver),
-      optional("suspend"),
-      "fun",
-      optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
-      // Kotlin accepts type parameters on an anonymous function in two
-      // placements, and one slot here covers both: with no receiver
-      // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
-      // renders as TYPE_PARAMETER_LIST following the receiver dot). Keeping it
-      // to a single slot after the optional receiver avoids two optional
-      // placements competing for the same `<`.
-      optional($.type_parameters),
-      $.function_value_parameters,
-      optional(seq(":", $._type)),
-      optional($.function_body)
-    )),
+    // A `fun` where Kotlin expects an expression, with or without a name: `if (c) fun g() {}`,
+    // `1 < fun g() {}`. `fun` starts an expression (EXPRESSION_FIRST) and parseAtomicExpression
+    // reads a named one as a local function; the compiler rejects the name later
+    // (ANONYMOUS_FUNCTION_WITH_NAME). At statement start the same text is a function_declaration,
+    // which wins by the lower precedence of the named form from its name on; the receiver before
+    // it keeps the conflicts of the anonymous form. The dynamic precedence settles `@A fun g()`,
+    // where the annotation is a modifier of the declaration or a prefix of the expression. The
+    // named form takes a body, so that after `fun <T> f()` the next line's `where@A T` stays a
+    // type constraint rather than a label of a trailing lambda.
+    anonymous_function: $ => choice(
+      prec.right(anonymousFunction($)),
+      prec.dynamic(-1, anonymousFunction($, $.simple_identifier)),
+    ),
 
     _optionally_typed_parameter: $ => seq($.simple_identifier, optional(seq(":", $._type))),
 
@@ -2297,6 +2294,28 @@ function wordExcept(words) {
     return depth > 0 && !node[''] ? `${body}?` : body;
   };
   return new RegExp(suffix(trie, 0));
+}
+
+// An anonymous function, or with `name` before its parameters a named one, which takes a body and
+// the lower precedence from its name on (see `anonymous_function`).
+function anonymousFunction($, name) {
+  const tail = name
+    ? [prec.right(-1, seq(name, $.function_value_parameters, optional(seq(":", $._type)), $.function_body))]
+    : [$.function_value_parameters, optional(seq(":", $._type)), optional($.function_body)];
+  return seq(
+    optional($.context_receiver),
+    optional("suspend"),
+    "fun",
+    optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
+    // Kotlin accepts type parameters on an anonymous function in two
+    // placements, and one slot here covers both: with no receiver
+    // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
+    // renders as TYPE_PARAMETER_LIST following the receiver dot). Keeping it
+    // to a single slot after the optional receiver avoids two optional
+    // placements competing for the same `<`.
+    optional($.type_parameters),
+    ...tail
+  );
 }
 
 function sep1(rule, separator) {
