@@ -394,6 +394,9 @@ module.exports = grammar({
     // Never produced: valid right after the `}` of a class body or a block, where Kotlin starts the
     // next declaration without a separator (`}enum class E`, see BLOCK_END_HINT in the scanner).
     $._block_end_hint,
+    // Never produced: valid after a modifier word of a declaration's modifiers, so that a line break
+    // before the declaration keyword inserts no semicolon (see MODIFIER_HINT in the scanner).
+    $._modifier_hint,
   ],
 
   extras: $ => [
@@ -1953,10 +1956,14 @@ module.exports = grammar({
     // `class_modifier`/`simple_identifier` conflict could not help, because the
     // alternative no longer existed. A conflict carries both readings instead
     // and keeps the one that parses.
+    // Kotlin's parser reads a statement as a declaration first: it takes every modifier word and
+    // annotation, across line breaks, and keeps them when a declaration keyword follows
+    // (KotlinParsing.parseLocalDeclaration), so `private` alone on a line before `fun x()` is a
+    // modifier, not an expression statement.
     modifiers: $ => repeat1(choice(
       prec.right(PREC.MODIFIERS, $.annotation),
       prec.right(PREC.MODIFIERS, $.context_receiver),
-      $._modifier
+      seq($._modifier, optional($._modifier_hint))
     )),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),

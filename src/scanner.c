@@ -28,6 +28,7 @@ enum TokenType {
   QUOTED_IDENTIFIER,
   CALL_LAMBDA_HINT,
   BLOCK_END_HINT,
+  MODIFIER_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -964,8 +965,15 @@ static bool call_prefix_continues(TSLexer *lexer, const bool *valid_symbols) {
   return false;
 }
 
+static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symbols);
+
 static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
   if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
+  if (valid_symbols[MODIFIER_HINT] && !valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+      !valid_symbols[STRING_CONTENT] &&
+      (iswalpha(lexer->lookahead) || lexer->lookahead == '@')) {
+    return semicolon_after_modifier_line(lexer, valid_symbols);
+  }
   switch (lexer->lookahead) {
     // '[' is absent, and '(' and ':' are handled separately: a call's '(',
     // an index's '[' and a callable reference's '::' each begin a new
@@ -1133,6 +1141,51 @@ static bool semicolon_before_else(TSLexer *lexer) {
   return !followed_by_arrow(lexer);
 }
 
+// A line break after a modifier word (MODIFIER_HINT is valid), at the first letter or `@` of the
+// next line: does a semicolon go at the line break? Kotlin's parser reads a statement as a
+// declaration first, takes every modifier word and annotation across line breaks, and keeps them
+// when a declaration keyword follows (parseLocalDeclaration), so `private` alone on a line before
+// `fun x()` is a modifier and no semicolon ends it. Otherwise the modifier word was an expression
+// statement (`open` alone, then `foo()`). A word that is no modifier gets the decisions the switch
+// in scan_automatic_semicolon makes for words, which cannot read it again. Words are read whole
+// with constructor_word, so one with a non-ASCII character is no keyword whatever the host's
+// locale (`Ŧun` is not `fun`); a false answer leaves the cursor dirty.
+//
+// The scan at each line break of a run of modifier lines reads the rest of the run, so the run
+// it reads is capped at MODIFIER_CHAIN_MAX words: N lines of `private` would otherwise cost
+// about N²/2 steps (16,000 lines took 15 s), and with the cap each line break reads at most that
+// many words. Kotlin's parser has no such bound, so a run longer than the cap before its
+// declaration keyword takes the semicolon at its first line break where PSI reads one
+// declaration; no list of real modifiers comes near it (Kotlin has about thirty).
+#define MODIFIER_CHAIN_MAX 256
+static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symbols) {
+  char word[16];
+  bool after_modifier = false;
+  for (unsigned modifiers = 0;; modifiers++) {
+    if (lexer->lookahead == '@') return false;
+    if (modifiers == MODIFIER_CHAIN_MAX) return true;
+    if (!constructor_word(lexer, word, sizeof(word))) return true;
+    if (WORD_IN(word, DECLARATION_WORDS)) return false;
+    if (!WORD_IN(word, MODIFIER_WORDS)) break;
+    after_modifier = true;
+    // A comment between the modifiers is whitespace to Kotlin (`suspend // c` before `fun b()`);
+    // a bare `/` cannot follow a modifier word, so the modifier word was an expression.
+    if (!skip_whitespace_and_comments(lexer)) return true;
+  }
+  if (after_modifier) return true;
+  if (strcmp(word, "by") == 0) return !valid_symbols[BY_DELEGATION_HINT];
+  if (strcmp(word, "else") == 0) return followed_by_arrow(lexer);
+  if (strcmp(word, "as") == 0) return false;
+  if (strcmp(word, "where") == 0) {
+    bool newline = false;
+    return !where_type_constraint_follows(lexer, &newline);
+  }
+  if (strcmp(word, "field") == 0) return !valid_symbols[BACKING_FIELD_HINT];
+  bool is_catch = strcmp(word, "catch") == 0;
+  if (is_catch || strcmp(word, "finally") == 0) return !valid_symbols[TRY_CLAUSE_HINT];
+  return true;
+}
+
 static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols,
                                      bool *cursor_clean) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
@@ -1206,6 +1259,13 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   }
 
   if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
+  // A primary constructor's modifiers (`class C private` with `constructor(...)` on the next
+  // line) take the PRIMARY_CONSTRUCTOR_KEYWORD cases of the switch.
+  if (valid_symbols[MODIFIER_HINT] && !valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+      !valid_symbols[STRING_CONTENT] &&
+      (iswalpha(lexer->lookahead) || lexer->lookahead == '@')) {
+    return semicolon_after_modifier_line(lexer, valid_symbols);
+  }
 
   // Characters that continue the previous expression across a newline.
   //

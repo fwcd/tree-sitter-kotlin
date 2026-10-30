@@ -8161,8 +8161,25 @@
             }
           },
           {
-            "type": "SYMBOL",
-            "name": "_modifier"
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_modifier"
+              },
+              {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_modifier_hint"
+                  },
+                  {
+                    "type": "BLANK"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -9962,6 +9979,10 @@
     {
       "type": "SYMBOL",
       "name": "_block_end_hint"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_modifier_hint"
     }
   ],
   "inline": [

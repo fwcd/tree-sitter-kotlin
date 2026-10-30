@@ -1354,3 +1354,140 @@ fun h(name: String?) {
             (when_entry
               (control_structure_body
                 (null_literal)))))))))
+
+================================================================================
+Modifiers on lines of their own before a declaration
+================================================================================
+
+private
+fun x() {}
+
+fun f() {
+    @A
+    private
+    suspend
+    fun g() {}
+    data
+    class D(val a: Int)
+    open
+    foo()
+    val v = if (c) a
+    else
+        value
+    val w = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (modifiers
+            (annotation
+              (user_type
+                (type_identifier)))
+            (visibility_modifier)
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))
+        (class_declaration
+          (modifiers
+            (class_modifier))
+          (type_identifier)
+          (primary_constructor
+            (class_parameter
+              (binding_pattern_kind)
+              (simple_identifier)
+              (user_type
+                (type_identifier)))))
+        (simple_identifier)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (if_expression
+            condition: (simple_identifier)
+            consequence: (control_structure_body
+              (simple_identifier))
+            alternative: (control_structure_body
+              (simple_identifier))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+Comments between modifiers on lines of their own
+================================================================================
+
+private
+suspend // c
+fun b() {}
+
+private
+suspend /* c */
+fun d() {}
+
+fun f() {
+    private // c
+    inline
+    fun g() {}
+    open
+    // c
+    foo()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (function_modifier))
+    (line_comment)
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (function_modifier))
+    (multiline_comment)
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (modifiers
+            (visibility_modifier)
+            (line_comment)
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))
+        (simple_identifier)
+        (line_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
