@@ -2045,6 +2045,96 @@ class D : I by obj.{ foo }() { fun member() {} }
         (function_body)))))
 
 ================================================================================
+No operand of a class delegate takes a trailing lambda
+================================================================================
+
+class A {
+  private class B(val d: P) : P by d()
+
+  companion object { val y = 1 }
+}
+class G : P by envs + extra {
+  override fun get(key: String) = null
+}
+class F<T>(parent: T) : P by parent
+    where T : P {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (class_declaration
+        (modifiers
+          (visibility_modifier))
+        (type_identifier)
+        (primary_constructor
+          (class_parameter
+            (binding_pattern_kind)
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (delegation_specifier
+          (explicit_delegation
+            (user_type
+              (type_identifier))
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))
+      (companion_object
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (additive_expression
+          (simple_identifier)
+          (simple_identifier))))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body
+          (null_literal)))))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
 Getter and setter on one line below the property
 ================================================================================
 
