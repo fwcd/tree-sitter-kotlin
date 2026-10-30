@@ -318,6 +318,7 @@
     "functionReceivers/PropertiesWithFunctionReceiversAnnotations",
     "greatSyntacticShift/FunctionTypesAsArguments",
     "greatSyntacticShift/functionLiterals",
+    "greatSyntacticShift/nullableTypes",
     "incorrectLTGTFallback",
     "inheritingClasses",
     "innerClassEnumEntry",
@@ -501,7 +502,6 @@
     "annotation/values/arraysWithNonConstantValue",
     "destructuring/danglingAnnotation",
     "examples/util/Comparison",
-    "greatSyntacticShift/nullableTypes",
     "propertyDelegate/PropertyWithInitializer",
     "recovery/binaryExpression/SoftModifierAsInfixFunction",
     "recovery/objects/expressions/Everything"

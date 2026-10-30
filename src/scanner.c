@@ -1727,6 +1727,12 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   //
   // mark_end is set straight after the `?`, so the lookahead below inspects
   // the following characters without lengthening the token.
+  //
+  // The second `?` of `X? ?::x` starts after a space. Skip it here rather than
+  // rely on the ASI scan above having stepped over it, which happens only where
+  // the parse state also accepts a semicolon.
+  if (valid_symbols[CALLABLE_REFERENCE_QUEST] && !valid_symbols[STRING_CONTENT])
+    while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
   if (valid_symbols[CALLABLE_REFERENCE_QUEST] && lexer->lookahead == '?') {
     advance(lexer);
     lexer->mark_end(lexer);
