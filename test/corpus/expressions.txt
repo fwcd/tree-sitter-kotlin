@@ -1785,13 +1785,13 @@ fun f(x: Int) = when (x) {
                     (value_arguments)))))))))))
 
 ================================================================================
-When expression with a guarded else after an unbraced if body
+When expression with a guarded else after a braced if body
 ================================================================================
 
-fun f(x: Int) = when (x) {
-    1 -> if (a) b()
-    else if c -> d()
-    else -> e()
+fun f(x: Any) = when (x) {
+    0 -> { if (a) b() }
+    else if ok() -> out()
+    else -> fallback()
 }
 
 --------------------------------------------------------------------------------
@@ -1812,22 +1812,101 @@ fun f(x: Int) = when (x) {
           (when_condition
             (integer_literal))
           (control_structure_body
-            (if_expression
-              (simple_identifier)
-              (control_structure_body
-                (call_expression
-                  (simple_identifier)
-                  (call_suffix
-                    (value_arguments)))))))
+            (statements
+              (if_expression
+                (simple_identifier)
+                (control_structure_body
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))
         (when_entry
           (guard_condition
-            (simple_identifier))
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
           (control_structure_body
             (call_expression
               (simple_identifier)
               (call_suffix
                 (value_arguments)))))
         (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+When expression with guard condition after multiple conditions
+================================================================================
+
+fun f(x: Any) = when (x) {
+    1, 2 if ok() -> out()
+    else -> fallback()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (when_condition
+            (integer_literal))
+          (guard_condition
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+If-else chain whose else body is a call to an identifier starting with if
+================================================================================
+
+fun f() {
+    if (a) b()
+    else ifé()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
           (control_structure_body
             (call_expression
               (simple_identifier)

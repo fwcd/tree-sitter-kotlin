@@ -487,19 +487,15 @@ static bool skip_whitespace_and_comments(TSLexer *lexer) {
   }
 }
 
-// After scan_for_word has matched "else", decide whether it opens a when
-// entry: `else ->`, or a guarded `else if <expr> ->`. An if-expression's
-// else-if is always `else if (`, so `if` not followed by `(` can only be a
-// guard. Uses skip() so characters are not included in the current token.
-static bool else_starts_when_entry(TSLexer *lexer) {
+// After scan_for_word has matched "else", peek past optional whitespace
+// and comments for "->". If found, this is a when-entry's `else ->`,
+// not an if-else. Uses skip() so characters are not included in the
+// current token.
+static bool followed_by_arrow(TSLexer *lexer) {
   if (!skip_whitespace_and_comments(lexer)) return false;
-  if (lexer->lookahead == '-') {
-    skip(lexer);
-    return lexer->lookahead == '>';
-  }
-  if (!check_word(lexer, "if", 2)) return false;
-  if (!skip_whitespace_and_comments(lexer)) return false;
-  return lexer->lookahead != '(';
+  if (lexer->lookahead != '-') return false;
+  skip(lexer);
+  return lexer->lookahead == '>';
 }
 
 // After a word has matched, peek past optional
@@ -648,21 +644,6 @@ static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity) {
   }
   word[length] = '\0';
   return ascii && length > 0;
-}
-
-// Advance-only twin of else_starts_when_entry for callers that must re-read
-// the text afterwards.
-static bool else_starts_when_entry_adv(TSLexer *lexer, bool *newline) {
-  if (!constructor_trivia(lexer, newline)) return false;
-  if (lexer->lookahead == '-') {
-    advance(lexer);
-    return lexer->lookahead == '>';
-  }
-  char word[32] = {0};
-  constructor_word(lexer, word, sizeof(word));
-  if (strcmp(word, "if") != 0) return false;
-  if (!constructor_trivia(lexer, newline)) return false;
-  return lexer->lookahead != '(';
 }
 
 static bool constructor_modifier(const char *word) {
@@ -845,8 +826,13 @@ static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
     continuation = valid_symbols[TRY_CLAUSE_HINT];
   }
   if (first == '!') { advance(lexer); continuation = lexer->lookahead == '='; }
-  if (strcmp(first_word, "else") == 0)
-    continuation = !else_starts_when_entry_adv(lexer, &newline);
+  if (strcmp(first_word, "else") == 0) {
+    continuation = true;
+    if (constructor_trivia(lexer, &newline) && lexer->lookahead == '-') {
+      advance(lexer);
+      continuation = lexer->lookahead != '>';
+    }
+  }
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
   return (header_newline ? !continuation : strcmp(first_word, "import") == 0) &&
     valid_symbols[AUTOMATIC_SEMICOLON];
@@ -875,7 +861,8 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
       return true;
     case 'e':
       if (scan_for_word(lexer, "lse", 3)) {
-        return else_starts_when_entry(lexer);
+        if (followed_by_arrow(lexer)) return true;
+        return false;
       }
       return true;
     case 'a':
@@ -927,7 +914,9 @@ static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_s
     return valid_symbols[TRY_CLAUSE_HINT];
   }
   if (strcmp(word, "else") == 0) {
-    return !else_starts_when_entry_adv(lexer, &newline);
+    if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
+    advance(lexer);
+    return lexer->lookahead != '>';
   }
   return false;
 }
@@ -1177,11 +1166,11 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
         return !(valid_symbols[BY_DELEGATION_HINT] &&
                  scan_for_word(lexer, "y", 1));
 
-      // Don't insert a semicolon before an else, unless it opens a when
-      // entry (`else ->` or `else if <expr> ->`).
+      // Don't insert a semicolon before an else, unless it's
+      // followed by "->" (a when-entry's else, not an if-else).
       case 'e':
         if (!scan_for_word(lexer, "lse", 3)) return true;
-        return else_starts_when_entry(lexer);
+        return followed_by_arrow(lexer);
 
       // Cast continuation outside a primary-constructor context.
       case 'a':
