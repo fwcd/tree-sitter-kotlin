@@ -809,3 +809,56 @@ fun f() {
                     (simple_identifier)
                     (call_suffix
                       (value_arguments))))))))))))
+
+================================================================================
+quoted where as a statement before a lambda on the next line
+================================================================================
+
+fun f() {
+    op()
+    `where`
+    { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier)
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+class with a supertype named where and the body on the next line
+================================================================================
+
+class C : where
+{
+    fun member() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (user_type
+        (type_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))

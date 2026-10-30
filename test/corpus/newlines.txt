@@ -435,3 +435,33 @@ val y = 2
     (variable_declaration
       (simple_identifier))
     (integer_literal)))
+
+================================================================================
+Identifier statement before a lambda on the next line
+================================================================================
+
+fun f() {
+    op()
+    foo
+    { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier)
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))

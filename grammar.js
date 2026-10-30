@@ -272,7 +272,7 @@ module.exports = grammar({
     $._comment_continuation_hint,
     $._try_clause_hint,
     $._backing_field_hint,
-    $._where_identifier_hint,
+    $._identifier_expression_hint,
   ],
 
   extras: $ => [
@@ -1301,7 +1301,11 @@ module.exports = grammar({
 
     _primary_expression: $ => choice(
       $.parenthesized_expression,
-      $.simple_identifier,
+      // The hint is never produced. Its validity tells the scanner that a
+      // bare identifier expression just ended, so a lambda on the next line
+      // is a new statement as in Kotlin's parser. Type names and the
+      // delegation chain above do not carry it.
+      seq($.simple_identifier, optional($._identifier_expression_hint)),
       $._literal_constant,
       $.string_literal,
       $.callable_reference,
@@ -1875,10 +1879,7 @@ module.exports = grammar({
       "context",
       "init",
       "dynamic",
-      // The hint is never produced. Its validity tells the scanner that the
-      // identifier `where` was just read, so a lambda on the next line is a
-      // new statement as in Kotlin's parser.
-      seq("where", optional($._where_identifier_hint)),
+      "where",
       "catch",
       "finally",
       // Batch 7: enum

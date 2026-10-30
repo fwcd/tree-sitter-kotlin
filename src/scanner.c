@@ -22,7 +22,7 @@ enum TokenType {
   COMMENT_CONTINUATION_HINT,
   TRY_CLAUSE_HINT,
   BACKING_FIELD_HINT,
-  WHERE_IDENTIFIER_HINT,
+  IDENTIFIER_EXPRESSION_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -929,7 +929,7 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
     // an index's '[' and a callable reference's '::' each begin a new
     // statement. Matches the non-comment path above.
     case '{':
-      return valid_symbols[WHERE_IDENTIFIER_HINT] && !valid_symbols[STRING_CONTENT];
+      return valid_symbols[IDENTIFIER_EXPRESSION_HINT] && !valid_symbols[STRING_CONTENT];
     case '.': case ',': case '*': case '%':
     case '>': case '<': case '=':
     case '?': case '|': case '&': case '/':
@@ -985,7 +985,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_s
   bool newline = false;
   if (!constructor_trivia(lexer, &newline)) return !lexer->eof(lexer);
   switch (lexer->lookahead) {
-    case '{': return !(valid_symbols[WHERE_IDENTIFIER_HINT] && !valid_symbols[STRING_CONTENT]);
+    case '{': return !(valid_symbols[IDENTIFIER_EXPRESSION_HINT] && !valid_symbols[STRING_CONTENT]);
     case '.': case ',': case '*': case '%': case '>': case '<': case '=':
     case '?': case '|': case '&': return true;
     case ':': advance(lexer); return lexer->lookahead != ':';
@@ -1119,9 +1119,9 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   // construct — `is T` then `<X>` is one type, which the Kotlin PSI confirms.
   switch (lexer->lookahead) {
       // Kotlin attaches a next-line lambda to a call's `()` but not to a bare
-      // identifier. The grammar flags the identifier `where` for us.
+      // identifier. The grammar flags a bare identifier expression for us.
       case '{':
-        if (valid_symbols[WHERE_IDENTIFIER_HINT] && !valid_symbols[STRING_CONTENT]) return true;
+        if (valid_symbols[IDENTIFIER_EXPRESSION_HINT] && !valid_symbols[STRING_CONTENT]) return true;
         *cursor_clean = true;
         return false;
 
