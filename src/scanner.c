@@ -1001,6 +1001,9 @@ static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *vali
       skip(lexer);
       if (lexer->lookahead == '=') return false;
       return true;
+    case '-':
+      skip(lexer);
+      return lexer->lookahead != '>';
     case 'e':
       if (scan_for_word(lexer, "lse", 3)) {
         if (followed_by_arrow(lexer)) return true;
@@ -1054,6 +1057,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, bool in_delegate, c
     case '?': case '|': case '&': return true;
     case ':': advance(lexer); return lexer->lookahead != ':';
     case '!': advance(lexer); return lexer->lookahead == '=';
+    case '-': advance(lexer); return lexer->lookahead == '>';
     default: break;
   }
   char word[32] = {0};
@@ -1317,8 +1321,14 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       // statement could end, so this won't fire inside () or [] where
       // newlines don't terminate statements.
       case '+':
-      case '-':
         return true;
+
+      // `->` is no prefix operator: it ends a lambda's parameters, which may sit
+      // on the line before it, `forEach { item\n -> ... }` (Kotlin's parser looks
+      // for the arrow of a parameter list across newlines).
+      case '-':
+        skip(lexer);
+        return lexer->lookahead != '>';
 
       // Don't insert a semicolon before `!=`, but do insert one before a unary `!`.
       case '!':
