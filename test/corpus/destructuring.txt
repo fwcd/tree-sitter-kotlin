@@ -522,3 +522,69 @@ val (_, b) = pair
       (variable_declaration
         (simple_identifier)))
     (simple_identifier)))
+
+================================================================================
+A statement destructuring starts with val or var
+================================================================================
+
+fun f() {
+    if (c) x else (p) = q
+    data[key] = value
+    (val a, var b) = pair
+    [val c, var d] = pair
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (simple_identifier))
+          alternative: (control_structure_body
+            (assignment
+              (directly_assignable_expression
+                (parenthesized_expression
+                  (simple_identifier)))
+              (simple_identifier))))
+        (assignment
+          (directly_assignable_expression
+            (simple_identifier)
+            (indexing_suffix
+              (simple_identifier)))
+          (simple_identifier))
+        (destructuring_declaration
+          (multi_variable_declaration
+            (variable_declaration
+              (binding_pattern_kind)
+              (simple_identifier))
+            (variable_declaration
+              (binding_pattern_kind)
+              (simple_identifier)))
+          (simple_identifier))
+        (destructuring_declaration
+          (multi_variable_declaration
+            (variable_declaration
+              (binding_pattern_kind)
+              (simple_identifier))
+            (variable_declaration
+              (binding_pattern_kind)
+              (simple_identifier)))
+          (simple_identifier))))))
+
+================================================================================
+A statement destructuring needs val or var on every entry
+:error
+================================================================================
+
+fun f() {
+    (val a, b) = pair
+    [val c, d] = pair
+}
+
+--------------------------------------------------------------------------------

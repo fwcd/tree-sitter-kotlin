@@ -132,6 +132,10 @@ module.exports = grammar({
     // `( name` at statement start: a destructuring target or a parenthesized
     // expression. Nothing tells them apart until after the ')', so carry both.
     [$._name_based_destructuring_entry_expr, $._primary_expression],
+    // `{ (val a) ...` or `{ [val a] ...`: a lambda's destructured parameter or a destructuring
+    // statement that must start with `val`/`var`; the `->` or the `=` decides.
+    [$._name_based_destructuring_entry_expr, $._name_based_destructuring_first_entry],
+    [$._positional_destructuring_entry, $._positional_destructuring_first_entry],
 
     // @Type(... — `(` after an annotation name is usually constructor args, but
     // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
@@ -944,7 +948,7 @@ module.exports = grammar({
 
     destructuring_declaration: $ => prec.right(seq(
       optional($.modifiers),
-      alias($._multi_variable_declaration_expr, $.multi_variable_declaration),
+      alias($._destructuring_declaration_target, $.multi_variable_declaration),
       optional($.type_constraints),
       "=",
       $._expression,
@@ -1462,6 +1466,40 @@ module.exports = grammar({
       optional(";"),
       optional($.statements),
       "}"
+    )),
+
+    // A destructuring statement (`(val a, var b) = pair`, `[val a, var b] = pair`) starts with `val`
+    // or `var` inside its bracket: Kotlin's parseCommonDeclaration takes `(` or `[` as a declaration
+    // only when lookahead(1) is VAL or VAR. Otherwise `(p) = q` is an assignment to `(p)`. Every
+    // further entry needs its own `val` or `var` too ("Expecting val or var keyword").
+    _destructuring_declaration_target: $ => choice(
+      seq(
+        '(',
+        alias($._name_based_destructuring_first_entry, $.variable_declaration),
+        repeat(seq(',', alias($._name_based_destructuring_first_entry, $.variable_declaration))),
+        optional(','),
+        ')'
+      ),
+      seq(
+        '[',
+        alias($._positional_destructuring_first_entry, $.variable_declaration),
+        repeat(seq(',', alias($._positional_destructuring_first_entry, $.variable_declaration))),
+        optional(','),
+        ']'
+      ),
+    ),
+
+    _name_based_destructuring_first_entry: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      $.binding_pattern_kind,
+      $.simple_identifier,
+      optional(seq(":", $._type)),
+      optional(seq("=", $.simple_identifier))
+    ))),
+
+    _positional_destructuring_first_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      $.binding_pattern_kind,
+      $.simple_identifier,
+      optional(seq(":", $._type))
     )),
 
     _multi_variable_declaration_expr: $ => choice(
