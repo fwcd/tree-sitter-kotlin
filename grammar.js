@@ -817,7 +817,14 @@ module.exports = grammar({
         seq("=", $._expression),
         $.property_delegate
       )),
-      optional(';'),
+      // No `optional(';')` here. A semicolon between a property and its
+      // accessors -- `val x: Int; get() = 42` -- is already consumed by the
+      // `_semi` separator that `class_body` and `source_file` apply between
+      // members, so a second optional semicolon inside the rule matched
+      // nothing the separator did not already match. It was not free: it sat
+      // directly in front of the accessor tail, and the extra decision point
+      // cost 453 large parse states, 2,120 KiB of src/parser.c. Keep the
+      // semicolon in the member separator, not here.
       optional(choice(
         seq($.getter, optional($.setter)),
         seq($.setter, optional($.getter)),
