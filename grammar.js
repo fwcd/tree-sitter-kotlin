@@ -288,6 +288,44 @@ module.exports = grammar({
 
   word: $ => $._alpha_identifier,
 
+  // Kotlin's hard keywords (https://kotlinlang.org/docs/keyword-reference.html#hard-keywords) are never
+  // identifiers unless escaped in backticks. Without reserving them, the lexer falls back to an identifier
+  // wherever the keyword is not valid, and GLR can prefer such a reading without any ERROR node:
+  // `@A sealed interface X<T> { ... }` became an annotated infix call `sealed interface X` with type arguments
+  // and a trailing lambda, because the generic call carries a higher dynamic precedence than the declaration.
+  // `typeof` is reserved by Kotlin too but no rule uses it, and a reserved word must be a token of the grammar.
+  reserved: {
+    global: _ => [
+      'as',
+      'break',
+      'class',
+      'continue',
+      'do',
+      'else',
+      'false',
+      'for',
+      'fun',
+      'if',
+      'in',
+      'interface',
+      'is',
+      'null',
+      'object',
+      'package',
+      'return',
+      'super',
+      'this',
+      'throw',
+      'true',
+      'try',
+      'typealias',
+      'val',
+      'var',
+      'when',
+      'while',
+    ],
+  },
+
   // Hidden rules substituted at their use sites instead of getting a symbol of
   // their own. `ts_parse_table` is a dense LARGE_STATE_COUNT x SYMBOL_COUNT
   // array and over 90% of the compiled parser, so every symbol costs about
@@ -1392,7 +1430,8 @@ module.exports = grammar({
 
     _interpolation: $ => choice(
       seq(alias($._interpolation_expression_start, $.interpolation_expression_start), alias($._expression, $.interpolated_expression), alias("}", $.interpolation_expression_end)),
-      seq(alias($._interpolation_identifier_start, $.interpolation_identifier_start), alias($.simple_identifier, $.interpolated_identifier)),
+      // `"$this"`: the one hard keyword a short template entry takes (reserved, so no simple_identifier).
+      seq(alias($._interpolation_identifier_start, $.interpolation_identifier_start), alias(choice($.simple_identifier, "this"), $.interpolated_identifier)),
     ),
 
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
