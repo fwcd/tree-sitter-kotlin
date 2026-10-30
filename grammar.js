@@ -1729,7 +1729,14 @@ module.exports = grammar({
       $.indexing_suffix
     ),
 
-    _postfix_unary_expression: $ => seq($._primary_expression, repeat($._postfix_unary_suffix)),
+    // The left side of an assignment: Kotlin's directlyAssignableExpression is a postfix
+    // expression with an assignable suffix, a simple name, or one in parentheses. Any other
+    // primary without a suffix stays possible, at dynamic precedence -1: otherwise
+    // `if (b) m.x = z` had an equal second reading, `(if (b) m.x) = z`, and GLR could pick it.
+    _postfix_unary_expression: $ => choice(
+      seq($._primary_expression, repeat1($._postfix_unary_suffix)),
+      prec.dynamic(-1, $._primary_expression)
+    ),
 
     _cast_assignable_expression: $ => prec(1, $.as_expression),
 
@@ -1737,8 +1744,8 @@ module.exports = grammar({
       PREC.ASSIGNMENT,
       choice(
         $._postfix_unary_expression,
-        $.simple_identifier
-        // TODO
+        $.simple_identifier,
+        $.parenthesized_expression
       )
     ),
 

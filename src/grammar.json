@@ -7142,17 +7142,30 @@
       ]
     },
     "_postfix_unary_expression": {
-      "type": "SEQ",
+      "type": "CHOICE",
       "members": [
         {
-          "type": "SYMBOL",
-          "name": "_primary_expression"
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_primary_expression"
+            },
+            {
+              "type": "REPEAT1",
+              "content": {
+                "type": "SYMBOL",
+                "name": "_postfix_unary_suffix"
+              }
+            }
+          ]
         },
         {
-          "type": "REPEAT",
+          "type": "PREC_DYNAMIC",
+          "value": -1,
           "content": {
             "type": "SYMBOL",
-            "name": "_postfix_unary_suffix"
+            "name": "_primary_expression"
           }
         }
       ]
@@ -7178,6 +7191,10 @@
           {
             "type": "SYMBOL",
             "name": "simple_identifier"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "parenthesized_expression"
           }
         ]
       }
