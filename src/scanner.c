@@ -235,6 +235,33 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
         if (additional_dollars <= PREFIX_LEN_MAX) additional_dollars++;
       }
       uint32_t total_dollars = 1 + additional_dollars;
+      // `"$`if`"`: Kotlin's short template entry also takes an escaped identifier, a backtick
+      // pair around at least one character on the line. The token ends after the dollars; the
+      // look past the backtick only decides whether the identifier is there.
+      if (total_dollars >= trigger_len && lexer->lookahead == '`') {
+        if (total_dollars > trigger_len) {
+          lexer->result_symbol = STRING_CONTENT;
+          return true;
+        }
+        if (additional_dollars > 0) {
+          lexer->mark_end(lexer);
+        }
+        if (valid_symbols[INTERPOLATION_IDENTIFIER_START]) {
+          advance(lexer);
+          bool named = false;
+          while (lexer->lookahead != '`' && lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
+                 !lexer->eof(lexer)) {
+            advance(lexer);
+            named = true;
+          }
+          if (named && lexer->lookahead == '`') {
+            lexer->result_symbol = INTERPOLATION_IDENTIFIER_START;
+            return true;
+          }
+        }
+        lexer->result_symbol = STRING_CONTENT;
+        return true;
+      }
       // The counter saturates strictly above trigger_len, so a run longer than
       // the cap always reads as "more than the prefix", never as a match.
       if (total_dollars >= trigger_len &&

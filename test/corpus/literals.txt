@@ -823,3 +823,23 @@ val g = """\$h"""
       (string_content)
       (interpolation_identifier_start)
       (interpolated_identifier))))
+
+================================================================================
+Quoted identifier in a short string template
+================================================================================
+
+val s = "$`if` and $`x`"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (interpolation_identifier_start)
+      (interpolated_identifier)
+      (string_content)
+      (interpolation_identifier_start)
+      (interpolated_identifier))))
