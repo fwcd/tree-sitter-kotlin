@@ -1227,6 +1227,14 @@ module.exports = grammar({
 
     assignment: $ => choice(
       prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
+      // Kotlin's parser reads `+=` and the other augmented assignments as binary operators of the
+      // lowest precedence, so a cast may stand left of them: `c as MutableList<T> += x` calls
+      // plusAssign on the cast.
+      prec.left(PREC.ASSIGNMENT, seq(
+        alias($._cast_assignable_expression, $.directly_assignable_expression),
+        $._assignment_and_operator,
+        $._expression
+      )),
       prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression)),
       // TODO
     ),
@@ -1729,6 +1737,8 @@ module.exports = grammar({
     ),
 
     _postfix_unary_expression: $ => seq($._primary_expression, repeat($._postfix_unary_suffix)),
+
+    _cast_assignable_expression: $ => prec(1, $.as_expression),
 
     directly_assignable_expression: $ => prec(
       PREC.ASSIGNMENT,

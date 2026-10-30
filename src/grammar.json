@@ -4189,6 +4189,32 @@
             "type": "SEQ",
             "members": [
               {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_cast_assignable_expression"
+                },
+                "named": true,
+                "value": "directly_assignable_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_assignment_and_operator"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_expression"
+              }
+            ]
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
                 "type": "SYMBOL",
                 "name": "directly_assignable_expression"
               },
@@ -7172,6 +7198,14 @@
           }
         }
       ]
+    },
+    "_cast_assignable_expression": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "SYMBOL",
+        "name": "as_expression"
+      }
     },
     "directly_assignable_expression": {
       "type": "PREC",
