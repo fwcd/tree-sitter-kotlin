@@ -89,3 +89,55 @@ Use `npm run cross-validate:debug -- <relative-fixture-name>` to inspect one
 fixture and `npm run cross-validate:test` to exercise importer/generator and
 comparison helpers. Goldens, imports, exclusions and generated parser failures
 are separate records; a grammar failure is not a fixture-policy exclusion.
+
+## Live PSI oracle
+
+The goldens cover only the pinned testData. `psi-oracle/` runs the Kotlin
+2.4.21 parser itself on any `.kt`/`.kts` file, so new input — hand-written
+edge cases, generated mutations, whole repositories — gets a PSI verdict too.
+It needs a JDK (17 or newer), no Gradle or kotlinc:
+
+```sh
+npm run psi-oracle:fetch    # kotlin-compiler-embeddable 2.4.21 + runtime, SHA-256 pinned, into psi-oracle/lib/
+npm run psi-oracle:verify   # every paired testData input, PSI-clean or not, against its golden
+```
+
+`PsiOracle.java` runs as a single-file Java program on the fetched jars. For a
+file list it writes `DebugUtil.psiToString(file, true, false)` — the text the
+Kotlin parsing tests compare — and an `index.jsonl` line per file with the
+`PsiErrorElement` count and the first error's offset, line and message.
+
+`vendor-fixtures.js --oracle-corpus DIR` exports all 789 paired inputs of the
+pin, including the 342 the comparison fixtures leave out because their golden
+holds a `PsiErrorElement`. `psi-oracle:verify` reproduces 788 of them byte for
+byte. The 789th, `spec/linked/expressions/when-expression/p-6/neg/1.2`, is a
+spec test marked `EXCEPTION: compiler`; upstream never compares its golden,
+which is a truncated artefact, so it is reported as skipped.
+
+## PSI differential run
+
+`cross-validation/diff-run.js` compares tree-sitter with the oracle on any
+corpus and for several grammar checkouts at once, so a branch is measured
+against its base in one pass:
+
+```sh
+npm run psi-diff:mutations   # local/psi-diff/corpora/{mutations,review-329}
+npm run psi-diff -- --corpus mutations --root local/psi-diff/corpora/mutations \
+  --grammar head=. --grammar base=../base-checkout
+npm run psi-diff:minimize -- --run local/psi-diff/runs/mutations
+```
+
+Each input gets a verdict per grammar: `A` (tree-sitter ERROR or MISSING, PSI
+clean), `B` (tree-sitter clean, PSI `PsiErrorElement`), `C` (both clean,
+normalized structures differ), `ok` or `both-error`. A, B and C carry a bucket
+key — the first ERROR node with its parent and the PSI node at that offset, the
+first PSI error with its parent and message, or the first diverging node — and
+`report.md` lists each bucket's count per grammar with its smallest example.
+Without `--list`, a git work tree contributes the `.kt`/`.kts` files it tracks;
+`--exclude REGEX` drops paths. The run is sharded (`--shard-size`, `--jobs`)
+and resumes from the shards already written under `local/psi-diff/runs/NAME`.
+
+`minimize.js` shrinks each bucket's smallest example by deleting lines, then
+tokens, while the bucket key holds; one warm oracle JVM (`PsiOracle --serve`)
+answers every candidate batch. Keep run artefacts out of `build/`: node-gyp
+deletes that directory on every rebuild.

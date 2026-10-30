@@ -18,7 +18,12 @@
     "vendor-jetbrains": "node tools/vendor-jetbrains-tests.js",
     "cross-validate": "node tools/cross-validation/main.js",
     "cross-validate:debug": "node tools/cross-validation/main.js --debug",
-    "cross-validate:test": "npx vitest run"
+    "cross-validate:test": "npx vitest run",
+    "psi-oracle:fetch": "node tools/psi-oracle/fetch.js",
+    "psi-oracle:verify": "node tools/vendor-fixtures.js --oracle-corpus local/psi-diff/corpora/testdata && node tools/psi-oracle/verify.js",
+    "psi-diff": "node tools/cross-validation/diff-run.js",
+    "psi-diff:minimize": "node tools/cross-validation/minimize.js",
+    "psi-diff:mutations": "node tools/cross-validation/mutations.js"
   },
   "repository": {
     "type": "git",
