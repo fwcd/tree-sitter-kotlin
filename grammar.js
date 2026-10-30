@@ -272,6 +272,7 @@ module.exports = grammar({
     $._comment_continuation_hint,
     $._try_clause_hint,
     $._backing_field_hint,
+    $._where_identifier_hint,
   ],
 
   extras: $ => [
@@ -1874,7 +1875,10 @@ module.exports = grammar({
       "context",
       "init",
       "dynamic",
-      "where",
+      // The hint is never produced. Its validity tells the scanner that the
+      // identifier `where` was just read, so a lambda on the next line is a
+      // new statement as in Kotlin's parser.
+      seq("where", optional($._where_identifier_hint)),
       "catch",
       "finally",
       // Batch 7: enum

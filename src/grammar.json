@@ -7574,8 +7574,25 @@
           "value": "dynamic"
         },
         {
-          "type": "STRING",
-          "value": "where"
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "where"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_where_identifier_hint"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "STRING",
@@ -8504,6 +8521,10 @@
     {
       "type": "SYMBOL",
       "name": "_backing_field_hint"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_where_identifier_hint"
     }
   ],
   "inline": [

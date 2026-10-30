@@ -688,3 +688,124 @@ fun f() {
           (directly_assignable_expression
             (simple_identifier))
           (simple_identifier))))))
+
+================================================================================
+where type constraint with an annotation directly after where
+================================================================================
+
+fun <T> f()
+where@Ann T : Any {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (type_constraints
+      (type_constraint
+        (annotation
+          (user_type
+            (type_identifier)))
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body)))
+
+================================================================================
+where as a statement before a lambda on the next line
+================================================================================
+
+fun f() {
+    op()
+    where
+    { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier)
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+where as a statement before a lambda after a line comment
+================================================================================
+
+fun f() {
+    op()
+    where // note
+    { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier)
+        (line_comment)
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+where called with a trailing lambda on the next line
+================================================================================
+
+fun f() {
+    op()
+    where()
+    { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))))))
