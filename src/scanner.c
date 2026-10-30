@@ -31,6 +31,7 @@ enum TokenType {
   MODIFIER_HINT,
   RESERVED_WORD_GUARD,
   QUOTED_LABEL,
+  MEMBER_SEMICOLON,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -1262,11 +1263,19 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     // starts the next declaration without a separator: a file's declarations
     // (parseTopLevelDeclaration) and a class body's members follow each other, so generated code
     // writes `}enum class E {` and `fun a() {}fun b() {}`. A declaration keyword, a modifier word or
-    // an annotation (`fun a() {} @A fun b() {}`) there takes a semicolon; any other word (`else`,
-    // `catch`, `as`) does not.
-    if (valid_symbols[BLOCK_END_HINT] && !valid_symbols[STRING_CONTENT]) {
-      if (lexer->lookahead == '@') return true;
-      if (iswalpha(lexer->lookahead)) return block_end_starts_declaration(lexer);
+    // an annotation (`fun a() {} @A fun b() {}`) there takes MEMBER_SEMICOLON, which only a file
+    // and a class body accept; any other word (`else`, `catch`, `as`) takes nothing. Between the
+    // statements of a block Kotlin wants a `;` or a line break (parseStatements: "Unexpected
+    // tokens"), so `fun f() { fun a() {} fun b() {} }` stays an error.
+    if (valid_symbols[BLOCK_END_HINT] && !valid_symbols[STRING_CONTENT] &&
+        (lexer->lookahead == '@' || iswalpha(lexer->lookahead))) {
+      bool annotation = lexer->lookahead == '@';
+      if ((annotation || block_end_starts_declaration(lexer)) && valid_symbols[MEMBER_SEMICOLON]) {
+        lexer->result_symbol = MEMBER_SEMICOLON;
+        return true;
+      }
+      // A word was read with skip(), so the cursor is dirty; `@` was not read.
+      if (!annotation) return false;
     }
     switch (lexer->lookahead) {
       // Insert imaginary semicolon before an 'import' but not in front
