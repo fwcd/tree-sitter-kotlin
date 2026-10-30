@@ -294,7 +294,8 @@ module.exports = grammar({
     [$.type_arguments, $._comparison_operator],
 
     // ambiguity between prefix expressions and annotations before functions
-    [$._statement, $.prefix_expression],
+    [$._statement, $._expression_statement, $.prefix_expression],
+    [$._expression_statement, $.prefix_expression],
     // _statement_annotation vs annotation (in prefix_expression and modifiers):
     // both parse @Identifier but route through different rules.
     [$._statement_annotation, $.annotation],
@@ -314,7 +315,6 @@ module.exports = grammar({
     [$.delegation_specifier, $._type_modifier, $.simple_identifier],
     [$.anonymous_function, $.function_modifier],
     [$.anonymous_function, $.simple_identifier],
-    [$.anonymous_function, $.function_modifier, $.simple_identifier],
 
 
     // ambiguity between simple identifier 'set/get' with actual setter/getter functions.
@@ -1270,6 +1270,11 @@ module.exports = grammar({
       // annotations on a declaration are already handled by `modifiers`, and
       // allowing both here would make them ambiguous.
       seq(optional($.label), $._declaration),
+      $._expression_statement
+    ),
+
+    // A statement that is no declaration; also the body of an if, else, loop or when entry.
+    _expression_statement: $ => choice(
       seq(repeat($.label), $._expression),
       seq($._statement_annotations, repeat($.label), $._expression),
       seq(repeat($.label), choice($.assignment, $._loop_statement)),
@@ -1316,7 +1321,11 @@ module.exports = grammar({
       "@"
     )),
 
-    control_structure_body: $ => choice($._block, $._statement),
+    // The body of an `if`, `else`, loop or `when` entry is an expression in Kotlin's parser
+    // (parseControlStructureBody -> parseBlockLevelExpression), where a modifier word is an
+    // identifier and a declaration is no statement. Kotlin parses a keyword-led one there
+    // (`if (c) val x = 1`) and rejects it; none occurs in the IntelliJ monorepo.
+    control_structure_body: $ => choice($._block, $._expression_statement),
 
     _block: $ => prec(PREC.BLOCK, seq(
       "{", $._delegate_end_hint, optional(";"), optional($.statements), "}",

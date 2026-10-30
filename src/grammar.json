@@ -4502,6 +4502,15 @@
           ]
         },
         {
+          "type": "SYMBOL",
+          "name": "_expression_statement"
+        }
+      ]
+    },
+    "_expression_statement": {
+      "type": "CHOICE",
+      "members": [
+        {
           "type": "SEQ",
           "members": [
             {
@@ -4645,7 +4654,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "_statement"
+          "name": "_expression_statement"
         }
       ]
     },
@@ -9669,6 +9678,11 @@
     ],
     [
       "_statement",
+      "_expression_statement",
+      "prefix_expression"
+    ],
+    [
+      "_expression_statement",
       "prefix_expression"
     ],
     [
@@ -9716,11 +9730,6 @@
     ],
     [
       "anonymous_function",
-      "simple_identifier"
-    ],
-    [
-      "anonymous_function",
-      "function_modifier",
       "simple_identifier"
     ],
     [

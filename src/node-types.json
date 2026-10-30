@@ -2375,10 +2375,6 @@
           "named": true
         },
         {
-          "type": "class_declaration",
-          "named": true
-        },
-        {
           "type": "collection_literal",
           "named": true
         },
@@ -2388,10 +2384,6 @@
         },
         {
           "type": "conjunction_expression",
-          "named": true
-        },
-        {
-          "type": "destructuring_declaration",
           "named": true
         },
         {
@@ -2412,10 +2404,6 @@
         },
         {
           "type": "for_statement",
-          "named": true
-        },
-        {
-          "type": "function_declaration",
           "named": true
         },
         {
@@ -2467,10 +2455,6 @@
           "named": true
         },
         {
-          "type": "object_declaration",
-          "named": true
-        },
-        {
           "type": "object_literal",
           "named": true
         },
@@ -2484,10 +2468,6 @@
         },
         {
           "type": "prefix_expression",
-          "named": true
-        },
-        {
-          "type": "property_declaration",
           "named": true
         },
         {
@@ -2524,10 +2504,6 @@
         },
         {
           "type": "try_expression",
-          "named": true
-        },
-        {
-          "type": "type_alias",
           "named": true
         },
         {
