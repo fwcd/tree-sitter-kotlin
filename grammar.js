@@ -271,6 +271,7 @@ module.exports = grammar({
     $._callable_reference_quest,
     $._comment_continuation_hint,
     $._try_clause_hint,
+    $._backing_field_hint,
   ],
 
   extras: $ => [
@@ -813,15 +814,59 @@ module.exports = grammar({
       optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration),
       optional($.type_constraints),
+      // One optional tail, not two. An initializer (or delegate) and the
+      // accessors used to be two independent `optional(...)` positions in a
+      // row; this admits exactly the same four combinations -- nothing, an
+      // initializer, accessors, or an initializer followed by accessors --
+      // from a single decision point.
+      //
+      // The pair of positions was expensive out of all proportion to what it
+      // expressed: merging them removes 596 large parse states and 2,720 KiB
+      // of src/parser.c. This rule's tail is a hot spot, for the same reason
+      // #323 found: `property_declaration` is reachable from almost
+      // everywhere, so every extra decision point here is paid for across the
+      // whole table. Keep it to one position.
+      //
+      // Also note there is no `optional(';')` here: a semicolon between a
+      // property and its accessors -- `val x: Int; get() = 42` -- is already
+      // consumed by the `_semi` separator that `class_body` and `source_file`
+      // apply between members (#323).
       optional(choice(
-        seq("=", $._expression),
-        $.property_delegate
-      )),
-      optional(';'),
-      optional(choice(
-        seq($.getter, optional($.setter)),
-        seq($.setter, optional($.getter)),
+        seq(
+          choice(seq("=", $._expression), $.property_delegate, $.backing_field),
+          optional($._property_accessors)
+        ),
+        $._property_accessors
       ))
+    )),
+
+    // `prec.right` so a lone getter does not reduce ambiguously against the
+    // getter-then-setter reading; `property_declaration`'s own `prec.right`
+    // used to supply that while the pair was written inline.
+    _property_accessors: $ => prec.right(choice(
+      seq($.getter, optional($.setter)),
+      seq($.setter, optional($.getter))
+    )),
+
+    // An explicit backing field, `val x: Any field: String = "OK"`. Default
+    // Kotlin since 2.4 -- the feature is not pre-release and compiles with no
+    // flags. JetBrains emits BACKING_FIELD inside the PROPERTY, holding its own
+    // modifiers, type and initializer, which is what this mirrors.
+    //
+    // Every part after `field` is optional independently: the type may be left
+    // to inference (`field = 2`) and the initializer may be deferred to an
+    // `init` block (`field: MutableList<Int>`).
+    //
+    // It is an alternative to the property's initializer rather than a
+    // position of its own. A property never has both, and a separate optional
+    // position here measured at +95% of compiled parser against this shape --
+    // see the comment above on why this tail is a hot spot.
+    backing_field: $ => prec.right(seq(
+      optional($._backing_field_hint),
+      optional($.modifiers),
+      "field",
+      optional(seq(":", $._type)),
+      optional(seq("=", $._expression))
     )),
 
     property_delegate: $ => seq(optional($._by_delegation_hint), "by", $._expression),
