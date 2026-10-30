@@ -220,3 +220,58 @@ object C private():T{}
       (user_type
         (type_identifier)))
     (class_body)))
+
+================================================================================
+An object expression with two supertypes as a call argument
+================================================================================
+
+val v = foo(object : Base(), Listener {
+  override fun run() = 1
+}, other)
+val w = object : Base(), Listener {}
+
+---
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (simple_identifier)
+      (call_suffix
+        (value_arguments
+          (value_argument
+            (object_literal
+              (delegation_specifier
+                (constructor_invocation
+                  (user_type
+                    (type_identifier))
+                  (value_arguments)))
+              (delegation_specifier
+                (user_type
+                  (type_identifier)))
+              (class_body
+                (function_declaration
+                  (modifiers
+                    (member_modifier))
+                  (simple_identifier)
+                  (function_value_parameters)
+                  (function_body
+                    (integer_literal))))))
+          (value_argument
+            (simple_identifier))))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments)))
+      (delegation_specifier
+        (user_type
+          (type_identifier)))
+      (class_body))))

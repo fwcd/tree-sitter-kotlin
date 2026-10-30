@@ -6124,99 +6124,36 @@
       ]
     },
     "object_literal": {
-      "type": "CHOICE",
+      "type": "SEQ",
       "members": [
         {
-          "type": "PREC_DYNAMIC",
-          "value": 1,
-          "content": {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": "data"
-                  },
-                  {
-                    "type": "BLANK"
-                  }
-                ]
-              },
-              {
-                "type": "STRING",
-                "value": "object"
-              },
-              {
-                "type": "CHOICE",
-                "members": [
-                  {
-                    "type": "SEQ",
-                    "members": [
-                      {
-                        "type": "STRING",
-                        "value": ":"
-                      },
-                      {
-                        "type": "SYMBOL",
-                        "name": "_delegation_specifiers"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "BLANK"
-                  }
-                ]
-              },
-              {
-                "type": "SYMBOL",
-                "name": "class_body"
-              }
-            ]
-          }
+          "type": "STRING",
+          "value": "object"
         },
         {
-          "type": "SEQ",
+          "type": "CHOICE",
           "members": [
             {
-              "type": "CHOICE",
+              "type": "SEQ",
               "members": [
                 {
                   "type": "STRING",
-                  "value": "data"
+                  "value": ":"
                 },
                 {
-                  "type": "BLANK"
+                  "type": "SYMBOL",
+                  "name": "_delegation_specifiers"
                 }
               ]
             },
             {
-              "type": "STRING",
-              "value": "object"
-            },
-            {
-              "type": "CHOICE",
-              "members": [
-                {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ":"
-                    },
-                    {
-                      "type": "SYMBOL",
-                      "name": "_delegation_specifiers"
-                    }
-                  ]
-                },
-                {
-                  "type": "BLANK"
-                }
-              ]
+              "type": "BLANK"
             }
           ]
+        },
+        {
+          "type": "SYMBOL",
+          "name": "class_body"
         }
       ]
     },
@@ -8670,26 +8607,6 @@
     [
       "parameter_modifiers",
       "_type_modifier"
-    ],
-    [
-      "object_literal"
-    ],
-    [
-      "object_literal",
-      "class_modifier"
-    ],
-    [
-      "object_literal",
-      "class_modifier",
-      "simple_identifier"
-    ],
-    [
-      "object_literal",
-      "simple_identifier"
-    ],
-    [
-      "object_literal",
-      "object_declaration"
     ],
     [
       "delegation_specifier",

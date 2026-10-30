@@ -211,13 +211,6 @@ module.exports = grammar({
     // ambiguity between parameter modifiers in anonymous functions
     [$.parameter_modifiers, $._type_modifier],
 
-    // ambiguity for object literal
-    [$.object_literal],
-    [$.object_literal, $.class_modifier],
-    [$.object_literal, $.class_modifier, $.simple_identifier],
-    [$.object_literal, $.simple_identifier],
-    [$.object_literal, $.object_declaration],
-
     // ambiguity between use of suspend in type and delegation specifiers
     [$.delegation_specifier, $._type_modifier],
 
@@ -1530,18 +1523,13 @@ module.exports = grammar({
       $.anonymous_function
     ),
 
-    object_literal: $ => choice(
-      prec.dynamic(1, seq(
-        optional("data"),
-        "object",
-        optional(seq(":", $._delegation_specifiers)),
-        $.class_body,
-      )),
-      seq(
-        optional("data"),
-        "object",
-        optional(seq(":", $._delegation_specifiers)),
-      ),
+    // An object expression always has a body and takes no modifier: Kotlin's parseObjectLiteral
+    // parses the object with optionalBody = false ("Body is not optional because of
+    // foo(object : A, B)"), and `data` is a modifier of an object declaration only.
+    object_literal: $ => seq(
+      "object",
+      optional(seq(":", $._delegation_specifiers)),
+      $.class_body,
     ),
 
     this_expression: $ => choice(
