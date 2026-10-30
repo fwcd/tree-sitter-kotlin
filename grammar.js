@@ -277,6 +277,9 @@ module.exports = grammar({
     $._delegate_end_hint,
     $._quoted_identifier,
     $._call_lambda_hint,
+    // Never produced: valid right after the `}` of a class body or a block, where Kotlin starts the
+    // next declaration without a separator (`}enum class E`, see BLOCK_END_HINT in the scanner).
+    $._block_end_hint,
   ],
 
   extras: $ => [
@@ -554,7 +557,10 @@ module.exports = grammar({
     // newline that opens every ordinary multi-line body. Two leading `;` stay
     // an error, as in PSI.
     // The scanner emits the hint after every `{` to close an open class delegate.
-    class_body: $ => seq("{", $._delegate_end_hint, optional(";"), optional($._class_member_declarations), "}"),
+    class_body: $ => seq(
+      "{", $._delegate_end_hint, optional(";"), optional($._class_member_declarations), "}",
+      optional($._block_end_hint)
+    ),
 
     _class_parameters: $ => seq(
       "(",
@@ -1007,7 +1013,8 @@ module.exports = grammar({
       $._delegate_end_hint,
       optional($._enum_entries),
       optional(seq(";", optional($._class_member_declarations))),
-      "}"
+      "}",
+      optional($._block_end_hint)
     ),
 
     _enum_entries: $ => seq(sep1($.enum_entry, ","), optional(",")),
@@ -1170,7 +1177,10 @@ module.exports = grammar({
 
     control_structure_body: $ => choice($._block, $._statement),
 
-    _block: $ => prec(PREC.BLOCK, seq("{", $._delegate_end_hint, optional(";"), optional($.statements), "}")),
+    _block: $ => prec(PREC.BLOCK, seq(
+      "{", $._delegate_end_hint, optional(";"), optional($.statements), "}",
+      optional($._block_end_hint)
+    )),
 
     _loop_statement: $ => choice(
       $.for_statement,

@@ -27,6 +27,7 @@ enum TokenType {
   DELEGATE_END_HINT,
   QUOTED_IDENTIFIER,
   CALL_LAMBDA_HINT,
+  BLOCK_END_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -1089,6 +1090,37 @@ static bool resume_pending_comment(Scanner *scanner, TSLexer *lexer,
 // only by the handful of returns that are provably still at the first
 // non-whitespace character. Skipping *whitespace* is safe (that is what skip() is
 // for); skipping comment or keyword text is not.
+// Words Kotlin reads as modifiers in a declaration's modifier list (KtTokens.MODIFIER_KEYWORDS,
+// without the hard keywords `in` and `fun`), and the keywords that start a declaration.
+static const char *const MODIFIER_WORDS[] = {
+  "abstract", "actual", "annotation", "companion", "const", "crossinline", "data", "enum", "expect",
+  "external", "final", "infix", "inline", "inner", "internal", "lateinit", "noinline", "open",
+  "operator", "out", "override", "private", "protected", "public", "reified", "sealed", "suspend",
+  "tailrec", "vararg", "value",
+};
+
+static const char *const DECLARATION_WORDS[] = {
+  "class", "constructor", "fun", "interface", "object", "typealias", "val", "var",
+};
+
+static bool word_in(const char *word, const char *const *words, unsigned count) {
+  for (unsigned i = 0; i < count; i++) {
+    if (strcmp(word, words[i]) == 0) return true;
+  }
+  return false;
+}
+
+#define WORD_IN(word, words) word_in(word, words, sizeof(words) / sizeof(words[0]))
+
+// At a letter right after a closing brace (see BLOCK_END_HINT): does a declaration start here?
+// Reads the word whole with constructor_word, so a word with a non-ASCII character is none of
+// the keywords whatever the host's locale, and a false answer leaves the cursor dirty.
+static bool block_end_starts_declaration(TSLexer *lexer) {
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word))) return false;
+  return WORD_IN(word, DECLARATION_WORDS) || WORD_IN(word, MODIFIER_WORDS);
+}
+
 static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols,
                                      bool *cursor_clean) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
@@ -1132,6 +1164,16 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     return false;
 
   if (sameline) {
+    // Right after the `}` of a class body or a block (BLOCK_END_HINT, never produced), Kotlin
+    // starts the next declaration without a separator: a file's declarations
+    // (parseTopLevelDeclaration) and a class body's members follow each other, so generated code
+    // writes `}enum class E {` and `fun a() {}fun b() {}`. A declaration keyword, a modifier word or
+    // an annotation (`fun a() {} @A fun b() {}`) there takes a semicolon; any other word (`else`,
+    // `catch`, `as`) does not.
+    if (valid_symbols[BLOCK_END_HINT] && !valid_symbols[STRING_CONTENT]) {
+      if (lexer->lookahead == '@') return true;
+      if (iswalpha(lexer->lookahead)) return block_end_starts_declaration(lexer);
+    }
     switch (lexer->lookahead) {
       // Insert imaginary semicolon before an 'import' but not in front
       // of other words or keywords starting with 'i'
