@@ -79,6 +79,7 @@
     "DocCommentForFirstDeclaration",
     "DocCommentOnPackageDirectiveLine",
     "DocCommentsBinding",
+    "DoubleColon",
     "DynamicReceiver",
     "DynamicTypes",
     "EOLsInComments",
@@ -487,7 +488,6 @@
   ],
   "expectedFailures": [
     "CallsInWhen",
-    "DoubleColon",
     "DoubleColonWhitespaces",
     "FunctionCalls",
     "FunctionExpressions",

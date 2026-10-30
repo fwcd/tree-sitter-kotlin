@@ -6421,6 +6421,10 @@
           "named": true
         },
         {
+          "type": "quest",
+          "named": true
+        },
+        {
           "type": "simple_identifier",
           "named": true
         },

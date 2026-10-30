@@ -2204,6 +2204,78 @@ fun g(){ when (val T.x = foo) {} }
             (simple_identifier)))))))
 
 ================================================================================
+Callable reference on a nullable generic receiver type
+================================================================================
+
+val b = List<T>?::orEmpty
+val s = List<T>::size
+val a = String?::length
+val c = x ?: ::fallback
+val d = Map<K, V>??::get
+
+---
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))
+        (quest)
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (elvis_expression
+      (simple_identifier)
+      (callable_reference
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier)))
+          (type_projection
+            (user_type
+              (type_identifier))))
+        (quest)
+        (quest)
+        (simple_identifier)))))
+
+================================================================================
 Labeled lambda on the next line continues a completed call
 ================================================================================
 

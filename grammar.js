@@ -1471,18 +1471,28 @@ module.exports = grammar({
 
     indexing_suffix: $ => seq("[", sep1($._expression, ","), optional(','), "]"),
 
-    navigation_suffix: $ => seq(
-      // this introduces ambiguities with 'less than' for comparisons
-      optional($.type_arguments),
-      $._member_access_operator,
-      choice(
-        seq($.simple_identifier, optional($._expression_end_hint)),
-        $.parenthesized_expression,
-        // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
-        // compiler diagnostic; Kotlin's parser reads the lambda and PSI
-        // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
-        $.lambda_literal,
-        seq("class", optional($._expression_end_hint))
+    navigation_suffix: $ => choice(
+      seq(
+        // this introduces ambiguities with 'less than' for comparisons
+        optional($.type_arguments),
+        $._member_access_operator,
+        choice(
+          seq($.simple_identifier, optional($._expression_end_hint)),
+          $.parenthesized_expression,
+          // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
+          // compiler diagnostic; Kotlin's parser reads the lambda and PSI
+          // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
+          $.lambda_literal,
+          seq("class", optional($._expression_end_hint))
+        )
+      ),
+      // A callable reference on a nullable generic receiver type, `List<T>?::orEmpty`, read the
+      // way `List<T>::size` is, with callable_reference's question marks.
+      seq(
+        $.type_arguments,
+        repeat1(alias($._callable_reference_quest, $.quest)),
+        "::",
+        choice($.simple_identifier, "class")
       )
     ),
 
