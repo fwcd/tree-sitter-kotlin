@@ -2043,3 +2043,43 @@ class D : I by obj.{ foo }() { fun member() {} }
         (simple_identifier)
         (function_value_parameters)
         (function_body)))))
+
+================================================================================
+Getter and setter on one line below the property
+================================================================================
+
+class A {
+  var startIndex: Int = 0
+    get private set
+  var b: Int = 0
+    private set get
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (integer_literal))
+      (getter)
+      (setter
+        (modifiers
+          (visibility_modifier)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (integer_literal))
+      (setter
+        (modifiers
+          (visibility_modifier)))
+      (getter))))

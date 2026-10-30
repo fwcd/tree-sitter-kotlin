@@ -747,6 +747,11 @@ module.exports = grammar({
 
     _class_member_declaration: $ => choice(
       $._declaration,
+      // Both accessors on the accessors' own line, `var x = 0\n  get private set`: Kotlin reads a
+      // property's accessors with no separator between them, but here they are class members of
+      // their own (see the TODO on `_declaration`), and two members on one line need one.
+      prec(1, seq($.getter, $.setter)),
+      prec(1, seq($.setter, $.getter)),
       $.companion_object,
       $.anonymous_initializer,
       $.secondary_constructor
