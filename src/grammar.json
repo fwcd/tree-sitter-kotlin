@@ -6248,7 +6248,7 @@
                   "name": "when_condition"
                 },
                 {
-                  "type": "REPEAT1",
+                  "type": "REPEAT",
                   "content": {
                     "type": "SEQ",
                     "members": [
@@ -6262,27 +6262,6 @@
                       }
                     ]
                   }
-                },
-                {
-                  "type": "CHOICE",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": ","
-                    },
-                    {
-                      "type": "BLANK"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "SEQ",
-              "members": [
-                {
-                  "type": "SYMBOL",
-                  "name": "when_condition"
                 },
                 {
                   "type": "CHOICE",
@@ -6311,8 +6290,25 @@
               ]
             },
             {
-              "type": "STRING",
-              "value": "else"
+              "type": "SEQ",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "else"
+                },
+                {
+                  "type": "CHOICE",
+                  "members": [
+                    {
+                      "type": "SYMBOL",
+                      "name": "guard_condition"
+                    },
+                    {
+                      "type": "BLANK"
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },

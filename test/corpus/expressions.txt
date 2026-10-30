@@ -1687,6 +1687,231 @@ when (animal) {
           (call_suffix
             (value_arguments)))))))
 
+================================================================================
+When expression with guard condition on else branch
+================================================================================
+
+fun f(type: String) = when (type) {
+    "tc" -> teamCity()
+    else if isIntellij() -> teamCity()
+    else -> console()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (string_literal
+              (string_content)))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (guard_condition
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+When expression with an if-expression as the else body
+================================================================================
+
+fun f(x: Int) = when (x) {
+    1 -> a()
+    else -> if (c) b() else d()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (if_expression
+              (simple_identifier)
+              (control_structure_body
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments))))
+              (control_structure_body
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments)))))))))))
+
+================================================================================
+When expression with a guarded else after a braced if body
+================================================================================
+
+fun f(x: Any) = when (x) {
+    0 -> { if (a) b() }
+    else if ok() -> out()
+    else -> fallback()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (control_structure_body
+            (statements
+              (if_expression
+                (simple_identifier)
+                (control_structure_body
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))
+        (when_entry
+          (guard_condition
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+When expression with guard condition after multiple conditions
+================================================================================
+
+fun f(x: Any) = when (x) {
+    1, 2 if ok() -> out()
+    else -> fallback()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (when_condition
+            (integer_literal))
+          (guard_condition
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+If-else chain whose else body is a call to an identifier starting with if
+================================================================================
+
+fun f() {
+    if (a) b()
+    else ifé()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
 
 ================================================================================
 Callable reference on a nullable receiver
@@ -1706,7 +1931,6 @@ val f = String?::plus
       (quest)
       (simple_identifier))))
 
-
 ================================================================================
 Callable reference on a nullable receiver with spaces
 ================================================================================
@@ -1725,7 +1949,6 @@ val f = String ?:: plus
       (quest)
       (simple_identifier))))
 
-
 ================================================================================
 Class reference on a nullable receiver
 ================================================================================
@@ -1742,7 +1965,6 @@ val f = String?::class
     (callable_reference
       (type_identifier)
       (quest))))
-
 
 ================================================================================
 Callable reference on a doubly nullable receiver
@@ -1762,7 +1984,6 @@ val f = String??::plus
       (quest)
       (quest)
       (simple_identifier))))
-
 
 ================================================================================
 Safe navigation is unaffected by nullable callable references
@@ -1803,7 +2024,6 @@ fun f(a: A?) {
             (quest)
             (simple_identifier)))))))
 
-
 ================================================================================
 Elvis is unaffected by nullable callable references
 ================================================================================
@@ -1821,7 +2041,6 @@ val x = a ?: b
       (simple_identifier)
       (simple_identifier))))
 
-
 ================================================================================
 Function type is not a callable reference receiver
 :error
@@ -1830,6 +2049,8 @@ Function type is not a callable reference receiver
 val f = ((Int) -> Unit)?::invoke
 
 --------------------------------------------------------------------------------
+
+
 
 ================================================================================
 Empty collection literal in an annotation argument
@@ -1851,7 +2072,6 @@ Empty collection literal in an annotation argument
               (collection_literal))))))
     (type_identifier)))
 
-
 ================================================================================
 Empty collection literal in an expression
 ================================================================================
@@ -1867,7 +2087,6 @@ fun f(){ [] }
     (function_body
       (statements
         (collection_literal)))))
-
 
 ================================================================================
 Collection literal with elements still parses

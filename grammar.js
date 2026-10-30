@@ -1513,11 +1513,10 @@ module.exports = grammar({
 
     when_entry: $ => seq(
       choice(
-        // guard condition not allowed when multiple conditions are given
-        seq($.when_condition, repeat1(seq(",", $.when_condition)), optional(",")),
-        // optional guard condition and optional trailing comma
-        seq($.when_condition, optional($.guard_condition), optional(",")),
-        "else"
+        // conditions, an optional guard and an optional trailing comma
+        seq($.when_condition, repeat(seq(",", $.when_condition)), optional($.guard_condition), optional(",")),
+        // `else if <expr> ->` is a guarded else branch (Kotlin 2.2)
+        seq("else", optional($.guard_condition))
       ),
       "->",
       $.control_structure_body,
