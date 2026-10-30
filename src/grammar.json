@@ -246,10 +246,14 @@
       ]
     },
     "import_list": {
-      "type": "REPEAT1",
+      "type": "PREC_RIGHT",
+      "value": 0,
       "content": {
-        "type": "SYMBOL",
-        "name": "import_header"
+        "type": "REPEAT1",
+        "content": {
+          "type": "SYMBOL",
+          "name": "import_header"
+        }
       }
     },
     "import_header": {
@@ -8105,9 +8109,6 @@
     [
       "context_receiver",
       "simple_identifier"
-    ],
-    [
-      "import_list"
     ],
     [
       "prefix_expression"

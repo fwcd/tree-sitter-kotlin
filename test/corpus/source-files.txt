@@ -308,11 +308,19 @@ val x = 1
     (integer_literal)))
 
 ================================================================================
-Imports before statements still group into one import_list
+Ten imports before statements group into one import_list
 ================================================================================
 
-import a.b.c
-import a.b.d
+import a.b1
+import a.b2
+import a.b3
+import a.b4
+import a.b5
+import a.b6
+import a.b7
+import a.b8
+import a.b9
+import a.b10
 
 fun main() {}
 
@@ -323,14 +331,145 @@ fun main() {}
     (import_header
       (identifier
         (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
         (simple_identifier)
         (simple_identifier)))
     (import_header
       (identifier
         (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
         (simple_identifier)
         (simple_identifier))))
   (function_declaration
     (simple_identifier)
     (function_value_parameters)
     (function_body)))
+
+================================================================================
+Ten imports after a statement group into one import_list
+================================================================================
+
+plugins {}
+
+import a.b1
+import a.b2
+import a.b3
+import a.b4
+import a.b5
+import a.b6
+import a.b7
+import a.b8
+import a.b9
+import a.b10
+
+val x = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (call_expression
+    (simple_identifier)
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal))))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Imports separated by a statement form two import_lists
+================================================================================
+
+import a.b
+plugins {}
+import c.d
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier))))
+  (call_expression
+    (simple_identifier)
+    (call_suffix
+      (annotated_lambda
+        (lambda_literal))))
+  (import_list
+    (import_header
+      (identifier
+        (simple_identifier)
+        (simple_identifier)))))
