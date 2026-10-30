@@ -386,7 +386,7 @@ module.exports = grammar({
       repeat($.file_annotation),
       optional($.package_header),
       optional($.import_list),
-      repeat(seq($._statement, $._semi))
+      repeat(seq(choice($._statement, $.getter, $.setter), $._semi))
     ),
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),
@@ -486,15 +486,6 @@ module.exports = grammar({
       $.function_declaration,
       $.property_declaration,
       $.destructuring_declaration,
-      // TODO: it would be better to have getter/setter only in
-      // property_declaration but it's difficult to get ASI
-      // (Automatic Semicolon Insertion) working in the lexer for
-      // getter/setter. Indeed, they can also have modifiers in
-      // front, which means it's not enough to lookahead for 'get' or 'set' in
-      // the lexer, you also need to handle modifier keywords. It is thus
-      // simpler to accept them here.
-      $.getter,
-      $.setter,
       $.type_alias
     ),
 
@@ -740,9 +731,20 @@ module.exports = grammar({
 
     _class_member_declaration: $ => choice(
       $._declaration,
+      // TODO: it would be better to have getter/setter only in
+      // property_declaration but it's difficult to get ASI
+      // (Automatic Semicolon Insertion) working in the lexer for
+      // getter/setter. Indeed, they can also have modifiers in
+      // front, which means it's not enough to lookahead for 'get' or 'set' in
+      // the lexer, you also need to handle modifier keywords. It is thus
+      // simpler to accept them as members of their own, in class bodies and at the top level. A
+      // local property has no accessors (KotlinParsing: DeclarationParsingMode.LOCAL), so
+      // `if (c) set.add(x)` never reads `set` as one.
+      $.getter,
+      $.setter,
       // Both accessors on the accessors' own line, `var x = 0\n  get private set`: Kotlin reads a
       // property's accessors with no separator between them, but here they are class members of
-      // their own (see the TODO on `_declaration`), and two members on one line need one.
+      // their own (see the TODO above), and two members on one line need one.
       prec(1, seq($.getter, $.setter)),
       prec(1, seq($.setter, $.getter)),
       $.companion_object,
@@ -949,7 +951,10 @@ module.exports = grammar({
       optional(';'),
     )),
 
-    getter: $ => prec.right(seq(
+    // Accessors on lines of their own are members of their own (see _class_member_declaration).
+    // At the top level a script statement competes, `get() = x` as an assignment; the accessor
+    // wins through its dynamic precedence.
+    getter: $ => prec.dynamic(1, prec.right(seq(
       optional($.modifiers),
       "get",
       optional(seq(
@@ -957,9 +962,9 @@ module.exports = grammar({
         optional(seq(":", $._type)),
         $.function_body
       ))
-    )),
+    ))),
 
-    setter: $ => prec.right(seq(
+    setter: $ => prec.dynamic(1, prec.right(seq(
       optional($.modifiers),
       "set",
       optional(seq(
@@ -970,7 +975,7 @@ module.exports = grammar({
         optional(seq(":", $._type)),
         $.function_body
       ))
-    )),
+    ))),
 
     parameters_with_optional_type: $ => seq("(", sep1($.parameter_with_optional_type, ","), ")"),
 

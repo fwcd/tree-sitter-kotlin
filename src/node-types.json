@@ -2419,10 +2419,6 @@
           "named": true
         },
         {
-          "type": "getter",
-          "named": true
-        },
-        {
           "type": "hex_literal",
           "named": true
         },
@@ -2500,10 +2496,6 @@
         },
         {
           "type": "real_literal",
-          "named": true
-        },
-        {
-          "type": "setter",
           "named": true
         },
         {
@@ -8675,10 +8667,6 @@
           "named": true
         },
         {
-          "type": "getter",
-          "named": true
-        },
-        {
           "type": "hex_literal",
           "named": true
         },
@@ -8756,10 +8744,6 @@
         },
         {
           "type": "real_literal",
-          "named": true
-        },
-        {
-          "type": "setter",
           "named": true
         },
         {

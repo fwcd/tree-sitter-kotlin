@@ -365,3 +365,66 @@ Function block with trailing comma
       (additive_expression
         (integer_literal)
         (simple_identifier)))))
+
+================================================================================
+Accessor keywords as names inside a function
+================================================================================
+
+fun f() {
+    if (c) set.add(x)
+    val v = g { set }
+}
+
+var Foo.bar: Int
+    internal set(value) {}
+    get() = 1
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (call_expression
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (simple_identifier)))))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (simple_identifier))))))))))
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (setter
+    (modifiers
+      (visibility_modifier))
+    (parameter_with_optional_type
+      (simple_identifier))
+    (function_body))
+  (getter
+    (function_body
+      (integer_literal))))
