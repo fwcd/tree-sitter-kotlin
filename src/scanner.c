@@ -21,6 +21,7 @@ enum TokenType {
   CALLABLE_REFERENCE_QUEST,
   COMMENT_CONTINUATION_HINT,
   TRY_CLAUSE_HINT,
+  BACKING_FIELD_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -533,6 +534,28 @@ static bool check_modifier_then_constructor(TSLexer *lexer) {
   return check_word(lexer, "constructor", 11);
 }
 
+// Check if the current position has a visibility modifier followed by
+// horizontal whitespace and "field" -- `val x: Any` / newline / `private
+// field: Int = 1`. Uses skip(), so it is safe to call speculatively.
+static bool check_modifier_then_field(TSLexer *lexer) {
+  char word[20];
+  unsigned len = 0;
+  while (is_word_char(lexer->lookahead) && len < 19) {
+    word[len++] = (char)lexer->lookahead;
+    skip(lexer);
+  }
+  word[len] = '\0';
+
+  if (strcmp(word, "public") != 0 && strcmp(word, "private") != 0 &&
+      strcmp(word, "protected") != 0 && strcmp(word, "internal") != 0) {
+    return false;
+  }
+
+  while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
+
+  return check_word(lexer, "field", 5);
+}
+
 // Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar,
 // @Bar(x=1)) and optional visibility modifier, then check for 'constructor'.
 // All characters are consumed with skip() so nothing affects token boundaries.
@@ -578,6 +601,45 @@ static bool check_annotation_then_constructor(TSLexer *lexer) {
   }
   // Check directly for 'constructor'
   return check_word(lexer, "constructor", 11);
+}
+
+// The same walk for an explicit backing field: `val x: Any` / newline /
+// `@Ann field: Int = 1`. Annotations on a backing field are accepted by
+// Kotlin's parser, which puts them in the BACKING_FIELD's MODIFIER_LIST.
+static bool check_annotation_then_field(TSLexer *lexer) {
+  while (lexer->lookahead == '@') {
+    skip(lexer);
+    if (!is_word_char(lexer->lookahead)) return false;
+    while (is_word_char(lexer->lookahead)) skip(lexer);
+    while (lexer->lookahead == '.') {
+      skip(lexer);
+      if (!is_word_char(lexer->lookahead)) break;
+      while (is_word_char(lexer->lookahead)) skip(lexer);
+    }
+    if (lexer->lookahead == '(') {
+      unsigned depth = 1;
+      skip(lexer);
+      while (depth > 0 && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
+        if (lexer->lookahead == '"') {
+          skip(lexer);
+          while (lexer->lookahead != '"' && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
+            if (lexer->lookahead == '\\') skip(lexer);
+            skip(lexer);
+          }
+          if (lexer->lookahead == '"') skip(lexer);
+        } else {
+          if (lexer->lookahead == '(') depth++;
+          else if (lexer->lookahead == ')') depth--;
+          skip(lexer);
+        }
+      }
+    }
+    while (iswspace(lexer->lookahead)) skip(lexer);
+  }
+  if (is_word_char(lexer->lookahead) && lexer->lookahead != 'f') {
+    return check_modifier_then_field(lexer);
+  }
+  return check_word(lexer, "field", 5);
 }
 
 
@@ -884,6 +946,13 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
           scan_for_word(lexer, "y", 1)) return false;
       return true;
     case 'f':
+      // `field` continues a property that can still take an explicit backing
+      // field, and ends the statement everywhere else -- a variable may be
+      // named `field`, so `var field = 0` followed by `field = 2` must stay two
+      // statements. The hint is only valid in the one grammar position where a
+      // backing field may follow, which is what tells the two apart.
+      if (valid_symbols[BACKING_FIELD_HINT] &&
+          scan_try_clause_keyword(lexer, "ield", 4)) return false;
       return !(valid_symbols[TRY_CLAUSE_HINT] &&
                scan_try_clause_keyword(lexer, "inally", 6));
     default:
@@ -913,6 +982,7 @@ static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_s
   if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) {
     return valid_symbols[TRY_CLAUSE_HINT];
   }
+  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
   if (strcmp(word, "else") == 0) {
     if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
     advance(lexer);
@@ -1191,6 +1261,11 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
             check_modifier_then_constructor(lexer)) {
           return false;
         }
+        if (valid_symbols[BACKING_FIELD_HINT] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_modifier_then_field(lexer)) {
+          return false;
+        }
         // Note: lexer has advanced past the word. For "instanceof", scan_for_word
         // can no longer match. But since "instanceof" is not a Kotlin keyword
         // (Kotlin uses "is"), this is acceptable — ASI is inserted, which is
@@ -1203,6 +1278,11 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT] &&
             check_modifier_then_constructor(lexer)) {
+          return false;
+        }
+        if (valid_symbols[BACKING_FIELD_HINT] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_modifier_then_field(lexer)) {
           return false;
         }
         return true;
@@ -1239,7 +1319,15 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
 
       // Don't insert a semicolon before finally (continues try_expression).
       // As with catch, only when a real clause follows.
+      //
+      // `field` is the other word starting with 'f' that can continue a
+      // statement: an explicit backing field sits inside the property it
+      // belongs to, usually on the next line. It is gated on the hint for the
+      // same reason `by` is gated -- a variable may be named `field`, so
+      // `var field = 0` followed by `field = 2` has to stay two statements.
       case 'f':
+        if (valid_symbols[BACKING_FIELD_HINT] &&
+            scan_try_clause_keyword(lexer, "ield", 4)) return false;
         return !(valid_symbols[TRY_CLAUSE_HINT] &&
                  scan_try_clause_keyword(lexer, "inally", 6));
 
@@ -1249,6 +1337,11 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT] &&
             check_annotation_then_constructor(lexer)) {
+          return false;
+        }
+        if (valid_symbols[BACKING_FIELD_HINT] &&
+            !valid_symbols[STRING_CONTENT] &&
+            check_annotation_then_field(lexer)) {
           return false;
         }
         return true;

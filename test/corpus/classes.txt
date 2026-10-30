@@ -1764,3 +1764,154 @@ class C{private init{}}
       (anonymous_initializer
         (modifiers
           (visibility_modifier))))))
+
+================================================================================
+Explicit backing field
+================================================================================
+
+class C {
+    val x: Any field: String = "OK"
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (backing_field
+          (user_type
+            (type_identifier))
+          (string_literal
+            (string_content)))))))
+
+================================================================================
+Explicit backing field on its own line, type inferred
+================================================================================
+
+class C {
+    val a: Any
+        field = 2
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (backing_field
+          (integer_literal))))))
+
+================================================================================
+Explicit backing field with no initializer
+================================================================================
+
+class C {
+    val c: Any
+        field: Int
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (backing_field
+          (user_type
+            (type_identifier)))))))
+
+================================================================================
+Explicit backing field with a visibility modifier
+================================================================================
+
+class C {
+    val f: Any
+        private field: Int = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (backing_field
+          (modifiers
+            (visibility_modifier))
+          (user_type
+            (type_identifier))
+          (integer_literal))))))
+
+================================================================================
+Explicit backing field alongside accessors
+================================================================================
+
+class C {
+    var g: Any
+        field: Int = 1
+        get() = field
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (backing_field
+          (user_type
+            (type_identifier))
+          (integer_literal)))
+      (getter
+        (function_body
+          (simple_identifier))))))
+
+================================================================================
+field stays an ordinary identifier
+================================================================================
+
+class C { val field = 1 }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier))
+        (integer_literal)))))
