@@ -271,6 +271,7 @@ module.exports = grammar({
     $._callable_reference_quest,
     $._comment_continuation_hint,
     $._try_clause_hint,
+    $._backing_field_hint,
   ],
 
   extras: $ => [
@@ -832,7 +833,7 @@ module.exports = grammar({
       // apply between members (#323).
       optional(choice(
         seq(
-          choice(seq("=", $._expression), $.property_delegate),
+          choice(seq("=", $._expression), $.property_delegate, $.backing_field),
           optional($._property_accessors)
         ),
         $._property_accessors
@@ -845,6 +846,27 @@ module.exports = grammar({
     _property_accessors: $ => prec.right(choice(
       seq($.getter, optional($.setter)),
       seq($.setter, optional($.getter))
+    )),
+
+    // An explicit backing field, `val x: Any field: String = "OK"`. Default
+    // Kotlin since 2.4 -- the feature is not pre-release and compiles with no
+    // flags. JetBrains emits BACKING_FIELD inside the PROPERTY, holding its own
+    // modifiers, type and initializer, which is what this mirrors.
+    //
+    // Every part after `field` is optional independently: the type may be left
+    // to inference (`field = 2`) and the initializer may be deferred to an
+    // `init` block (`field: MutableList<Int>`).
+    //
+    // It is an alternative to the property's initializer rather than a
+    // position of its own. A property never has both, and a separate optional
+    // position here measured at +95% of compiled parser against this shape --
+    // see the comment above on why this tail is a hot spot.
+    backing_field: $ => prec.right(seq(
+      optional($._backing_field_hint),
+      optional($.modifiers),
+      "field",
+      optional(seq(":", $._type)),
+      optional(seq("=", $._expression))
     )),
 
     property_delegate: $ => seq(optional($._by_delegation_hint), "by", $._expression),

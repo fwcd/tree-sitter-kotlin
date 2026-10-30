@@ -2339,6 +2339,10 @@
                           {
                             "type": "SYMBOL",
                             "name": "property_delegate"
+                          },
+                          {
+                            "type": "SYMBOL",
+                            "name": "backing_field"
                           }
                         ]
                       },
@@ -2415,6 +2419,85 @@
                     "type": "BLANK"
                   }
                 ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "backing_field": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_backing_field_hint"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "modifiers"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "STRING",
+            "value": "field"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": ":"
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_type"
+                  }
+                ]
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "STRING",
+                    "value": "="
+                  },
+                  {
+                    "type": "SYMBOL",
+                    "name": "_expression"
+                  }
+                ]
+              },
+              {
+                "type": "BLANK"
               }
             ]
           }
@@ -8421,6 +8504,10 @@
     {
       "type": "SYMBOL",
       "name": "_try_clause_hint"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_backing_field_hint"
     }
   ],
   "inline": [
