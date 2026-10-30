@@ -1121,6 +1121,18 @@ static bool block_end_starts_declaration(TSLexer *lexer) {
   return WORD_IN(word, DECLARATION_WORDS) || WORD_IN(word, MODIFIER_WORDS);
 }
 
+// An explicit `;` separates statements, except the one Kotlin allows between an if's consequence
+// and its `else` (ifExpression: `if (c) a(); else b()`, also `if (c)\n  "a";\nelse\n  "b"`),
+// which belongs to if_expression. Called after the `;` is consumed and marked; true for that `;`,
+// so the caller declines it and the internal lexer produces the literal `;`. A when entry's
+// `else ->` keeps the separator.
+static bool semicolon_before_else(TSLexer *lexer) {
+  if (!skip_whitespace_and_comments(lexer)) return false;
+  if (lexer->lookahead != 'e') return false;
+  if (!scan_for_word(lexer, "lse", 3)) return false;
+  return !followed_by_arrow(lexer);
+}
+
 static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols,
                                      bool *cursor_clean) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
@@ -1134,7 +1146,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     if (lexer->lookahead == ';') {
       advance(lexer);
       lexer->mark_end(lexer);
-      return true;
+      return !semicolon_before_else(lexer);
     }
 
     if (!iswspace(lexer->lookahead)) break;
@@ -1183,7 +1195,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       case ';':
         advance(lexer);
         lexer->mark_end(lexer);
-        return true;
+        return !semicolon_before_else(lexer);
 
       // Don't insert a semicolon in other cases. Nothing but whitespace has
       // been skipped, so a string or comment token may still start here.
@@ -1481,7 +1493,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       case ';':
         advance(lexer);
         lexer->mark_end(lexer);
-        return true;
+        return !semicolon_before_else(lexer);
 
       default:
         return true;

@@ -2263,3 +2263,78 @@ fun f() {
             (simple_identifier)
             (call_suffix
               (value_arguments))))))))
+
+================================================================================
+Semicolon before else
+================================================================================
+
+fun f(): String =
+  if (c)
+    "\t";
+  else
+    " "
+fun f() { if (c) a(); else b() }
+fun f(x: Int) = when (x) {
+    1 -> a();
+    else -> b()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (user_type
+      (type_identifier))
+    (function_body
+      (if_expression
+        condition: (simple_identifier)
+        consequence: (control_structure_body
+          (string_literal
+            (string_content)))
+        alternative: (control_structure_body
+          (string_literal
+            (string_content))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          alternative: (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
