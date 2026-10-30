@@ -441,3 +441,250 @@ fun <T> f(x: T): T
                 (type_identifier)))))))
     (function_body
       (simple_identifier))))
+
+================================================================================
+where type constraint with a backtick-quoted name after a newline
+================================================================================
+
+fun <`T`> f()
+where `T` : Any {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body)))
+
+================================================================================
+where type constraint with a Unicode name on a class header after a newline
+================================================================================
+
+class C<𝐀>
+where 𝐀 : Any {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+where type constraint with a Unicode name after a block comment
+================================================================================
+
+class C<𝐀>
+/* comment */
+where 𝐀 : Any {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (multiline_comment)
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+where type constraint with the annotation on the next line
+================================================================================
+
+fun <T> f()
+where
+@Ann T : Any {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (type_constraints
+      (type_constraint
+        (annotation
+          (user_type
+            (type_identifier)))
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body)))
+
+================================================================================
+where as a label after a newline
+================================================================================
+
+fun f() {
+    op()
+    where@ while (true) { break@where }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (label)
+        (while_statement
+          (boolean_literal)
+          (control_structure_body
+            (statements
+              (jump_expression
+                (label)))))))))
+
+================================================================================
+where as a statement before an annotated declaration
+================================================================================
+
+fun f() {
+    op()
+    where
+    @Ann val x = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier)
+        (property_declaration
+          (modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+where as a statement before a callable reference
+================================================================================
+
+fun f() {
+    op()
+    where
+    foo::bar
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier)
+        (callable_reference
+          (type_identifier)
+          (simple_identifier))))))
+
+================================================================================
+where as a navigation receiver after a line comment
+================================================================================
+
+fun f() {
+    op()
+    // comment
+    where?.let { it }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (line_comment)
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (simple_identifier))))))))))
+
+================================================================================
+where as an assignment target after a block comment
+================================================================================
+
+fun f() {
+    op()
+    /* comment */
+    where = predicate
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (multiline_comment)
+        (assignment
+          (directly_assignable_expression
+            (simple_identifier))
+          (simple_identifier))))))
