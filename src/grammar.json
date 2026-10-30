@@ -8771,6 +8771,10 @@
         {
           "type": "STRING",
           "value": "enum"
+        },
+        {
+          "type": "STRING",
+          "value": "out"
         }
       ]
     },
@@ -8952,6 +8956,10 @@
         {
           "type": "STRING",
           "value": "enum"
+        },
+        {
+          "type": "STRING",
+          "value": "out"
         }
       ]
     },
@@ -9622,6 +9630,9 @@
     ],
     [
       "parameter_modifiers"
+    ],
+    [
+      "type_projection_modifiers"
     ],
     [
       "type_parameter_modifiers"

@@ -188,12 +188,13 @@ const SOFT_KEYWORD_IDENTIFIERS = [
   "finally",
   // Batch 7: enum
   "enum",
-  // "out" and "in" are deliberately absent, and listing them here would
-  // be dead weight: keyword extraction already lexes them as
-  // `_alpha_identifier` and only promotes them to keywords in states that
-  // expect one, so `val out = 1` and `class C<out out>` parse as
-  // identifiers without any entry. See `type_parameter_modifiers`, which
-  // is what has to bound the variance slot for that to work.
+  // The variance modifier `out` (`in` is a hard keyword). Keyword extraction lexes it as
+  // `_alpha_identifier` only in states that expect no variance, so `val out = 1` needs no
+  // entry; but after a `<`, where type arguments may start, the keyword wins and
+  // `i < out.size` failed. Kotlin parses the type arguments speculatively and keeps them only
+  // when a `>` closes them (tryParseTypeArgumentList); with `out` here both readings fork.
+  // See `type_parameter_modifiers`, which bounds the variance slot of a declaration.
+  "out",
 ];
 
 const UNARY_NAMES = [
@@ -278,6 +279,8 @@ module.exports = grammar({
     [$.parameter_modifier, $.simple_identifier],
     [$.modifiers],
     [$.parameter_modifiers],
+    // `out` is a variance modifier or an identifier: `List<out T>` against `i < out.size`
+    [$.type_projection_modifiers],
     [$.type_parameter_modifiers],
 
     // "<x>.<y> = z assignment conflicts with <x>.<y>() function call"

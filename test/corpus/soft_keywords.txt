@@ -962,3 +962,64 @@ class C : I by foo {
                   (simple_identifier)
                   (call_suffix
                     (value_arguments)))))))))))
+
+================================================================================
+The variance word out as an identifier after a less-than
+================================================================================
+
+fun f(out: MutableList<Int>, a: Array<out Number>) {
+    var i = 0
+    while (i < out.size) i++
+    out.add(i)
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier))))))
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (type_projection_modifiers
+                (variance_modifier))
+              (user_type
+                (type_identifier)))))))
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (while_statement
+          (comparison_expression
+            (simple_identifier)
+            (navigation_expression
+              (simple_identifier)
+              (navigation_suffix
+                (simple_identifier))))
+          (control_structure_body
+            (postfix_expression
+              (simple_identifier))))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (simple_identifier)))))))))
