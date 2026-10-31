@@ -1749,6 +1749,7 @@ class C private ()
     (primary_constructor
       (modifiers
         (visibility_modifier)))))
+
 ================================================================================
 Modifier on an anonymous initializer
 ================================================================================
@@ -1915,3 +1916,130 @@ class C { val field = 1 }
         (variable_declaration
           (simple_identifier))
         (integer_literal)))))
+
+================================================================================
+Class with explicit delegation to a postfix expression member
+================================================================================
+
+class A : I by a!!.b { }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (navigation_expression
+          (postfix_expression
+            (simple_identifier))
+          (navigation_suffix
+            (simple_identifier)))))
+    (class_body)))
+
+================================================================================
+Class with explicit delegation to a callable reference, body on next line
+================================================================================
+
+class C : I by ::foo
+{ fun member() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (callable_reference
+          (simple_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Class with explicit delegation to an elvis expression, body on next line
+================================================================================
+
+class D : I by a ?: b
+{ fun member() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (elvis_expression
+          (simple_identifier)
+          (simple_identifier))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Class with explicit delegation to a parenthesized selector
+================================================================================
+
+class C : I by obj.(foo) { fun member() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (parenthesized_expression
+              (simple_identifier))))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Class with explicit delegation to a lambda selector call
+================================================================================
+
+class D : I by obj.{ foo }() { fun member() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (call_expression
+          (navigation_expression
+            (simple_identifier)
+            (navigation_suffix
+              (lambda_literal
+                (statements
+                  (simple_identifier)))))
+          (call_suffix
+            (value_arguments)))))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))

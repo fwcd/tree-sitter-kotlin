@@ -795,19 +795,16 @@ fun foo() {
     (function_value_parameters)
     (function_body
       (statements
-        (call_expression
-          (navigation_expression
-            (simple_identifier)
-            (navigation_suffix
-              (simple_identifier)))
-          (line_comment)
-          (call_suffix
-            (annotated_lambda
-              (lambda_literal
-                (statements
-                  (multiplicative_expression
-                    (simple_identifier)
-                    (integer_literal)))))))))))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (simple_identifier)))
+        (line_comment)
+        (lambda_literal
+          (statements
+            (multiplicative_expression
+              (simple_identifier)
+              (integer_literal))))))))
 
 ================================================================================
 Comment before parentheses on a new line does not make a call
