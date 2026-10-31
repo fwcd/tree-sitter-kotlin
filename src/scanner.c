@@ -25,6 +25,7 @@ enum TokenType {
   EXPRESSION_END_HINT,
   DELEGATE_START_HINT,
   DELEGATE_END_HINT,
+  QUOTED_IDENTIFIER,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -1471,6 +1472,31 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
     // wildcard_import, and a nested comment collapses to zero width.
     if (ret) return ret;
     if (!cursor_clean && !valid_symbols[STRING_CONTENT]) return false;
+  }
+
+  // A backtick-quoted identifier. The internal lexer cannot express this:
+  // a character class stops at the NUL that terminates its input buffer, so
+  // `a<NUL>b` tore into pieces, while Kotlin's lexer accepts any character
+  // here except a backtick or a line terminator. Scanning it externally and
+  // testing `eof` rather than a sentinel byte carries the NUL through.
+  if (valid_symbols[QUOTED_IDENTIFIER] && !valid_symbols[STRING_CONTENT]) {
+    while (iswspace(lexer->lookahead)) skip(lexer);
+    if (lexer->lookahead == '`') {
+      advance(lexer);
+      bool content = false;
+      while (!lexer->eof(lexer) && lexer->lookahead != '`' &&
+             lexer->lookahead != '\n' && lexer->lookahead != '\r') {
+        content = true;
+        advance(lexer);
+      }
+      if (content && lexer->lookahead == '`') {
+        advance(lexer);
+        lexer->mark_end(lexer);
+        lexer->result_symbol = QUOTED_IDENTIFIER;
+        return true;
+      }
+      return false;
+    }
   }
 
   // A `?` in a callable-reference receiver: `String?::plus`.

@@ -275,6 +275,7 @@ module.exports = grammar({
     $._expression_end_hint,
     $._delegate_start_hint,
     $._delegate_end_hint,
+    $._quoted_identifier,
   ],
 
   extras: $ => [
@@ -1934,7 +1935,9 @@ module.exports = grammar({
     // General
     // ==========
 
-    line_comment: $ => token(seq('//', /.*/)),
+    // `.` matches a carriage return, so a comment ended by a bare CR used to
+    // swallow the line after it. Kotlin treats CR on its own as a terminator.
+    line_comment: $ => token(seq('//', /[^\r\n]*/)),
 
     // `multiline_comment` is an external token (src/scanner.c) so that nested
     // and unterminated comments can be handled. This internal definition
@@ -2045,7 +2048,9 @@ module.exports = grammar({
 
     _alpha_identifier: $ => new RegExp(`[\\p{L}_${UNICODE_LETTER_SUPPLEMENT}][\\p{L}_\\p{Nd}${UNICODE_LETTER_SUPPLEMENT}]*`, 'u'),
 
-    _backtick_identifier: $ => /`[^\r\n`]+`/,
+    // Scanned externally: the internal lexer cannot carry a NUL through a
+    // character class, and Kotlin allows one inside a quoted identifier.
+    _backtick_identifier: $ => $._quoted_identifier,
 
     _uni_character_literal: $ => seq(
       "\\u",

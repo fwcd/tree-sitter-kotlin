@@ -1,0 +1,89 @@
+================================================================================
+Line comment ended by a bare carriage return
+================================================================================
+
+fun f() {
+    // commentval x = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (line_comment)
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+Bare carriage return between two line comments
+================================================================================
+
+// first// secondval x = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (line_comment)
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Line comment ended by CRLF
+================================================================================
+
+// comment
+val x = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (line_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Carriage return inside a block comment
+================================================================================
+
+/* onetwo */
+val x = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (multiline_comment)
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal)))
+
+================================================================================
+Line comment ended by a carriage return at end of file
+================================================================================
+
+val x = 1
+// trailing
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (integer_literal))
+  (line_comment))

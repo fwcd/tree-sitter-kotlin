@@ -7815,7 +7815,7 @@
           },
           {
             "type": "PATTERN",
-            "value": ".*"
+            "value": "[^\\r\\n]*"
           }
         ]
       }
@@ -8308,8 +8308,8 @@
       "flags": "u"
     },
     "_backtick_identifier": {
-      "type": "PATTERN",
-      "value": "`[^\\r\\n`]+`"
+      "type": "SYMBOL",
+      "name": "_quoted_identifier"
     },
     "_uni_character_literal": {
       "type": "SEQ",
@@ -8678,6 +8678,10 @@
     {
       "type": "SYMBOL",
       "name": "_delegate_end_hint"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_quoted_identifier"
     }
   ],
   "inline": [
