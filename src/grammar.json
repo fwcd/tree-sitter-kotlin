@@ -4849,6 +4849,18 @@
                 "name": "value_arguments"
               }
             ]
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_call_lambda_hint"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
           }
         ]
       }
@@ -4894,6 +4906,18 @@
               {
                 "type": "SYMBOL",
                 "name": "value_arguments"
+              }
+            ]
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_call_lambda_hint"
+              },
+              {
+                "type": "BLANK"
               }
             ]
           }
@@ -8682,6 +8706,10 @@
     {
       "type": "SYMBOL",
       "name": "_quoted_identifier"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_call_lambda_hint"
     }
   ],
   "inline": [

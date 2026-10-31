@@ -2202,3 +2202,64 @@ fun g(){ when (val T.x = foo) {} }
             (variable_declaration
               (simple_identifier))
             (simple_identifier)))))))
+
+================================================================================
+Labeled lambda on the next line continues a completed call
+================================================================================
+
+fun f() {
+    foo()
+    lab@ { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)
+            (annotated_lambda
+              (label)
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))))))
+
+================================================================================
+Annotated statement on the next line is not swallowed by the call
+================================================================================
+
+fun f() {
+    foo()
+    @Ann
+    bar()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (prefix_expression
+          (annotation
+            (user_type
+              (type_identifier)))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))

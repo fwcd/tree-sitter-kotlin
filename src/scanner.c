@@ -26,6 +26,7 @@ enum TokenType {
   DELEGATE_START_HINT,
   DELEGATE_END_HINT,
   QUOTED_IDENTIFIER,
+  CALL_LAMBDA_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -929,7 +930,47 @@ static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
 // automatic semicolon belongs before it: `false` if the next real token
 // continues the previous statement, `true` otherwise. Uses skip() throughout so
 // nothing is added to the pending token.
+static bool trailing_lambda_follows(TSLexer *lexer, char leading_word[32]) {
+  leading_word[0] = 0; bool annotated = false;
+  bool newline = false;
+  if (!constructor_trivia(lexer, &newline)) return false;
+  while (lexer->lookahead == '@') {
+    annotated = true;
+    if (!constructor_annotation(lexer) || !constructor_trivia(lexer, &newline)) return false;
+  }
+  if (lexer->lookahead == '{') return true;
+  if (lexer->lookahead == '`') {
+    advance(lexer);
+    while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
+    if (lexer->eof(lexer)) return false;
+    advance(lexer);
+  } else {
+    if (!constructor_word_char(lexer->lookahead)) return false;
+    bool ascii = constructor_word(lexer, leading_word, 32);
+    if (annotated || !ascii) leading_word[0] = 0;
+  }
+  if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '@') return false;
+  advance(lexer);
+  return constructor_trivia(lexer, &newline) && lexer->lookahead == '{';
+}
+
+static bool call_prefix_continues(TSLexer *lexer, const bool *valid_symbols) {
+  char word[32] = {0};
+  if (trailing_lambda_follows(lexer, word)) return true;
+  // A failed label probe must retain ordinary keyword continuations.
+  if (strcmp(word, "as") == 0) return true;
+  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
+  if (strcmp(word, "where") == 0) {
+    bool newline = false; return where_type_constraint_follows(lexer, &newline);
+  }
+  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) return valid_symbols[TRY_CLAUSE_HINT];
+  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
+  if (strcmp(word, "else") == 0) return !followed_by_arrow(lexer);
+  return false;
+}
+
 static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
+  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
   switch (lexer->lookahead) {
     // '(' and '[' are absent, and ':' is handled separately: a call's '(',
     // an index's '[' and a callable reference's '::' each begin a new
@@ -993,6 +1034,7 @@ static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *vali
 static bool continuation_after_block_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
   bool newline = false;
   if (!constructor_trivia(lexer, &newline)) return !lexer->eof(lexer);
+  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return call_prefix_continues(lexer, valid_symbols);
   switch (lexer->lookahead) {
     case '{': return !brace_starts_statement(in_delegate, valid_symbols);
     case '.': case ',': case '*': case '%': case '>': case '<': case '=':
@@ -1107,6 +1149,8 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
         return false;
     }
   }
+
+  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
 
   // Characters that continue the previous expression across a newline.
   //
