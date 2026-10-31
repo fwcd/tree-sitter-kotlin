@@ -1,5 +1,7 @@
 src/** linguist-vendored
 
-# Contains an intentional NUL byte (regression fixture); keep bytes verbatim so
-# EOL normalization can't corrupt it.
+# Contain intentional NUL bytes or bare carriage returns (regression fixtures);
+# keep bytes verbatim so EOL normalization can't corrupt them.
 test/corpus/null_byte_comment.txt -text
+test/corpus/quoted_identifiers.txt -text
+test/corpus/carriage_return_comments.txt -text
