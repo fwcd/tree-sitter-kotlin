@@ -927,3 +927,38 @@ fun f() {
               (simple_identifier)
               (call_suffix
                 (value_arguments)))))))))
+
+================================================================================
+where as a statement inside a delegating class
+================================================================================
+
+class C : I by foo {
+    fun f() {
+        where
+        { op() }
+    }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (class_body
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body
+          (statements
+            (simple_identifier)
+            (lambda_literal
+              (statements
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (value_arguments)))))))))))

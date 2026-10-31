@@ -23,6 +23,8 @@ enum TokenType {
   TRY_CLAUSE_HINT,
   BACKING_FIELD_HINT,
   EXPRESSION_END_HINT,
+  DELEGATE_START_HINT,
+  DELEGATE_END_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -95,6 +97,8 @@ typedef struct {
   // emitting that comment, until the constructor/ASI decision can be made.
   bool constructor_newline;
   PendingComment comment;
+  // Set after `by` in a class header, cleared at the next `{` or automatic semicolon.
+  bool in_delegate;
 } Scanner;
 
 static inline void stack_push(Stack *stack, char chr, bool triple, uint16_t prefix_len) {
@@ -833,11 +837,10 @@ static bool where_type_constraint_follows(TSLexer *lexer, bool *newline) {
   return lexer->lookahead != ':';
 }
 
-// Kotlin attaches a `{` on the next line to a call, never to a name. The hint
-// is never produced, only its validity carries the context.
-static bool brace_starts_statement(const bool *valid_symbols) {
-  return valid_symbols[EXPRESSION_END_HINT] &&
-         !valid_symbols[BY_DELEGATION_HINT] &&
+// Kotlin attaches a `{` on the next line to a call, never to a name, and an
+// open class delegate keeps the body that follows.
+static bool brace_starts_statement(bool in_delegate, const bool *valid_symbols) {
+  return valid_symbols[EXPRESSION_END_HINT] && !in_delegate &&
          !valid_symbols[STRING_CONTENT];
 }
 
@@ -925,13 +928,13 @@ static bool scan_primary_constructor_hint(Scanner *scanner, TSLexer *lexer,
 // automatic semicolon belongs before it: `false` if the next real token
 // continues the previous statement, `true` otherwise. Uses skip() throughout so
 // nothing is added to the pending token.
-static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
+static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
   switch (lexer->lookahead) {
     // '(' and '[' are absent, and ':' is handled separately: a call's '(',
     // an index's '[' and a callable reference's '::' each begin a new
     // statement. Matches the non-comment path above.
     case '{':
-      return brace_starts_statement(valid_symbols);
+      return brace_starts_statement(in_delegate, valid_symbols);
     case '.': case ',': case '*': case '%':
     case '>': case '<': case '=':
     case '?': case '|': case '&': case '/':
@@ -986,11 +989,11 @@ static bool asi_after_comment(TSLexer *lexer, const bool *valid_symbols) {
 
 // Like asi_after_comment, but advance-only: the pending comment must be
 // re-read at its original position, with no keyword/comment text skipped away.
-static bool continuation_after_block_comment(TSLexer *lexer, const bool *valid_symbols) {
+static bool continuation_after_block_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
   bool newline = false;
   if (!constructor_trivia(lexer, &newline)) return !lexer->eof(lexer);
   switch (lexer->lookahead) {
-    case '{': return !brace_starts_statement(valid_symbols);
+    case '{': return !brace_starts_statement(in_delegate, valid_symbols);
     case '.': case ',': case '*': case '%': case '>': case '<': case '=':
     case '?': case '|': case '&': return true;
     case ':': advance(lexer); return lexer->lookahead != ':';
@@ -1124,7 +1127,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   // construct — `is T` then `<X>` is one type, which the Kotlin PSI confirms.
   switch (lexer->lookahead) {
       case '{':
-        if (brace_starts_statement(valid_symbols)) return true;
+        if (brace_starts_statement(scanner->in_delegate, valid_symbols)) return true;
         *cursor_clean = true;
         return false;
 
@@ -1176,7 +1179,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
           // A bare '/' (division) after comments is a continuation operator.
           if (!skip_whitespace_and_comments(lexer)) return false;
           // Now check the next real token.
-          return asi_after_comment(lexer, valid_symbols);
+          return asi_after_comment(lexer, scanner->in_delegate, valid_symbols);
         } else if (lexer->lookahead == '*') {
           // Block comment after a line break. Read through it to find out what
           // comes *after* it, but leave mark_end where it is so the decision
@@ -1216,7 +1219,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
             return true;
           }
           if (nested || has_nul) {
-            if (continuation_after_block_comment(lexer, valid_symbols) &&
+            if (continuation_after_block_comment(lexer, scanner->in_delegate, valid_symbols) &&
                 valid_symbols[COMMENT_CONTINUATION_HINT] &&
                 !valid_symbols[STRING_CONTENT] &&
                 prefix_bytes <= UINT32_MAX - comment_bytes) {
@@ -1232,7 +1235,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
           // Skip any whitespace and further comments after this block comment.
           // A bare '/' (division) after comments is a continuation operator.
           if (!skip_whitespace_and_comments(lexer)) return false;
-          return asi_after_comment(lexer, valid_symbols);
+          return asi_after_comment(lexer, scanner->in_delegate, valid_symbols);
         }
 
         // Bare `/` (not `//` or `/*`) — division. No ASI.
@@ -1423,20 +1426,30 @@ static bool scan_import_dot(TSLexer *lexer) {
   return true;
 }
 
-bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
-  Scanner *scanner = payload;
+static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
   // Pending work takes priority over constructor, ASI, string and
   // interpolation paths. No other branch may consume its source as padding.
   if (scanner->comment.pending)
     return resume_pending_comment(scanner, lexer, valid_symbols);
+  if (valid_symbols[DELEGATE_START_HINT] && !valid_symbols[STRING_CONTENT]) {
+    lexer->mark_end(lexer);
+    scanner->in_delegate = true;
+    lexer->result_symbol = DELEGATE_START_HINT;
+    return true;
+  }
+  if (valid_symbols[DELEGATE_END_HINT] && !valid_symbols[STRING_CONTENT]) {
+    lexer->mark_end(lexer);
+    scanner->in_delegate = false;
+    lexer->result_symbol = DELEGATE_END_HINT;
+    return true;
+  }
   if (valid_symbols[PRIMARY_CONSTRUCTOR_HINT] && !valid_symbols[STRING_CONTENT])
     return scan_primary_constructor_hint(scanner, lexer, valid_symbols);
   scanner->constructor_newline = false;
   // TRY_CLAUSE_HINT is optional before catch/finally and is never emitted.
   // Its validity identifies clause positions without changing keyword nodes.
   // BY_DELEGATION_HINT is declared in the grammar (optional, before `by` in
-  // explicit_delegation and property_delegate, and after the delegate's name in
-  // explicit_delegation) purely so it appears in
+  // explicit_delegation and property_delegate) purely so it appears in
   // valid_symbols when the parser is in a delegation context. The scanner
   // never emits it; it's used only as a context flag in scan_automatic_semicolon.
   if (valid_symbols[AUTOMATIC_SEMICOLON]) {
@@ -1548,6 +1561,13 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   return false;
 }
 
+bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
+  Scanner *scanner = payload;
+  bool found = scan_token(scanner, lexer, valid_symbols);
+  if (found && lexer->result_symbol == AUTOMATIC_SEMICOLON) scanner->in_delegate = false;
+  return found;
+}
+
 void *tree_sitter_kotlin_external_scanner_create() {
   Scanner *scanner = ts_calloc(1, sizeof(Scanner));
   if (scanner == NULL) abort();
@@ -1593,7 +1613,7 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     // A legacy delimiter has low bits 2/3, so low bits 0 plus bit 3
     // unambiguously identify this format, including an empty string stack.
     buffer[0] = 8 | (scanner->constructor_newline ? 4 : 0) |
-      (scanner->comment.semi_owed ? 16 : 0);
+      (scanner->comment.semi_owed ? 16 : 0) | (scanner->in_delegate ? 32 : 0);
     buffer[1] = (char)frames;
     buffer[2] = (char)(frames >> 8);
     write_u32(buffer + 3, scanner->comment.start_byte);
@@ -1611,11 +1631,13 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     }
     return length;
   }
+  // in_delegate is bit 16 here and bit 32 in the pending form, where 16 is taken.
+  uint8_t flags = (scanner->constructor_newline ? 4 : 0) | (scanner->in_delegate ? 16 : 0);
   if (n > 0) {
     memcpy(buffer, stack->contents, n);
-    if (scanner->constructor_newline) buffer[0] |= 4;
-  } else if (scanner->constructor_newline) {
-    buffer[0] = 4;
+    buffer[0] |= flags;
+  } else if (flags) {
+    buffer[0] = flags;
     return 1;
   }
   return n;
@@ -1627,10 +1649,11 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
   array_clear(stack);
   scanner->constructor_newline = false;
   scanner->comment = (PendingComment){0};
+  scanner->in_delegate = false;
   if (!length || length > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) return;
   uint8_t flags = (uint8_t)buffer[0];
   if ((flags & 3) == 0 && (flags & 8)) {
-    if (length < PENDING_HEADER_BYTES || (flags & ~28u)) return;
+    if (length < PENDING_HEADER_BYTES || (flags & ~60u)) return;
     unsigned frames = (uint8_t)buffer[1] | ((unsigned)(uint8_t)buffer[2] << 8);
     if (frames > MAX_STRING_FRAMES ||
         length != PENDING_HEADER_BYTES + (frames * PENDING_FRAME_BITS + 7) / 8) return;
@@ -1646,14 +1669,20 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
       stack_push(stack, '"', (value & 1024) != 0, (uint16_t)(value & 1023));
     }
     scanner->constructor_newline = (flags & 4) != 0;
+    scanner->in_delegate = (flags & 32) != 0;
     scanner->comment = (PendingComment){true, start, end, (flags & 16) != 0};
     return;
   }
-  if (length == 1 && flags == 4) { scanner->constructor_newline = true; return; }
+  if (length == 1 && (flags & ~20u) == 0) {
+    scanner->constructor_newline = (flags & 4) != 0;
+    scanner->in_delegate = (flags & 16) != 0;
+    return;
+  }
   if (length % 2) return;
   array_reserve(stack, length);
   memcpy(stack->contents, buffer, length);
-  stack->contents[0] &= (Delimiter)~4;
+  stack->contents[0] &= (Delimiter)~20;
   stack->size = length;
   scanner->constructor_newline = (flags & 4) != 0;
+  scanner->in_delegate = (flags & 16) != 0;
 }

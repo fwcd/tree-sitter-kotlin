@@ -273,6 +273,8 @@ module.exports = grammar({
     $._try_clause_hint,
     $._backing_field_hint,
     $._expression_end_hint,
+    $._delegate_start_hint,
+    $._delegate_end_hint,
   ],
 
   extras: $ => [
@@ -511,7 +513,8 @@ module.exports = grammar({
     // making it valid right after `{` would let the scanner emit one for the
     // newline that opens every ordinary multi-line body. Two leading `;` stay
     // an error, as in PSI.
-    class_body: $ => seq("{", optional(";"), optional($._class_member_declarations), "}"),
+    // The scanner emits the hint after every `{` to close an open class delegate.
+    class_body: $ => seq("{", $._delegate_end_hint, optional(";"), optional($._class_member_declarations), "}"),
 
     _class_parameters: $ => seq(
       "(",
@@ -579,6 +582,9 @@ module.exports = grammar({
       ),
       optional($._by_delegation_hint),
       "by",
+      // The scanner emits the hint and then keeps a `{` on the next line for
+      // the class body, as Kotlin does.
+      $._delegate_start_hint,
       // Use a restricted expression that doesn't allow trailing lambda calls
       // to avoid ambiguity with class_body in object literals.
       // e.g., `object : Interface by delegate { }` - the `{` should be class_body, not a lambda.
@@ -589,31 +595,36 @@ module.exports = grammar({
 
     // Expression variant that doesn't allow call expressions with trailing lambdas.
     // This is used in explicit_delegation to prevent ambiguity with class_body.
-    // Member access goes through the variant below, so the hint can follow it.
+    // Kotlin reads no trailing lambda anywhere in a delegate, so the right
+    // operand of `?:` gets its own rule. Other operators keep the general one.
     _expression_no_trailing_lambda: $ => choice(
       $.postfix_expression,
       $.indexing_expression,
-      $.prefix_expression,
+      $.navigation_expression,
       $.as_expression,
       $.spread_expression,
-      $._binary_expression,
+      $.prefix_expression,
+      $.multiplicative_expression,
+      $.additive_expression,
+      $.range_expression,
+      $.infix_expression,
+      $.check_expression,
+      $.comparison_expression,
+      $.equality_expression,
+      $.conjunction_expression,
+      $.disjunction_expression,
+      alias($._elvis_expression_no_trailing_lambda, $.elvis_expression),
       $._primary_expression_no_trailing_lambda
     ),
 
+    _elvis_expression_no_trailing_lambda: $ => prec.left(PREC.ELVIS, seq($._expression, "?:", $._expression_no_trailing_lambda)),
+
     _primary_expression_no_trailing_lambda: $ => choice(
       $.parenthesized_expression,
-      // The hint is valid after the delegate as well, which cancels the end
-      // hint, so the class body on the next line stays attached.
-      seq(
-        choice(
-          $.simple_identifier,
-          alias($._navigation_expression_no_trailing_lambda, $.navigation_expression)
-        ),
-        optional($._by_delegation_hint)
-      ),
-      $.callable_reference,
+      $.simple_identifier,
       $._literal_constant,
       $.string_literal,
+      $.callable_reference,
       alias($.call_expression_no_trailing_lambda, $.call_expression),
       alias($._generic_call_expression_no_trailing_lambda, $.call_expression),
       $._function_literal,
@@ -626,13 +637,6 @@ module.exports = grammar({
       $.try_expression,
       $.jump_expression
     ),
-
-    _navigation_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, seq(
-      $._expression_no_trailing_lambda,
-      alias($._navigation_suffix_no_trailing_lambda, $.navigation_suffix)
-    )),
-
-    _navigation_suffix_no_trailing_lambda: $ => seq($._member_access_operator, $.simple_identifier),
 
     // Call expression that only allows value_arguments, not trailing lambdas
     call_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, seq(
@@ -960,6 +964,7 @@ module.exports = grammar({
 
     enum_class_body: $ => seq(
       "{",
+      $._delegate_end_hint,
       optional($._enum_entries),
       optional(seq(";", optional($._class_member_declarations))),
       "}"
@@ -1125,7 +1130,7 @@ module.exports = grammar({
 
     control_structure_body: $ => choice($._block, $._statement),
 
-    _block: $ => prec(PREC.BLOCK, seq("{", optional(";"), optional($.statements), "}")),
+    _block: $ => prec(PREC.BLOCK, seq("{", $._delegate_end_hint, optional(";"), optional($.statements), "}")),
 
     _loop_statement: $ => choice(
       $.for_statement,
@@ -1388,6 +1393,7 @@ module.exports = grammar({
 
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
       "{",
+      $._delegate_end_hint,
       optional(seq(optional($.lambda_parameters), "->")),
       optional(";"),
       optional($.statements),
@@ -1529,6 +1535,7 @@ module.exports = grammar({
       "when",
       optional($.when_subject),
       "{",
+      $._delegate_end_hint,
       repeat($.when_entry),
       "}"
     ),
