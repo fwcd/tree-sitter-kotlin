@@ -276,6 +276,7 @@ module.exports = grammar({
     $._delegate_start_hint,
     $._delegate_end_hint,
     $._quoted_identifier,
+    $._call_lambda_hint,
   ],
 
   extras: $ => [
@@ -1287,7 +1288,8 @@ module.exports = grammar({
       choice(
         prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
         $.value_arguments
-      )
+      ),
+      optional($._call_lambda_hint)
     )),
 
     // Call suffix with REQUIRED type_arguments (used by _generic_call_expression)
@@ -1296,7 +1298,8 @@ module.exports = grammar({
       choice(
         prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
         $.value_arguments
-      )
+      ),
+      optional($._call_lambda_hint)
     )),
 
     annotated_lambda: $ => seq(
