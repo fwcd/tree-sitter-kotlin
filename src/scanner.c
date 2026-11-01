@@ -1495,6 +1495,24 @@ static bool scan_import_dot(TSLexer *lexer) {
   return true;
 }
 
+// After a `?` of a callable-reference receiver: do further `?`s and then `::` follow? Kotlin's
+// lexer reads comments and line breaks as whitespace, so `X?/*c*/?::x`, `X?` / newline / `?::x`
+// and `a?` / newline / `::b` are one reference each, as are `a? ::b` and `X ?? :: x` (JetBrains
+// fixtures). Reads with advance() past the marked end of the `?` token.
+static bool quest_chain_reaches_reference(TSLexer *lexer) {
+  for (;;) {
+    bool newline = false;
+    if (!constructor_trivia(lexer, &newline)) return false;
+    if (lexer->lookahead == '?') {
+      advance(lexer);
+      continue;
+    }
+    if (lexer->lookahead != ':') return false;
+    advance(lexer);
+    return lexer->lookahead == ':';
+  }
+}
+
 static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
   // Pending work takes priority over constructor, ASI, string and
   // interpolation paths. No other branch may consume its source as padding.
@@ -1596,32 +1614,18 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   // mark_end is set straight after the `?`, so the lookahead below inspects
   // the following characters without lengthening the token.
   //
-  // The second `?` of `X? ?::x` starts after a space. Skip it here rather than
-  // rely on the ASI scan above having stepped over it, which happens only where
-  // the parse state also accepts a semicolon.
+  // The second `?` of `X? ?::x` starts after whitespace, a line break included
+  // (`X?` / newline / `?::x`). Skip it here rather than rely on the ASI scan
+  // above having stepped over it, which happens only where the parse state also
+  // accepts a semicolon. A comment before it is an extra of its own.
   if (valid_symbols[CALLABLE_REFERENCE_QUEST] && !valid_symbols[STRING_CONTENT])
-    while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
+    while (iswspace(lexer->lookahead)) skip(lexer);
   if (valid_symbols[CALLABLE_REFERENCE_QUEST] && lexer->lookahead == '?') {
     advance(lexer);
     lexer->mark_end(lexer);
-    // Whitespace is allowed between the `?` and what follows: `a? ::b` and
-    // `X ?? :: x` are both in the JetBrains fixtures. Horizontal only --
-    // crossing a newline here would second-guess statement termination,
-    // which is not this token's job.
-    while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
-    if (lexer->lookahead == '?') {
-      // `??::` — the next `?` is handled by the next scan.
-      lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
-      return true;
-    }
-    if (lexer->lookahead == ':') {
-      advance(lexer);
-      if (lexer->lookahead == ':') {
-        lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
-        return true;
-      }
-    }
-    return false;
+    if (!quest_chain_reaches_reference(lexer)) return false;
+    lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
+    return true;
   }
 
   // Match dots in import identifiers, refusing dots that would cause

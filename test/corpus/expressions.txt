@@ -2431,3 +2431,56 @@ val r = ArrayList.this.size
           (this_expression)))
       (navigation_suffix
         (simple_identifier)))))
+
+================================================================================
+A nullable callable-reference receiver with a comment or a line break between its question marks
+================================================================================
+
+val a = X?/*c*/?::x
+val b = X?
+?::x
+val c = X? // c
+?::x
+val d = a?
+::b
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (multiline_comment)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (line_comment)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (simple_identifier))))
