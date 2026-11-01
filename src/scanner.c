@@ -1155,6 +1155,16 @@ static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symb
     if (modifiers == MODIFIER_CHAIN_MAX) return true;
     if (!constructor_word(lexer, word, sizeof(word))) return true;
     if (WORD_IN(word, DECLARATION_WORDS)) return false;
+    // Context parameters are part of the modifier list too (`private` above `context(_: String)`
+    // above `fun f()`), so the run goes on after their parentheses.
+    if (strcmp(word, "context") == 0) {
+      bool newline = false;
+      if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '(') break;
+      if (!constructor_balanced(lexer, ')')) return true;
+      after_modifier = true;
+      if (!skip_whitespace_and_comments(lexer)) return true;
+      continue;
+    }
     if (!WORD_IN(word, MODIFIER_WORDS)) break;
     after_modifier = true;
     // A comment between the modifiers is whitespace to Kotlin (`suspend // c` before `fun b()`);

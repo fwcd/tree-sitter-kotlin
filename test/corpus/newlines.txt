@@ -743,3 +743,46 @@ fun f() {
               (simple_identifier)
               (call_suffix
                 (value_arguments)))))))))
+
+================================================================================
+enum and context parameters on lines of their own stay modifiers
+================================================================================
+
+enum
+class E { A }
+
+fun g() {
+    enum
+    class F
+}
+
+private
+context(_: String)
+fun f() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier)))))
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))

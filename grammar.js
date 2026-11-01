@@ -634,7 +634,9 @@ module.exports = grammar({
       ),
       seq(
         optional($.modifiers),
-        "enum", "class",
+        // As after any other modifier word, a line break before `class` ends nothing (`enum` on a
+        // line of its own, see _modifier_hint).
+        "enum", optional($._modifier_hint), "class",
         alias($.simple_identifier, $.type_identifier),
         optional($.type_parameters),
         optional($.primary_constructor),
