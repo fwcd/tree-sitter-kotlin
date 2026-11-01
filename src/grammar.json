@@ -1953,8 +1953,150 @@
         {
           "type": "SYMBOL",
           "name": "_expression_no_trailing_lambda"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_assignment_no_trailing_lambda"
+          },
+          "named": true,
+          "value": "assignment"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "_loop_statement"
         }
       ]
+    },
+    "_assignment_no_trailing_lambda": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "PREC_LEFT",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_assignable_no_trailing_lambda"
+                },
+                "named": true,
+                "value": "directly_assignable_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_assignment_and_operator"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_expression_no_trailing_lambda"
+              }
+            ]
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_cast_assignable_no_trailing_lambda"
+                },
+                "named": true,
+                "value": "directly_assignable_expression"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_assignment_and_operator"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_expression_no_trailing_lambda"
+              }
+            ]
+          }
+        },
+        {
+          "type": "PREC_LEFT",
+          "value": 1,
+          "content": {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_assignable_no_trailing_lambda"
+                },
+                "named": true,
+                "value": "directly_assignable_expression"
+              },
+              {
+                "type": "STRING",
+                "value": "="
+              },
+              {
+                "type": "SYMBOL",
+                "name": "_expression_no_trailing_lambda"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "_cast_assignable_no_trailing_lambda": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "ALIAS",
+        "content": {
+          "type": "SYMBOL",
+          "name": "_as_expression_no_trailing_lambda"
+        },
+        "named": true,
+        "value": "as_expression"
+      }
+    },
+    "_assignable_no_trailing_lambda": {
+      "type": "PREC",
+      "value": 1,
+      "content": {
+        "type": "CHOICE",
+        "members": [
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "_primary_expression_no_trailing_lambda"
+              },
+              {
+                "type": "REPEAT1",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_postfix_unary_suffix"
+                }
+              }
+            ]
+          },
+          {
+            "type": "SYMBOL",
+            "name": "simple_identifier"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "parenthesized_expression"
+          }
+        ]
+      }
     },
     "call_expression_no_trailing_lambda": {
       "type": "PREC_LEFT",

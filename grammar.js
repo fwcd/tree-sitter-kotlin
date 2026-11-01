@@ -792,7 +792,32 @@ module.exports = grammar({
       )
     )),
 
-    _control_structure_body_no_trailing_lambda: $ => choice($._block, $._expression_no_trailing_lambda),
+    // An `if` branch in a delegate is a control structure body like any other (an assignment or a
+    // loop too: `by if (c) x = y else z`), whose expression takes no trailing lambda. An
+    // assignment's right side follows that; a loop keeps its own body, so a loop as the last branch
+    // takes a `{` after it as a trailing lambda of its body, which no real delegate has.
+    _control_structure_body_no_trailing_lambda: $ => choice(
+      $._block,
+      $._expression_no_trailing_lambda,
+      alias($._assignment_no_trailing_lambda, $.assignment),
+      $._loop_statement
+    ),
+
+    _assignment_no_trailing_lambda: $ => assignmentForms(
+      $, $._expression_no_trailing_lambda,
+      alias($._assignable_no_trailing_lambda, $.directly_assignable_expression),
+      alias($._cast_assignable_no_trailing_lambda, $.directly_assignable_expression),
+    ),
+
+    _cast_assignable_no_trailing_lambda: $ => prec(1, alias($._as_expression_no_trailing_lambda, $.as_expression)),
+
+    // The left side of such an assignment, in the shape of directly_assignable_expression: a primary
+    // without trailing lambdas and its assignable suffixes, a name, or one in parentheses.
+    _assignable_no_trailing_lambda: $ => prec(PREC.ASSIGNMENT, choice(
+      seq($._primary_expression_no_trailing_lambda, repeat1($._postfix_unary_suffix)),
+      $.simple_identifier,
+      $.parenthesized_expression
+    )),
 
     // Call expression that only allows value_arguments, not trailing lambdas
     call_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, seq(
@@ -1365,19 +1390,7 @@ module.exports = grammar({
     // generic EOF/newline token
     _semi: $ => $._automatic_semicolon,
 
-    assignment: $ => choice(
-      prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
-      // Kotlin's parser reads `+=` and the other augmented assignments as binary operators of the
-      // lowest precedence, so a cast may stand left of them: `c as MutableList<T> += x` calls
-      // plusAssign on the cast.
-      prec.left(PREC.ASSIGNMENT, seq(
-        alias($._cast_assignable_expression, $.directly_assignable_expression),
-        $._assignment_and_operator,
-        $._expression
-      )),
-      prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression)),
-      // TODO
-    ),
+    assignment: $ => assignmentForms($, $._expression),
 
     // ==========
     // Expressions
@@ -2312,6 +2325,23 @@ function anonymousFunction($, name) {
     // placements competing for the same `<`.
     optional($.type_parameters),
     ...tail
+  );
+}
+
+// The assignments of `target` with the right side `value`: the full grammar takes `$._expression`,
+// an `if` branch inside a delegate `$._expression_no_trailing_lambda` and a target of its own.
+function assignmentForms(
+  $, value,
+  target = $.directly_assignable_expression,
+  castTarget = alias($._cast_assignable_expression, $.directly_assignable_expression),
+) {
+  return choice(
+    prec.left(PREC.ASSIGNMENT, seq(target, $._assignment_and_operator, value)),
+    // Kotlin's parser reads `+=` and the other augmented assignments as binary operators of the
+    // lowest precedence, so a cast may stand left of them: `c as MutableList<T> += x` calls
+    // plusAssign on the cast.
+    prec.left(PREC.ASSIGNMENT, seq(castTarget, $._assignment_and_operator, value)),
+    prec.left(PREC.ASSIGNMENT, seq(target, "=", value)),
   );
 }
 
