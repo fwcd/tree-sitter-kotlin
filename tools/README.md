@@ -141,3 +141,22 @@ and resumes from the shards already written under `local/psi-diff/runs/NAME`.
 tokens, while the bucket key holds; one warm oracle JVM (`PsiOracle --serve`)
 answers every candidate batch. Keep run artefacts out of `build/`: node-gyp
 deletes that directory on every rebuild.
+
+## PSI gate
+
+`psi-gate/run.sh` runs the differential where its verdicts say most: the whole Kotlin
+repository at the oracle's commit (66,875 files, the `diagnostics`, `codegen/box` and spec test
+data included), an IntelliJ checkout (`IDEA_ROOT`), and the generic mutations of
+`psi-gate/mutate.js` over Kotlin's PSI test data: a comment between any two tokens of a line, a
+line break before the tokens that decide statement termination, a Unicode suffix on every name,
+and each hard keyword in place of a selector. `psi-gate/unmarked.py` leaves out files with IDE
+test markup (`<caret>`, `<selection>`, highlighting tags), which Kotlin's parser reads as code.
+
+```sh
+zsh tools/psi-gate/run.sh kotlin mutations
+IDEA_ROOT=~/idea zsh tools/psi-gate/run.sh idea
+```
+
+An `A` verdict on code the compiler accepts is a grammar gap. An `A` on code only PSI accepts,
+and a `B`, is either fixed where that is cheap or one of the deliberate differences the pull
+request lists.
