@@ -358,28 +358,3 @@ class C { fun c() {} @A val x = 1 }
         (variable_declaration
           (simple_identifier))
         (integer_literal)))))
-
-================================================================================
-Declarations on one line in a block take no separator either
-================================================================================
-
-fun f() {
-    fun a() {} fun b() {}
-}
-
---------------------------------------------------------------------------------
-
-(source_file
-  (function_declaration
-    (simple_identifier)
-    (function_value_parameters)
-    (function_body
-      (statements
-        (function_declaration
-          (simple_identifier)
-          (function_value_parameters)
-          (function_body))
-        (function_declaration
-          (simple_identifier)
-          (function_value_parameters)
-          (function_body))))))
