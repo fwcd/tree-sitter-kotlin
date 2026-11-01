@@ -360,8 +360,7 @@ class C { fun c() {} @A val x = 1 }
         (integer_literal)))))
 
 ================================================================================
-Declarations on one line in a block need a separator
-:error
+Declarations on one line in a block take no separator either
 ================================================================================
 
 fun f() {
@@ -369,3 +368,18 @@ fun f() {
 }
 
 --------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))
+        (function_declaration
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))

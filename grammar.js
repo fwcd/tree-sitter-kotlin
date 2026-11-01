@@ -408,8 +408,6 @@ module.exports = grammar({
     $._reserved_word_guard,
     // `` `if`@ ``: a backtick-quoted identifier with `@` right after it, see `label`.
     $._quoted_label,
-    // The separator a declaration takes on the line of the `}` before it, see `_member_semi`.
-    $._member_semicolon,
   ],
 
   extras: $ => [
@@ -496,7 +494,7 @@ module.exports = grammar({
       repeat($.file_annotation),
       optional($.package_header),
       optional($.import_list),
-      repeat(seq(choice($._statement, $.getter, $.setter), $._member_semi))
+      repeat(seq(choice($._statement, $.getter, $.setter), $._semi))
     ),
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),
@@ -856,16 +854,9 @@ module.exports = grammar({
     // member. This is the shape `statements` already uses successfully.
     _class_member_declarations: $ => seq(
       $._class_member_declaration,
-      repeat(seq($._member_semi, $._class_member_declaration)),
-      optional($._member_semi),
+      repeat(seq($._semi, $._class_member_declaration)),
+      optional($._semi),
     ),
-
-    // A file's declarations and a class body's members may follow each other with no separator
-    // right after a `}` (`}enum class E {`, `fun a() {}fun b() {}`): Kotlin's parseTopLevelDeclaration
-    // and parseMemberDeclaration take no separator at all. The scanner emits `_member_semicolon`
-    // there, only where it is valid; `statements` takes `_semi` alone, as Kotlin's parseStatements
-    // wants a `;` or a line break between two statements of a block.
-    _member_semi: $ => choice($._semi, $._member_semicolon),
 
     _class_member_declaration: $ => choice(
       $._declaration,
