@@ -47,6 +47,12 @@ describe('psiLayout', () => {
     expect(layout.errors).toEqual([]);
   });
 
+  it('reads a leaf holding a line separator as one leaf', () => {
+    const dump = ['KtFile: a.kt', '  STRING_TEMPLATE', "    PsiElement(REGULAR_STRING_PART)('a\u2028b')", '  PROPERTY',
+      "    PsiElement(val)('val')"].join('\n');
+    expect(psiLayout(dump).composites.find(entry => entry.type === 'PROPERTY')).toMatchObject({ start: 3 });
+  });
+
   it('records the first token of a composite, past whitespace, comments and KDoc', () => {
     const dump = ['KtFile: a.kt', '  FUN', '    KDoc', "      PsiElement(KDOC_START)('/**')", "      PsiElement(KDOC_END)('*/')",
       "    PsiWhiteSpace('\\n')", "    PsiComment(EOL_COMMENT)('//')", "    PsiWhiteSpace('\\n')", "    PsiElement(fun)('fun')"].join('\n');

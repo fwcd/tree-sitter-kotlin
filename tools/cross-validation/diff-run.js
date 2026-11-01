@@ -53,7 +53,9 @@ const DEFAULT_OUT = path.join(REPO_ROOT, 'local', 'psi-diff');
 // PSI dump layout: offsets, composite types and error elements
 // ---------------------------------------------------------------------------
 
-const LEAF_RE = /^(PsiElement|PsiWhiteSpace|PsiComment)(?:\(([^)]*)\))?\('(.*)'\)$/;
+// `s`: a leaf's text may hold a line or paragraph separator (U+2028, U+2029), which DebugUtil
+// prints raw and `.` would not match without it.
+const LEAF_RE = /^(PsiElement|PsiWhiteSpace|PsiComment)(?:\(([^)]*)\))?\('(.*)'\)$/s;
 
 const LINE_ESCAPES = { n: '\n', r: '\r', t: '\t' };
 
