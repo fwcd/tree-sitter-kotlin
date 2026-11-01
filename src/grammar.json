@@ -94,7 +94,7 @@
               },
               {
                 "type": "SYMBOL",
-                "name": "_semi"
+                "name": "_semis"
               }
             ]
           }
@@ -2370,7 +2370,7 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_semi"
+                "name": "_semis"
               },
               {
                 "type": "SYMBOL",
@@ -2384,7 +2384,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "_semi"
+              "name": "_semis"
             },
             {
               "type": "BLANK"
@@ -4119,6 +4119,13 @@
                   "value": ";"
                 },
                 {
+                  "type": "REPEAT",
+                  "content": {
+                    "type": "STRING",
+                    "value": ";"
+                  }
+                },
+                {
                   "type": "CHOICE",
                   "members": [
                     {
@@ -4677,7 +4684,7 @@
             "members": [
               {
                 "type": "SYMBOL",
-                "name": "_semi"
+                "name": "_semis"
               },
               {
                 "type": "SYMBOL",
@@ -4691,7 +4698,7 @@
           "members": [
             {
               "type": "SYMBOL",
-              "name": "_semi"
+              "name": "_semis"
             },
             {
               "type": "BLANK"
@@ -5104,6 +5111,22 @@
     "_semi": {
       "type": "SYMBOL",
       "name": "_automatic_semicolon"
+    },
+    "_semis": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_semi"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "STRING",
+            "value": ";"
+          }
+        }
+      ]
     },
     "assignment": {
       "type": "CHOICE",

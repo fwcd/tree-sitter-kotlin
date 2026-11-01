@@ -1524,3 +1524,39 @@ fun f() {
           (simple_identifier)
           (call_suffix
             (value_arguments)))))))
+
+================================================================================
+Further semicolons after a separator
+================================================================================
+
+fun f() { a(); ; b() }
+enum class E { A, B; ; // c
+    ;
+    companion object;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier))
+      (line_comment)
+      (companion_object))))

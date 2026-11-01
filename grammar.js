@@ -498,7 +498,7 @@ module.exports = grammar({
       repeat($.file_annotation),
       optional($.package_header),
       optional($.import_list),
-      repeat(seq(choice($._statement, $.getter, $.setter), $._semi))
+      repeat(seq(choice($._statement, $.getter, $.setter), $._semis))
     ),
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),
@@ -883,8 +883,8 @@ module.exports = grammar({
     // member. This is the shape `statements` already uses successfully.
     _class_member_declarations: $ => seq(
       $._class_member_declaration,
-      repeat(seq($._semi, $._class_member_declaration)),
-      optional($._semi),
+      repeat(seq($._semis, $._class_member_declaration)),
+      optional($._semis),
     ),
 
     _class_member_declaration: $ => choice(
@@ -1193,7 +1193,7 @@ module.exports = grammar({
       "{",
       $._delegate_end_hint,
       optional($._enum_entries),
-      optional(seq(";", optional($._class_member_declarations))),
+      optional(seq(";", repeat(";"), optional($._class_member_declarations))),
       "}",
       optional($._block_end_hint)
     ),
@@ -1300,8 +1300,8 @@ module.exports = grammar({
 
     statements: $ => seq(
       $._statement,
-      repeat(seq($._semi, $._statement)),
-      optional($._semi),
+      repeat(seq($._semis, $._statement)),
+      optional($._semis),
     ),
 
     _statement: $ => choice(
@@ -1413,6 +1413,12 @@ module.exports = grammar({
     // See also https://github.com/tree-sitter/tree-sitter/issues/160
     // generic EOF/newline token
     _semi: $ => $._automatic_semicolon,
+
+    // A separator and any further `;`: Kotlin skips them between statements and between members,
+    // `a(); ; b()` and the `; ;` of an enum body that goes on with members (PSI rejects two
+    // adjacent `;` in some places, `a();; b()`, which this accepts). The scanner reads the first
+    // as the separator; after it no separator is valid, so the internal lexer reads the others.
+    _semis: $ => seq($._semi, repeat(";")),
 
     assignment: $ => assignmentForms($, $._expression),
 
