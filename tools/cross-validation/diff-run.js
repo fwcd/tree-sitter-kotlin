@@ -260,7 +260,7 @@ function tsDeclarationStarts(root) {
     if (node && !(type === 'PROPERTY' && node.namedChildren.some(child => child.type === 'multi_variable_declaration'))) {
       let first = node.firstChild;
       while (first && COMMENT_TYPES.has(first.type)) first = first.nextSibling;
-      out.push(`${type}@${(first || node).startIndex}`);
+      out.push(`${type}@${annotatedStart(node, (first || node).startIndex)}`);
     }
     if (descend && cursor.gotoFirstChild()) continue;
     if (cursor.gotoNextSibling()) { descend = true; continue; }
@@ -268,6 +268,18 @@ function tsDeclarationStarts(root) {
     descend = false;
   }
   return out.sort();
+}
+
+// An anonymous function's annotations are a prefix_expression around it in tree-sitter and the
+// FUN's own MODIFIER_LIST in PSI (`g(@Ann fun() {})`): the function starts at the first of them.
+function annotatedStart(node, start) {
+  if (node.type !== 'anonymous_function') return start;
+  for (let parent = node.parent; parent && parent.type === 'prefix_expression' && parent.lastNamedChild?.id === node.id;
+    node = parent, parent = parent.parent) {
+    if (!parent.namedChildren.slice(0, -1).every(child => child.type === 'annotation')) break;
+    start = parent.startIndex;
+  }
+  return start;
 }
 
 function psiDeclarationStarts(layout) {
