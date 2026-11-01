@@ -1024,9 +1024,23 @@ module.exports = grammar({
       $.simple_identifier,
       $.function_value_parameters,
       optional(seq(":", $._type)),
-      optional($.type_constraints),
+      // Kotlin reads a contract before or after the type constraints (parseFunction).
+      optional(choice(
+        seq($.contract_effect_list, optional($.type_constraints)),
+        seq($.type_constraints, optional($.contract_effect_list))
+      )),
       optional($.function_body)
     )),
+
+    // A contract of the declaration syntax (ContractSyntaxV2): `fun f(x: Any?) contract
+    // [returns() implies (x != null)] { … }`, also on a property accessor. Each effect is an
+    // expression (KotlinExpressionParsing.parseContractEffectList).
+    contract_effect_list: $ => seq(
+      "contract",
+      "[",
+      optional(seq(sep1($._expression, ","), optional(","))),
+      "]"
+    ),
 
     function_body: $ => choice($._block, seq("=", $._expression)),
 
@@ -1155,6 +1169,7 @@ module.exports = grammar({
       optional(seq(
         "(", ")",
         optional(seq(":", $._type)),
+        optional($.contract_effect_list),
         $.function_body
       ))
     ))),
@@ -1168,6 +1183,7 @@ module.exports = grammar({
         optional(","),
         ")",
         optional(seq(":", $._type)),
+        optional($.contract_effect_list),
         $.function_body
       ))
     ))),
