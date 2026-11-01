@@ -2407,13 +2407,15 @@ module.exports = grammar({
     // literal (CHARACTER_LITERAL in Kotlin.flex), `''` and `'org.sample'` included, and leaves the
     // count to the compiler; Groovy-style quotes in Gradle scripts are such literals. It is one
     // token there, so its parts here follow each other immediately: no line break, and no
-    // comment as an extra inside (`'a/*c*/b'` is text). An escape is a backslash and any
+    // comment as an extra inside (`'a/*c*/b'` is text), and its closing quote is optional. An escape is a backslash and any
     // character but a line break (ESCAPE_SEQUENCE), the compiler judging `'\q'`. The characters
     // between the escapes are scanned externally, as the internal lexer cannot carry a NUL.
     character_literal: $ => seq(
       "'",
       repeat(choice($.character_escape_seq, $._character_content)),
-      token.immediate("'")
+      // Optional there too: a literal ends at its line without one, `'a` above `b'`, and the
+      // compiler reports it.
+      optional(token.immediate("'"))
     ),
 
     character_escape_seq: $ => choice(

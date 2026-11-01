@@ -1732,7 +1732,9 @@ static bool scan_label_identifier(TSLexer *lexer) {
 
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
-  if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT]) return scan_character_content(lexer);
+  // Nothing read leaves the cursor where it was: a line break ends the literal, and the
+  // separator after it is the scan's below.
+  if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT] && scan_character_content(lexer)) return true;
   if (valid_symbols[LABEL_IDENTIFIER] && !valid_symbols[STRING_CONTENT] && lexer->lookahead != '`') {
     return scan_label_identifier(lexer);
   }

@@ -898,3 +898,29 @@ val x = 'a
 b'
 
 --------------------------------------------------------------------------------
+
+================================================================================
+A character literal without its closing quote ends at its line
+================================================================================
+
+fun f() {
+    g('x
+      , 'y')
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (character_literal))
+              (value_argument
+                (character_literal)))))))))
