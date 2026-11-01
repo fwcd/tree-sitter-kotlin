@@ -485,3 +485,32 @@ var Foo.bar: Int
   (getter
     (function_body
       (integer_literal))))
+================================================================================
+A named function where an expression starts, with type parameters before its receiver
+================================================================================
+
+fun h() { if (c) fun <T> R.g(x: T) {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (anonymous_function
+              (type_parameters
+                (type_parameter
+                  (type_identifier)))
+              (type_identifier)
+              (simple_identifier)
+              (function_value_parameters
+                (parameter
+                  (simple_identifier)
+                  (user_type
+                    (type_identifier))))
+              (function_body))))))))

@@ -2311,6 +2311,18 @@ function wordExcept(words) {
 // An anonymous function, or with `name` before its parameters a named one, which takes a body and
 // the lower precedence from its name on (see `anonymous_function`).
 function anonymousFunction($, name) {
+  const receiver = optional(seq(sep1($._simple_user_type, "."), ".")); // TODO
+  // Kotlin accepts type parameters on an anonymous function in two
+  // placements, and one slot here covers both: with no receiver
+  // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
+  // renders as TYPE_PARAMETER_LIST following the receiver dot). Keeping it
+  // to a single slot after the optional receiver avoids two optional
+  // placements competing for the same `<`. A named one also takes them where a
+  // function declaration does, before the receiver: `if (c) fun <T> R.g(x: T) {}`;
+  // the two placements are alternatives, so no `<` has two optional slots.
+  const head = name
+    ? [choice(seq(optional($.type_parameters), receiver), seq(sep1($._simple_user_type, "."), ".", $.type_parameters))]
+    : [receiver, optional($.type_parameters)];
   const tail = name
     ? [prec.right(-1, seq(name, $.function_value_parameters, optional(seq(":", $._type)), $.function_body))]
     : [$.function_value_parameters, optional(seq(":", $._type)), optional($.function_body)];
@@ -2318,14 +2330,7 @@ function anonymousFunction($, name) {
     optional($.context_receiver),
     optional("suspend"),
     "fun",
-    optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
-    // Kotlin accepts type parameters on an anonymous function in two
-    // placements, and one slot here covers both: with no receiver
-    // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
-    // renders as TYPE_PARAMETER_LIST following the receiver dot). Keeping it
-    // to a single slot after the optional receiver avoids two optional
-    // placements competing for the same `<`.
-    optional($.type_parameters),
+    ...head,
     ...tail
   );
 }
