@@ -297,28 +297,151 @@ val anon = fun() { assert(true) }
                   (boolean_literal))))))))))
 
 ==================
-Anonymous suspend function with body
+Named function where an expression starts
+==================
+
+fun f() {
+    if (c) fun g() {}
+    x = 1 < fun <T> g() = 1
+    run(fun g() {})
+    @A fun h() {}
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (simple_identifier)
+              (function_value_parameters)
+              (function_body))))
+        (assignment
+          (directly_assignable_expression
+            (simple_identifier))
+          (comparison_expression
+            (integer_literal)
+            (anonymous_function
+              (type_parameters
+                (type_parameter
+                  (type_identifier)))
+              (simple_identifier)
+              (function_value_parameters)
+              (function_body
+                (integer_literal)))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (anonymous_function
+                  (simple_identifier)
+                  (function_value_parameters)
+                  (function_body))))))
+        (function_declaration
+          (modifiers
+            (annotation
+              (user_type
+                (type_identifier))))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
+
+==================
+A named function without a body as the body of an if
+==================
+
+fun f() {
+    if (c) fun g()
+    if (d) fun <T> h(): T else y
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (simple_identifier)
+              (function_value_parameters))))
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (type_parameters
+                (type_parameter
+                  (type_identifier)))
+              (simple_identifier)
+              (function_value_parameters)
+              (user_type
+                (type_identifier))))
+          alternative: (control_structure_body
+            (simple_identifier)))))))
+
+==================
+suspend before a named function where an expression starts
+:error
+==================
+
+fun h() { if (c) suspend fun g() {} }
+
+---
+
+==================
+suspend is no part of an anonymous function
+:error
 ==================
 
 val anon = suspend fun() { assert(true) }
 
 ---
 
+==================
+suspend before a function without a name where a statement starts
+==================
+
+fun f() {
+    run {
+        suspend fun() {}
+    }
+    suspend fun g() {}
+}
+
+---
+
 (source_file
-  (property_declaration
-    (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function
-      (function_value_parameters)
-      (function_body
-        (statements
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments
-                (value_argument
-                  (boolean_literal))))))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (anonymous_function
+                    (function_value_parameters)
+                    (function_body)))))))
+        (function_declaration
+          (modifiers
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
 
 ==================
 Function with backticked name
@@ -365,3 +488,225 @@ Function block with trailing comma
       (additive_expression
         (integer_literal)
         (simple_identifier)))))
+
+================================================================================
+Accessor keywords as names inside a function
+================================================================================
+
+fun f() {
+    if (c) set.add(x)
+    val v = g { set }
+}
+
+var Foo.bar: Int
+    internal set(value) {}
+    get() = 1
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (call_expression
+              (navigation_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (call_suffix
+                (value_arguments
+                  (value_argument
+                    (simple_identifier)))))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (annotated_lambda
+                (lambda_literal
+                  (statements
+                    (simple_identifier))))))))))
+  (property_declaration
+    (binding_pattern_kind)
+    receiver: (receiver_type
+      (user_type
+        (type_identifier)))
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier))))
+  (setter
+    (modifiers
+      (visibility_modifier))
+    (parameter_with_optional_type
+      (simple_identifier))
+    (function_body))
+  (getter
+    (function_body
+      (integer_literal))))
+================================================================================
+A named function where an expression starts, with type parameters before its receiver
+================================================================================
+
+fun h() { if (c) fun <T> R.g(x: T) {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (anonymous_function
+              (type_parameters
+                (type_parameter
+                  (type_identifier)))
+              (receiver_type
+                (user_type
+                  (type_identifier)))
+              (simple_identifier)
+              (function_value_parameters
+                (parameter
+                  (simple_identifier)
+                  (user_type
+                    (type_identifier))))
+              (function_body))))))))
+
+================================================================================
+A contract of the declaration syntax on a function and an accessor
+================================================================================
+
+fun test1(arg: Any?) contract [returns() implies (arg != null)] { }
+fun <T> f(x: T) contract [returns()] where T : Any { }
+var myInt: Int = 0
+    get() contract [returnsNotNull()] = 1
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))
+          (quest))))
+    (contract_effect_list
+      (infix_expression
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier)
+        (parenthesized_expression
+          (equality_expression
+            (simple_identifier)
+            (null_literal)))))
+    (function_body))
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (contract_effect_list
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier)
+      (user_type
+        (type_identifier)))
+    (integer_literal))
+  (getter
+    (contract_effect_list
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (function_body
+      (integer_literal))))
+
+================================================================================
+A contract on the line after the return type, before the constraints
+================================================================================
+
+fun <T> f(x: T): String
+    contract [
+        returns()
+    ]
+    where T : A
+{
+}
+
+fun g() {
+    val y = 2
+    contract [0]
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier))
+    (contract_effect_list
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (indexing_expression
+          (simple_identifier)
+          (indexing_suffix
+            (integer_literal)))))))

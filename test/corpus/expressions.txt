@@ -2204,6 +2204,78 @@ fun g(){ when (val T.x = foo) {} }
             (simple_identifier)))))))
 
 ================================================================================
+Callable reference on a nullable generic receiver type
+================================================================================
+
+val b = List<T>?::orEmpty
+val s = List<T>::size
+val a = String?::length
+val c = x ?: ::fallback
+val d = Map<K, V>??::get
+
+---
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))
+        (quest)
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier))))
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (elvis_expression
+      (simple_identifier)
+      (callable_reference
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (simple_identifier)
+      (navigation_suffix
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier)))
+          (type_projection
+            (user_type
+              (type_identifier))))
+        (quest)
+        (quest)
+        (simple_identifier)))))
+
+================================================================================
 Labeled lambda on the next line continues a completed call
 ================================================================================
 
@@ -2232,6 +2304,53 @@ fun f() {
                     (simple_identifier)
                     (call_suffix
                       (value_arguments))))))))))))
+
+================================================================================
+A quoted label of a lambda on the next line continues a completed call
+================================================================================
+
+fun g() {
+    op()
+    foo()
+    `lab`@ { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)
+            (annotated_lambda
+              (label)
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))))))
+
+================================================================================
+A label name follows its at sign directly
+:error
+================================================================================
+
+fun f() { break@ lab }
+fun g() { run { return@ run } }
+class C { fun h() = this@ C }
+fun i() { run { return@as } }
+
+--------------------------------------------------------------------------------
 
 ================================================================================
 Annotated statement on the next line is not swallowed by the call
@@ -2263,3 +2382,433 @@ fun f() {
             (simple_identifier)
             (call_suffix
               (value_arguments))))))))
+
+================================================================================
+Semicolon before else
+================================================================================
+
+fun f(): String =
+  if (c)
+    "\t";
+  else
+    " "
+fun f() { if (c) a(); else b() }
+fun f(x: Int) = when (x) {
+    1 -> a();
+    else -> b()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (user_type
+      (type_identifier))
+    (function_body
+      (if_expression
+        condition: (simple_identifier)
+        consequence: (control_structure_body
+          (string_literal
+            (string_content)))
+        alternative: (control_structure_body
+          (string_literal
+            (string_content))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))
+          alternative: (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (integer_literal))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))
+        (when_entry
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+this as a selector
+================================================================================
+
+val r = ArrayList.this.size
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (navigation_expression
+      (navigation_expression
+        (simple_identifier)
+        (navigation_suffix
+          (this_expression)))
+      (navigation_suffix
+        (simple_identifier)))))
+
+================================================================================
+A nullable callable-reference receiver with a comment or a line break between its question marks
+================================================================================
+
+val a = X?/*c*/?::x
+val b = X?
+?::x
+val c = X? // c
+?::x
+val d = a?
+::b
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (multiline_comment)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (line_comment)
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (type_identifier)
+      (quest)
+      (simple_identifier))))
+
+================================================================================
+A nullable callable-reference receiver in parentheses
+================================================================================
+
+val f = (X)?::x
+val g = (a.b)??::class
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (parenthesized_expression
+        (simple_identifier))
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (parenthesized_expression
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (simple_identifier))))
+      (quest)
+      (quest))))
+
+================================================================================
+A super expression as a navigation selector
+================================================================================
+
+fun f() { x.super }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (super_expression)))))))
+
+================================================================================
+A when subject variable declared with var
+================================================================================
+
+fun g() { when (var i = 2) { else -> i } }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (when_entry
+            (control_structure_body
+              (simple_identifier))))))))
+
+================================================================================
+A literal or a jump as a navigation selector
+================================================================================
+
+fun h() { "foo".return }
+fun i() { value.null }
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (string_literal (string_content)) (navigation_suffix (jump_expression)))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (null_literal)))))))
+
+================================================================================
+A when, an object literal or an anonymous function as a navigation selector
+================================================================================
+
+fun f() { x.fun() }
+fun g() { x.object{} }
+fun h() { x.when{} }
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (anonymous_function (function_value_parameters))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (object_literal (class_body))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (when_expression)))))))
+
+================================================================================
+class is no selector after a dot
+:error
+================================================================================
+
+fun j() { x.class() }
+fun l() { x?.class }
+
+--------------------------------------------------------------------------------
+
+
+================================================================================
+Type arguments without value arguments make a call
+================================================================================
+
+fun f() {
+    g(x<T>)
+    when (x) { a.foo<T> -> a }
+    x<T>(1)
+    Array<Array<T>>(3)
+    val c = y as a.B<C<D>>
+    try {} finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier))))))))))
+        (when_expression
+          (when_subject
+            (simple_identifier))
+          (when_entry
+            (when_condition
+              (call_expression
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))
+                (call_suffix
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))
+            (control_structure_body
+              (simple_identifier))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))
+            (value_arguments
+              (value_argument
+                (integer_literal)))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))
+            (value_arguments
+              (value_argument
+                (integer_literal)))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (as_expression
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier))))))))))
+        (try_expression
+          (finally_block))))))
+
+================================================================================
+A number or a string after a dot and a space is a selector
+================================================================================
+
+fun f() {
+    x. 1
+    x."a"
+    x?.
+    2L
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (integer_literal)))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (string_literal
+              (string_content))))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (long_literal
+              (integer_literal))))))))
+
+================================================================================
+An anonymous function in its full form as a selector
+================================================================================
+
+fun f() {
+    x.fun(): T {}
+    x.fun<T>() {}
+    x?.fun R.() {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (anonymous_function
+              (function_value_parameters)
+              (user_type
+                (type_identifier))
+              (function_body))))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (anonymous_function
+              (type_parameters
+                (type_parameter
+                  (type_identifier)))
+              (function_value_parameters)
+              (function_body))))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (anonymous_function
+              receiver: (receiver_type
+                (user_type
+                  (type_identifier)))
+              (function_value_parameters)
+              (function_body))))))))

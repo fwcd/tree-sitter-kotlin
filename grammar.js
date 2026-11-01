@@ -105,6 +105,123 @@ const BIN_DIGITS = token(/[0-9_]*/);
 // single FLOAT tokens to the Kotlin lexer.
 const REAL_EXPONENT = token(seq(/[eE]/, optional(/[+-]/), /[0-9_]*/));
 
+// The operator forms of an expression over the operand `e`. The full grammar takes `$._expression`; the
+// delegate after `by` takes `$._expression_no_trailing_lambda`, so that no operand of it takes a
+// trailing lambda.
+const UNARY_FORMS = ($, e) => ({
+  postfix_expression: prec.left(PREC.POSTFIX, seq(e, $._postfix_unary_operator)),
+  indexing_expression: prec.left(PREC.POSTFIX, seq(e, $.indexing_suffix)),
+  navigation_expression: prec.left(PREC.POSTFIX, seq(e, $.navigation_suffix)),
+  prefix_expression: choice(
+    prec.right(PREC.PREFIX, seq($._prefix_unary_operator, e)),
+    prec.right(seq(choice($.annotation, $.label), e)),
+  ),
+  as_expression: prec.left(PREC.AS, seq(e, $._as_operator, $._type)),
+  spread_expression: prec.left(PREC.SPREAD, seq("*", e)),
+});
+
+const BINARY_FORMS = ($, e, infixName = $.simple_identifier) => ({
+  multiplicative_expression: prec.left(PREC.MULTIPLICATIVE, seq(e, $._multiplicative_operator, e)),
+  additive_expression: prec.left(PREC.ADDITIVE, seq(e, $._additive_operator, e)),
+  range_expression: prec.left(PREC.RANGE, seq(e, choice("..", "..<"), e)),
+  infix_expression: prec.left(PREC.INFIX, seq(e, infixName, e)),
+  elvis_expression: prec.left(PREC.ELVIS, seq(e, "?:", e)),
+  check_expression: prec.left(PREC.CHECK, seq(e, choice(
+    seq(optional("!"), $._in_operator, e),
+    seq(optional("!"), $._is_operator, $._type)))),
+  comparison_expression: prec.left(PREC.COMPARISON, seq(e, $._comparison_operator, e)),
+  equality_expression: prec.left(PREC.EQUALITY, seq(e, $._equality_operator, e)),
+  conjunction_expression: prec.left(PREC.CONJUNCTION, seq(e, "&&", e)),
+  disjunction_expression: prec.left(PREC.DISJUNCTION, seq(e, "||", e)),
+});
+
+// Kotlin's hard keywords, `typeof` included: never an identifier or a label unless escaped.
+const HARD_KEYWORDS = [
+  'as', 'break', 'class', 'continue', 'do', 'else', 'false', 'for', 'fun', 'if', 'in', 'interface',
+  'is', 'null', 'object', 'package', 'return', 'super', 'this', 'throw', 'true', 'try', 'typealias',
+  'typeof', 'val', 'var', 'when', 'while',
+];
+
+// Soft keywords and modifiers that are identifiers wherever no rule takes them as keywords.
+const SOFT_KEYWORD_IDENTIFIERS = [
+  "expect",
+  "data",
+  "inner",
+  "value",
+  "actual",
+  "set",
+  "get",
+  "override",
+  "suspend",
+  // Batch 1: covered by existing conflict rules (class_modifier, member_modifier, function_modifier)
+  "annotation",
+  "sealed",
+  "lateinit",
+  "tailrec",
+  "operator",
+  "infix",
+  "inline",
+  "external",
+  // Batch 2: visibility modifiers
+  "public",
+  "private",
+  "internal",
+  "protected",
+  // Batch 3: inheritance modifiers
+  "abstract",
+  "final",
+  "open",
+  // Batch 4: property, parameter, reification modifiers
+  "const",
+  "vararg",
+  "noinline",
+  "crossinline",
+  "reified",
+  // Batch 5: annotation use-site targets (no conflict rules needed — disambiguated by ":")
+  "field",
+  "property",
+  "receiver",
+  "param",
+  "setparam",
+  "delegate",
+  // Batch 6: structural keywords used as identifiers
+  "companion",
+  "constructor",
+  "context",
+  "init",
+  "dynamic",
+  "where",
+  "catch",
+  "finally",
+  // Batch 7: enum
+  "enum",
+  // The variance modifier `out` (`in` is a hard keyword). Keyword extraction lexes it as
+  // `_alpha_identifier` only in states that expect no variance, so `val out = 1` needs no
+  // entry; but after a `<`, where type arguments may start, the keyword wins and
+  // `i < out.size` failed. Kotlin parses the type arguments speculatively and keeps them only
+  // when a `>` closes them (tryParseTypeArgumentList); with `out` here both readings fork.
+  // See `type_parameter_modifiers`, which bounds the variance slot of a declaration.
+  "out",
+];
+
+const UNARY_NAMES = [
+  'postfix_expression', 'indexing_expression', 'navigation_expression', 'prefix_expression', 'as_expression',
+  'spread_expression',
+];
+const BINARY_NAMES = [
+  'multiplicative_expression', 'additive_expression', 'range_expression', 'infix_expression', 'elvis_expression',
+  'check_expression', 'comparison_expression', 'equality_expression', 'conjunction_expression',
+  'disjunction_expression',
+];
+
+// `_<name>_no_trailing_lambda` for each form, the operands restricted to `$._expression_no_trailing_lambda`.
+function noTrailingLambdaForms(forms, names) {
+  return Object.fromEntries(names.map(name => [
+    `_${name}_no_trailing_lambda`,
+    $ => forms($, $._expression_no_trailing_lambda, alias($._delegate_infix_name, $.simple_identifier))[name],
+  ]));
+}
+
 module.exports = grammar({
   name: "kotlin",
 
@@ -124,6 +241,7 @@ module.exports = grammar({
     // declaration prefix or an ordinary call whose callee is named `context`.
     // GLR explores both and keeps whichever yields a valid parse.
     [$.context_receiver, $.simple_identifier],
+    [$._type_context_receiver, $.simple_identifier],
 
     // `l@` may begin a labelled expression or, now, a labelled declaration;
     // which it is only becomes clear at the token after the label.
@@ -132,6 +250,18 @@ module.exports = grammar({
     // `( name` at statement start: a destructuring target or a parenthesized
     // expression. Nothing tells them apart until after the ')', so carry both.
     [$._name_based_destructuring_entry_expr, $._primary_expression],
+    [$._positional_destructuring_entry_expr, $._primary_expression],
+    [$._positional_destructuring_entry_expr, $._positional_destructuring_first_entry],
+    [$._positional_destructuring_entry_expr, $.prefix_expression, $._positional_destructuring_first_entry],
+    // `{ (val a) ...` or `{ [val a] ...`: a lambda's destructured parameter or a destructuring
+    // statement that must start with `val`/`var`; the `->` or the `=` decides.
+    [$._name_based_destructuring_entry_expr, $._name_based_destructuring_first_entry],
+    // An annotated destructuring entry against an annotated expression or an annotated type:
+    // `[@A val x] = y` against `[@A x]`, `(@A x, y) ->` against `(@A x)`.
+    [$._name_based_destructuring_entry_expr, $.prefix_expression, $._name_based_destructuring_first_entry],
+    [$._name_based_destructuring_entry, $._type_modifier],
+    [$.prefix_expression, $._name_based_destructuring_first_entry],
+    [$.prefix_expression, $._positional_destructuring_first_entry],
 
     // @Type(... — `(` after an annotation name is usually constructor args, but
     // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
@@ -165,10 +295,13 @@ module.exports = grammar({
     [$.parameter_modifier, $.simple_identifier],
     [$.modifiers],
     [$.parameter_modifiers],
+    // `out` is a variance modifier or an identifier: `List<out T>` against `i < out.size`
+    [$.type_projection_modifiers],
     [$.type_parameter_modifiers],
 
     // "<x>.<y> = z assignment conflicts with <x>.<y>() function call"
     [$._postfix_unary_expression, $._expression],
+    [$._postfix_unary_expression_no_trailing_lambda, $._expression_no_trailing_lambda],
 
     // ambiguity between generics and comparison operations (foo < b > c)
     // _generic_call_expression is the prec.dynamic(1) variant with required type_arguments
@@ -181,27 +314,28 @@ module.exports = grammar({
     [$.type_arguments, $._comparison_operator],
 
     // ambiguity between prefix expressions and annotations before functions
-    [$._statement, $.prefix_expression],
+    [$._statement, $._expression_statement, $.prefix_expression],
+    [$._expression_statement, $.prefix_expression],
     // _statement_annotation vs annotation (in prefix_expression and modifiers):
     // both parse @Identifier but route through different rules.
     [$._statement_annotation, $.annotation],
-    [$.prefix_expression, $._when_subject_variable],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
     [$.call_expression, $._generic_call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
 
     // ambiguity between multiple user types and class property/function declarations
     [$.user_type],
-    [$.user_type, $.anonymous_function],
     //[$.user_type, $.function_type],
 
     // ambiguity caused by 'suspend'
     [$.function_modifier, $.simple_identifier],
+    // `suspend fun` at statement start: a modifier of a declaration or of a function without a name.
+    [$._suspend_anonymous_function, $.function_modifier],
     [$._type_modifier, $.simple_identifier],
     [$.delegation_specifier, $._type_modifier, $.simple_identifier],
-    [$.anonymous_function, $.function_modifier],
-    [$.anonymous_function, $.simple_identifier],
-    [$.anonymous_function, $.function_modifier, $.simple_identifier],
+    // `fun T.` at statement start: the receiver of a declaration or of an anonymous function.
+    [$._anonymous_receiver_type, $.receiver_type],
+    [$._anonymous_receiver_type, $.nullable_type],
 
 
     // ambiguity between simple identifier 'set/get' with actual setter/getter functions.
@@ -210,13 +344,6 @@ module.exports = grammar({
 
     // ambiguity between parameter modifiers in anonymous functions
     [$.parameter_modifiers, $._type_modifier],
-
-    // ambiguity for object literal
-    [$.object_literal],
-    [$.object_literal, $.class_modifier],
-    [$.object_literal, $.class_modifier, $.simple_identifier],
-    [$.object_literal, $.simple_identifier],
-    [$.object_literal, $.object_declaration],
 
     // ambiguity between use of suspend in type and delegation specifiers
     [$.delegation_specifier, $._type_modifier],
@@ -237,15 +364,20 @@ module.exports = grammar({
     // parenthesized function type?
     [$.delegation_specifier, $._type],
 
-    // Ambiguity between regular expressions and the no-trailing-lambda variant
-    // used in explicit_delegation to prevent `{ }` after `by expr` being parsed
-    // as a trailing lambda instead of class_body.
-    [$._expression, $._expression_no_trailing_lambda],
-    [$._primary_expression, $._primary_expression_no_trailing_lambda],
-    // Three-way conflict: a callable reference (Foo::bar) starts with the name
-    // alone, which both primary_expression variants can match. Carrying the
-    // name rule here covers the whole `callable_reference` reading with it.
-    [$._primary_expression, $._primary_expression_no_trailing_lambda, $._callable_reference_name],
+    // The delegate after `by` (`_expression_no_trailing_lambda`) has its own operator forms, so
+    // it no longer conflicts with `_expression`; only the ambiguities of `_expression` itself
+    // recur in it. A callable reference (Foo::bar) starts with a name the delegate can be.
+    [$._primary_expression_no_trailing_lambda, $._callable_reference_name],
+    // The generics-versus-comparison ambiguities above, over the delegate's operands.
+    // `_generic_call_expression_no_trailing_lambda` is no inlined rule: an alias of an inlined
+    // rule names its children, and `by f<T>(a)` became two sibling call expressions.
+    ...['range', 'elvis', 'check', 'additive', 'infix', 'multiplicative', 'prefix'].map(op => [
+      $.call_expression_no_trailing_lambda,
+      $._generic_call_expression_no_trailing_lambda,
+      $._navigation_expression_no_trailing_lambda,
+      $[`_${op}_expression_no_trailing_lambda`],
+      $._comparison_expression_no_trailing_lambda,
+    ]),
 
     // Inside the callable-reference receiver the parser must choose a
     // production at `Name <` before it can see whether any `?` follows.
@@ -277,6 +409,27 @@ module.exports = grammar({
     $._delegate_end_hint,
     $._quoted_identifier,
     $._call_lambda_hint,
+    // Never produced: valid right after the `}` of a class body or a block, where Kotlin starts the
+    // next declaration without a separator (`}enum class E`, see BLOCK_END_HINT in the scanner).
+    $._block_end_hint,
+    // Never produced: valid after a modifier word of a declaration's modifiers, so that a line break
+    // before the declaration keyword inserts no semicolon (see MODIFIER_HINT in the scanner).
+    $._modifier_hint,
+    // Never produced, and the scanner never looks at it: it only guards `typeof`, see `reserved`.
+    $._reserved_word_guard,
+    // `` `if`@ ``: a backtick-quoted identifier with `@` right after it, see `label`.
+    $._quoted_label,
+    // Zero-width, before the `companion` of `companion object`, see companion_object.
+    $._companion_object_hint,
+    // A `;` after a separator, not right after another `;`, see _semis.
+    $._further_semicolon,
+    // The characters of a character literal between its escapes, NUL included.
+    $._character_content,
+    // The name right after `break@`, `return@` and the like, see _label_name.
+    $._label_identifier,
+    // Never produced: valid where a declaration's contract may start, so that a line break before
+    // `contract [` inserts no semicolon (see word_continues_statement in the scanner).
+    $._contract_hint,
   ],
 
   extras: $ => [
@@ -287,6 +440,17 @@ module.exports = grammar({
   ],
 
   word: $ => $._alpha_identifier,
+
+  // Kotlin's hard keywords (https://kotlinlang.org/docs/keyword-reference.html#hard-keywords) are never
+  // identifiers unless escaped in backticks. Without reserving them, the lexer falls back to an identifier
+  // wherever the keyword is not valid, and GLR can prefer such a reading without any ERROR node:
+  // `@A sealed interface X<T> { ... }` became an annotated infix call `sealed interface X` with type arguments
+  // and a trailing lambda, because the generic call carries a higher dynamic precedence than the declaration.
+  // `typeof` is reserved by Kotlin too but no rule uses it, and a reserved word must be a token of the grammar:
+  // `source_file` takes it behind `_reserved_word_guard`, which the scanner never produces.
+  reserved: {
+    global: _ => HARD_KEYWORDS,
+  },
 
   // Hidden rules substituted at their use sites instead of getting a symbol of
   // their own. `ts_parse_table` is a dense LARGE_STATE_COUNT x SYMBOL_COUNT
@@ -313,7 +477,6 @@ module.exports = grammar({
     $._declaration_receiver_type,
     $._equality_operator,
     $._function_literal,
-    $._generic_call_expression_no_trailing_lambda,
     $._in_operator,
     $._interpolation,
     $._is_operator,
@@ -334,7 +497,6 @@ module.exports = grammar({
     $._type_parameter_modifier,
     $._type_projection_modifier,
     $._unary_expression,
-    $._uni_character_literal,
   ],
 
   rules: {
@@ -348,11 +510,12 @@ module.exports = grammar({
 
     // start
     source_file: $ => seq(
+      optional(seq($._reserved_word_guard, 'typeof')),
       optional($.shebang_line),
       repeat($.file_annotation),
       optional($.package_header),
       optional($.import_list),
-      repeat(seq($._statement, $._semi))
+      repeat(seq(choice($._statement, $.getter, $.setter), $._semis))
     ),
 
     shebang_line: $ => seq("#!", /[^\r\n]*/),
@@ -452,15 +615,6 @@ module.exports = grammar({
       $.function_declaration,
       $.property_declaration,
       $.destructuring_declaration,
-      // TODO: it would be better to have getter/setter only in
-      // property_declaration but it's difficult to get ASI
-      // (Automatic Semicolon Insertion) working in the lexer for
-      // getter/setter. Indeed, they can also have modifiers in
-      // front, which means it's not enough to lookahead for 'get' or 'set' in
-      // the lexer, you also need to handle modifier keywords. It is thus
-      // simpler to accept them here.
-      $.getter,
-      $.setter,
       $.type_alias
     ),
 
@@ -468,7 +622,7 @@ module.exports = grammar({
     // Classes
     // ==========
 
-    class_declaration: $ => prec.dynamic(1, prec.right(choice(
+    class_declaration: $ => prec.right(choice(
       seq(
         optional($.modifiers),
         choice("class", seq(optional("fun"), "interface")),
@@ -481,7 +635,9 @@ module.exports = grammar({
       ),
       seq(
         optional($.modifiers),
-        "enum", "class",
+        // As after any other modifier word, a line break before `class` ends nothing (`enum` on a
+        // line of its own, see _modifier_hint).
+        "enum", optional($._modifier_hint), "class",
         alias($.simple_identifier, $.type_identifier),
         optional($.type_parameters),
         optional($.primary_constructor),
@@ -489,7 +645,7 @@ module.exports = grammar({
         optional($.type_constraints),
         optional($.enum_class_body)
       )
-    ))),
+    )),
 
     // The `constructor` keyword is optional even when modifiers are present.
     // `class C private ()` is accepted by Kotlin's parser, which builds a
@@ -516,7 +672,10 @@ module.exports = grammar({
     // newline that opens every ordinary multi-line body. Two leading `;` stay
     // an error, as in PSI.
     // The scanner emits the hint after every `{` to close an open class delegate.
-    class_body: $ => seq("{", $._delegate_end_hint, optional(";"), optional($._class_member_declarations), "}"),
+    class_body: $ => seq(
+      "{", $._delegate_end_hint, optional(";"), optional($._class_member_declarations), "}",
+      optional($._block_end_hint)
+    ),
 
     _class_parameters: $ => seq(
       "(",
@@ -549,8 +708,13 @@ module.exports = grammar({
       // The grammar doesn't explicitly define it, but parenthesized function
       // types seem to work!
       seq('(', $.function_type, ')'),
-      seq("suspend", $.function_type)
+      seq("suspend", $.function_type),
+      // A function type with a context, `class A : context(String) () -> Unit`, as in a type
+      // position. Annotations before a supertype stay those of _annotated_delegation_specifier.
+      seq(alias($._context_type_modifiers, $.type_modifiers), $.function_type)
     )),
+
+    _context_type_modifiers: $ => repeat1(alias($._type_context_receiver, $.context_receiver)),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
 
@@ -597,29 +761,19 @@ module.exports = grammar({
 
     // Expression variant that doesn't allow call expressions with trailing lambdas.
     // This is used in explicit_delegation to prevent ambiguity with class_body.
-    // Kotlin reads no trailing lambda anywhere in a delegate, so the right
-    // operand of `?:` gets its own rule. Other operators keep the general one.
+    // Kotlin reads the delegate with trailing lambdas off (`parseCallWithClosure` of the
+    // by-clause parser), except inside parentheses, brackets or braces, so no operand takes one
+    // either: every operator form has its own copy over this expression, under the same node
+    // names. `by a + b { }` ends before the class body, and an infix call keeps its newline rule:
+    // `by d()` followed by `companion object` on the next line ends at the newline.
     _expression_no_trailing_lambda: $ => choice(
-      $.postfix_expression,
-      $.indexing_expression,
-      $.navigation_expression,
-      $.as_expression,
-      $.spread_expression,
-      $.prefix_expression,
-      $.multiplicative_expression,
-      $.additive_expression,
-      $.range_expression,
-      $.infix_expression,
-      $.check_expression,
-      $.comparison_expression,
-      $.equality_expression,
-      $.conjunction_expression,
-      $.disjunction_expression,
-      alias($._elvis_expression_no_trailing_lambda, $.elvis_expression),
+      ...UNARY_NAMES.map(name => alias($[`_${name}_no_trailing_lambda`], $[name])),
+      ...BINARY_NAMES.map(name => alias($[`_${name}_no_trailing_lambda`], $[name])),
       $._primary_expression_no_trailing_lambda
     ),
 
-    _elvis_expression_no_trailing_lambda: $ => prec.left(PREC.ELVIS, seq($._expression, "?:", $._expression_no_trailing_lambda)),
+    ...noTrailingLambdaForms(UNARY_FORMS, UNARY_NAMES),
+    ...noTrailingLambdaForms(BINARY_FORMS, BINARY_NAMES),
 
     _primary_expression_no_trailing_lambda: $ => choice(
       $.parenthesized_expression,
@@ -634,10 +788,71 @@ module.exports = grammar({
       $.collection_literal,
       $.this_expression,
       $.super_expression,
-      $.if_expression,
+      alias($._if_expression_no_trailing_lambda, $.if_expression),
       $.when_expression,
       $.try_expression,
-      $.jump_expression
+      alias($._jump_expression_no_trailing_lambda, $.jump_expression)
+    ),
+
+    // The operand of `throw` or `return`, and an unbraced branch of `if`, end before a `{` too:
+    // `by throw x { }` and `by if (c) x else y { }` are followed by the class body.
+    _jump_expression_no_trailing_lambda: $ => choice(
+      prec.right(PREC.RETURN_OR_THROW, seq("throw", $._expression_no_trailing_lambda)),
+      prec.right(PREC.RETURN_OR_THROW, seq(choice("return", $._return_at), optional($._expression_no_trailing_lambda))),
+      "continue",
+      $._continue_at,
+      "break",
+      $._break_at
+    ),
+
+    _if_expression_no_trailing_lambda: $ => prec.right(seq(
+      "if",
+      "(", field('condition', $._expression), ")",
+      choice(
+        field('consequence', alias($._control_structure_body_no_trailing_lambda, $.control_structure_body)),
+        seq(
+          optional(field('consequence', alias($._control_structure_body_no_trailing_lambda, $.control_structure_body))),
+          optional(";"),
+          "else",
+          choice(field('alternative', alias($._control_structure_body_no_trailing_lambda, $.control_structure_body)), ";")
+        ),
+        ";"
+      )
+    )),
+
+    // An `if` branch in a delegate is a control structure body like any other (an assignment or a
+    // loop too: `by if (c) x = y else z`), whose expression takes no trailing lambda. An
+    // assignment's right side follows that; a loop keeps its own body, so a loop as the last branch
+    // takes a `{` after it as a trailing lambda of its body, which no real delegate has.
+    _control_structure_body_no_trailing_lambda: $ => choice(
+      $._block,
+      $._expression_no_trailing_lambda,
+      alias($._assignment_no_trailing_lambda, $.assignment),
+      $._loop_statement,
+      alias($._bodyless_named_function, $.anonymous_function)
+    ),
+
+    _assignment_no_trailing_lambda: $ => assignmentForms(
+      $, $._expression_no_trailing_lambda,
+      alias($._assignable_no_trailing_lambda, $.directly_assignable_expression),
+      alias($._cast_assignable_no_trailing_lambda, $.directly_assignable_expression),
+    ),
+
+    _cast_assignable_no_trailing_lambda: $ => prec(1, alias($._as_expression_no_trailing_lambda, $.as_expression)),
+
+    // The left side of such an assignment, in the shape of directly_assignable_expression: a primary
+    // without trailing lambdas and its assignable suffixes, a name, or one in parentheses. As
+    // there, the precedence sits on the whole and the suffixes are a rule of their own, which
+    // stays in conflict with the expression: a precedence on the suffixes themselves would shift
+    // the `<` after `x` as a selector's type arguments, so `by if (c) x<T> else y<T>` failed.
+    _assignable_no_trailing_lambda: $ => prec(PREC.ASSIGNMENT, choice(
+      $._postfix_unary_expression_no_trailing_lambda,
+      $.simple_identifier,
+      $.parenthesized_expression
+    )),
+
+    _postfix_unary_expression_no_trailing_lambda: $ => seq(
+      $._primary_expression_no_trailing_lambda, repeat1($._postfix_unary_suffix)
     ),
 
     // Call expression that only allows value_arguments, not trailing lambdas
@@ -657,10 +872,13 @@ module.exports = grammar({
       $.value_arguments
     ),
 
-    _generic_call_suffix_no_trailing_lambda: $ => seq(
+    // `by x<T>` takes no arguments at all: Kotlin reads type arguments followed by neither `(`
+    // nor an operand as a call of their own, so `by x<T>, J {` and `by x<T>` before a `{` on the
+    // next line end at the `>`.
+    _generic_call_suffix_no_trailing_lambda: $ => prec.right(seq(
       $.type_arguments,
-      $.value_arguments
-    ),
+      optional($.value_arguments)
+    )),
 
     type_parameters: $ => seq("<", sep1($.type_parameter, ","), optional(","), ">"),
 
@@ -697,13 +915,30 @@ module.exports = grammar({
     // member. This is the shape `statements` already uses successfully.
     _class_member_declarations: $ => seq(
       $._class_member_declaration,
-      repeat(seq($._semi, $._class_member_declaration)),
-      optional($._semi),
+      repeat(seq($._semis, $._class_member_declaration)),
+      optional($._semis),
     ),
 
     _class_member_declaration: $ => choice(
       $._declaration,
+      // TODO: it would be better to have getter/setter only in
+      // property_declaration but it's difficult to get ASI
+      // (Automatic Semicolon Insertion) working in the lexer for
+      // getter/setter. Indeed, they can also have modifiers in
+      // front, which means it's not enough to lookahead for 'get' or 'set' in
+      // the lexer, you also need to handle modifier keywords. It is thus
+      // simpler to accept them as members of their own, in class bodies and at the top level. A
+      // local property has no accessors (KotlinParsing: DeclarationParsingMode.LOCAL), so
+      // `if (c) set.add(x)` never reads `set` as one.
+      $.getter,
+      $.setter,
+      // Both accessors on the accessors' own line, `var x = 0\n  get private set`: Kotlin reads a
+      // property's accessors with no separator between them, but here they are class members of
+      // their own (see the TODO above), and two members on one line need one.
+      prec(1, seq($.getter, $.setter)),
+      prec(1, seq($.setter, $.getter)),
       $.companion_object,
+      $.companion_block,
       $.anonymous_initializer,
       $.secondary_constructor
     ),
@@ -714,14 +949,24 @@ module.exports = grammar({
     // still parses.
     anonymous_initializer: $ => seq(optional($.modifiers), "init", $._block),
 
-    companion_object: $ => seq(
+    // Kotlin 2.4 companion block (CompanionBlocksAndExtensions): `companion { fun f() {} }` among the
+    // members of a class or object, the static members of its class (KotlinParsing.parseCompanionBlock:
+    // `companion` first, then `{`).
+    companion_block: $ => seq("companion", $.class_body),
+
+    // `companion` is also a member_modifier (companion extensions), so after an annotation
+    // `@Ann companion object Key` could read as an object_declaration. The scanner emits
+    // `_companion_object_hint` only where the words `companion object` follow, so this node keeps
+    // them; the precedence settles `companion` first, where the hint and the modifier meet.
+    companion_object: $ => prec(1, seq(
       optional($.modifiers),
+      $._companion_object_hint,
       "companion",
       "object",
       optional(alias($.simple_identifier, $.type_identifier)),
       optional(seq(":", $._delegation_specifiers)),
       optional($.class_body)
-    ),
+    )),
 
     function_value_parameters: $ => seq(
       "(",
@@ -740,6 +985,15 @@ module.exports = grammar({
       optional($.binding_pattern_kind),
       alias($._optionally_typed_parameter, $.parameter),
       optional(seq("=", $._expression))
+    ),
+
+    // The receiver of an anonymous function: see anonymousFunction.
+    _anonymous_receiver_type: $ => seq(
+      optional($.type_modifiers),
+      choice(
+        alias(seq($._type_reference, repeat1($.quest)), $.nullable_type),
+        $._type_reference,
+      )
     ),
 
     receiver_type: $ => seq(
@@ -769,20 +1023,19 @@ module.exports = grammar({
     // prefix on a callable declaration. Entries are either context parameters
     // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
     // enclosing declaration must parse so its body is scored.
-    context_receiver: $ => seq(
-      "context",
-      "(",
-      sep1(choice(seq(optional($.parameter_modifiers), $.parameter), $._type), ","),
-      optional(","),
-      ")"
-    ),
+    // A receiver of a declaration may carry a label (`context(s@String)`), which
+    // KotlinParsing.parseContextReceiver reads as LABEL_QUALIFIER before the type; one of a
+    // function type may not (`context(label@String) () -> Unit` is an error for PSI).
+    context_receiver: $ => contextReceiver($, true),
 
-    // `public fun Foo.bar() { … }` also parses as an infix expression, because
-    // the visibility modifiers are soft keywords in `simple_identifier`. Both
-    // readings are complete, so this is the dynamic-precedence decision #278
-    // made for `class` and `object` (issue #277); at the time `fun` was not
-    // reachable that way, and the GLR conflict on annotations made it so.
-    function_declaration: $ => prec.dynamic(1, prec.right(seq( // TODO
+    _type_context_receiver: $ => contextReceiver($, false),
+
+    // `public fun Foo.bar() { … }` once had a complete second reading as an infix
+    // expression over soft-keyword modifiers (#277). With the hard keywords
+    // reserved, `fun`, `class` and `object` are never identifiers, and an
+    // object expression always has a body, so no expression spans a
+    // declaration and the dynamic precedence of #278/#280 has nothing to decide.
+    function_declaration: $ => prec.right(seq( // TODO
       optional($.modifiers),
       "fun",
       optional($.type_parameters),
@@ -790,9 +1043,24 @@ module.exports = grammar({
       $.simple_identifier,
       $.function_value_parameters,
       optional(seq(":", $._type)),
-      optional($.type_constraints),
+      // Kotlin reads a contract before or after the type constraints (parseFunction).
+      optional(choice(
+        seq($.contract_effect_list, optional($.type_constraints)),
+        seq($.type_constraints, optional($.contract_effect_list))
+      )),
       optional($.function_body)
-    ))),
+    )),
+
+    // A contract of the declaration syntax (ContractSyntaxV2): `fun f(x: Any?) contract
+    // [returns() implies (x != null)] { … }`, also on a property accessor. Each effect is an
+    // expression (KotlinExpressionParsing.parseContractEffectList).
+    contract_effect_list: $ => seq(
+      optional($._contract_hint),
+      "contract",
+      "[",
+      optional(seq(sep1($._expression, ","), optional(","))),
+      "]"
+    ),
 
     function_body: $ => choice($._block, seq("=", $._expression)),
 
@@ -813,14 +1081,18 @@ module.exports = grammar({
     // competitor — a parenthesized receiver type, as in `val (A).foo` — that
     // the static precedence is needed to beat.
     _name_based_destructuring_entry_expr: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      repeat($.annotation),
       optional($.binding_pattern_kind),
       $.simple_identifier,
       optional(seq(":", $._type)),
       optional(seq("=", $.simple_identifier))
     ))),
 
-    // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming
+    // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming.
+    // Each entry of a destructuring may carry annotations, as Kotlin's parseMultiDeclarationEntry
+    // reads a modifier list first: `val (@A x, @B y) = two`, `for ((@A x, y) in z)`.
     _name_based_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      repeat($.annotation),
       optional($.binding_pattern_kind),
       $.simple_identifier,
       optional(seq(":", $._type)),
@@ -828,7 +1100,17 @@ module.exports = grammar({
     )),
 
     // Entry in positional (bracketed) destructuring — supports optional val/var, NO renaming
+    // The statement-position variant, as for the name-based one: `{ [it] }` is a body holding a
+    // collection literal, `{ [a, b] -> }` a destructured parameter, and only the `->` tells.
+    _positional_destructuring_entry_expr: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      repeat($.annotation),
+      optional($.binding_pattern_kind),
+      $.simple_identifier,
+      optional(seq(":", $._type))
+    ))),
+
     _positional_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      repeat($.annotation),
       optional($.binding_pattern_kind),
       $.simple_identifier,
       optional(seq(":", $._type))
@@ -900,24 +1182,28 @@ module.exports = grammar({
 
     destructuring_declaration: $ => prec.right(seq(
       optional($.modifiers),
-      alias($._multi_variable_declaration_expr, $.multi_variable_declaration),
+      alias($._destructuring_declaration_target, $.multi_variable_declaration),
       optional($.type_constraints),
       "=",
       $._expression,
       optional(';'),
     )),
 
-    getter: $ => prec.right(seq(
+    // Accessors on lines of their own are members of their own (see _class_member_declaration).
+    // At the top level a script statement competes, `get() = x` as an assignment; the accessor
+    // wins through its dynamic precedence.
+    getter: $ => prec.dynamic(1, prec.right(seq(
       optional($.modifiers),
       "get",
       optional(seq(
         "(", ")",
         optional(seq(":", $._type)),
+        optional($.contract_effect_list),
         $.function_body
       ))
-    )),
+    ))),
 
-    setter: $ => prec.right(seq(
+    setter: $ => prec.dynamic(1, prec.right(seq(
       optional($.modifiers),
       "set",
       optional(seq(
@@ -926,9 +1212,10 @@ module.exports = grammar({
         optional(","),
         ")",
         optional(seq(":", $._type)),
+        optional($.contract_effect_list),
         $.function_body
       ))
-    )),
+    ))),
 
     parameters_with_optional_type: $ => seq("(", sep1($.parameter_with_optional_type, ","), ")"),
 
@@ -940,7 +1227,7 @@ module.exports = grammar({
 
     parameter: $ => seq($.simple_identifier, ":", $._type),
 
-    object_declaration: $ => prec.dynamic(1, prec.right(seq(
+    object_declaration: $ => prec.right(seq(
       optional($.modifiers),
       "object",
       alias($.simple_identifier, $.type_identifier),
@@ -948,7 +1235,7 @@ module.exports = grammar({
       optional($.primary_constructor),
       optional(seq(":", $._delegation_specifiers)),
       optional($.class_body)
-    ))),
+    )),
 
     secondary_constructor: $ => seq(
       optional($.modifiers),
@@ -968,8 +1255,10 @@ module.exports = grammar({
       "{",
       $._delegate_end_hint,
       optional($._enum_entries),
-      optional(seq(";", optional($._class_member_declarations))),
-      "}"
+      // Further semicolons as in _semis: `A;;` is Kotlin's DOUBLE_SEMICOLON, an error.
+      optional(seq(";", repeat(alias($._further_semicolon, ";")), optional($._class_member_declarations))),
+      "}",
+      optional($._block_end_hint)
     ),
 
     _enum_entries: $ => seq(sep1($.enum_entry, ","), optional(",")),
@@ -1074,8 +1363,8 @@ module.exports = grammar({
 
     statements: $ => seq(
       $._statement,
-      repeat(seq($._semi, $._statement)),
-      optional($._semi),
+      repeat(seq($._semis, $._statement)),
+      optional($._semis),
     ),
 
     _statement: $ => choice(
@@ -1084,6 +1373,16 @@ module.exports = grammar({
       // annotations on a declaration are already handled by `modifiers`, and
       // allowing both here would make them ambiguous.
       seq(optional($.label), $._declaration),
+      $._expression_statement,
+      // `suspend fun() {}` where a statement starts: parseLocalDeclaration reads the modifier
+      // and the function without a name as a local declaration.
+      alias($._suspend_anonymous_function, $.anonymous_function)
+    ),
+
+    _suspend_anonymous_function: $ => prec.right(seq("suspend", anonymousFunction($, undefined, false, false))),
+
+    // A statement that is no declaration; also the body of an if, else, loop or when entry.
+    _expression_statement: $ => choice(
       seq(repeat($.label), $._expression),
       seq($._statement_annotations, repeat($.label), $._expression),
       seq(repeat($.label), choice($.assignment, $._loop_statement)),
@@ -1125,14 +1424,39 @@ module.exports = grammar({
       $._multi_annotation
     ),
 
-    label: $ => token(seq(
-      /[a-zA-Z_][a-zA-Z_0-9]*/,
-      "@"
+    // A label is an identifier with `@` right after it, one token as in Kotlin's lexer: as an
+    // identifier followed by `@` the parser could not tell `x foo@{ }` from an infix call. The word
+    // pattern leaves out the hard keywords, so `class@` is no label, and the scanner reads the
+    // escaped form, so `` `if`@ `` is one.
+    label: $ => choice(
+      token(seq(wordExcept(HARD_KEYWORDS), "@")),
+      $._quoted_label,
+      // The same for the internal lexer: after a completed call the scanner probes the next line
+      // for a labelled lambda (`foo()` above `` `lab`@ { } ``), passes the label and leaves the
+      // token to the internal lexer. Without NUL, which only the scanner carries.
+      token(seq("`", /[^`\r\n\x00]+/, "`@"))
+    ),
+
+    // The body of an `if`, `else`, loop or `when` entry is an expression in Kotlin's parser
+    // (parseControlStructureBody -> parseBlockLevelExpression), where a modifier word is an
+    // identifier and a declaration is no statement. Kotlin parses a keyword-led one there
+    // (`if (c) val x = 1`) and rejects it; none occurs in the IntelliJ monorepo.
+    control_structure_body: $ => choice(
+      $._block,
+      $._expression_statement,
+      alias($._bodyless_named_function, $.anonymous_function)
+    ),
+
+    // `if (c) fun g()`: a named function without a body, which parseAtomicExpression reads as a
+    // local function wherever an expression starts. Only here: elsewhere at statement start it
+    // would take the `where@` of a type constraint as a label, see anonymous_function; in an
+    // operand or an argument it stays a difference (tools/psi-gate/expected.json).
+    _bodyless_named_function: $ => prec.dynamic(-1, anonymousFunction($, $.simple_identifier, true)),
+
+    _block: $ => prec(PREC.BLOCK, seq(
+      "{", $._delegate_end_hint, optional(";"), optional($.statements), "}",
+      optional($._block_end_hint)
     )),
-
-    control_structure_body: $ => choice($._block, $._statement),
-
-    _block: $ => prec(PREC.BLOCK, seq("{", $._delegate_end_hint, optional(";"), optional($.statements), "}")),
 
     _loop_statement: $ => choice(
       $.for_statement,
@@ -1172,11 +1496,14 @@ module.exports = grammar({
     // generic EOF/newline token
     _semi: $ => $._automatic_semicolon,
 
-    assignment: $ => choice(
-      prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, $._assignment_and_operator, $._expression)),
-      prec.left(PREC.ASSIGNMENT, seq($.directly_assignable_expression, "=", $._expression)),
-      // TODO
-    ),
+    // A separator and any further `;`: Kotlin skips them between statements and between members,
+    // `a(); ; b()` and the `; ;` of an enum body that goes on with members. Its lexer reads two
+    // adjacent `;` as one token, DOUBLE_SEMICOLON, which no rule takes, so `a();; b()` is an
+    // error. The scanner reads the first `;` as the separator and each further one only when
+    // something stands between it and the `;` before it.
+    _semis: $ => seq($._semi, repeat(alias($._further_semicolon, ";"))),
+
+    assignment: $ => assignmentForms($, $._expression),
 
     // ==========
     // Expressions
@@ -1199,32 +1526,29 @@ module.exports = grammar({
       $.spread_expression
     ),
 
-    postfix_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $._postfix_unary_operator)),
+    postfix_expression: $ => UNARY_FORMS($, $._expression).postfix_expression,
 
     call_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.call_suffix)),
 
     // Generic call expression: call with REQUIRED type_arguments.
-    // prec.dynamic(1) tells GLR to prefer the generic-call interpretation
+    // The prec.dynamic(1) of its suffix tells GLR to prefer the generic-call interpretation
     // (f<T>(x)) over the comparison interpretation (f < T > (x)).
     // Separated from call_expression so the dynamic boost only applies
     // when type_arguments are actually parsed, not for all calls.
-    _generic_call_expression: $ => prec.left(PREC.POSTFIX, prec.dynamic(1, seq(
+    _generic_call_expression: $ => prec.left(PREC.POSTFIX, seq(
       $._expression,
       alias($._generic_call_suffix, $.call_suffix)
-    ))),
+    )),
 
-    indexing_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.indexing_suffix)),
+    indexing_expression: $ => UNARY_FORMS($, $._expression).indexing_expression,
 
-    navigation_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.navigation_suffix)),
+    navigation_expression: $ => UNARY_FORMS($, $._expression).navigation_expression,
 
-    prefix_expression: $ => choice(
-      prec.right(PREC.PREFIX, seq($._prefix_unary_operator, $._expression)),
-      prec.right(seq(choice($.annotation, $.label), $._expression)),
-    ),
+    prefix_expression: $ => UNARY_FORMS($, $._expression).prefix_expression,
 
-    as_expression: $ => prec.left(PREC.AS, seq($._expression, $._as_operator, $._type)),
+    as_expression: $ => UNARY_FORMS($, $._expression).as_expression,
 
-    spread_expression: $ => prec.left(PREC.SPREAD, seq("*", $._expression)),
+    spread_expression: $ => UNARY_FORMS($, $._expression).spread_expression,
 
     // Binary expressions
 
@@ -1241,44 +1565,79 @@ module.exports = grammar({
       $.disjunction_expression
     ),
 
-    multiplicative_expression: $ => prec.left(PREC.MULTIPLICATIVE, seq($._expression, $._multiplicative_operator, $._expression)),
+    multiplicative_expression: $ => BINARY_FORMS($, $._expression).multiplicative_expression,
 
-    additive_expression: $ => prec.left(PREC.ADDITIVE, seq($._expression, $._additive_operator, $._expression)),
+    additive_expression: $ => BINARY_FORMS($, $._expression).additive_expression,
 
-    range_expression: $ => prec.left(PREC.RANGE, seq($._expression, choice("..", "..<"), $._expression)),
+    range_expression: $ => BINARY_FORMS($, $._expression).range_expression,
 
-    infix_expression: $ => prec.left(PREC.INFIX, seq($._expression, $.simple_identifier, $._expression)),
+    infix_expression: $ => BINARY_FORMS($, $._expression).infix_expression,
 
-    elvis_expression: $ => prec.left(PREC.ELVIS, seq($._expression, "?:", $._expression)),
+    elvis_expression: $ => BINARY_FORMS($, $._expression).elvis_expression,
 
-    check_expression: $ => prec.left(PREC.CHECK, seq($._expression, choice(
-      seq(optional("!"), $._in_operator, $._expression),
-      seq(optional("!"), $._is_operator, $._type)))),
+    check_expression: $ => BINARY_FORMS($, $._expression).check_expression,
 
-    comparison_expression: $ => prec.left(PREC.COMPARISON, seq($._expression, $._comparison_operator, $._expression)),
+    comparison_expression: $ => BINARY_FORMS($, $._expression).comparison_expression,
 
-    equality_expression: $ => prec.left(PREC.EQUALITY, seq($._expression, $._equality_operator, $._expression)),
+    equality_expression: $ => BINARY_FORMS($, $._expression).equality_expression,
 
-    conjunction_expression: $ => prec.left(PREC.CONJUNCTION, seq($._expression, "&&", $._expression)),
+    conjunction_expression: $ => BINARY_FORMS($, $._expression).conjunction_expression,
 
-    disjunction_expression: $ => prec.left(PREC.DISJUNCTION, seq($._expression, "||", $._expression)),
+    disjunction_expression: $ => BINARY_FORMS($, $._expression).disjunction_expression,
 
     // Suffixes
 
     indexing_suffix: $ => seq("[", sep1($._expression, ","), optional(','), "]"),
 
-    navigation_suffix: $ => seq(
-      // this introduces ambiguities with 'less than' for comparisons
-      optional($.type_arguments),
-      $._member_access_operator,
-      choice(
-        seq($.simple_identifier, optional($._expression_end_hint)),
-        $.parenthesized_expression,
-        // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
-        // compiler diagnostic; Kotlin's parser reads the lambda and PSI
-        // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
-        $.lambda_literal,
-        seq("class", optional($._expression_end_hint))
+    navigation_suffix: $ => choice(
+      seq(
+        // this introduces ambiguities with 'less than' for comparisons
+        optional($.type_arguments),
+        choice(".", "?."),
+        choice(
+          seq($.simple_identifier, optional($._expression_end_hint)),
+          // Kotlin's selector is an atomic expression (parseSelectorCallExpression), so the
+          // reserved `this` and `super` are ones, and so are a literal, a jump, `value.null` and
+          // `"foo".return`, a `when`, an object literal and an anonymous function, which the
+          // compiler rejects. A number right after the dot is not one: Kotlin's lexer reads `.1`
+          // as a real literal; after a space (`x. 1`) or a line break it is, as is a string.
+          $.this_expression,
+          $.integer_literal,
+          $.hex_literal,
+          $.bin_literal,
+          $.real_literal,
+          $.long_literal,
+          $.unsigned_literal,
+          $.string_literal,
+          $.super_expression,
+          $.boolean_literal,
+          $.null_literal,
+          $.character_literal,
+          $.jump_expression,
+          $.parenthesized_expression,
+          $.when_expression,
+          $.object_literal,
+          alias($._selector_function, $.anonymous_function),
+          // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
+          // compiler diagnostic; Kotlin's parser reads the lambda and PSI
+          // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
+          $.lambda_literal
+        )
+      ),
+      // After `::` only a name or `class` (parseDoubleColonSuffix).
+      seq(
+        optional($.type_arguments),
+        "::",
+        choice($.simple_identifier, "class"),
+        optional($._expression_end_hint)
+      ),
+      // A callable reference on a nullable generic receiver type, `List<T>?::orEmpty`, read the
+      // way `List<T>::size` is, with callable_reference's question marks.
+      seq(
+        $.type_arguments,
+        repeat1(alias($._callable_reference_quest, $.quest)),
+        "::",
+        choice($.simple_identifier, "class")
       )
     ),
 
@@ -1292,14 +1651,24 @@ module.exports = grammar({
       optional($._call_lambda_hint)
     )),
 
-    // Call suffix with REQUIRED type_arguments (used by _generic_call_expression)
-    _generic_call_suffix: $ => prec.left(seq(
-      $.type_arguments,
-      choice(
-        prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
-        $.value_arguments
-      ),
-      optional($._call_lambda_hint)
+    // Call suffix with REQUIRED type_arguments (used by _generic_call_expression). The arguments
+    // are optional: KotlinExpressionParsing.parseCallSuffix makes a call of type arguments that
+    // close with `>` whatever follows (`g(x<T>)`, `a.foo<T> -> a`), while `a < b > c`, which
+    // that reading leaves without an operator, stays a comparison. A suffix with arguments ranks
+    // its reading higher, one without lower: a reading that needs one is the wrong one wherever
+    // another reads the same tokens, as the comparison reading of `Array<Array<T>>(3)`
+    // (`Array < Array<T> > (3)`) and that of `x as a.B<C<D>>` above `try { … }` (a navigation
+    // after `x as a`, compared with `C<D>` and with the `try`) do.
+    _generic_call_suffix: $ => prec.right(choice(
+      prec.dynamic(1, seq(
+        $.type_arguments,
+        choice(
+          prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
+          $.value_arguments
+        ),
+        optional($._call_lambda_hint)
+      )),
+      prec.dynamic(-1, seq($.type_arguments, optional($._call_lambda_hint)))
     )),
 
     annotated_lambda: $ => seq(
@@ -1392,7 +1761,8 @@ module.exports = grammar({
 
     _interpolation: $ => choice(
       seq(alias($._interpolation_expression_start, $.interpolation_expression_start), alias($._expression, $.interpolated_expression), alias("}", $.interpolation_expression_end)),
-      seq(alias($._interpolation_identifier_start, $.interpolation_identifier_start), alias($.simple_identifier, $.interpolated_identifier)),
+      // `"$this"`: the one hard keyword a short template entry takes (reserved, so no simple_identifier).
+      seq(alias($._interpolation_identifier_start, $.interpolation_identifier_start), alias(choice($.simple_identifier, "this"), $.interpolated_identifier)),
     ),
 
     lambda_literal: $ => prec(PREC.LAMBDA_LITERAL, seq(
@@ -1404,6 +1774,42 @@ module.exports = grammar({
       "}"
     )),
 
+    // A destructuring statement (`(val a, var b) = pair`, `[val a, var b] = pair`) starts with `val`
+    // or `var` inside its bracket: Kotlin's parseCommonDeclaration takes `(` or `[` as a declaration
+    // only when lookahead(1) is VAL or VAR. Otherwise `(p) = q` is an assignment to `(p)`. Every
+    // further entry needs its own `val` or `var` too ("Expecting val or var keyword").
+    _destructuring_declaration_target: $ => choice(
+      seq(
+        '(',
+        alias($._name_based_destructuring_first_entry, $.variable_declaration),
+        repeat(seq(',', alias($._name_based_destructuring_first_entry, $.variable_declaration))),
+        optional(','),
+        ')'
+      ),
+      seq(
+        '[',
+        alias($._positional_destructuring_first_entry, $.variable_declaration),
+        repeat(seq(',', alias($._positional_destructuring_first_entry, $.variable_declaration))),
+        optional(','),
+        ']'
+      ),
+    ),
+
+    _name_based_destructuring_first_entry: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      repeat($.annotation),
+      $.binding_pattern_kind,
+      $.simple_identifier,
+      optional(seq(":", $._type)),
+      optional(seq("=", $.simple_identifier))
+    ))),
+
+    _positional_destructuring_first_entry: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      repeat($.annotation),
+      $.binding_pattern_kind,
+      $.simple_identifier,
+      optional(seq(":", $._type))
+    ))),
+
     _multi_variable_declaration_expr: $ => choice(
       seq(
         '(',
@@ -1413,7 +1819,7 @@ module.exports = grammar({
       ),
       seq(
         '[',
-        sep1(alias($._positional_destructuring_entry, $.variable_declaration), ','),
+        sep1(alias($._positional_destructuring_entry_expr, $.variable_declaration), ','),
         optional(','),
         ']'
       ),
@@ -1444,22 +1850,28 @@ module.exports = grammar({
           optional(seq(":", $._type)))
     ),
 
-    anonymous_function: $ => prec.right(seq(
-      optional($.context_receiver),
-      optional("suspend"),
-      "fun",
-      optional(seq(sep1($._simple_user_type, "."), ".")), // TODO
-      // Kotlin accepts type parameters on an anonymous function in two
-      // placements, and one slot here covers both: with no receiver
-      // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
-      // renders as TYPE_PARAMETER_LIST following the receiver dot). Keeping it
-      // to a single slot after the optional receiver avoids two optional
-      // placements competing for the same `<`.
-      optional($.type_parameters),
-      $.function_value_parameters,
-      optional(seq(":", $._type)),
-      optional($.function_body)
-    )),
+    // `x.fun()`, `x.fun(): T {}`, `x.fun<T>() {}`, `x.fun R.() {}`: an anonymous function as a
+    // selector, in its full form but for a context, as parseAtomicExpression reads it there. No
+    // compiler accepts one; the form main already read costs 256 states over the plain one.
+    _selector_function: $ => prec.right(anonymousFunction($, undefined, false, false)),
+
+    // A `fun` where Kotlin expects an expression, with or without a name: `if (c) fun g() {}`,
+    // `1 < fun g() {}`. `fun` starts an expression (EXPRESSION_FIRST) and parseAtomicExpression
+    // reads a named one as a local function; the compiler rejects the name later
+    // (ANONYMOUS_FUNCTION_WITH_NAME). At statement start the same text is a function_declaration,
+    // which wins by the lower precedence of the named form from its name on; the receiver before
+    // it keeps the conflicts of the anonymous form. The dynamic precedence settles `@A fun g()`,
+    // where the annotation is a modifier of the declaration or a prefix of the expression.
+    // Neither form takes `suspend`: parseAtomicExpression reads a word before `fun` as an
+    // expression of its own, so `val x = suspend fun() {}` is "Unexpected tokens". A context
+    // before an anonymous function is one of its parts (`context(a: A) fun () {}`); before a
+    // named one it is a call. The named form takes a body here, so that after `fun <T> f()` at
+    // statement start the next line's `where@A T` stays a type constraint rather than a label of
+    // a trailing lambda; without one it is a control structure body, `if (c) fun g()`.
+    anonymous_function: $ => choice(
+      prec.right(anonymousFunction($)),
+      prec.dynamic(-1, anonymousFunction($, $.simple_identifier)),
+    ),
 
     _optionally_typed_parameter: $ => seq($.simple_identifier, optional(seq(":", $._type))),
 
@@ -1468,18 +1880,13 @@ module.exports = grammar({
       $.anonymous_function
     ),
 
-    object_literal: $ => choice(
-      prec.dynamic(1, seq(
-        optional("data"),
-        "object",
-        optional(seq(":", $._delegation_specifiers)),
-        $.class_body,
-      )),
-      seq(
-        optional("data"),
-        "object",
-        optional(seq(":", $._delegation_specifiers)),
-      ),
+    // An object expression always has a body and takes no modifier: Kotlin's parseObjectLiteral
+    // parses the object with optionalBody = false ("Body is not optional because of
+    // foo(object : A, B)"), and `data` is a modifier of an object declaration only.
+    object_literal: $ => seq(
+      "object",
+      optional(seq(":", $._delegation_specifiers)),
+      $.class_body,
     ),
 
     this_expression: $ => choice(
@@ -1528,9 +1935,10 @@ module.exports = grammar({
     // compiler object, so the subject variable can destructure or carry a
     // receiver just like any other `val`: `when (val (a, b) = foo) {}`,
     // `when (val T.x = foo) {}`.
+    // `when (var i = 2)` too: Kotlin's parser takes either keyword, the compiler rejects `var`.
     _when_subject_variable: $ => seq(
       repeat($.annotation),
-      "val",
+      choice("val", "var"),
       optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration)
     ),
@@ -1640,8 +2048,17 @@ module.exports = grammar({
       repeat1(alias($._callable_reference_quest, $.quest))
     ),
 
+    // `(X)?::x`: an expression in parentheses with question marks, which Kotlin's parser reads
+    // as a nullable receiver of the reference (CALLABLE_REFERENCE_EXPRESSION over PARENTHESIZED).
+    // Without question marks `(X)::x` stays a navigation; a type in parentheses is no expression,
+    // so `((Int) -> Unit)?::invoke` stays an error.
+    _callable_reference_parenthesized: $ => seq(
+      $.parenthesized_expression,
+      repeat1(alias($._callable_reference_quest, $.quest))
+    ),
+
     callable_reference: $ => seq(
-      optional(choice($._callable_reference_name, $._callable_reference_nullable)),
+      optional(choice($._callable_reference_name, $._callable_reference_nullable, $._callable_reference_parenthesized)),
       "::",
       choice($.simple_identifier, "class")
     ),
@@ -1674,14 +2091,23 @@ module.exports = grammar({
       $.indexing_suffix
     ),
 
-    _postfix_unary_expression: $ => seq($._primary_expression, repeat($._postfix_unary_suffix)),
+    // The left side of an assignment: Kotlin's directlyAssignableExpression is a postfix
+    // expression with an assignable suffix, a simple name, or one in parentheses. Any other
+    // primary without a suffix stays possible, at dynamic precedence -1: otherwise
+    // `if (b) m.x = z` had an equal second reading, `(if (b) m.x) = z`, and GLR could pick it.
+    _postfix_unary_expression: $ => choice(
+      seq($._primary_expression, repeat1($._postfix_unary_suffix)),
+      prec.dynamic(-1, $._primary_expression)
+    ),
+
+    _cast_assignable_expression: $ => prec(1, $.as_expression),
 
     directly_assignable_expression: $ => prec(
       PREC.ASSIGNMENT,
       choice(
         $._postfix_unary_expression,
-        $.simple_identifier
-        // TODO
+        $.simple_identifier,
+        $.parenthesized_expression
       )
     ),
 
@@ -1700,10 +2126,20 @@ module.exports = grammar({
     // `class_modifier`/`simple_identifier` conflict could not help, because the
     // alternative no longer existed. A conflict carries both readings instead
     // and keeps the one that parses.
+    // Kotlin's parser reads a statement as a declaration first: it takes every modifier word and
+    // annotation, across line breaks, and keeps them when a declaration keyword follows
+    // (KotlinParsing.parseLocalDeclaration), so `private` alone on a line before `fun x()` is a
+    // modifier, not an expression statement.
+    // A word read as a modifier ranks its reading one higher. A run of modifier words over lines
+    // also reads as infix expressions ending at any of its line breaks, then a declaration with
+    // the rest (`private private private` above `private fun f() {}`); Kotlin's parser takes the
+    // whole run as the declaration's modifiers (parseLocalDeclaration), and so does the reading
+    // with the most modifiers. Without the ranking GLR kept the readings unordered, and past its
+    // version limit a run of 25 words split.
     modifiers: $ => repeat1(choice(
       prec.right(PREC.MODIFIERS, $.annotation),
       prec.right(PREC.MODIFIERS, $.context_receiver),
-      $._modifier
+      prec.dynamic(1, seq($._modifier, optional($._modifier_hint)))
     )),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
@@ -1721,7 +2157,7 @@ module.exports = grammar({
 
     type_modifiers: $ => repeat1($._type_modifier),
 
-    _type_modifier: $ => choice($.annotation, $.context_receiver, "suspend"),
+    _type_modifier: $ => choice($.annotation, alias($._type_context_receiver, $.context_receiver), "suspend"),
 
     class_modifier: $ => choice(
       "sealed",
@@ -1733,7 +2169,10 @@ module.exports = grammar({
 
     member_modifier: $ => choice(
       "override",
-      "lateinit"
+      "lateinit",
+      // Kotlin 2.4 companion extensions (CompanionBlocksAndExtensions): `companion fun String.foo()`,
+      // `private companion val A.k = "K"`. `companion object` keeps its own rule, companion_object.
+      "companion"
     ),
 
     visibility_modifier: $ => choice(
@@ -1861,63 +2300,17 @@ module.exports = grammar({
 
     simple_identifier: $ => choice(
       $._lexical_identifier,
-      "expect",
-      "data",
-      "inner",
-      "value",
-      "actual",
-      "set",
-      "get",
-      "override",
-      "suspend",
-      // Batch 1: covered by existing conflict rules (class_modifier, member_modifier, function_modifier)
-      "annotation",
-      "sealed",
-      "lateinit",
-      "tailrec",
-      "operator",
-      "infix",
-      "inline",
-      "external",
-      // Batch 2: visibility modifiers
-      "public",
-      "private",
-      "internal",
-      "protected",
-      // Batch 3: inheritance modifiers
-      "abstract",
-      "final",
-      "open",
-      // Batch 4: property, parameter, reification modifiers
-      "const",
-      "vararg",
-      "noinline",
-      "crossinline",
-      "reified",
-      // Batch 5: annotation use-site targets (no conflict rules needed — disambiguated by ":")
-      "field",
-      "property",
-      "receiver",
-      "param",
-      "setparam",
-      "delegate",
-      // Batch 6: structural keywords used as identifiers
-      "companion",
-      "constructor",
-      "context",
-      "init",
-      "dynamic",
-      "where",
-      "catch",
-      "finally",
-      // Batch 7: enum
-      "enum",
-      // "out" and "in" are deliberately absent, and listing them here would
-      // be dead weight: keyword extraction already lexes them as
-      // `_alpha_identifier` and only promotes them to keywords in states that
-      // expect one, so `val out = 1` and `class C<out out>` parse as
-      // identifiers without any entry. See `type_parameter_modifiers`, which
-      // is what has to bound the variance slot for that to work.
+      ...SOFT_KEYWORD_IDENTIFIERS,
+    ),
+
+    // The name of an infix call inside a class delegate (`by a foo b`): a `where` after the
+    // delegate starts the type constraints instead. Kotlin ends an infix call at a newline, and
+    // the scanner inserts no semicolon before a `where` a type constraint follows, so the line
+    // break before `where T : A` is invisible here; on one line, Kotlin's `by a where T` is an
+    // infix call and a compile error.
+    _delegate_infix_name: $ => choice(
+      $._lexical_identifier,
+      ...SOFT_KEYWORD_IDENTIFIERS.filter(word => word !== "where"),
     ),
 
     identifier: $ => sep1($.simple_identifier, "."),
@@ -1959,36 +2352,51 @@ module.exports = grammar({
     // Keywords
     // ==========
 
+    // The name after `break@`, `return@`, `this@` and the like follows the `@` directly, as
+    // Kotlin's lexer reads them; `break@ lab` is an error ("Label must be named"). The scanner
+    // reads it as a whole word, so a hard keyword is none (`return@as`), where an immediate token
+    // of the internal lexer took the longest word it accepted, `a` of `as`. A quoted name keeps
+    // any whitespace before it.
+    // A name with a character outside ASCII is the internal lexer's, which knows the Unicode
+    // letters: a letter first and no character that is neither a letter nor a digit (`labé`, while
+    // `lab💩` and `١lab` are none); the scanner declines it.
+    _label_name: $ => choice($._label_identifier, $._unicode_label_identifier, $._backtick_identifier),
+
+    _unicode_label_identifier: $ => token.immediate(new RustRegex(
+      `(?:[[\\p{L}${UNICODE_LETTER_SUPPLEMENT}]&&[^\\x00-\\x7f]]` +
+      `|[A-Za-z_][A-Za-z0-9_]*[[\\p{L}\\p{Nd}${UNICODE_LETTER_SUPPLEMENT}]&&[^\\x00-\\x7f]])` +
+      `[\\p{L}\\p{Nd}_${UNICODE_LETTER_SUPPLEMENT}]*`)),
+
     _return_at: $ => seq(
       "return@",
-      alias($._lexical_identifier, $.label)
+      alias($._label_name, $.label)
     ),
 
     _continue_at: $ => seq(
       "continue@",
-      alias($._lexical_identifier, $.label)
+      alias($._label_name, $.label)
     ),
 
     _break_at: $ => seq(
       "break@",
-      alias($._lexical_identifier, $.label)
+      alias($._label_name, $.label)
     ),
 
     _this_at: $ => seq(
       "this@",
-      alias($._lexical_identifier, $.type_identifier)
+      alias($._label_name, $.type_identifier)
     ),
 
     _super_at: $ => choice(
       seq(
         "super@",
-        alias($._lexical_identifier, $.type_identifier)
+        alias($._label_name, $.type_identifier)
       ),
       seq(
         "super",
         "<", $._type, ">",
         token.immediate("@"),
-        alias($._lexical_identifier, $.type_identifier)
+        alias($._label_name, $.type_identifier)
       )
     ),
 
@@ -2027,10 +2435,19 @@ module.exports = grammar({
 
     boolean_literal: $ => choice("true", "false"),
 
+    // Kotlin's lexer reads any run of characters and escapes between the quotes as one character
+    // literal (CHARACTER_LITERAL in Kotlin.flex), `''` and `'org.sample'` included, and leaves the
+    // count to the compiler; Groovy-style quotes in Gradle scripts are such literals. It is one
+    // token there, so its parts here follow each other immediately: no line break, and no
+    // comment as an extra inside (`'a/*c*/b'` is text), and its closing quote is optional. An escape is a backslash and any
+    // character but a line break (ESCAPE_SEQUENCE), the compiler judging `'\q'`. The characters
+    // between the escapes are scanned externally, as the internal lexer cannot carry a NUL.
     character_literal: $ => seq(
       "'",
-      choice($.character_escape_seq, /[^\n\r'\\]/),
-      "'"
+      repeat(choice($.character_escape_seq, $._character_content)),
+      // Optional there too: a literal ends at its line without one, `'a` above `b'`, and the
+      // compiler reports it.
+      optional(token.immediate("'"))
     ),
 
     character_escape_seq: $ => choice(
@@ -2055,15 +2472,98 @@ module.exports = grammar({
     // character class, and Kotlin allows one inside a quoted identifier.
     _backtick_identifier: $ => $._quoted_identifier,
 
-    _uni_character_literal: $ => seq(
-      "\\u",
-      /[0-9a-fA-F]{4}/
-    ),
+    _uni_character_literal: $ => token.immediate(/\\u[0-9a-fA-F]{4}/),
 
-    _escaped_identifier: $ => /\\[tbrn'"\\$]/,
+    _escaped_identifier: $ => token.immediate(/\\[^\n\r]/),
 
   }
 });
+
+// An identifier other than the ASCII `words`, built from their trie: at each prefix, either stop
+// (when the prefix is no word), or go on with a character no word continues with, or follow a
+// word. A character no word continues with is any other identifier character, so a Unicode letter
+// or digit (`labé@`) leads off the trie at once. Classes are intersected with `&&`, which tree-sitter
+// reads (regex-syntax); a RustRegex hands the pattern over unparsed, since JavaScript takes `&&` only
+// under the `v` flag, which Node 18 lacks.
+function wordExcept(words) {
+  const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
+  const rest = letters + '0123456789';
+  const nonAscii = classes => `[[${classes}${UNICODE_LETTER_SUPPLEMENT}]&&[^\\x00-\\x7f]]`;
+  const identifierRest = `[\\p{L}_\\p{Nd}${UNICODE_LETTER_SUPPLEMENT}]*`;
+  const trie = {};
+  for (const word of words) {
+    let node = trie;
+    for (const char of word) node = node[char] ??= {};
+    node[''] = true;
+  }
+  const suffix = (node, depth) => {
+    const next = Object.keys(node).filter(key => key !== '');
+    const others = [...(depth === 0 ? letters : rest)].filter(char => !next.includes(char)).join('');
+    const leave = `(?:[${others}]|${nonAscii(depth === 0 ? '\\p{L}' : '\\p{L}\\p{Nd}')})${identifierRest}`;
+    const body = `(${[leave, ...next.map(char => char + suffix(node[char], depth + 1))].join('|')})`;
+    return depth > 0 && !node[''] ? `${body}?` : body;
+  };
+  return new RustRegex(suffix(trie, 0));
+}
+
+// `context(...)` before a declaration or a function type, see context_receiver.
+function contextReceiver($, labelled) {
+  const receiver = labelled ? seq(optional($.label), $._type) : $._type;
+  return seq(
+    "context",
+    "(",
+    sep1(choice(seq(optional($.parameter_modifiers), $.parameter), receiver), ","),
+    optional(","),
+    ")"
+  );
+}
+
+// An anonymous function, or with `name` before its parameters a named one, which takes a body and
+// the lower precedence from its name on (see `anonymous_function`).
+function anonymousFunction($, name, bodyless = false, context = !name) {
+  // The receiver is a type as for a function declaration (`fun Any?.() = this`,
+  // `fun @[a] T.(a: foo)`), but not one in parentheses: `fun (b) {}` is a parameter
+  // list, and `(b)` cannot be told from a receiver until the `.` that never comes.
+  const receiver = optional(seq(field("receiver", alias($._anonymous_receiver_type, $.receiver_type)), "."));
+  // Kotlin accepts type parameters on an anonymous function in two
+  // placements, and one slot here covers both: with no receiver
+  // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
+  // renders as TYPE_PARAMETER_LIST following the receiver dot). Keeping it
+  // to a single slot after the optional receiver avoids two optional
+  // placements competing for the same `<`. A named one also takes them where a
+  // function declaration does, before the receiver: `if (c) fun <T> R.g(x: T) {}`;
+  // the two placements are alternatives, so no `<` has two optional slots.
+  const head = name
+    ? [choice(seq(optional($.type_parameters), receiver), seq(field("receiver", alias($._anonymous_receiver_type, $.receiver_type)), ".", $.type_parameters))]
+    : [receiver, optional($.type_parameters)];
+  const body = bodyless ? [] : [$.function_body];
+  const tail = name
+    ? [prec.right(-1, seq(name, $.function_value_parameters, optional(seq(":", $._type)), ...body))]
+    : [$.function_value_parameters, optional(seq(":", $._type)), optional($.function_body)];
+  return seq(
+    ...(context ? [optional($.context_receiver)] : []),
+    "fun",
+    ...head,
+    ...tail
+  );
+}
+
+// The assignments of `target` with the right side `value`: the full grammar takes `$._expression`,
+// an `if` branch inside a delegate `$._expression_no_trailing_lambda` and a target of its own.
+function assignmentForms(
+  $, value,
+  target = $.directly_assignable_expression,
+  castTarget = alias($._cast_assignable_expression, $.directly_assignable_expression),
+) {
+  return choice(
+    prec.left(PREC.ASSIGNMENT, seq(target, $._assignment_and_operator, value)),
+    // Kotlin's parser reads `=` and the augmented assignments as binary operators of the lowest
+    // precedence, so a cast may stand left of them: `c as MutableList<T> += x` calls plusAssign on
+    // the cast, and `x as T = y` is PSI-clean, which the compiler rejects.
+    prec.left(PREC.ASSIGNMENT, seq(castTarget, choice($._assignment_and_operator, "="), value)),
+    prec.left(PREC.ASSIGNMENT, seq(target, "=", value)),
+  );
+}
 
 function sep1(rule, separator) {
   return seq(rule, repeat(seq(separator, rule)));

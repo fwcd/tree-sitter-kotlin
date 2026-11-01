@@ -97,3 +97,124 @@ fun main(){
             (navigation_suffix
               (simple_identifier)))
           (simple_identifier))))))
+
+================================================================================
+Assignment in an if branch
+================================================================================
+
+fun f() {
+    if (a) m.x = y else if (b) w[i] = z
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier)
+                (navigation_suffix
+                  (simple_identifier)))
+              (simple_identifier)))
+          alternative: (control_structure_body
+            (if_expression
+              condition: (simple_identifier)
+              consequence: (control_structure_body
+                (assignment
+                  (directly_assignable_expression
+                    (simple_identifier)
+                    (indexing_suffix
+                      (simple_identifier)))
+                  (simple_identifier))))))))))
+
+================================================================================
+Augmented assignment to a cast
+================================================================================
+
+fun f() {
+  c as MutableList<T> += child
+  val g = { it as Config<E> -= other }
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (assignment
+          (directly_assignable_expression
+            (as_expression
+              (simple_identifier)
+              (user_type
+                (type_identifier)
+                (type_arguments
+                  (type_projection
+                    (user_type
+                      (type_identifier)))))))
+          (simple_identifier))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (lambda_literal
+            (statements
+              (assignment
+                (directly_assignable_expression
+                  (as_expression
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier)
+                      (type_arguments
+                        (type_projection
+                          (user_type
+                            (type_identifier)))))))
+                (simple_identifier)))))))))
+
+================================================================================
+A cast on the left of a plain assignment
+================================================================================
+
+fun f() {
+    x as T = y
+    when (a) { 1 -> x as T = y }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (assignment
+          (directly_assignable_expression
+            (as_expression
+              (simple_identifier)
+              (user_type
+                (type_identifier))))
+          (simple_identifier))
+        (when_expression
+          (when_subject
+            (simple_identifier))
+          (when_entry
+            (when_condition
+              (integer_literal))
+            (control_structure_body
+              (assignment
+                (directly_assignable_expression
+                  (as_expression
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (simple_identifier)))))))))

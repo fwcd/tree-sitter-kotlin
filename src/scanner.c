@@ -27,6 +27,15 @@ enum TokenType {
   DELEGATE_END_HINT,
   QUOTED_IDENTIFIER,
   CALL_LAMBDA_HINT,
+  BLOCK_END_HINT,
+  MODIFIER_HINT,
+  RESERVED_WORD_GUARD,
+  QUOTED_LABEL,
+  COMPANION_OBJECT_HINT,
+  FURTHER_SEMICOLON,
+  CHARACTER_CONTENT,
+  LABEL_IDENTIFIER,
+  CONTRACT_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -101,6 +110,13 @@ typedef struct {
   PendingComment comment;
   // Set after `by` in a class header, cleared at the next `{` or automatic semicolon.
   bool in_delegate;
+  // Set by a block comment right after a separator: a `;` right after the comment is a further
+  // semicolon (`a();/*c*/; b()`), see the scan's FURTHER_SEMICOLON. The state restored for a scan
+  // is that after the last external token, so a token of the internal lexer clears neither flag.
+  bool after_comment;
+  // Set by a block comment right after a label's `@`: a name right after the comment is no label
+  // (`break@/*c*/lab`). Not kept inside a string template, whose serialized form has no bit left.
+  bool label_comment;
 } Scanner;
 
 static inline void stack_push(Stack *stack, char chr, bool triple, uint16_t prefix_len) {
@@ -233,6 +249,33 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
         if (additional_dollars <= PREFIX_LEN_MAX) additional_dollars++;
       }
       uint32_t total_dollars = 1 + additional_dollars;
+      // `"$`if`"`: Kotlin's short template entry also takes an escaped identifier, a backtick
+      // pair around at least one character on the line. The token ends after the dollars; the
+      // look past the backtick only decides whether the identifier is there.
+      if (total_dollars >= trigger_len && lexer->lookahead == '`') {
+        if (total_dollars > trigger_len) {
+          lexer->result_symbol = STRING_CONTENT;
+          return true;
+        }
+        if (additional_dollars > 0) {
+          lexer->mark_end(lexer);
+        }
+        if (valid_symbols[INTERPOLATION_IDENTIFIER_START]) {
+          advance(lexer);
+          bool named = false;
+          while (lexer->lookahead != '`' && lexer->lookahead != '\n' && lexer->lookahead != '\r' &&
+                 !lexer->eof(lexer)) {
+            advance(lexer);
+            named = true;
+          }
+          if (named && lexer->lookahead == '`') {
+            lexer->result_symbol = INTERPOLATION_IDENTIFIER_START;
+            return true;
+          }
+        }
+        lexer->result_symbol = STRING_CONTENT;
+        return true;
+      }
       // The counter saturates strictly above trigger_len, so a run longer than
       // the cap always reads as "more than the prefix", never as a match.
       if (total_dollars >= trigger_len &&
@@ -277,32 +320,16 @@ static bool scan_string_content(TSLexer *lexer, Stack *stack,
       return true;
     }
     if (lexer->lookahead == '\\') {
-      // if we see a \, then this might possibly escape a dollar sign
-      // in which case, we should not defer to the interpolation
       advance(lexer);
-      // this dollar sign is escaped, so it must be content.
-      // we consume it here so we don't enter the dollar sign case above,
-      // which leaves the possibility that it is an interpolation 
-      if (lexer->lookahead == '$') {
-        advance(lexer);
-        // however this leaves an edgecase where an escaped dollar sign could
-        // appear at the end of a string (e.g "aa\$") which isn't handled
-        // correctly; if we were at the end of the string, terminate properly
-        if (lexer->lookahead == end_char) {
-          if (!stack_pop(stack)) return false;
-          advance(lexer);
-          lexer->mark_end(lexer);
-          lexer->result_symbol = STRING_END;
-          return true;
-        }
-      } else if (is_triple && lexer->lookahead == end_char) {
-        // In triple-quoted strings, `\` is NOT an escape character. So `\"` is
-        // also literal backslash + quote, and the `"` might be the start of
-        // the closing `"""`. Don't advance past it (at the end of the while
-        // loop). Let the next iteration handle it.
-        has_content = true;
-        continue;
-      }
+      has_content = true;
+      // In a triple-quoted (raw) string `\` is an ordinary character: the next one is
+      // examined as usual, so `"""\$"""` is a backslash and a dollar, and the `"` of `\"`
+      // may start the closing `"""`.
+      if (is_triple) continue;
+      // Otherwise the escaped character is content, whatever it is: `\$` is no
+      // interpolation, `\"` no string end, `\\` no new escape.
+      if (!lexer->eof(lexer)) advance(lexer);
+      continue;
     } else if (lexer->lookahead == end_char) {
       if (is_triple) {
         lexer->mark_end(lexer);
@@ -506,56 +533,29 @@ static bool followed_by_arrow(TSLexer *lexer) {
   return lexer->lookahead == '>';
 }
 
-// Check if the current position has a visibility modifier (public, private,
-// protected, internal) followed by horizontal whitespace and "constructor".
-// Uses skip() — safe to call speculatively since no token boundary is changed.
-static bool check_modifier_then_constructor(TSLexer *lexer) {
-  // Buffer the first word to identify the modifier
-  char word[20];
-  unsigned len = 0;
-  while (is_word_char(lexer->lookahead) && len < 19) {
-    word[len++] = (char)lexer->lookahead;
-    skip(lexer);
-  }
-  word[len] = '\0';
+// Check if the current position has a visibility modifier (public, private, protected,
+// internal) followed by horizontal whitespace and `next`: `private constructor(...)` of a
+// primary constructor, or `val x: Any` / newline / `private field: Int = 1` of a backing field.
+// The modifier is read whole as ASCII (constructor_word), so a non-ASCII word is none of them.
+static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity);
 
+static bool check_visibility_then(TSLexer *lexer, const char *next, unsigned next_len) {
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word))) return false;
   if (strcmp(word, "public") != 0 && strcmp(word, "private") != 0 &&
       strcmp(word, "protected") != 0 && strcmp(word, "internal") != 0) {
     return false;
   }
-
-  // Skip horizontal whitespace (not newlines)
   while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
-
-  return check_word(lexer, "constructor", 11);
+  return check_word(lexer, next, next_len);
 }
 
-// Check if the current position has a visibility modifier followed by
-// horizontal whitespace and "field" -- `val x: Any` / newline / `private
-// field: Int = 1`. Uses skip(), so it is safe to call speculatively.
-static bool check_modifier_then_field(TSLexer *lexer) {
-  char word[20];
-  unsigned len = 0;
-  while (is_word_char(lexer->lookahead) && len < 19) {
-    word[len++] = (char)lexer->lookahead;
-    skip(lexer);
-  }
-  word[len] = '\0';
-
-  if (strcmp(word, "public") != 0 && strcmp(word, "private") != 0 &&
-      strcmp(word, "protected") != 0 && strcmp(word, "internal") != 0) {
-    return false;
-  }
-
-  while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
-
-  return check_word(lexer, "field", 5);
-}
-
-// Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar,
-// @Bar(x=1)) and optional visibility modifier, then check for 'constructor'.
-// All characters are consumed with skip() so nothing affects token boundaries.
-static bool check_annotation_then_constructor(TSLexer *lexer) {
+// Look ahead past one or more annotations (e.g. @Bar, @com.example.Bar, @Bar(x=1)) and an
+// optional visibility modifier, then check for `next`: `constructor` of a primary constructor,
+// or `field` of an explicit backing field, whose annotations Kotlin's parser puts in the
+// BACKING_FIELD's MODIFIER_LIST. All characters are consumed with skip() so nothing affects
+// token boundaries.
+static bool check_annotations_then(TSLexer *lexer, const char *next, unsigned next_len) {
   // Skip one or more '@annotation' sequences
   while (lexer->lookahead == '@') {
     skip(lexer); // skip '@'
@@ -588,56 +588,15 @@ static bool check_annotation_then_constructor(TSLexer *lexer) {
         }
       }
     }
-    // Skip whitespace and newlines between annotations or before constructor
+    // Skip whitespace and newlines between annotations or before the keyword
     while (iswspace(lexer->lookahead)) skip(lexer);
   }
-  // Allow an optional visibility modifier before 'constructor'
-  if (is_word_char(lexer->lookahead) && lexer->lookahead != 'c') {
-    return check_modifier_then_constructor(lexer);
+  // Allow an optional visibility modifier before the keyword
+  if (is_word_char(lexer->lookahead) && lexer->lookahead != next[0]) {
+    return check_visibility_then(lexer, next, next_len);
   }
-  // Check directly for 'constructor'
-  return check_word(lexer, "constructor", 11);
+  return check_word(lexer, next, next_len);
 }
-
-// The same walk for an explicit backing field: `val x: Any` / newline /
-// `@Ann field: Int = 1`. Annotations on a backing field are accepted by
-// Kotlin's parser, which puts them in the BACKING_FIELD's MODIFIER_LIST.
-static bool check_annotation_then_field(TSLexer *lexer) {
-  while (lexer->lookahead == '@') {
-    skip(lexer);
-    if (!is_word_char(lexer->lookahead)) return false;
-    while (is_word_char(lexer->lookahead)) skip(lexer);
-    while (lexer->lookahead == '.') {
-      skip(lexer);
-      if (!is_word_char(lexer->lookahead)) break;
-      while (is_word_char(lexer->lookahead)) skip(lexer);
-    }
-    if (lexer->lookahead == '(') {
-      unsigned depth = 1;
-      skip(lexer);
-      while (depth > 0 && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
-        if (lexer->lookahead == '"') {
-          skip(lexer);
-          while (lexer->lookahead != '"' && lexer->lookahead != '\0' && !lexer->eof(lexer)) {
-            if (lexer->lookahead == '\\') skip(lexer);
-            skip(lexer);
-          }
-          if (lexer->lookahead == '"') skip(lexer);
-        } else {
-          if (lexer->lookahead == '(') depth++;
-          else if (lexer->lookahead == ')') depth--;
-          skip(lexer);
-        }
-      }
-    }
-    while (iswspace(lexer->lookahead)) skip(lexer);
-  }
-  if (is_word_char(lexer->lookahead) && lexer->lookahead != 'f') {
-    return check_modifier_then_field(lexer);
-  }
-  return check_word(lexer, "field", 5);
-}
-
 
 // Probe only while the grammar can start a primary constructor. The hidden
 // hint commits that alternative before trivia/modifiers are lexed, so every
@@ -684,14 +643,24 @@ static bool constructor_word_char(int32_t c) {
   return !constructor_space(c);
 }
 
-// C-locale iswalnum can miss Unicode identifier suffixes. A context keyword
-// probe must not turn catché/finallyé into a clause; only wholly ASCII words
-// with a complete identifier boundary qualify. This probe emits no identifier.
-static bool scan_try_clause_keyword(TSLexer *lexer, const char *suffix, unsigned length) {
-  return scan_for_word(lexer, suffix, length) &&
-    !constructor_word_char(lexer->lookahead);
+// `constructor` as a whole word: the PRIMARY_CONSTRUCTOR_KEYWORD token, which the internal lexer
+// cannot produce. False when it does not match, with the characters read so far advanced past.
+static bool scan_constructor_keyword(TSLexer *lexer) {
+  static const char keyword[] = "constructor";
+  for (unsigned i = 0; i < sizeof(keyword) - 1; i++) {
+    if (lexer->lookahead != keyword[i]) return false;
+    advance(lexer);
+  }
+  if (constructor_word_char(lexer->lookahead)) return false;
+  lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
+  lexer->mark_end(lexer);
+  return true;
 }
 
+// Read a whole word with advance(); true when it is ASCII and fits `capacity` with its NUL. C-locale
+// iswalnum can miss Unicode identifier suffixes, and a keyword probe must not turn catché or
+// finallyé into a clause; only wholly ASCII words with a complete identifier boundary qualify.
+// This probe emits no identifier.
 static bool constructor_word(TSLexer *lexer, char *word, unsigned capacity) {
   unsigned length = 0;
   bool ascii = true;
@@ -783,6 +752,16 @@ static bool constructor_balanced(TSLexer *lexer, char close) {
   return ok;
 }
 
+// A backtick-quoted name, read with advance(); false when the input ends before its closing
+// backtick.
+static bool constructor_quoted_name(TSLexer *lexer) {
+  advance(lexer);
+  while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
+  if (lexer->eof(lexer)) return false;
+  advance(lexer);
+  return true;
+}
+
 static bool constructor_annotation(TSLexer *lexer) {
   advance(lexer); // @
   bool newline = false;
@@ -791,10 +770,7 @@ static bool constructor_annotation(TSLexer *lexer) {
   for (;;) {
     if (!constructor_trivia(lexer, &newline)) return false;
     if (lexer->lookahead == '`') {
-      advance(lexer);
-      while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
-      if (lexer->eof(lexer)) return false;
-      advance(lexer);
+      if (!constructor_quoted_name(lexer)) return false;
     } else {
       if (!constructor_word_char(lexer->lookahead)) return false;
       char ignored[32]; constructor_word(lexer, ignored, sizeof(ignored));
@@ -840,9 +816,22 @@ static bool where_type_constraint_follows(TSLexer *lexer, bool *newline) {
 }
 
 // Kotlin attaches a `{` on the next line to a call, never to a name, and an
-// open class delegate keeps the body that follows.
+// open class delegate keeps the body that follows. Nor does a property take one
+// after its name or type, where a backing field may follow (BACKING_FIELD_HINT):
+// parseProperty reads no body, so `var m: Long` then `{ … }` is a property and a
+// lambda statement.
 static bool brace_starts_statement(bool in_delegate, const bool *valid_symbols) {
-  return valid_symbols[EXPRESSION_END_HINT] && !in_delegate &&
+  return ((valid_symbols[EXPRESSION_END_HINT] && !in_delegate) || valid_symbols[BACKING_FIELD_HINT]) &&
+         !valid_symbols[STRING_CONTENT];
+}
+
+// A supertype reads its constructor arguments across a newline (KotlinParsing:
+// parseDelegationSpecifier has no newline check), unlike a call: `: Base<T>\n(args)` is one
+// supertype entry, in a class header and an object literal alike. The parser expects `by` after
+// a supertype and after a property's name or type, where a backing field may follow instead;
+// that tells the supertype apart (`val x: T` then `(a).b()` stays two statements).
+static bool paren_continues_supertype(const bool *valid_symbols) {
+  return valid_symbols[BY_DELEGATION_HINT] && !valid_symbols[BACKING_FIELD_HINT] &&
          !valid_symbols[STRING_CONTENT];
 }
 
@@ -940,10 +929,7 @@ static bool trailing_lambda_follows(TSLexer *lexer, char leading_word[32]) {
   }
   if (lexer->lookahead == '{') return true;
   if (lexer->lookahead == '`') {
-    advance(lexer);
-    while (!lexer->eof(lexer) && lexer->lookahead != '`') advance(lexer);
-    if (lexer->eof(lexer)) return false;
-    advance(lexer);
+    if (!constructor_quoted_name(lexer)) return false;
   } else {
     if (!constructor_word_char(lexer->lookahead)) return false;
     bool ascii = constructor_word(lexer, leading_word, 32);
@@ -954,29 +940,93 @@ static bool trailing_lambda_follows(TSLexer *lexer, char leading_word[32]) {
   return constructor_trivia(lexer, &newline) && lexer->lookahead == '{';
 }
 
+// The words that continue the statement before a line break, read whole by constructor_word,
+// with the lexer right after the word. Every path that decides a line break by its next word
+// asks here, so the decisions cannot drift apart. Reads with advance() only, as the probe of
+// continuation_after_block_comment requires.
+//
+// - `as` is a cast of the expression before it.
+// - `by` delegates, only where BY_DELEGATION_HINT is valid: elsewhere it is an identifier.
+// - `where` continues a declaration only when a type constraint follows; `where()` is a call
+//   to a function named where, and the statement before it has already ended.
+// - `contract` continues a declaration only where its contract may start (CONTRACT_HINT) and its
+//   effect list follows (`contract [`): parseFunction reads it after the parameters, the return
+//   type or the constraints, on any line, while `x = 2` above `contract [0]` is two statements
+//   and `contract { … }` and `contract()` are calls.
+// - `catch` and `finally` continue a try only in its clause slot (TRY_CLAUSE_HINT), including
+//   malformed clauses; outside it, `catch(x)` is a call.
+// - `field` continues a property that can still take an explicit backing field
+//   (BACKING_FIELD_HINT), and ends the statement everywhere else: a variable may be named
+//   `field`, so `var field = 0` followed by `field = 2` must stay two statements.
+// - `else` continues an if, unless `->` follows: a when entry's `else ->`.
+static bool word_continues_statement(const char *word, TSLexer *lexer, const bool *valid_symbols) {
+  if (strcmp(word, "as") == 0) return true;
+  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
+  bool newline = false;
+  if (strcmp(word, "where") == 0) return where_type_constraint_follows(lexer, &newline);
+  if (strcmp(word, "contract") == 0) {
+    return valid_symbols[CONTRACT_HINT] && !valid_symbols[STRING_CONTENT] &&
+           constructor_trivia(lexer, &newline) && lexer->lookahead == '[';
+  }
+  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) return valid_symbols[TRY_CLAUSE_HINT];
+  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
+  if (strcmp(word, "else") == 0) {
+    if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
+    advance(lexer);
+    return lexer->lookahead != '>';
+  }
+  return false;
+}
+
+// At the first character of the next line: does the line break before it end the statement?
+// A word answers by word_continues_statement; anything else that reaches here ends it. Most
+// lines start with a word, so one whose first letter starts none of the continuing words
+// (`as`, `by`, `catch`, `contract`, `else`, `field`, `finally`, `where`) ends the statement unread.
+static bool semicolon_before_word(TSLexer *lexer, const bool *valid_symbols) {
+  switch (lexer->lookahead) {
+    case 'a': case 'b': case 'c': case 'e': case 'f': case 'w': break;
+    default: return true;
+  }
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word))) return true;
+  return !word_continues_statement(word, lexer, valid_symbols);
+}
+
 static bool call_prefix_continues(TSLexer *lexer, const bool *valid_symbols) {
   char word[32] = {0};
   if (trailing_lambda_follows(lexer, word)) return true;
   // A failed label probe must retain ordinary keyword continuations.
-  if (strcmp(word, "as") == 0) return true;
-  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
-  if (strcmp(word, "where") == 0) {
-    bool newline = false; return where_type_constraint_follows(lexer, &newline);
-  }
-  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) return valid_symbols[TRY_CLAUSE_HINT];
-  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
-  if (strcmp(word, "else") == 0) return !followed_by_arrow(lexer);
-  return false;
+  return word_continues_statement(word, lexer, valid_symbols);
 }
 
+// A call may still take a trailing lambda (CALL_LAMBDA_HINT) and the next line starts with a
+// word, an annotation or a backtick: call_prefix_continues decides.
+static bool call_lambda_prefix_at(TSLexer *lexer, const bool *valid_symbols) {
+  return valid_symbols[CALL_LAMBDA_HINT] &&
+         (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`');
+}
+
+// The line before ended in a modifier word (MODIFIER_HINT) and the next one starts with a letter
+// or `@`: semicolon_after_modifier_line decides. A primary constructor's modifiers (`class C
+// private` with `constructor(...)` on the next line) take the PRIMARY_CONSTRUCTOR_KEYWORD paths.
+static bool modifier_line_at(TSLexer *lexer, const bool *valid_symbols) {
+  return valid_symbols[MODIFIER_HINT] && !valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
+         !valid_symbols[STRING_CONTENT] && (iswalpha(lexer->lookahead) || lexer->lookahead == '@');
+}
+
+static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symbols);
+
 static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
-  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
+  if (call_lambda_prefix_at(lexer, valid_symbols)) return !call_prefix_continues(lexer, valid_symbols);
+  if (modifier_line_at(lexer, valid_symbols)) return semicolon_after_modifier_line(lexer, valid_symbols);
   switch (lexer->lookahead) {
-    // '(' and '[' are absent, and ':' is handled separately: a call's '(',
+    // '[' is absent, and '(' and ':' are handled separately: a call's '(',
     // an index's '[' and a callable reference's '::' each begin a new
-    // statement. Matches the non-comment path above.
+    // statement, but a supertype's '(' does not. Matches the non-comment path above.
     case '{':
       return brace_starts_statement(in_delegate, valid_symbols);
+    case '(':
+      return !paren_continues_supertype(valid_symbols);
     case '.': case ',': case '*': case '%':
     case '>': case '<': case '=':
     case '?': case '|': case '&': case '/':
@@ -989,43 +1039,11 @@ static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *vali
       skip(lexer);
       if (lexer->lookahead == '=') return false;
       return true;
-    case 'e':
-      if (scan_for_word(lexer, "lse", 3)) {
-        if (followed_by_arrow(lexer)) return true;
-        return false;
-      }
-      return true;
-    case 'a':
-      if (scan_for_word(lexer, "s", 1)) return false;
-      return true;
-    case 'w':
-      if (scan_for_word(lexer, "here", 4)) {
-        // Like `catch` and `finally`: `where` only continues a declaration
-        // when a type constraint follows. `where()` is a call to a function
-        // named where, and the statement before it has already ended.
-        bool newline = false;
-        return !where_type_constraint_follows(lexer, &newline);
-      }
-      return true;
-    case 'c':
-      return !(valid_symbols[TRY_CLAUSE_HINT] &&
-               scan_try_clause_keyword(lexer, "atch", 4));
-    case 'b':
-      if (valid_symbols[BY_DELEGATION_HINT] &&
-          scan_for_word(lexer, "y", 1)) return false;
-      return true;
-    case 'f':
-      // `field` continues a property that can still take an explicit backing
-      // field, and ends the statement everywhere else -- a variable may be
-      // named `field`, so `var field = 0` followed by `field = 2` must stay two
-      // statements. The hint is only valid in the one grammar position where a
-      // backing field may follow, which is what tells the two apart.
-      if (valid_symbols[BACKING_FIELD_HINT] &&
-          scan_try_clause_keyword(lexer, "ield", 4)) return false;
-      return !(valid_symbols[TRY_CLAUSE_HINT] &&
-               scan_try_clause_keyword(lexer, "inally", 6));
+    case '-':
+      skip(lexer);
+      return lexer->lookahead != '>';
     default:
-      return true;
+      return semicolon_before_word(lexer, valid_symbols);
   }
 }
 
@@ -1034,32 +1052,20 @@ static bool asi_after_comment(TSLexer *lexer, bool in_delegate, const bool *vali
 static bool continuation_after_block_comment(TSLexer *lexer, bool in_delegate, const bool *valid_symbols) {
   bool newline = false;
   if (!constructor_trivia(lexer, &newline)) return !lexer->eof(lexer);
-  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return call_prefix_continues(lexer, valid_symbols);
+  if (call_lambda_prefix_at(lexer, valid_symbols)) return call_prefix_continues(lexer, valid_symbols);
   switch (lexer->lookahead) {
     case '{': return !brace_starts_statement(in_delegate, valid_symbols);
+    case '(': return paren_continues_supertype(valid_symbols);
     case '.': case ',': case '*': case '%': case '>': case '<': case '=':
     case '?': case '|': case '&': return true;
     case ':': advance(lexer); return lexer->lookahead != ':';
     case '!': advance(lexer); return lexer->lookahead == '=';
+    case '-': advance(lexer); return lexer->lookahead == '>';
     default: break;
   }
   char word[32] = {0};
   if (!constructor_word(lexer, word, sizeof(word))) return false;
-  if (strcmp(word, "as") == 0) return true;
-  if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
-  if (strcmp(word, "where") == 0) {
-    return where_type_constraint_follows(lexer, &newline);
-  }
-  if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) {
-    return valid_symbols[TRY_CLAUSE_HINT];
-  }
-  if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
-  if (strcmp(word, "else") == 0) {
-    if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '-') return true;
-    advance(lexer);
-    return lexer->lookahead != '>';
-  }
-  return false;
+  return word_continues_statement(word, lexer, valid_symbols);
 }
 
 static bool resume_pending_comment(Scanner *scanner, TSLexer *lexer,
@@ -1088,6 +1094,96 @@ static bool resume_pending_comment(Scanner *scanner, TSLexer *lexer,
 // only by the handful of returns that are provably still at the first
 // non-whitespace character. Skipping *whitespace* is safe (that is what skip() is
 // for); skipping comment or keyword text is not.
+// Words Kotlin reads as modifiers in a declaration's modifier list (KtTokens.MODIFIER_KEYWORDS,
+// without the hard keywords `in` and `fun`), and the keywords that start a declaration.
+static const char *const MODIFIER_WORDS[] = {
+  "abstract", "actual", "annotation", "companion", "const", "crossinline", "data", "enum", "expect",
+  "external", "final", "infix", "inline", "inner", "internal", "lateinit", "noinline", "open",
+  "operator", "out", "override", "private", "protected", "public", "reified", "sealed", "suspend",
+  "tailrec", "vararg", "value",
+};
+
+static const char *const DECLARATION_WORDS[] = {
+  "class", "constructor", "fun", "interface", "object", "typealias", "val", "var",
+};
+
+static bool word_in(const char *word, const char *const *words, unsigned count) {
+  for (unsigned i = 0; i < count; i++) {
+    if (strcmp(word, words[i]) == 0) return true;
+  }
+  return false;
+}
+
+#define WORD_IN(word, words) word_in(word, words, sizeof(words) / sizeof(words[0]))
+
+// At a letter right after a closing brace (see BLOCK_END_HINT): does a declaration start here?
+// Reads the word whole with constructor_word, so a word with a non-ASCII character is none of
+// the keywords whatever the host's locale, and a false answer leaves the cursor dirty.
+static bool block_end_starts_declaration(TSLexer *lexer) {
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word))) return false;
+  return WORD_IN(word, DECLARATION_WORDS) || WORD_IN(word, MODIFIER_WORDS);
+}
+
+// An explicit `;` separates statements, except the one Kotlin allows between an if's consequence
+// and its `else` (ifExpression: `if (c) a(); else b()`, also `if (c)\n  "a";\nelse\n  "b"`),
+// which belongs to if_expression. Called after the `;` is consumed and marked; true for that `;`,
+// so the caller declines it and the internal lexer produces the literal `;`. A when entry's
+// `else ->` keeps the separator.
+static bool semicolon_before_else(TSLexer *lexer) {
+  if (!skip_whitespace_and_comments(lexer)) return false;
+  if (lexer->lookahead != 'e') return false;
+  if (!scan_for_word(lexer, "lse", 3)) return false;
+  return !followed_by_arrow(lexer);
+}
+
+// A line break after a modifier word (MODIFIER_HINT is valid), at the first letter or `@` of the
+// next line: does a semicolon go at the line break? Kotlin's parser reads a statement as a
+// declaration first, takes every modifier word and annotation across line breaks, and keeps them
+// when a declaration keyword follows (parseLocalDeclaration), so `private` alone on a line before
+// `fun x()` is a modifier and no semicolon ends it. Otherwise the modifier word was an expression
+// statement (`open` alone, then `foo()`). A word that is no modifier gets word_continues_statement,
+// as the switch in scan_automatic_semicolon cannot read it again. Words are read whole
+// with constructor_word, so one with a non-ASCII character is no keyword whatever the host's
+// locale (`Ŧun` is not `fun`); a false answer leaves the cursor dirty.
+//
+// The scan at each line break of a run of modifier lines reads the rest of the run, so the run
+// it reads is capped at MODIFIER_CHAIN_MAX words: N lines of `private` would otherwise cost
+// about N²/2 steps (16,000 lines took 15 s), and with the cap each line break reads at most that
+// many words. Past the cap the run is taken as modifiers, as it is whenever it ends in a
+// declaration: a run of any length before its declaration keyword reads as PSI reads it, and a
+// line break of a run that ends otherwise is decided once the rest of the run is within the cap,
+// so only a run of more than MODIFIER_CHAIN_MAX modifier words that no declaration follows,
+// which the compiler rejects, keeps its first words as modifiers where PSI reads expressions.
+#define MODIFIER_CHAIN_MAX 256
+static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symbols) {
+  char word[16];
+  bool after_modifier = false;
+  for (unsigned modifiers = 0;; modifiers++) {
+    if (lexer->lookahead == '@') return false;
+    if (modifiers == MODIFIER_CHAIN_MAX) return false;
+    if (!constructor_word(lexer, word, sizeof(word))) return true;
+    if (WORD_IN(word, DECLARATION_WORDS)) return false;
+    // Context parameters are part of the modifier list too (`private` above `context(_: String)`
+    // above `fun f()`), so the run goes on after their parentheses.
+    if (strcmp(word, "context") == 0) {
+      bool newline = false;
+      if (!constructor_trivia(lexer, &newline) || lexer->lookahead != '(') break;
+      if (!constructor_balanced(lexer, ')')) return true;
+      after_modifier = true;
+      if (!skip_whitespace_and_comments(lexer)) return true;
+      continue;
+    }
+    if (!WORD_IN(word, MODIFIER_WORDS)) break;
+    after_modifier = true;
+    // A comment between the modifiers is whitespace to Kotlin (`suspend // c` before `fun b()`);
+    // a bare `/` cannot follow a modifier word, so the modifier word was an expression.
+    if (!skip_whitespace_and_comments(lexer)) return true;
+  }
+  if (after_modifier) return true;
+  return !word_continues_statement(word, lexer, valid_symbols);
+}
+
 static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols,
                                      bool *cursor_clean) {
   lexer->result_symbol = AUTOMATIC_SEMICOLON;
@@ -1101,7 +1197,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     if (lexer->lookahead == ';') {
       advance(lexer);
       lexer->mark_end(lexer);
-      return true;
+      return !semicolon_before_else(lexer);
     }
 
     if (!iswspace(lexer->lookahead)) break;
@@ -1131,6 +1227,22 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     return false;
 
   if (sameline) {
+    // Right after the `}` of a class body or a block (BLOCK_END_HINT, never produced), Kotlin
+    // starts the next declaration without a separator: a file's declarations
+    // (parseTopLevelDeclaration) and a class body's members follow each other, so generated code
+    // writes `}enum class E {` and `fun a() {}fun b() {}`. A declaration keyword, a modifier word or
+    // an annotation (`fun a() {} @A fun b() {}`) there takes a semicolon; any other word (`else`,
+    // `catch`, `as`) takes nothing, and a false answer leaves the cursor dirty.
+    //
+    // Between the statements of a block Kotlin wants a `;` or a line break (parseStatements:
+    // "Unexpected tokens"), so `fun f() { fun a() {} fun b() {} }` is an error there. Here it is
+    // not: telling a block from a file or a class body needs a separator token of their own, and
+    // the parse states of block statements then no longer share with those of members, which cost
+    // 2,113 states (28 % of the parse table, 5.2 MB of src/parser.c) for no valid code.
+    if (valid_symbols[BLOCK_END_HINT] && !valid_symbols[STRING_CONTENT]) {
+      if (lexer->lookahead == '@') return true;
+      if (iswalpha(lexer->lookahead)) return block_end_starts_declaration(lexer);
+    }
     switch (lexer->lookahead) {
       // Insert imaginary semicolon before an 'import' but not in front
       // of other words or keywords starting with 'i'
@@ -1140,7 +1252,7 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       case ';':
         advance(lexer);
         lexer->mark_end(lexer);
-        return true;
+        return !semicolon_before_else(lexer);
 
       // Don't insert a semicolon in other cases. Nothing but whitespace has
       // been skipped, so a string or comment token may still start here.
@@ -1150,7 +1262,8 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
     }
   }
 
-  if (valid_symbols[CALL_LAMBDA_HINT] && (lexer->lookahead == '@' || constructor_word_char(lexer->lookahead) || lexer->lookahead == '`')) return !call_prefix_continues(lexer, valid_symbols);
+  if (call_lambda_prefix_at(lexer, valid_symbols)) return !call_prefix_continues(lexer, valid_symbols);
+  if (modifier_line_at(lexer, valid_symbols)) return semicolon_after_modifier_line(lexer, valid_symbols);
 
   // Characters that continue the previous expression across a newline.
   //
@@ -1162,7 +1275,8 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   //     (ftp.executor as ExecutorService).awaitTermination(1, SECONDS)
   //
   // is two statements, not `close()(...)`. Treating them as continuations
-  // merged the lines with no error node at all.
+  // merged the lines with no error node at all. The exception is a supertype's
+  // argument list (see paren_continues_supertype).
   //
   // '{' stays: `foo()` followed by `{ … }` on the next line is a trailing
   // lambda, which is one expression — confirmed against the Kotlin PSI, as
@@ -1173,6 +1287,11 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
   switch (lexer->lookahead) {
       case '{':
         if (brace_starts_statement(scanner->in_delegate, valid_symbols)) return true;
+        *cursor_clean = true;
+        return false;
+
+      case '(':
+        if (!paren_continues_supertype(valid_symbols)) return true;
         *cursor_clean = true;
         return false;
 
@@ -1298,68 +1417,34 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       // statement could end, so this won't fire inside () or [] where
       // newlines don't terminate statements.
       case '+':
-      case '-':
         return true;
+
+      // `->` is no prefix operator: it ends a lambda's parameters, which may sit
+      // on the line before it, `forEach { item\n -> ... }` (Kotlin's parser looks
+      // for the arrow of a parameter list across newlines).
+      case '-':
+        skip(lexer);
+        return lexer->lookahead != '>';
 
       // Don't insert a semicolon before `!=`, but do insert one before a unary `!`.
       case '!':
         skip(lexer);
         return lexer->lookahead != '=';
 
-      // Don't insert a semicolon before 'by' in delegation contexts.
-      // Gated on BY_DELEGATION_HINT so `by` remains a usable soft-keyword
-      // identifier in non-delegation positions.
-      case 'b':
-        return !(valid_symbols[BY_DELEGATION_HINT] &&
-                 scan_for_word(lexer, "y", 1));
-
-      // Don't insert a semicolon before an else, unless it's
-      // followed by "->" (a when-entry's else, not an if-else).
-      case 'e':
-        if (!scan_for_word(lexer, "lse", 3)) return true;
-        return followed_by_arrow(lexer);
-
-      // Cast continuation outside a primary-constructor context.
-      case 'a':
-        return !scan_for_word(lexer, "s", 1);
-
-      // Don't insert a semicolon before a where
-      case 'w': {
-        if (!scan_for_word(lexer, "here", 4)) return true;
-        bool newline = false;
-        return !where_type_constraint_follows(lexer, &newline);
-      }
-
-      // Don't insert a semicolon before `instanceof`, or before `internal`
-      // when followed by `constructor` in a class declaration context.
+      // A visibility modifier (`internal`, `public`, `private`, `protected`) on the next line
+      // before `constructor` in a class declaration, or before `field` of an explicit backing
+      // field, continues the declaration. No other word starting with `i` or `p` continues a
+      // statement (Kotlin has no `instanceof`; it uses `is`).
       case 'i':
-        if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
-            !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_constructor(lexer)) {
-          return false;
-        }
-        if (valid_symbols[BACKING_FIELD_HINT] &&
-            !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_field(lexer)) {
-          return false;
-        }
-        // Note: lexer has advanced past the word. For "instanceof", scan_for_word
-        // can no longer match. But since "instanceof" is not a Kotlin keyword
-        // (Kotlin uses "is"), this is acceptable — ASI is inserted, which is
-        // the correct behavior for any non-constructor identifier.
-        return true;
-
-      // Don't insert a semicolon before `public/private/protected constructor`
-      // in class declaration context.
       case 'p':
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_constructor(lexer)) {
+            check_visibility_then(lexer, "constructor", 11)) {
           return false;
         }
         if (valid_symbols[BACKING_FIELD_HINT] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_modifier_then_field(lexer)) {
+            check_visibility_then(lexer, "field", 5)) {
           return false;
         }
         return true;
@@ -1371,54 +1456,27 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       // Guard against error recovery mode where all symbols are valid.
       // Instead of suppressing ASI, we emit the constructor keyword directly
       // since it's an external token and the internal lexer won't match it.
+      // If `constructor` does not match, characters were advanced past and
+      // `catch` can no longer be read: the automatic semicolon goes in.
       case 'c':
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT]) {
-          const char *kw = "constructor";
-          bool matched = true;
-          for (unsigned i = 0; i < 11; i++) {
-            if (lexer->lookahead != kw[i]) { matched = false; break; }
-            advance(lexer);
-          }
-          if (matched && !constructor_word_char(lexer->lookahead)) {
-            lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
-            lexer->mark_end(lexer);
-            return true;
-          }
-          // If constructor didn't match, we've advanced past some chars.
-          // Can't reliably check 'catch' now. Just insert ASI.
+          scan_constructor_keyword(lexer);
           return true;
         }
-        // In a try-clause slot this keyword belongs to that construct,
-        // including malformed clauses. Outside it, `catch(x)` is a call.
-        return !(valid_symbols[TRY_CLAUSE_HINT] &&
-                 scan_try_clause_keyword(lexer, "atch", 4));
-
-      // Don't insert a semicolon before finally (continues try_expression).
-      // As with catch, only when a real clause follows.
-      //
-      // `field` is the other word starting with 'f' that can continue a
-      // statement: an explicit backing field sits inside the property it
-      // belongs to, usually on the next line. It is gated on the hint for the
-      // same reason `by` is gated -- a variable may be named `field`, so
-      // `var field = 0` followed by `field = 2` has to stay two statements.
-      case 'f':
-        if (valid_symbols[BACKING_FIELD_HINT] &&
-            scan_try_clause_keyword(lexer, "ield", 4)) return false;
-        return !(valid_symbols[TRY_CLAUSE_HINT] &&
-                 scan_try_clause_keyword(lexer, "inally", 6));
+        return semicolon_before_word(lexer, valid_symbols);
 
       // Don't insert a semicolon before an annotation that precedes 'constructor'
       // e.g. `class Foo\n@Bar\nconstructor(...)` — the @Bar is a constructor modifier
       case '@':
         if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_annotation_then_constructor(lexer)) {
+            check_annotations_then(lexer, "constructor", 11)) {
           return false;
         }
         if (valid_symbols[BACKING_FIELD_HINT] &&
             !valid_symbols[STRING_CONTENT] &&
-            check_annotation_then_field(lexer)) {
+            check_annotations_then(lexer, "field", 5)) {
           return false;
         }
         return true;
@@ -1426,10 +1484,11 @@ static bool scan_automatic_semicolon(Scanner *scanner, TSLexer *lexer, const boo
       case ';':
         advance(lexer);
         lexer->mark_end(lexer);
-        return true;
+        return !semicolon_before_else(lexer);
 
+      // `as`, `by`, `else`, `where`, `catch`, `finally` and `field`: see word_continues_statement.
       default:
-        return true;
+        return semicolon_before_word(lexer, valid_symbols);
   }
 }
 
@@ -1471,6 +1530,43 @@ static bool scan_import_dot(TSLexer *lexer) {
   return true;
 }
 
+// After a `?` of a callable-reference receiver: do further `?`s and then `::` follow? Kotlin's
+// lexer reads comments and line breaks as whitespace, so `X?/*c*/?::x`, `X?` / newline / `?::x`
+// and `a?` / newline / `::b` are one reference each, as are `a? ::b` and `X ?? :: x` (JetBrains
+// fixtures). Reads with advance() past the marked end of the `?` token.
+static bool quest_chain_reaches_reference(TSLexer *lexer) {
+  for (;;) {
+    bool newline = false;
+    if (!constructor_trivia(lexer, &newline)) return false;
+    if (lexer->lookahead == '?') {
+      advance(lexer);
+      continue;
+    }
+    if (lexer->lookahead != ':') return false;
+    advance(lexer);
+    return lexer->lookahead == ':';
+  }
+}
+
+// Where a companion object may start (COMPANION_OBJECT_HINT is valid): do the words `companion`
+// and `object` follow? The hint is zero-width at the `companion`, and without it `companion` is a
+// member_modifier (`companion fun String.f()`, `@Ann companion val`). Only a `c` is read past: a
+// member that starts otherwise is left to the rest of the scan.
+static bool scan_companion_object_hint(TSLexer *lexer, bool *decided) {
+  *decided = false;
+  while (iswspace(lexer->lookahead)) skip(lexer);
+  if (lexer->lookahead != 'c') return false;
+  *decided = true;
+  lexer->mark_end(lexer);
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word)) || strcmp(word, "companion") != 0) return false;
+  bool newline = false;
+  if (!constructor_trivia(lexer, &newline)) return false;
+  if (!constructor_word(lexer, word, sizeof(word)) || strcmp(word, "object") != 0) return false;
+  lexer->result_symbol = COMPANION_OBJECT_HINT;
+  return true;
+}
+
 static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
   // Pending work takes priority over constructor, ASI, string and
   // interpolation paths. No other branch may consume its source as padding.
@@ -1490,6 +1586,12 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   }
   if (valid_symbols[PRIMARY_CONSTRUCTOR_HINT] && !valid_symbols[STRING_CONTENT])
     return scan_primary_constructor_hint(scanner, lexer, valid_symbols);
+  if (valid_symbols[COMPANION_OBJECT_HINT] && !valid_symbols[STRING_CONTENT] &&
+      !valid_symbols[AUTOMATIC_SEMICOLON]) {
+    bool decided;
+    if (scan_companion_object_hint(lexer, &decided)) return true;
+    if (decided) return false;
+  }
   scanner->constructor_newline = false;
   // TRY_CLAUSE_HINT is optional before catch/finally and is never emitted.
   // Its validity identifies clause positions without changing keyword nodes.
@@ -1523,7 +1625,10 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   // `a<NUL>b` tore into pieces, while Kotlin's lexer accepts any character
   // here except a backtick or a line terminator. Scanning it externally and
   // testing `eof` rather than a sentinel byte carries the NUL through.
-  if (valid_symbols[QUOTED_IDENTIFIER] && !valid_symbols[STRING_CONTENT]) {
+  //
+  // With `@` right after the closing backtick it is a label, `` `if`@ ``, one
+  // token as in Kotlin's lexer, where a label is valid.
+  if ((valid_symbols[QUOTED_IDENTIFIER] || valid_symbols[QUOTED_LABEL]) && !valid_symbols[STRING_CONTENT]) {
     while (iswspace(lexer->lookahead)) skip(lexer);
     if (lexer->lookahead == '`') {
       advance(lexer);
@@ -1536,6 +1641,13 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
       if (content && lexer->lookahead == '`') {
         advance(lexer);
         lexer->mark_end(lexer);
+        if (valid_symbols[QUOTED_LABEL] && lexer->lookahead == '@') {
+          advance(lexer);
+          lexer->mark_end(lexer);
+          lexer->result_symbol = QUOTED_LABEL;
+          return true;
+        }
+        if (!valid_symbols[QUOTED_IDENTIFIER]) return false;
         lexer->result_symbol = QUOTED_IDENTIFIER;
         return true;
       }
@@ -1561,27 +1673,19 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   //
   // mark_end is set straight after the `?`, so the lookahead below inspects
   // the following characters without lengthening the token.
+  //
+  // The second `?` of `X? ?::x` starts after whitespace, a line break included
+  // (`X?` / newline / `?::x`). Skip it here rather than rely on the ASI scan
+  // above having stepped over it, which happens only where the parse state also
+  // accepts a semicolon. A comment before it is an extra of its own.
+  if (valid_symbols[CALLABLE_REFERENCE_QUEST] && !valid_symbols[STRING_CONTENT])
+    while (iswspace(lexer->lookahead)) skip(lexer);
   if (valid_symbols[CALLABLE_REFERENCE_QUEST] && lexer->lookahead == '?') {
     advance(lexer);
     lexer->mark_end(lexer);
-    // Whitespace is allowed between the `?` and what follows: `a? ::b` and
-    // `X ?? :: x` are both in the JetBrains fixtures. Horizontal only --
-    // crossing a newline here would second-guess statement termination,
-    // which is not this token's job.
-    while (lexer->lookahead == ' ' || lexer->lookahead == '\t') skip(lexer);
-    if (lexer->lookahead == '?') {
-      // `??::` — the next `?` is handled by the next scan.
-      lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
-      return true;
-    }
-    if (lexer->lookahead == ':') {
-      advance(lexer);
-      if (lexer->lookahead == ':') {
-        lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
-        return true;
-      }
-    }
-    return false;
+    if (!quest_chain_reaches_reference(lexer)) return false;
+    lexer->result_symbol = CALLABLE_REFERENCE_QUEST;
+    return true;
   }
 
   // Match dots in import identifiers, refusing dots that would cause
@@ -1594,19 +1698,7 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   // (the cross-newline case is handled inside scan_automatic_semicolon)
   if (valid_symbols[PRIMARY_CONSTRUCTOR_KEYWORD] && !valid_symbols[STRING_CONTENT]) {
     while (iswspace(lexer->lookahead)) skip(lexer);
-    if (lexer->lookahead == 'c') {
-      const char *kw = "constructor";
-      bool matched = true;
-      for (unsigned i = 0; i < 11; i++) {
-        if (lexer->lookahead != kw[i]) { matched = false; break; }
-        advance(lexer);
-      }
-      if (matched && !constructor_word_char(lexer->lookahead)) {
-        lexer->result_symbol = PRIMARY_CONSTRUCTOR_KEYWORD;
-        lexer->mark_end(lexer);
-        return true;
-      }
-    }
+    if (scan_constructor_keyword(lexer)) return true;
   }
 
   // content, end, or interpolation start
@@ -1631,10 +1723,112 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   return false;
 }
 
+// A `;` after a separator (FURTHER_SEMICOLON valid) is one only with whitespace or a comment
+// before it: the scan starts where the `;` before it ended, and Kotlin's lexer reads `;;` as one
+// token, DOUBLE_SEMICOLON, which its parser rejects, while `;/*c*/;` is two semicolons. A block
+// comment is a token of its own, so the scan that reads it leaves after_comment for the next.
+// The characters of a character literal up to its next escape, closing quote or line break
+// (CHARACTER_CONTENT valid, only inside one): any character, a NUL too, which the internal lexer
+// cannot carry through a character class. The scan starts right after the previous part, so a
+// space or a `/*` is content, as it is for Kotlin's lexer.
+// A backslash before a raw NUL is an escape the internal lexer cannot read either (`'\<NUL>'`,
+// which Kotlin's lexer takes as one), so it is content here; any other escape ends the content.
+// True for a token; false with *read set when the probe of a backslash read past it, after which
+// no other token may be scanned from the moved cursor (`'\"'` would start a string).
+static bool scan_character_content(TSLexer *lexer, bool *read) {
+  lexer->result_symbol = CHARACTER_CONTENT;
+  bool content = false;
+  *read = false;
+  while (!lexer->eof(lexer) && lexer->lookahead != '\'' &&
+         lexer->lookahead != '\n' && lexer->lookahead != '\r') {
+    if (lexer->lookahead == '\\') {
+      lexer->mark_end(lexer);
+      advance(lexer);
+      *read = true;
+      if (lexer->eof(lexer) || lexer->lookahead != 0) return content;
+    }
+    advance(lexer);
+    content = true;
+  }
+  lexer->mark_end(lexer);
+  return content;
+}
+
+// Kotlin's hard keywords, which grammar.js reserves: none is the name of a label.
+static const char *const HARD_KEYWORD_WORDS[] = {
+  "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in", "interface",
+  "is", "null", "object", "package", "return", "super", "this", "throw", "true", "try", "typealias",
+  "typeof", "val", "var", "when", "while",
+};
+
+// The name right after `break@`, `return@`, `this@` and the like (LABEL_IDENTIFIER valid): a
+// whole word at the scan's start, which is where the `@` ended, and no hard keyword. Anything
+// else leaves the position to the internal lexer, which has no token for it.
+// A label name of ASCII characters; one with another character is the internal lexer's, which
+// knows the Unicode letters (`labé`, while `lab💩` and `١lab` are no names), see _label_name.
+static bool scan_label_identifier(TSLexer *lexer) {
+  if (!constructor_word_char(lexer->lookahead) || iswdigit(lexer->lookahead)) return false;
+  char word[16];
+  unsigned length = 0;
+  while (!lexer->eof(lexer) && constructor_word_char(lexer->lookahead)) {
+    if (lexer->lookahead >= 128) return false;
+    if (length + 1 < sizeof(word)) word[length] = (char)lexer->lookahead;
+    length++;
+    advance(lexer);
+  }
+  word[length < sizeof(word) ? length : sizeof(word) - 1] = '\0';
+  if (length < sizeof(word) && WORD_IN(word, HARD_KEYWORD_WORDS)) return false;
+  lexer->mark_end(lexer);
+  lexer->result_symbol = LABEL_IDENTIFIER;
+  return true;
+}
+
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
+  bool after_comment = scanner->after_comment;
+  bool label_comment = scanner->label_comment;
+  scanner->after_comment = false;
+  scanner->label_comment = false;
+  // Nothing read leaves the cursor where it was: a line break ends the literal, and the
+  // separator after it is the scan's below.
+  if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT]) {
+    bool read;
+    if (scan_character_content(lexer, &read)) return true;
+    if (read) return false;
+  }
+  if (valid_symbols[LABEL_IDENTIFIER] && !valid_symbols[STRING_CONTENT] && lexer->lookahead != '`') {
+    // The name follows the `@` directly: a comment before it leaves the label unnamed, as
+    // whitespace does. The comment is scanned here, so the next scan knows it came first.
+    if (label_comment) return false;
+    if (lexer->lookahead == '/' && valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, NULL, NULL)) {
+      scanner->label_comment = true;
+      return true;
+    }
+    return scan_label_identifier(lexer);
+  }
+  if (valid_symbols[FURTHER_SEMICOLON] && !valid_symbols[STRING_CONTENT] &&
+      (lexer->lookahead == ';' || iswspace(lexer->lookahead))) {
+    if (lexer->lookahead == ';') {
+      if (!after_comment) return false;
+      advance(lexer);
+      lexer->result_symbol = FURTHER_SEMICOLON;
+      return true;
+    }
+    // Whitespace, then maybe a `;`. No token valid after a separator depends on a line break
+    // before it (the separator itself is not valid here), so the scan below goes on from there.
+    while (iswspace(lexer->lookahead)) skip(lexer);
+    if (lexer->lookahead == ';') {
+      advance(lexer);
+      lexer->result_symbol = FURTHER_SEMICOLON;
+      return true;
+    }
+  }
   bool found = scan_token(scanner, lexer, valid_symbols);
   if (found && lexer->result_symbol == AUTOMATIC_SEMICOLON) scanner->in_delegate = false;
+  if (found && lexer->result_symbol == MULTILINE_COMMENT && valid_symbols[FURTHER_SEMICOLON] &&
+      !valid_symbols[STRING_CONTENT]) {
+    scanner->after_comment = true;
+  }
   return found;
 }
 
@@ -1683,7 +1877,8 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     // A legacy delimiter has low bits 2/3, so low bits 0 plus bit 3
     // unambiguously identify this format, including an empty string stack.
     buffer[0] = 8 | (scanner->constructor_newline ? 4 : 0) |
-      (scanner->comment.semi_owed ? 16 : 0) | (scanner->in_delegate ? 32 : 0);
+      (scanner->comment.semi_owed ? 16 : 0) | (scanner->in_delegate ? 32 : 0) |
+      (scanner->after_comment ? 64 : 0) | (scanner->label_comment ? 128 : 0);
     buffer[1] = (char)frames;
     buffer[2] = (char)(frames >> 8);
     write_u32(buffer + 3, scanner->comment.start_byte);
@@ -1702,12 +1897,14 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     return length;
   }
   // in_delegate is bit 16 here and bit 32 in the pending form, where 16 is taken.
+  // after_comment is bit 8 over a string delimiter, whose low bits are never 0, and bit 64
+  // alone, where bit 8 would mark the pending form; label_comment is bit 128 alone.
   uint8_t flags = (scanner->constructor_newline ? 4 : 0) | (scanner->in_delegate ? 16 : 0);
   if (n > 0) {
     memcpy(buffer, stack->contents, n);
-    buffer[0] |= flags;
-  } else if (flags) {
-    buffer[0] = flags;
+    buffer[0] |= flags | (scanner->after_comment ? 8 : 0);
+  } else if (flags || scanner->after_comment || scanner->label_comment) {
+    buffer[0] = flags | (scanner->after_comment ? 64 : 0) | (scanner->label_comment ? 128 : 0);
     return 1;
   }
   return n;
@@ -1720,10 +1917,12 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
   scanner->constructor_newline = false;
   scanner->comment = (PendingComment){0};
   scanner->in_delegate = false;
+  scanner->after_comment = false;
+  scanner->label_comment = false;
   if (!length || length > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) return;
   uint8_t flags = (uint8_t)buffer[0];
   if ((flags & 3) == 0 && (flags & 8)) {
-    if (length < PENDING_HEADER_BYTES || (flags & ~60u)) return;
+    if (length < PENDING_HEADER_BYTES || (flags & ~252u)) return;
     unsigned frames = (uint8_t)buffer[1] | ((unsigned)(uint8_t)buffer[2] << 8);
     if (frames > MAX_STRING_FRAMES ||
         length != PENDING_HEADER_BYTES + (frames * PENDING_FRAME_BITS + 7) / 8) return;
@@ -1740,19 +1939,24 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
     }
     scanner->constructor_newline = (flags & 4) != 0;
     scanner->in_delegate = (flags & 32) != 0;
+    scanner->after_comment = (flags & 64) != 0;
+    scanner->label_comment = (flags & 128) != 0;
     scanner->comment = (PendingComment){true, start, end, (flags & 16) != 0};
     return;
   }
-  if (length == 1 && (flags & ~20u) == 0) {
+  if (length == 1 && (flags & ~212u) == 0) {
     scanner->constructor_newline = (flags & 4) != 0;
     scanner->in_delegate = (flags & 16) != 0;
+    scanner->after_comment = (flags & 64) != 0;
+    scanner->label_comment = (flags & 128) != 0;
     return;
   }
   if (length % 2) return;
   array_reserve(stack, length);
   memcpy(stack->contents, buffer, length);
-  stack->contents[0] &= (Delimiter)~20;
+  stack->contents[0] &= (Delimiter)~28;
   stack->size = length;
   scanner->constructor_newline = (flags & 4) != 0;
   scanner->in_delegate = (flags & 16) != 0;
+  scanner->after_comment = (flags & 8) != 0;
 }

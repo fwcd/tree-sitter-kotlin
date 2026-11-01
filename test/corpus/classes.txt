@@ -2043,3 +2043,309 @@ class D : I by obj.{ foo }() { fun member() {} }
         (simple_identifier)
         (function_value_parameters)
         (function_body)))))
+
+================================================================================
+No operand of a class delegate takes a trailing lambda
+================================================================================
+
+class A {
+  private class B(val d: P) : P by d()
+
+  companion object { val y = 1 }
+}
+class G : P by envs + extra {
+  override fun get(key: String) = null
+}
+class F<T>(parent: T) : P by parent
+    where T : P {
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (class_declaration
+        (modifiers
+          (visibility_modifier))
+        (type_identifier)
+        (primary_constructor
+          (class_parameter
+            (binding_pattern_kind)
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (delegation_specifier
+          (explicit_delegation
+            (user_type
+              (type_identifier))
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments))))))
+      (companion_object
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))))))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (additive_expression
+          (simple_identifier)
+          (simple_identifier))))
+    (class_body
+      (function_declaration
+        (modifiers
+          (member_modifier))
+        (simple_identifier)
+        (function_value_parameters
+          (parameter
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (function_body
+          (null_literal)))))
+  (class_declaration
+    (type_identifier)
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (simple_identifier)))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+Getter and setter on one line below the property
+================================================================================
+
+class A {
+  var startIndex: Int = 0
+    get private set
+  var b: Int = 0
+    private set get
+}
+
+---
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (integer_literal))
+      (getter)
+      (setter
+        (modifiers
+          (visibility_modifier)))
+      (property_declaration
+        (binding_pattern_kind)
+        (variable_declaration
+          (simple_identifier)
+          (user_type
+            (type_identifier)))
+        (integer_literal))
+      (setter
+        (modifiers
+          (visibility_modifier)))
+      (getter))))
+
+================================================================================
+A companion block among the members of a class, an object and an enum class
+================================================================================
+
+class C {
+    companion {
+        companion {
+            fun inner() {}
+        }
+
+        fun outer() {}
+    }
+}
+object O { companion { } }
+enum class E { A; companion { val x = 1 } }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_block
+        (class_body
+          (companion_block
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters)
+                (function_body))))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body))))))
+  (object_declaration
+    (type_identifier)
+    (class_body
+      (companion_block
+        (class_body))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (companion_block
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal)))))))
+
+================================================================================
+Companion extensions, with other modifiers and a context
+================================================================================
+
+companion fun String.foo() {}
+private companion val A.k = "K"
+internal inline companion fun A.f() = o() + k
+context(_: A)
+companion fun C.func(s: String) = s
+class C { companion object Named }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (member_modifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (property_declaration
+    (modifiers
+      (visibility_modifier)
+      (member_modifier))
+    (binding_pattern_kind)
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)))
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (function_modifier)
+      (member_modifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (additive_expression
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier))))
+  (function_declaration
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (member_modifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_object
+        (type_identifier)))))
+
+================================================================================
+A function type with a context as a supertype
+================================================================================
+
+class A : context(String) () -> Unit {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (type_modifiers
+        (context_receiver
+          (user_type
+            (type_identifier))))
+      (function_type
+        (function_type_parameters)
+        (user_type
+          (type_identifier))))
+    (class_body)))
+
+================================================================================
+A named function without a body as an if branch of a delegate
+================================================================================
+
+class C : I by if (c) fun g() else z {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (simple_identifier)
+              (function_value_parameters)))
+          alternative: (control_structure_body
+            (simple_identifier)))))
+    (class_body)))

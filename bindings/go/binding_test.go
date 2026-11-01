@@ -12,4 +12,10 @@ func TestCanLoadGrammar(t *testing.T) {
 	if language == nil {
 		t.Errorf("Error loading Kotlin grammar")
 	}
+	// A parser takes the language only when the runtime supports its ABI version.
+	parser := tree_sitter.NewParser()
+	defer parser.Close()
+	if err := parser.SetLanguage(language); err != nil {
+		t.Errorf("Error setting the Kotlin grammar: %v", err)
+	}
 }

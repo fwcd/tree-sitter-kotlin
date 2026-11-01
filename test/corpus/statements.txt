@@ -978,6 +978,39 @@ fun foo(e: Any) {
               (integer_literal))))))))
 
 ================================================================================
+A label of Unicode letters
+================================================================================
+
+fun f() {
+    labé@ while (true) {}
+    名前@ for (x in y) {}
+    classé@ while (true) {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (label)
+        (while_statement
+          (boolean_literal)
+          (control_structure_body))
+        (label)
+        (for_statement
+          (variable_declaration
+            (simple_identifier))
+          (simple_identifier)
+          (control_structure_body))
+        (label)
+        (while_statement
+          (boolean_literal)
+          (control_structure_body))))))
+
+================================================================================
 Label before a property declaration
 ================================================================================
 
@@ -1278,3 +1311,427 @@ val x: T
         (simple_identifier)
         (call_suffix
           (value_arguments))))))
+
+================================================================================
+A control structure body is an expression
+================================================================================
+
+fun h(name: String?) {
+    val text = if (name != null)
+        name
+    else
+        value
+
+    val next = 1
+    val s = when (x) {
+        1 -> @Suppress("UNCHECKED_CAST") y as T
+        else -> null
+    }
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (nullable_type
+          (user_type
+            (type_identifier))
+          (quest))))
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (if_expression
+            condition: (equality_expression
+              (simple_identifier)
+              (null_literal))
+            consequence: (control_structure_body
+              (simple_identifier))
+            alternative: (control_structure_body
+              (simple_identifier))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (when_expression
+            (when_subject
+              (simple_identifier))
+            (when_entry
+              (when_condition
+                (integer_literal))
+              (control_structure_body
+                (prefix_expression
+                  (annotation
+                    (constructor_invocation
+                      (user_type
+                        (type_identifier))
+                      (value_arguments
+                        (value_argument
+                          (string_literal
+                            (string_content))))))
+                  (as_expression
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))))
+            (when_entry
+              (control_structure_body
+                (null_literal)))))))))
+
+================================================================================
+Modifiers on lines of their own before a declaration
+================================================================================
+
+private
+fun x() {}
+
+fun f() {
+    @A
+    private
+    suspend
+    fun g() {}
+    data
+    class D(val a: Int)
+    open
+    foo()
+    val v = if (c) a
+    else
+        value
+    val w = 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (modifiers
+            (annotation
+              (user_type
+                (type_identifier)))
+            (visibility_modifier)
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))
+        (class_declaration
+          (modifiers
+            (class_modifier))
+          (type_identifier)
+          (primary_constructor
+            (class_parameter
+              (binding_pattern_kind)
+              (simple_identifier)
+              (user_type
+                (type_identifier)))))
+        (simple_identifier)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (if_expression
+            condition: (simple_identifier)
+            consequence: (control_structure_body
+              (simple_identifier))
+            alternative: (control_structure_body
+              (simple_identifier))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))))))
+
+================================================================================
+A run of modifiers over lines, several on each line, before a declaration
+================================================================================
+
+private private private
+private private private
+private private private
+private private private
+private private private
+private private private
+private private private
+private private private
+private fun f(){}
+fun g() {
+    private private
+    private private
+    val x = 1
+    open open
+    foo()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (modifiers
+            (visibility_modifier)
+            (visibility_modifier)
+            (visibility_modifier)
+            (visibility_modifier))
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))
+================================================================================
+Comments between modifiers on lines of their own
+================================================================================
+
+private
+suspend // c
+fun b() {}
+
+private
+suspend /* c */
+fun d() {}
+
+fun f() {
+    private // c
+    inline
+    fun g() {}
+    open
+    // c
+    foo()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (function_modifier))
+    (line_comment)
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (function_modifier))
+    (multiline_comment)
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (function_declaration
+          (modifiers
+            (visibility_modifier)
+            (line_comment)
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))
+        (simple_identifier)
+        (line_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Further semicolons after a separator
+================================================================================
+
+fun f() { a(); ; b() }
+enum class E { A, B; ; // c
+    ;
+    companion object;
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (enum_entry
+        (simple_identifier))
+      (line_comment)
+      (companion_object))))
+
+================================================================================
+Two adjacent semicolons are one token
+:error
+================================================================================
+
+fun g() { a();; b() }
+val x = 1;;
+
+--------------------------------------------------------------------------------
+
+================================================================================
+A comment between two semicolons keeps them two
+================================================================================
+
+fun g() { a();/*c*/; b() }
+
+enum class E { A;/*c*/; fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (multiline_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (multiline_comment)
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Two adjacent semicolons after the last enum entry are one token
+:error
+================================================================================
+
+enum class E { A;; fun f() {} }
+
+--------------------------------------------------------------------------------
+
+
+================================================================================
+A label name that is no whole name, or follows a comment, leaves the label unnamed
+:error
+================================================================================
+
+fun f() { return@lab💩 }
+fun g() { return@١lab }
+fun h() { break@/*c*/lab }
+
+--------------------------------------------------------------------------------
+
+
+================================================================================
+A label name after a comment that ended a line before it
+================================================================================
+
+val x = run {
+    a()
+    /* c */ return@run 1
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (call_expression
+      (simple_identifier)
+      (call_suffix
+        (annotated_lambda
+          (lambda_literal
+            (statements
+              (call_expression
+                (simple_identifier)
+                (call_suffix
+                  (value_arguments)))
+              (multiline_comment)
+              (jump_expression
+                (label)
+                (integer_literal)))))))))

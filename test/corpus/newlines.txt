@@ -582,3 +582,207 @@ class C : I by foo.bar
         (simple_identifier)
         (function_value_parameters)
         (function_body)))))
+
+================================================================================
+Supertype arguments on the next line
+================================================================================
+
+class S(project: Project) : Base<X.State>
+                            (ID, project),
+                            Other<X.State> {
+}
+
+val o = object : Base
+    (x) {}
+
+fun f() {
+    val e: String
+    (a).b()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (primary_constructor
+      (class_parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (delegation_specifier
+      (constructor_invocation
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)
+                (type_identifier)))))
+        (value_arguments
+          (value_argument
+            (simple_identifier))
+          (value_argument
+            (simple_identifier)))))
+    (delegation_specifier
+      (user_type
+        (type_identifier)
+        (type_arguments
+          (type_projection
+            (user_type
+              (type_identifier)
+              (type_identifier))))))
+    (class_body))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (object_literal
+      (delegation_specifier
+        (constructor_invocation
+          (user_type
+            (type_identifier))
+          (value_arguments
+            (value_argument
+              (simple_identifier)))))
+      (class_body)))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (call_expression
+          (navigation_expression
+            (parenthesized_expression
+              (simple_identifier))
+            (navigation_suffix
+              (simple_identifier)))
+          (call_suffix
+            (value_arguments)))))))
+
+================================================================================
+Lambda arrow on the line after its parameters
+================================================================================
+
+fun f() {
+    run { x
+        -> x }
+    a
+    -b
+    run { x // c
+        -> x }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (variable_declaration
+                    (simple_identifier)))
+                (statements
+                  (simple_identifier))))))
+        (simple_identifier)
+        (prefix_expression
+          (simple_identifier))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (lambda_parameters
+                  (variable_declaration
+                    (simple_identifier)))
+                (line_comment)
+                (statements
+                  (simple_identifier))))))))))
+
+================================================================================
+A brace on the line after a local property's type starts a lambda statement
+================================================================================
+
+fun f() {
+  var m: Long
+  {
+    g()
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
+
+================================================================================
+enum and context parameters on lines of their own stay modifiers
+================================================================================
+
+enum
+class E { A }
+
+fun g() {
+    enum
+    class F
+}
+
+private
+context(_: String)
+fun f() {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (class_declaration
+          (type_identifier)))))
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier)))))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body)))

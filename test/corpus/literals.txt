@@ -138,7 +138,8 @@ More string interpolation
     (string_content))
   (string_literal
     (string_content))
-  (string_literal))
+  (string_literal
+    (string_content)))
 
 ================================================================================
 Empty interpolation is an error
@@ -768,3 +769,210 @@ val c = 1.toString()
           (simple_identifier)))
       (call_suffix
         (value_arguments)))))
+
+================================================================================
+Escapes next to a dollar sign
+================================================================================
+
+val a = "say \"\$\""
+val b = "\\\\wsl\$\\"
+val c = "\$${d.e}"
+val f = """\$"""
+val g = """\$h"""
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)
+      (interpolation_expression_start)
+      (interpolated_expression
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (simple_identifier))))
+      (interpolation_expression_end)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)
+      (string_content)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)
+      (interpolation_identifier_start)
+      (interpolated_identifier))))
+
+================================================================================
+Quoted identifier in a short string template
+================================================================================
+
+val s = "$`if` and $`x`"
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (interpolation_identifier_start)
+      (interpolated_identifier)
+      (string_content)
+      (interpolation_identifier_start)
+      (interpolated_identifier))))
+
+================================================================================
+A character literal of no character or of several
+================================================================================
+
+val c = ''
+val d = 'org.sample'
+
+--------------------------------------------------------------------------------
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (character_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (character_literal)))
+
+================================================================================
+A character literal is one token: any escape, a NUL, a comment opener as text
+================================================================================
+
+val z = '\q'
+val n = ' '
+val s = 'a/*c*/b'
+val t = ' // '
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal
+      (character_escape_seq)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal)))
+
+================================================================================
+A character literal ends at its line
+:error
+================================================================================
+
+val x = 'a
+b'
+
+--------------------------------------------------------------------------------
+
+================================================================================
+A character literal without its closing quote ends at its line
+================================================================================
+
+fun f() {
+    g('x
+      , 'y')
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (character_literal))
+              (value_argument
+                (character_literal)))))))))
+
+================================================================================
+A backslash before a raw NUL in a character literal
+================================================================================
+
+val x = '\ '
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal)))
+
+================================================================================
+An escape that opens a character literal where one may end
+================================================================================
+
+fun f(c: Char) = when (c) {
+    '\"' -> '\"' to 1
+    else -> null
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (character_literal
+              (character_escape_seq)))
+          (control_structure_body
+            (infix_expression
+              (character_literal
+                (character_escape_seq))
+              (simple_identifier)
+              (integer_literal))))
+        (when_entry
+          (control_structure_body
+            (null_literal)))))))
