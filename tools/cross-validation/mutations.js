@@ -98,6 +98,37 @@ const DESTRUCTURING = ['(val a, b) = p', '(a, val b) = p', '[val a, b] = p', '[a
   'val (a = x, b = y) = p', '(val a = x, val b = y) = p', '(val a = x, b = y) = p'];
 
 /**
+ * Expression positions, `E` the hole, and the forms each takes: every form in every position, so
+ * a rule changed for one position is checked in the others (a generic call in an `if` branch of a
+ * delegate, a bodyless named function where a statement starts, a keyword after a dot).
+ */
+const EXPRESSION_CONTEXTS = [
+  ['delegate-if-then', 'class C : I by if (c) E else y {}\n'],
+  ['delegate-if-else', 'class C : I by if (c) x else E {}\n'],
+  ['delegate-if-assignment', 'class C : I by if (c) x = E else z {}\n'],
+  ['if-branch', 'fun f() {\n    if (c) E else y\n}\n'],
+  ['if-branch-bare', 'fun f() {\n    if (c) E\n}\n'],
+  ['selector', 'fun f() {\n    x.E\n}\n'],
+  ['safe-selector', 'fun f() {\n    x?.E\n}\n'],
+  ['comparison-right', 'fun f() {\n    1 < E\n}\n'],
+  ['assignment-value', 'fun f() {\n    a = E\n}\n'],
+  ['argument', 'fun f() {\n    g(E)\n}\n'],
+  ['when-branch', 'fun f() {\n    when (x) { 1 -> E }\n}\n'],
+  ['lambda-body', 'fun f() {\n    run { E }\n}\n'],
+  ['reference-receiver', 'val f = E::x\n'],
+  ['nullable-reference-receiver', 'val f = E?::x\n'],
+  ['after-completed-call', 'fun f() {\n    op()\n    foo()\n    E\n}\n'],
+  ['after-brace-same-line', 'fun f() {\n    fun a() {} E\n}\n'],
+  ['after-semicolons', 'fun f() {\n    a();; E\n}\n'],
+];
+const EXPRESSION_FORMS = ['x<T>', 'x<T>()', 'x<T>.y', 'x<T, U>', 'x = y', 'if (d) y<T> else z<T>', 'if (d) y else z',
+  'fun()', 'fun() {}', 'fun g()', 'fun g() {}', 'suspend fun g() {}', 'private fun g() {}', 'object {}',
+  'object : I {}', 'when {}', 'when (x) {}', 'interface I {}', 'class K', 'typealias T = Int', 'val y = 1',
+  'try { x } finally {}', '1', '1.0', '.1', "'a'", "'\\q'", 'true', 'null', 'this', 'super', 'return', 'break',
+  'break@l', 'break@ l', '(X)', '(x).y', 'X?', '`l`@ { op() }', 'l@ { op() }', 'x!!', 'a < b', '-x', 'x++',
+  'x as T', 'x::y'];
+
+/**
  * @returns {Array<{ id: string, group: string, text: string, extension: string }>}
  */
 function generateMutations() {
@@ -136,6 +167,9 @@ function generateMutations() {
     add('destructuring', `fun f() {\n    for (${form.replace(/^val /, '').replace(/ = p$/, '')} in xs) {}\n}\n`);
     add('destructuring', `fun f() {\n    xs.forEach { ${form.replace(/^val /, '').replace(/ = p$/, '')} -> }\n}\n`);
   }
+  for (const [group, template] of EXPRESSION_CONTEXTS) {
+    for (const form of EXPRESSION_FORMS) add(`position-${group}`, template.replace('E', () => form));
+  }
   return snippets;
 }
 
@@ -154,6 +188,27 @@ const REVIEW_329 = [
   ['7-escaped-template', 'val x = "$`if`"\n'],
   ['8-positional-mixed', 'fun f() { [val a, b] = pair }\n'],
   ['8-parenthesized-mixed', 'fun g() { (val a, b) = pair }\n'],
+  // The third round of the review.
+  ['r3-1-delegate-generic-branches', 'class C : I by if (c) x<T> else y<T> {}\n'],
+  ['r3-1-delegate-nested-assignment', 'class D : I by if (c) x = if (d) y<T> else z<T> else z {}\n'],
+  ['r3-2-fun-selector', 'fun f() { x.fun() }\n'],
+  ['r3-2-object-selector', 'fun g() { x.object{} }\n'],
+  ['r3-2-when-selector', 'fun h() { x.when{} }\n'],
+  ['r3-2-interface-operand', 'fun i() { 1 < interface I {} }\n'],
+  ['r3-2-class-selector', 'fun j() { x.class() }\n'],
+  ['r3-2-number-selector', 'fun k() { x.1 }\n'],
+  ['r3-3-modifier-lines', 'private private private\n'.repeat(8) + 'private fun f(){}\n'],
+  ['r3-4-same-line-locals', 'fun f() { fun a() {} private fun b() {} }\n'],
+  ['r3-4-double-semicolon', 'fun g() { a();; b() }\n'],
+  ['r3-5-label-space', 'fun f() { break@ lab }\n'],
+  ['r3-5-quoted-label-after-call', 'fun g() {\n    op()\n    foo()\n    `lab`@ { op() }\n}\n'],
+  ['r3-6-bodyless-named-function', 'fun f() { if (c) fun g() }\n'],
+  ['r3-6-suspend-named-function', 'fun h() { if (c) suspend fun g() {} }\n'],
+  ['r3-7-parenthesized-nullable-reference', 'val f = (X)?::x\n'],
+  ['r3-8-char-line-break', "val x = 'a\nb'\n"],
+  ['r3-8-char-comment', "val y = 'a/*c*/b'\n"],
+  ['r3-8-char-unknown-escape', "val z = '\\q'\n"],
+  ['r3-8-char-nul', "val x='\u0000'\n"],
 ].map(([id, text]) => ({ id, group: 'review-329', text, extension: '.kt' }));
 
 function writeCorpus(dir, snippets) {
@@ -166,7 +221,7 @@ function writeCorpus(dir, snippets) {
   fs.writeFileSync(path.join(dir, 'snippets.json'), JSON.stringify(snippets, null, 2) + '\n');
 }
 
-module.exports = { HARD_KEYWORDS, SOFT_KEYWORDS, MODIFIERS, NAME_TEMPLATES, REVIEW_329, names, generateMutations, writeCorpus };
+module.exports = { HARD_KEYWORDS, SOFT_KEYWORDS, MODIFIERS, NAME_TEMPLATES, EXPRESSION_CONTEXTS, EXPRESSION_FORMS, REVIEW_329, names, generateMutations, writeCorpus };
 
 if (require.main === module) {
   const args = process.argv.slice(2);
