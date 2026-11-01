@@ -426,6 +426,9 @@ module.exports = grammar({
     $._character_content,
     // The name right after `break@`, `return@` and the like, see _label_name.
     $._label_identifier,
+    // Never produced: valid where a declaration's contract may start, so that a line break before
+    // `contract [` inserts no semicolon (see word_continues_statement in the scanner).
+    $._contract_hint,
   ],
 
   extras: $ => [
@@ -1049,6 +1052,7 @@ module.exports = grammar({
     // [returns() implies (x != null)] { … }`, also on a property accessor. Each effect is an
     // expression (KotlinExpressionParsing.parseContractEffectList).
     contract_effect_list: $ => seq(
+      optional($._contract_hint),
       "contract",
       "[",
       optional(seq(sep1($._expression, ","), optional(","))),

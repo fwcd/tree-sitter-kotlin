@@ -35,6 +35,7 @@ enum TokenType {
   FURTHER_SEMICOLON,
   CHARACTER_CONTENT,
   LABEL_IDENTIFIER,
+  CONTRACT_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -941,6 +942,10 @@ static bool trailing_lambda_follows(TSLexer *lexer, char leading_word[32]) {
 // - `by` delegates, only where BY_DELEGATION_HINT is valid: elsewhere it is an identifier.
 // - `where` continues a declaration only when a type constraint follows; `where()` is a call
 //   to a function named where, and the statement before it has already ended.
+// - `contract` continues a declaration only where its contract may start (CONTRACT_HINT) and its
+//   effect list follows (`contract [`): parseFunction reads it after the parameters, the return
+//   type or the constraints, on any line, while `x = 2` above `contract [0]` is two statements
+//   and `contract { … }` and `contract()` are calls.
 // - `catch` and `finally` continue a try only in its clause slot (TRY_CLAUSE_HINT), including
 //   malformed clauses; outside it, `catch(x)` is a call.
 // - `field` continues a property that can still take an explicit backing field
@@ -952,6 +957,10 @@ static bool word_continues_statement(const char *word, TSLexer *lexer, const boo
   if (strcmp(word, "by") == 0) return valid_symbols[BY_DELEGATION_HINT];
   bool newline = false;
   if (strcmp(word, "where") == 0) return where_type_constraint_follows(lexer, &newline);
+  if (strcmp(word, "contract") == 0) {
+    return valid_symbols[CONTRACT_HINT] && !valid_symbols[STRING_CONTENT] &&
+           constructor_trivia(lexer, &newline) && lexer->lookahead == '[';
+  }
   if (strcmp(word, "catch") == 0 || strcmp(word, "finally") == 0) return valid_symbols[TRY_CLAUSE_HINT];
   if (strcmp(word, "field") == 0) return valid_symbols[BACKING_FIELD_HINT];
   if (strcmp(word, "else") == 0) {
@@ -965,7 +974,7 @@ static bool word_continues_statement(const char *word, TSLexer *lexer, const boo
 // At the first character of the next line: does the line break before it end the statement?
 // A word answers by word_continues_statement; anything else that reaches here ends it. Most
 // lines start with a word, so one whose first letter starts none of the continuing words
-// (`as`, `by`, `catch`, `else`, `field`, `finally`, `where`) ends the statement unread.
+// (`as`, `by`, `catch`, `contract`, `else`, `field`, `finally`, `where`) ends the statement unread.
 static bool semicolon_before_word(TSLexer *lexer, const bool *valid_symbols) {
   switch (lexer->lookahead) {
     case 'a': case 'b': case 'c': case 'e': case 'f': case 'w': break;

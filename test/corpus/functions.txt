@@ -652,3 +652,61 @@ var myInt: Int = 0
           (value_arguments))))
     (function_body
       (integer_literal))))
+
+================================================================================
+A contract on the line after the return type, before the constraints
+================================================================================
+
+fun <T> f(x: T): String
+    contract [
+        returns()
+    ]
+    where T : A
+{
+}
+
+fun g() {
+    val y = 2
+    contract [0]
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (type_parameters
+      (type_parameter
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (user_type
+      (type_identifier))
+    (contract_effect_list
+      (call_expression
+        (simple_identifier)
+        (call_suffix
+          (value_arguments))))
+    (type_constraints
+      (type_constraint
+        (type_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (indexing_expression
+          (simple_identifier)
+          (indexing_suffix
+            (integer_literal)))))))

@@ -3115,6 +3115,18 @@
       "type": "SEQ",
       "members": [
         {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "_contract_hint"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
           "type": "STRING",
           "value": "contract"
         },
@@ -11116,6 +11128,10 @@
     {
       "type": "SYMBOL",
       "name": "_label_identifier"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_contract_hint"
     }
   ],
   "inline": [
