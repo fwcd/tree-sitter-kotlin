@@ -420,6 +420,8 @@ module.exports = grammar({
     $._quoted_label,
     // Zero-width, before the `companion` of `companion object`, see companion_object.
     $._companion_object_hint,
+    // A `;` after a separator, not right after another `;`, see _semis.
+    $._further_semicolon,
   ],
 
   extras: $ => [
@@ -1465,10 +1467,11 @@ module.exports = grammar({
     _semi: $ => $._automatic_semicolon,
 
     // A separator and any further `;`: Kotlin skips them between statements and between members,
-    // `a(); ; b()` and the `; ;` of an enum body that goes on with members (PSI rejects two
-    // adjacent `;` in some places, `a();; b()`, which this accepts). The scanner reads the first
-    // as the separator; after it no separator is valid, so the internal lexer reads the others.
-    _semis: $ => seq($._semi, repeat(";")),
+    // `a(); ; b()` and the `; ;` of an enum body that goes on with members. Its lexer reads two
+    // adjacent `;` as one token, DOUBLE_SEMICOLON, which no rule takes, so `a();; b()` is an
+    // error. The scanner reads the first `;` as the separator and each further one only when
+    // something stands between it and the `;` before it.
+    _semis: $ => seq($._semi, repeat(alias($._further_semicolon, ";"))),
 
     assignment: $ => assignmentForms($, $._expression),
 

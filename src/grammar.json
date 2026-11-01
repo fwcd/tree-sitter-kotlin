@@ -5363,7 +5363,12 @@
         {
           "type": "REPEAT",
           "content": {
-            "type": "STRING",
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_further_semicolon"
+            },
+            "named": false,
             "value": ";"
           }
         }
@@ -10826,6 +10831,10 @@
     {
       "type": "SYMBOL",
       "name": "_companion_object_hint"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_further_semicolon"
     }
   ],
   "inline": [

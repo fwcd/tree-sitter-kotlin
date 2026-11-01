@@ -32,6 +32,7 @@ enum TokenType {
   RESERVED_WORD_GUARD,
   QUOTED_LABEL,
   COMPANION_OBJECT_HINT,
+  FURTHER_SEMICOLON,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -1689,8 +1690,24 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   return false;
 }
 
+// A `;` after a separator (FURTHER_SEMICOLON valid) is one only with whitespace before it: the
+// scan starts where the `;` before it ended, and Kotlin's lexer reads `;;` as one token,
+// DOUBLE_SEMICOLON, which its parser rejects. A comment between them (`;/*c*/;`) is no
+// whitespace here, so that pair is an error too, where Kotlin reads two semicolons.
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
+  if (valid_symbols[FURTHER_SEMICOLON] && !valid_symbols[STRING_CONTENT] &&
+      (lexer->lookahead == ';' || iswspace(lexer->lookahead))) {
+    if (lexer->lookahead == ';') return false;
+    // Whitespace, then maybe a `;`. No token valid after a separator depends on a line break
+    // before it (the separator itself is not valid here), so the scan below goes on from there.
+    while (iswspace(lexer->lookahead)) skip(lexer);
+    if (lexer->lookahead == ';') {
+      advance(lexer);
+      lexer->result_symbol = FURTHER_SEMICOLON;
+      return true;
+    }
+  }
   bool found = scan_token(scanner, lexer, valid_symbols);
   if (found && lexer->result_symbol == AUTOMATIC_SEMICOLON) scanner->in_delegate = false;
   return found;
