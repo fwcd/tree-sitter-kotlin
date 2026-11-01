@@ -409,6 +409,41 @@ val anon = suspend fun() { assert(true) }
 ---
 
 ==================
+suspend before a function without a name where a statement starts
+==================
+
+fun f() {
+    run {
+        suspend fun() {}
+    }
+    suspend fun g() {}
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (annotated_lambda
+              (lambda_literal
+                (statements
+                  (anonymous_function
+                    (function_value_parameters)
+                    (function_body)))))))
+        (function_declaration
+          (modifiers
+            (function_modifier))
+          (simple_identifier)
+          (function_value_parameters)
+          (function_body))))))
+
+==================
 Function with backticked name
 ==================
 

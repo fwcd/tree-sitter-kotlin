@@ -328,6 +328,8 @@ module.exports = grammar({
 
     // ambiguity caused by 'suspend'
     [$.function_modifier, $.simple_identifier],
+    // `suspend fun` at statement start: a modifier of a declaration or of a function without a name.
+    [$._suspend_anonymous_function, $.function_modifier],
     [$._type_modifier, $.simple_identifier],
     [$.delegation_specifier, $._type_modifier, $.simple_identifier],
     // `fun T.` at statement start: the receiver of a declaration or of an anonymous function.
@@ -1363,8 +1365,13 @@ module.exports = grammar({
       // annotations on a declaration are already handled by `modifiers`, and
       // allowing both here would make them ambiguous.
       seq(optional($.label), $._declaration),
-      $._expression_statement
+      $._expression_statement,
+      // `suspend fun() {}` where a statement starts: parseLocalDeclaration reads the modifier
+      // and the function without a name as a local declaration.
+      alias($._suspend_anonymous_function, $.anonymous_function)
     ),
+
+    _suspend_anonymous_function: $ => prec.right(seq("suspend", anonymousFunction($, undefined, false, false))),
 
     // A statement that is no declaration; also the body of an if, else, loop or when entry.
     _expression_statement: $ => choice(
@@ -2466,7 +2473,7 @@ function wordExcept(words) {
 
 // An anonymous function, or with `name` before its parameters a named one, which takes a body and
 // the lower precedence from its name on (see `anonymous_function`).
-function anonymousFunction($, name, bodyless = false) {
+function anonymousFunction($, name, bodyless = false, context = !name) {
   // The receiver is a type as for a function declaration (`fun Any?.() = this`,
   // `fun @[a] T.(a: foo)`), but not one in parentheses: `fun (b) {}` is a parameter
   // list, and `(b)` cannot be told from a receiver until the `.` that never comes.
@@ -2487,7 +2494,7 @@ function anonymousFunction($, name, bodyless = false) {
     ? [prec.right(-1, seq(name, $.function_value_parameters, optional(seq(":", $._type)), ...body))]
     : [$.function_value_parameters, optional(seq(":", $._type)), optional($.function_body)];
   return seq(
-    ...(name ? [] : [optional($.context_receiver)]),
+    ...(context ? [optional($.context_receiver)] : []),
     "fun",
     ...head,
     ...tail
