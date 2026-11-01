@@ -2451,7 +2451,8 @@ module.exports = grammar({
 // (when the prefix is no word), or go on with a character no word continues with, or follow a
 // word. A character no word continues with is any other identifier character, so a Unicode letter
 // or digit (`labé@`) leads off the trie at once. Classes are intersected with `&&`, which tree-sitter
-// reads (regex-syntax) and JavaScript accepts under the `v` flag.
+// reads (regex-syntax); a RustRegex hands the pattern over unparsed, since JavaScript takes `&&` only
+// under the `v` flag, which Node 18 lacks.
 function wordExcept(words) {
   const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
   const rest = letters + '0123456789';
@@ -2470,7 +2471,7 @@ function wordExcept(words) {
     const body = `(${[leave, ...next.map(char => char + suffix(node[char], depth + 1))].join('|')})`;
     return depth > 0 && !node[''] ? `${body}?` : body;
   };
-  return new RegExp(suffix(trie, 0), 'v');
+  return new RustRegex(suffix(trie, 0));
 }
 
 // An anonymous function, or with `name` before its parameters a named one, which takes a body and
