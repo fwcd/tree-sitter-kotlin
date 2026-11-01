@@ -2630,12 +2630,11 @@ fun h() { x.when{} }
 (source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (anonymous_function (function_value_parameters))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (object_literal (class_body))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (when_expression)))))))
 
 ================================================================================
-Neither class nor a number is a selector after a dot
+class is no selector after a dot
 :error
 ================================================================================
 
 fun j() { x.class() }
-fun k() { x.1 }
 fun l() { x?.class }
 
 --------------------------------------------------------------------------------
@@ -2734,3 +2733,37 @@ fun f() {
                           (type_identifier))))))))))
         (try_expression
           (finally_block))))))
+
+================================================================================
+A number or a string after a dot and a space is a selector
+================================================================================
+
+fun f() {
+    x. 1
+    x."a"
+    x?.
+    2L
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (integer_literal)))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (string_literal
+              (string_content))))
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (long_literal
+              (integer_literal))))))))

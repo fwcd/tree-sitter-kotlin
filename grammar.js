@@ -1597,8 +1597,16 @@ module.exports = grammar({
           // Kotlin's selector is an atomic expression (parseSelectorCallExpression), so the
           // reserved `this` and `super` are ones, and so are a literal, a jump, `value.null` and
           // `"foo".return`, a `when`, an object literal and an anonymous function, which the
-          // compiler rejects. A number is not one: Kotlin's lexer reads `.1` as a real literal.
+          // compiler rejects. A number right after the dot is not one: Kotlin's lexer reads `.1`
+          // as a real literal; after a space (`x. 1`) or a line break it is, as is a string.
           $.this_expression,
+          $.integer_literal,
+          $.hex_literal,
+          $.bin_literal,
+          $.real_literal,
+          $.long_literal,
+          $.unsigned_literal,
+          $.string_literal,
           $.super_expression,
           $.boolean_literal,
           $.null_literal,

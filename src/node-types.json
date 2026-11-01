@@ -6638,6 +6638,10 @@
           "named": true
         },
         {
+          "type": "bin_literal",
+          "named": true
+        },
+        {
           "type": "boolean_literal",
           "named": true
         },
@@ -6646,11 +6650,23 @@
           "named": true
         },
         {
+          "type": "hex_literal",
+          "named": true
+        },
+        {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
           "type": "jump_expression",
           "named": true
         },
         {
           "type": "lambda_literal",
+          "named": true
+        },
+        {
+          "type": "long_literal",
           "named": true
         },
         {
@@ -6670,7 +6686,15 @@
           "named": true
         },
         {
+          "type": "real_literal",
+          "named": true
+        },
+        {
           "type": "simple_identifier",
+          "named": true
+        },
+        {
+          "type": "string_literal",
           "named": true
         },
         {
@@ -6683,6 +6707,10 @@
         },
         {
           "type": "type_arguments",
+          "named": true
+        },
+        {
+          "type": "unsigned_literal",
           "named": true
         },
         {

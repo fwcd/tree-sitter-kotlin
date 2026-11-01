@@ -6527,6 +6527,34 @@
                 },
                 {
                   "type": "SYMBOL",
+                  "name": "integer_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "hex_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "bin_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "real_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "long_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "unsigned_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "string_literal"
+                },
+                {
+                  "type": "SYMBOL",
                   "name": "super_expression"
                 },
                 {
