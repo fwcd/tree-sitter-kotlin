@@ -924,3 +924,55 @@ fun f() {
                 (character_literal))
               (value_argument
                 (character_literal)))))))))
+
+================================================================================
+A backslash before a raw NUL in a character literal
+================================================================================
+
+val x = '\ '
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal)))
+
+================================================================================
+An escape that opens a character literal where one may end
+================================================================================
+
+fun f(c: Char) = when (c) {
+    '\"' -> '\"' to 1
+    else -> null
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (when_expression
+        (when_subject
+          (simple_identifier))
+        (when_entry
+          (when_condition
+            (character_literal
+              (character_escape_seq)))
+          (control_structure_body
+            (infix_expression
+              (character_literal
+                (character_escape_seq))
+              (simple_identifier)
+              (integer_literal))))
+        (when_entry
+          (control_structure_body
+            (null_literal)))))))

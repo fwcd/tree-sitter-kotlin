@@ -1731,14 +1731,26 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
 // (CHARACTER_CONTENT valid, only inside one): any character, a NUL too, which the internal lexer
 // cannot carry through a character class. The scan starts right after the previous part, so a
 // space or a `/*` is content, as it is for Kotlin's lexer.
-static bool scan_character_content(TSLexer *lexer) {
+// A backslash before a raw NUL is an escape the internal lexer cannot read either (`'\<NUL>'`,
+// which Kotlin's lexer takes as one), so it is content here; any other escape ends the content.
+// True for a token; false with *read set when the probe of a backslash read past it, after which
+// no other token may be scanned from the moved cursor (`'\"'` would start a string).
+static bool scan_character_content(TSLexer *lexer, bool *read) {
+  lexer->result_symbol = CHARACTER_CONTENT;
   bool content = false;
-  while (!lexer->eof(lexer) && lexer->lookahead != '\'' && lexer->lookahead != '\\' &&
+  *read = false;
+  while (!lexer->eof(lexer) && lexer->lookahead != '\'' &&
          lexer->lookahead != '\n' && lexer->lookahead != '\r') {
+    if (lexer->lookahead == '\\') {
+      lexer->mark_end(lexer);
+      advance(lexer);
+      *read = true;
+      if (lexer->eof(lexer) || lexer->lookahead != 0) return content;
+    }
     advance(lexer);
     content = true;
   }
-  lexer->result_symbol = CHARACTER_CONTENT;
+  lexer->mark_end(lexer);
   return content;
 }
 
@@ -1779,7 +1791,11 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   scanner->label_comment = false;
   // Nothing read leaves the cursor where it was: a line break ends the literal, and the
   // separator after it is the scan's below.
-  if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT] && scan_character_content(lexer)) return true;
+  if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT]) {
+    bool read;
+    if (scan_character_content(lexer, &read)) return true;
+    if (read) return false;
+  }
   if (valid_symbols[LABEL_IDENTIFIER] && !valid_symbols[STRING_CONTENT] && lexer->lookahead != '`') {
     // The name follows the `@` directly: a comment before it leaves the label unnamed, as
     // whitespace does. The comment is scanned here, so the next scan knows it came first.
