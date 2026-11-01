@@ -54,6 +54,19 @@ describe('mutantsOf', () => {
     expect(byDir(mutants, 'unicode-latin')).toHaveLength(1);
   });
 
+  it('puts a comment where trivia goes, between semicolons, and names Kotlin does not take whole', () => {
+    expect(byDir(mutants, 'trivia-after/comment')).toContain(SOURCE.replace('break@loop', 'break@/*c*/loop'));
+    expect(byDir(mutants, 'double-semi/comment')).toContain(SOURCE.replace('g(); h()', 'g();/*c*/; h()'));
+    expect(byDir(mutants, 'bad-name/emoji-suffix')).toContain(SOURCE.replace('break@loop', 'break@loop💩'));
+    expect(byDir(mutants, 'bad-name/digit-start')).toContain(SOURCE.replace('loop@ while', '١loop@ while'));
+    expect(byDir(mutants, 'char-content/3')).toContain(SOURCE.replace("'a'", "'\\\u0000'"));
+  });
+
+  it('parenthesizes a receiver with type arguments', () => {
+    const text = 'fun f() {\n    val r = X<T, U>?::x\n}\n';
+    expect(byDir(mutantsOf(text, { perFile: 100 }), 'parenthesize')).toContain(text.replace('X<T, U>', '(X<T, U>)'));
+  });
+
   it('picks sites by a seeded generator, the same each run', () => {
     expect(mutantsOf(SOURCE, { perFile: 1, rel: 'a.kt' })).toEqual(mutantsOf(SOURCE, { perFile: 1, rel: 'a.kt' }));
     expect(pick([1, 2, 3, 4, 5], 2, generator('s'))).toHaveLength(2);

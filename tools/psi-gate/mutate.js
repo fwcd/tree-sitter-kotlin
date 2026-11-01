@@ -87,8 +87,12 @@ const DECLARATION_KEYWORDS = new Set(['fun', 'class', 'interface', 'object', 'va
 // one grammar; the scanner's bound is 256 words.
 const MODIFIER_RUNS = [[2, 2], [9, 3], [25, 3], [300, 1], [300, 5]];
 // Contents of a character literal, PSI-clean and not: an unknown escape, a NUL escape, a raw NUL,
-// a raw line break, comment openers and lengths other than one.
-const CHAR_CONTENTS = ['\\q', '\\u0000', '\u0000', 'a\nb', 'a/*c*/b', 'a//b', 'ab', ''];
+// a backslash before a raw NUL, a raw line break, comment openers and lengths other than one. A raw
+// carriage return is left out: kotlinc reads it as a line break, and so does the oracle.
+const CHAR_CONTENTS = ['\\q', '\\u0000', '\u0000', '\\\u0000', 'a\nb', 'a/*c*/b', 'a//b', 'ab', ''];
+// Names Kotlin's lexer does not take whole: a suffix that is no letter or digit, a digit of another
+// script first. Each replaces one name or label, so PSI errs at that place alone.
+const BAD_NAMES = [['emoji-suffix', n => n + '💩'], ['digit-start', n => '١' + n]];
 // Pieces one insertion puts at a token boundary, as kotlin-syntax's parse-fuzz.py does.
 const PIECES = ['(', ')', '{', '}', '[', ']', '<', '>', ',', ':', ';', '=', '->', '.', '?.', '::', '?', '!!', '?:',
   '..', '..<', '@', '@Ann ', '*', '&&', '!', 'is ', 'as ', 'in ', '\n', 'fun ', 'class ', 'interface ', 'object ',
@@ -112,10 +116,12 @@ function operators(text, tokens) {
     && !opaque(next(k))), k => [['', edit(text, tokens[k].end, tokens[k].end, '/*c*/')]]);
   add('break-before', indexes(k => k > 0 && BREAK_BEFORE.has(tokens[k].text) && tokens[k - 1].line === tokens[k].line),
     k => [['', edit(text, tokens[k].start, tokens[k].start, '\n')]]);
-  // `break@ lab`, `x. y`, `x:: y`, `@ A`: trivia where Kotlin's lexer wants none or allows some.
+  // `break@ lab`, `x. y`, `x:: y`, `@ A`, `break@/*c*/lab`: trivia where Kotlin's lexer wants none or
+  // allows some.
   add('trivia-after', indexes(k => next(k) && next(k).start === tokens[k].end
     && (tokens[k].kind === 'label' || ['@', '::', '?.', '.'].includes(tokens[k].text))),
-  k => [['space', edit(text, tokens[k].end, tokens[k].end, ' ')], ['break', edit(text, tokens[k].end, tokens[k].end, '\n')]]);
+  k => [['space', ' '], ['break', '\n'], ['comment', '/*c*/']]
+    .map(([variant, trivia]) => [variant, edit(text, tokens[k].end, tokens[k].end, trivia)]));
   const labelName = t => t.kind === 'label' && isName({ kind: 'word', text: t.text.slice(0, -1) });
   add('backtick-name', indexes(k => inBody(tokens[k]) && (isName(tokens[k]) || labelName(tokens[k]))), k => {
     const t = tokens[k], label = t.kind === 'label';
@@ -124,19 +130,26 @@ function operators(text, tokens) {
   add('keyword-selector', indexes(k => k > 0 && inBody(tokens[k]) && isName(tokens[k])
     && (tokens[k - 1].text === '.' || tokens[k - 1].text === '?.')),
   k => HARD.map(word => [word, edit(text, tokens[k].start, tokens[k].end, word)]));
-  // `(X)?::x`, `(x).y`: a receiver in parentheses.
+  // `(X)?::x`, `(x).y`, `(X<T>)?::x`: a receiver in parentheses, a name or a name with type arguments.
   const NO_RECEIVER_AFTER = ['.', '?.', '::', ':', '@', 'fun', 'val', 'var', 'class', 'interface', 'object', 'typealias'];
-  add('parenthesize', indexes(k => k > 0 && inBody(tokens[k]) && isName(tokens[k]) && next(k)
-    && next(k).start === tokens[k].end && ['.', '?.', '::', '?'].includes(next(k).text)
+  const receiverEnd = k => {
+    const end = tokens[k + 1]?.text === '<' ? typeArgumentsEnd(tokens, k + 1) : k;
+    // The tokenizer reads `?::` as `?:` and `:`.
+    return end >= 0 && next(end) && next(end).start === tokens[end].end
+      && (['.', '?.', '::', '?'].includes(next(end).text) || text.startsWith('?::', next(end).start)) ? end : -1;
+  };
+  add('parenthesize', indexes(k => k > 0 && inBody(tokens[k]) && isName(tokens[k]) && receiverEnd(k) >= 0
     && !NO_RECEIVER_AFTER.includes(tokens[k - 1].text)),
-  k => [['', edit(text, tokens[k].start, tokens[k].end, `(${tokens[k].text})`)]]);
+  k => { const end = receiverEnd(k); return [['', edit(text, tokens[k].start, tokens[end].end, `(${text.slice(tokens[k].start, tokens[end].end)})`)]]; });
   // Two statements joined on one line by one semicolon, two or none.
   const ends = t => t.text === ')' || t.text === '}' || isName(t) || t.kind === 'number';
   add('join-lines', indexes(k => next(k) && next(k).line !== tokens[k].line && inBody(tokens[k]) && inBody(next(k))
     && ends(tokens[k]) && isName(next(k)) && text.slice(tokens[k].end, next(k).start).trim() === ''),
   k => [['semi', '; '], ['double-semi', ';; '], ['none', ' ']]
     .map(([variant, glue]) => [variant, edit(text, tokens[k].end, next(k).start, glue)]));
-  add('double-semi', indexes(k => tokens[k].text === ';'), k => [['', edit(text, tokens[k].end, tokens[k].end, ';')]]);
+  // `a();; b()`, `a();/*c*/; b()`, `A;; fun f()` in an enum: `;;` is one token for Kotlin's lexer.
+  add('double-semi', indexes(k => tokens[k].text === ';'), k => [['', ';'], ['comment', '/*c*/;'], ['space', ' ;']]
+    .map(([variant, more]) => [variant, edit(text, tokens[k].end, tokens[k].end, more)]));
   add('modifier-run', indexes(k => DECLARATION_KEYWORDS.has(tokens[k].text) && inBody(tokens[k])
     && (k === 0 || tokens[k - 1].line !== tokens[k].line)), k => {
     const t = tokens[k];
@@ -146,6 +159,10 @@ function operators(text, tokens) {
       for (let left = words; left > 0; left -= perLine) lines.push(Array(Math.min(perLine, left)).fill('private').join(' '));
       return [`${words}x${perLine}`, edit(text, t.start, t.start, lines.join('\n' + indent) + '\n' + indent)];
     });
+  });
+  add('bad-name', indexes(k => inBody(tokens[k]) && (isName(tokens[k]) || labelName(tokens[k]))), k => {
+    const t = tokens[k], label = t.kind === 'label', name = label ? t.text.slice(0, -1) : t.text;
+    return BAD_NAMES.map(([variant, make]) => [variant, edit(text, t.start, t.end, make(name) + (label ? '@' : ''))]);
   });
   add('char-content', indexes(k => tokens[k].kind === 'char'),
     k => CHAR_CONTENTS.map((content, i) => [String(i), edit(text, tokens[k].start, tokens[k].end, `'${content}'`)]));
@@ -174,6 +191,17 @@ function bodyOf(tokens, k) {
   if (i >= tokens.length) return null;
   const end = matching(tokens, i, '{', '}');
   return end < 0 ? null : [i, end];
+}
+
+/** Index of the `>` closing the type arguments that open at `k`, or -1. */
+function typeArgumentsEnd(tokens, k) {
+  for (let depth = 0, i = k; i < tokens.length && i < k + 40; i++) {
+    const t = tokens[i].text;
+    if (t === '<') depth++;
+    else if (t === '>' && --depth === 0) return i;
+    else if (!['?', ',', '.', '*', 'in', 'out'].includes(t) && tokens[i].kind !== 'word') return -1;
+  }
+  return -1;
 }
 
 function matching(tokens, k, open, close) {

@@ -33,7 +33,8 @@ describe('mutations', () => {
 
 describe('review-329', () => {
   it('holds the snippets of the review rounds', () => {
-    expect(REVIEW_329).toHaveLength(33);
+    expect(REVIEW_329).toHaveLength(52);
+    expect(REVIEW_329.map(snippet => snippet.text)).toContain('fun g() { a();/*c*/; b() }\n');
     expect(REVIEW_329.map(snippet => snippet.text)).toContain('fun f() { class@ foo() }\n');
     expect(REVIEW_329.map(snippet => snippet.text)).toContain('val z = \'\\q\'\n');
   });

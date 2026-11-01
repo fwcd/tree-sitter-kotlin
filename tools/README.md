@@ -181,11 +181,15 @@ REV with `git archive` and compares both.
 
 A mutant of `mutate.js` changes one place of its original, so the change is not lost behind an
 error the file has elsewhere: a comment between two tokens, a line break before a token that
-decides statement termination, a space or a line break after `@`, `::`, `?.`, `.` or a label,
-a name in backticks, a keyword after a dot, a receiver in parentheses, two statements joined by
-`;`, `;;` or nothing, a doubled `;`, a run of modifiers over lines, other contents of a character
+decides statement termination, a space, a line break or a comment after `@`, `::`, `?.`, `.` or
+a label, a name in backticks, a name Kotlin's lexer does not take whole (a non-letter suffix, a
+digit of another script first), a keyword after a dot, a receiver in parentheses with or without
+type arguments, two statements joined by `;`, `;;` or nothing, a second `;` with or without a
+comment or a space before it, a run of modifiers over lines, other contents of a character
 literal, a function without its body, and one inserted piece at a token boundary (as
-kotlin-syntax's `parse-fuzz.py` does); Unicode suffixes rename every name at once.
+kotlin-syntax's `parse-fuzz.py` does); Unicode suffixes rename every name at once. The oracle
+reads a carriage return as a line break, as kotlinc does when it loads a file, and the
+differential gives tree-sitter the same text.
 `origins.json` maps each mutant to its original, so `C-mutant` is a divergence the mutation made.
 `corpus.js` checks each case's claim: PSI contradicts a case without `:error` with a `B` and a case
 with `:error` with an `A`.

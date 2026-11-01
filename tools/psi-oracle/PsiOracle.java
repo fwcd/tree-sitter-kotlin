@@ -130,6 +130,8 @@ public class PsiOracle {
           .append(",\"dump\":").append(json(dumpName));
         try {
           String text = Files.readString(source, StandardCharsets.UTF_8);
+          // kotlinc converts line separators when it loads a file, so its lexer, which reads a raw
+          // '\r' as BAD_CHARACTER, never sees one: `'a<CR>b'` is "incorrect character literal 'a".
           boolean crlf = text.indexOf('\r') >= 0;
           if (crlf) text = text.replace("\r\n", "\n").replace('\r', '\n');
           if (trim) text = text.strip();

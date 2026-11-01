@@ -64,6 +64,7 @@ const NAME_TEMPLATES = [
   ['label-declaration', 'fun f() {\n    N@ val x = 1\n}\n'],
   ['label-call', 'fun f() {\n    N@ foo()\n}\n'],
   ['return-label', 'fun f() {\n    run { return@N }\n}\n'],
+  ['break-label-comment', 'fun f() {\n    while (true) { break@/*c*/N }\n}\n'],
   ['this-label', 'class C {\n    fun f() = this@N\n}\n'],
   ['dot-selector', 'fun f() {\n    x.N\n}\n'],
   ['safe-selector', 'fun f() {\n    x?.N\n}\n'],
@@ -109,6 +110,9 @@ const EXPRESSION_CONTEXTS = [
   ['if-branch', 'fun f() {\n    if (c) E else y\n}\n'],
   ['if-branch-bare', 'fun f() {\n    if (c) E\n}\n'],
   ['selector', 'fun f() {\n    x.E\n}\n'],
+  ['selector-space', 'fun f() {\n    x. E\n}\n'],
+  ['selector-break', 'fun f() {\n    x.\nE\n}\n'],
+  ['selector-comment', 'fun f() {\n    x./*c*/E\n}\n'],
   ['safe-selector', 'fun f() {\n    x?.E\n}\n'],
   ['comparison-right', 'fun f() {\n    1 < E\n}\n'],
   ['assignment-value', 'fun f() {\n    a = E\n}\n'],
@@ -126,7 +130,7 @@ const EXPRESSION_FORMS = ['x<T>', 'x<T>()', 'x<T>.y', 'x<T, U>', 'x = y', 'if (d
   'object : I {}', 'when {}', 'when (x) {}', 'interface I {}', 'class K', 'typealias T = Int', 'val y = 1',
   'try { x } finally {}', '1', '1.0', '.1', "'a'", "'\\q'", 'true', 'null', 'this', 'super', 'return', 'break',
   'break@l', 'break@ l', '(X)', '(x).y', 'X?', '`l`@ { op() }', 'l@ { op() }', 'x!!', 'a < b', '-x', 'x++',
-  'x as T', 'x::y'];
+  'x as T', 'x::y', 'x as T = y', '"a"', '(X<T>)', 'fun(): T {}', 'fun <T> g() {}', 'fun R.() {}'];
 
 /**
  * @returns {Array<{ id: string, group: string, text: string, extension: string }>}
@@ -209,6 +213,26 @@ const REVIEW_329 = [
   ['r3-8-char-comment', "val y = 'a/*c*/b'\n"],
   ['r3-8-char-unknown-escape', "val z = '\\q'\n"],
   ['r3-8-char-nul', "val x='\u0000'\n"],
+  // The fourth round of the review.
+  ['r4-1-interface-operand', 'fun f() { 1 < interface I {} }\n'],
+  ['r4-2-number-selector-space', 'fun f() { x. 1 }\n'],
+  ['r4-2-typed-fun-selector', 'fun g() { x.fun(): T {} }\n'],
+  ['r4-2-generic-fun-selector', 'fun h() { x.fun<T>() {} }\n'],
+  ['r4-2-receiver-fun-selector', 'fun i() { x.fun R.() {} }\n'],
+  ['r4-2-string-selector', 'fun j() { x."a" }\n'],
+  ['r4-3-same-line-locals', 'fun f() { fun a() {} private fun b() {} }\n'],
+  ['r4-3-comment-between-semicolons', 'fun g() { a();/*c*/; b() }\n'],
+  ['r4-3-enum-double-semicolon', 'enum class E { A;; fun f() {} }\n'],
+  ['r4-4-label-emoji', 'fun f() { return@lab💩 }\n'],
+  ['r4-4-label-arabic-digit', 'fun g() { return@١lab }\n'],
+  ['r4-4-label-comment', 'fun h() { break@/*c*/lab }\n'],
+  ['r4-5-bodyless-fun-argument', 'fun f() { foo(fun g()) }\n'],
+  ['r4-5-delegate-bodyless-fun', 'class C : I by if (c) fun g() else z {}\n'],
+  ['r4-5-delegate-cast-assignment', 'class D : I by if (c) x as T = y else z {}\n'],
+  ['r4-6-parenthesized-generic-nullable-reference', 'val f = (X<T>)?::x\n'],
+  ['r4-7-modifier-257', 'private\n' + 'private '.repeat(256) + 'fun f() {}\n'],
+  ['r4-8-char-cr', "val x='a\rb'\n"],
+  ['r4-8-char-backslash-nul', "val x='\\\u0000'\n"],
 ].map(([id, text]) => ({ id, group: 'review-329', text, extension: '.kt' }));
 
 function writeCorpus(dir, snippets) {
