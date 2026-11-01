@@ -2306,6 +2306,52 @@ fun f() {
                       (value_arguments))))))))))))
 
 ================================================================================
+A quoted label of a lambda on the next line continues a completed call
+================================================================================
+
+fun g() {
+    op()
+    foo()
+    `lab`@ { op() }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)
+            (annotated_lambda
+              (label)
+              (lambda_literal
+                (statements
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (value_arguments))))))))))))
+
+================================================================================
+A label name follows its at sign directly
+:error
+================================================================================
+
+fun f() { break@ lab }
+fun g() { run { return@ run } }
+class C { fun h() = this@ C }
+
+--------------------------------------------------------------------------------
+
+================================================================================
 Annotated statement on the next line is not swallowed by the call
 ================================================================================
 

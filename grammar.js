@@ -1414,7 +1414,11 @@ module.exports = grammar({
     // escaped form, so `` `if`@ `` is one.
     label: $ => choice(
       token(seq(wordExcept(HARD_KEYWORDS), "@")),
-      $._quoted_label
+      $._quoted_label,
+      // The same for the internal lexer: after a completed call the scanner probes the next line
+      // for a labelled lambda (`foo()` above `` `lab`@ { } ``), passes the label and leaves the
+      // token to the internal lexer. Without NUL, which only the scanner carries.
+      token(seq("`", /[^`\r\n\x00]+/, "`@"))
     ),
 
     // The body of an `if`, `else`, loop or `when` entry is an expression in Kotlin's parser
@@ -2293,36 +2297,41 @@ module.exports = grammar({
     // Keywords
     // ==========
 
+    // The name after `break@`, `return@`, `this@` and the like follows the `@` directly, as
+    // Kotlin's lexer reads them; `break@ lab` is an error ("Label must be named"). A quoted name
+    // is scanned externally and keeps any whitespace before it.
+    _label_name: $ => choice(token.immediate(wordExcept(HARD_KEYWORDS)), $._backtick_identifier),
+
     _return_at: $ => seq(
       "return@",
-      alias($._lexical_identifier, $.label)
+      alias($._label_name, $.label)
     ),
 
     _continue_at: $ => seq(
       "continue@",
-      alias($._lexical_identifier, $.label)
+      alias($._label_name, $.label)
     ),
 
     _break_at: $ => seq(
       "break@",
-      alias($._lexical_identifier, $.label)
+      alias($._label_name, $.label)
     ),
 
     _this_at: $ => seq(
       "this@",
-      alias($._lexical_identifier, $.type_identifier)
+      alias($._label_name, $.type_identifier)
     ),
 
     _super_at: $ => choice(
       seq(
         "super@",
-        alias($._lexical_identifier, $.type_identifier)
+        alias($._label_name, $.type_identifier)
       ),
       seq(
         "super",
         "<", $._type, ">",
         token.immediate("@"),
-        alias($._lexical_identifier, $.type_identifier)
+        alias($._label_name, $.type_identifier)
       )
     ),
 
