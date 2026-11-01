@@ -5,8 +5,8 @@
   "comparedFixtures": 436,
   "fixtureContentHash": "946c62787d7d902c2881055f669ad81602fcee998bd5844f25c194bc329e4354",
   "parser": {
-    "src/parser.c": "9e74dffe9463820d285e853adfc43518ec9f52e33bd9a339df8530386630c761",
-    "src/scanner.c": "0d86529027b950b43f595a9869e7c5f957ef7a8acc9f9d9c9271b771c1d091fe"
+    "src/parser.c": "14511e1f799173b9a2dd71b1234333ad03f983ef02764fe3c3ec21d8e622bc2e",
+    "src/scanner.c": "96da66a907c99ed7812eae397f10ed0458ceaec20192d09c3acb890976c1208a"
   },
   "excluded": [
     {
