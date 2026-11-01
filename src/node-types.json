@@ -1411,6 +1411,10 @@
           "named": true
         },
         {
+          "type": "companion_block",
+          "named": true
+        },
+        {
           "type": "companion_object",
           "named": true
         },
@@ -1870,6 +1874,21 @@
         },
         {
           "type": "when_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "companion_block",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "class_body",
           "named": true
         }
       ]
@@ -3388,6 +3407,10 @@
         },
         {
           "type": "class_declaration",
+          "named": true
+        },
+        {
+          "type": "companion_block",
           "named": true
         },
         {

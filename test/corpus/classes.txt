@@ -2173,3 +2173,132 @@ class A {
         (modifiers
           (visibility_modifier)))
       (getter))))
+
+================================================================================
+A companion block among the members of a class, an object and an enum class
+================================================================================
+
+class C {
+    companion {
+        companion {
+            fun inner() {}
+        }
+
+        fun outer() {}
+    }
+}
+object O { companion { } }
+enum class E { A; companion { val x = 1 } }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_block
+        (class_body
+          (companion_block
+            (class_body
+              (function_declaration
+                (simple_identifier)
+                (function_value_parameters)
+                (function_body))))
+          (function_declaration
+            (simple_identifier)
+            (function_value_parameters)
+            (function_body))))))
+  (object_declaration
+    (type_identifier)
+    (class_body
+      (companion_block
+        (class_body))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (companion_block
+        (class_body
+          (property_declaration
+            (binding_pattern_kind)
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal)))))))
+
+================================================================================
+Companion extensions, with other modifiers and a context
+================================================================================
+
+companion fun String.foo() {}
+private companion val A.k = "K"
+internal inline companion fun A.f() = o() + k
+context(_: A)
+companion fun C.func(s: String) = s
+class C { companion object Named }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (member_modifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (property_declaration
+    (modifiers
+      (visibility_modifier)
+      (member_modifier))
+    (binding_pattern_kind)
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (variable_declaration
+      (simple_identifier))
+    (string_literal
+      (string_content)))
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (function_modifier)
+      (member_modifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (additive_expression
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (simple_identifier))))
+  (function_declaration
+    (modifiers
+      (context_receiver
+        (parameter
+          (simple_identifier)
+          (user_type
+            (type_identifier))))
+      (member_modifier))
+    (receiver_type
+      (user_type
+        (type_identifier)))
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (simple_identifier)))
+  (class_declaration
+    (type_identifier)
+    (class_body
+      (companion_object
+        (type_identifier)))))

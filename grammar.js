@@ -410,6 +410,8 @@ module.exports = grammar({
     $._reserved_word_guard,
     // `` `if`@ ``: a backtick-quoted identifier with `@` right after it, see `label`.
     $._quoted_label,
+    // Zero-width, before the `companion` of `companion object`, see companion_object.
+    $._companion_object_hint,
   ],
 
   extras: $ => [
@@ -904,6 +906,7 @@ module.exports = grammar({
       prec(1, seq($.getter, $.setter)),
       prec(1, seq($.setter, $.getter)),
       $.companion_object,
+      $.companion_block,
       $.anonymous_initializer,
       $.secondary_constructor
     ),
@@ -914,14 +917,24 @@ module.exports = grammar({
     // still parses.
     anonymous_initializer: $ => seq(optional($.modifiers), "init", $._block),
 
-    companion_object: $ => seq(
+    // Kotlin 2.4 companion block (CompanionBlocksAndExtensions): `companion { fun f() {} }` among the
+    // members of a class or object, the static members of its class (KotlinParsing.parseCompanionBlock:
+    // `companion` first, then `{`).
+    companion_block: $ => seq("companion", $.class_body),
+
+    // `companion` is also a member_modifier (companion extensions), so after an annotation
+    // `@Ann companion object Key` could read as an object_declaration. The scanner emits
+    // `_companion_object_hint` only where the words `companion object` follow, so this node keeps
+    // them; the precedence settles `companion` first, where the hint and the modifier meet.
+    companion_object: $ => prec(1, seq(
       optional($.modifiers),
+      $._companion_object_hint,
       "companion",
       "object",
       optional(alias($.simple_identifier, $.type_identifier)),
       optional(seq(":", $._delegation_specifiers)),
       optional($.class_body)
-    ),
+    )),
 
     function_value_parameters: $ => seq(
       "(",
@@ -2007,7 +2020,10 @@ module.exports = grammar({
 
     member_modifier: $ => choice(
       "override",
-      "lateinit"
+      "lateinit",
+      // Kotlin 2.4 companion extensions (CompanionBlocksAndExtensions): `companion fun String.foo()`,
+      // `private companion val A.k = "K"`. `companion object` keeps its own rule, companion_object.
+      "companion"
     ),
 
     visibility_modifier: $ => choice(

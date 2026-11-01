@@ -31,6 +31,7 @@ enum TokenType {
   MODIFIER_HINT,
   RESERVED_WORD_GUARD,
   QUOTED_LABEL,
+  COMPANION_OBJECT_HINT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -1513,6 +1514,25 @@ static bool quest_chain_reaches_reference(TSLexer *lexer) {
   }
 }
 
+// Where a companion object may start (COMPANION_OBJECT_HINT is valid): do the words `companion`
+// and `object` follow? The hint is zero-width at the `companion`, and without it `companion` is a
+// member_modifier (`companion fun String.f()`, `@Ann companion val`). Only a `c` is read past: a
+// member that starts otherwise is left to the rest of the scan.
+static bool scan_companion_object_hint(TSLexer *lexer, bool *decided) {
+  *decided = false;
+  while (iswspace(lexer->lookahead)) skip(lexer);
+  if (lexer->lookahead != 'c') return false;
+  *decided = true;
+  lexer->mark_end(lexer);
+  char word[16];
+  if (!constructor_word(lexer, word, sizeof(word)) || strcmp(word, "companion") != 0) return false;
+  bool newline = false;
+  if (!constructor_trivia(lexer, &newline)) return false;
+  if (!constructor_word(lexer, word, sizeof(word)) || strcmp(word, "object") != 0) return false;
+  lexer->result_symbol = COMPANION_OBJECT_HINT;
+  return true;
+}
+
 static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbols) {
   // Pending work takes priority over constructor, ASI, string and
   // interpolation paths. No other branch may consume its source as padding.
@@ -1532,6 +1552,12 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   }
   if (valid_symbols[PRIMARY_CONSTRUCTOR_HINT] && !valid_symbols[STRING_CONTENT])
     return scan_primary_constructor_hint(scanner, lexer, valid_symbols);
+  if (valid_symbols[COMPANION_OBJECT_HINT] && !valid_symbols[STRING_CONTENT] &&
+      !valid_symbols[AUTOMATIC_SEMICOLON]) {
+    bool decided;
+    if (scan_companion_object_hint(lexer, &decided)) return true;
+    if (decided) return false;
+  }
   scanner->constructor_newline = false;
   // TRY_CLAUSE_HINT is optional before catch/finally and is never emitted.
   // Its validity identifies clause positions without changing keyword nodes.
