@@ -316,7 +316,6 @@ module.exports = grammar({
 
     // ambiguity between multiple user types and class property/function declarations
     [$.user_type],
-    [$.user_type, $.anonymous_function],
     //[$.user_type, $.function_type],
 
     // ambiguity caused by 'suspend'
@@ -324,6 +323,9 @@ module.exports = grammar({
     [$._type_modifier, $.simple_identifier],
     [$.delegation_specifier, $._type_modifier, $.simple_identifier],
     [$.anonymous_function, $.function_modifier],
+    // `fun T.` at statement start: the receiver of a declaration or of an anonymous function.
+    [$._anonymous_receiver_type, $.receiver_type],
+    [$._anonymous_receiver_type, $.nullable_type],
     [$.anonymous_function, $.simple_identifier],
 
 
@@ -938,6 +940,15 @@ module.exports = grammar({
       optional($.binding_pattern_kind),
       alias($._optionally_typed_parameter, $.parameter),
       optional(seq("=", $._expression))
+    ),
+
+    // The receiver of an anonymous function: see anonymousFunction.
+    _anonymous_receiver_type: $ => seq(
+      optional($.type_modifiers),
+      choice(
+        alias(seq($._type_reference, repeat1($.quest)), $.nullable_type),
+        $._type_reference,
+      )
     ),
 
     receiver_type: $ => seq(
@@ -2311,7 +2322,10 @@ function wordExcept(words) {
 // An anonymous function, or with `name` before its parameters a named one, which takes a body and
 // the lower precedence from its name on (see `anonymous_function`).
 function anonymousFunction($, name) {
-  const receiver = optional(seq(sep1($._simple_user_type, "."), ".")); // TODO
+  // The receiver is a type as for a function declaration (`fun Any?.() = this`,
+  // `fun @[a] T.(a: foo)`), but not one in parentheses: `fun (b) {}` is a parameter
+  // list, and `(b)` cannot be told from a receiver until the `.` that never comes.
+  const receiver = optional(seq(field("receiver", alias($._anonymous_receiver_type, $.receiver_type)), "."));
   // Kotlin accepts type parameters on an anonymous function in two
   // placements, and one slot here covers both: with no receiver
   // (`fun <T>() {}`) and after a receiver (`fun T.<A>(x: T): T`, which PSI
@@ -2321,7 +2335,7 @@ function anonymousFunction($, name) {
   // function declaration does, before the receiver: `if (c) fun <T> R.g(x: T) {}`;
   // the two placements are alternatives, so no `<` has two optional slots.
   const head = name
-    ? [choice(seq(optional($.type_parameters), receiver), seq(sep1($._simple_user_type, "."), ".", $.type_parameters))]
+    ? [choice(seq(optional($.type_parameters), receiver), seq(field("receiver", alias($._anonymous_receiver_type, $.receiver_type)), ".", $.type_parameters))]
     : [receiver, optional($.type_parameters)];
   const tail = name
     ? [prec.right(-1, seq(name, $.function_value_parameters, optional(seq(":", $._type)), $.function_body))]

@@ -2673,6 +2673,53 @@
         }
       ]
     },
+    "_anonymous_receiver_type": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "type_modifiers"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "ALIAS",
+              "content": {
+                "type": "SEQ",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_type_reference"
+                  },
+                  {
+                    "type": "REPEAT1",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "quest"
+                    }
+                  }
+                ]
+              },
+              "named": true,
+              "value": "nullable_type"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "_type_reference"
+            }
+          ]
+        }
+      ]
+    },
     "receiver_type": {
       "type": "SEQ",
       "members": [
@@ -7138,29 +7185,17 @@
                     "type": "SEQ",
                     "members": [
                       {
-                        "type": "SEQ",
-                        "members": [
-                          {
+                        "type": "FIELD",
+                        "name": "receiver",
+                        "content": {
+                          "type": "ALIAS",
+                          "content": {
                             "type": "SYMBOL",
-                            "name": "_simple_user_type"
+                            "name": "_anonymous_receiver_type"
                           },
-                          {
-                            "type": "REPEAT",
-                            "content": {
-                              "type": "SEQ",
-                              "members": [
-                                {
-                                  "type": "STRING",
-                                  "value": "."
-                                },
-                                {
-                                  "type": "SYMBOL",
-                                  "name": "_simple_user_type"
-                                }
-                              ]
-                            }
-                          }
-                        ]
+                          "named": true,
+                          "value": "receiver_type"
+                        }
                       },
                       {
                         "type": "STRING",
@@ -7284,29 +7319,17 @@
                             "type": "SEQ",
                             "members": [
                               {
-                                "type": "SEQ",
-                                "members": [
-                                  {
+                                "type": "FIELD",
+                                "name": "receiver",
+                                "content": {
+                                  "type": "ALIAS",
+                                  "content": {
                                     "type": "SYMBOL",
-                                    "name": "_simple_user_type"
+                                    "name": "_anonymous_receiver_type"
                                   },
-                                  {
-                                    "type": "REPEAT",
-                                    "content": {
-                                      "type": "SEQ",
-                                      "members": [
-                                        {
-                                          "type": "STRING",
-                                          "value": "."
-                                        },
-                                        {
-                                          "type": "SYMBOL",
-                                          "name": "_simple_user_type"
-                                        }
-                                      ]
-                                    }
-                                  }
-                                ]
+                                  "named": true,
+                                  "value": "receiver_type"
+                                }
                               },
                               {
                                 "type": "STRING",
@@ -7325,29 +7348,17 @@
                     "type": "SEQ",
                     "members": [
                       {
-                        "type": "SEQ",
-                        "members": [
-                          {
+                        "type": "FIELD",
+                        "name": "receiver",
+                        "content": {
+                          "type": "ALIAS",
+                          "content": {
                             "type": "SYMBOL",
-                            "name": "_simple_user_type"
+                            "name": "_anonymous_receiver_type"
                           },
-                          {
-                            "type": "REPEAT",
-                            "content": {
-                              "type": "SEQ",
-                              "members": [
-                                {
-                                  "type": "STRING",
-                                  "value": "."
-                                },
-                                {
-                                  "type": "SYMBOL",
-                                  "name": "_simple_user_type"
-                                }
-                              ]
-                            }
-                          }
-                        ]
+                          "named": true,
+                          "value": "receiver_type"
+                        }
                       },
                       {
                         "type": "STRING",
@@ -10134,10 +10145,6 @@
       "user_type"
     ],
     [
-      "user_type",
-      "anonymous_function"
-    ],
-    [
       "function_modifier",
       "simple_identifier"
     ],
@@ -10153,6 +10160,14 @@
     [
       "anonymous_function",
       "function_modifier"
+    ],
+    [
+      "_anonymous_receiver_type",
+      "receiver_type"
+    ],
+    [
+      "_anonymous_receiver_type",
+      "nullable_type"
     ],
     [
       "anonymous_function",

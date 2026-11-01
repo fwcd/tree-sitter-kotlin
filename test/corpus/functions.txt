@@ -506,7 +506,9 @@ fun h() { if (c) fun <T> R.g(x: T) {} }
               (type_parameters
                 (type_parameter
                   (type_identifier)))
-              (type_identifier)
+              (receiver_type
+                (user_type
+                  (type_identifier)))
               (simple_identifier)
               (function_value_parameters
                 (parameter
