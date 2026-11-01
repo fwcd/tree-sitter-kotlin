@@ -10488,15 +10488,18 @@
                 "name": "character_escape_seq"
               },
               {
-                "type": "PATTERN",
-                "value": "[^\\n\\r'\\\\]"
+                "type": "SYMBOL",
+                "name": "_character_content"
               }
             ]
           }
         },
         {
-          "type": "STRING",
-          "value": "'"
+          "type": "IMMEDIATE_TOKEN",
+          "content": {
+            "type": "STRING",
+            "value": "'"
+          }
         }
       ]
     },
@@ -10540,21 +10543,18 @@
       "name": "_quoted_identifier"
     },
     "_uni_character_literal": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "STRING",
-          "value": "\\u"
-        },
-        {
-          "type": "PATTERN",
-          "value": "[0-9a-fA-F]{4}"
-        }
-      ]
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "\\\\u[0-9a-fA-F]{4}"
+      }
     },
     "_escaped_identifier": {
-      "type": "PATTERN",
-      "value": "\\\\[tbrn'\"\\\\$]"
+      "type": "IMMEDIATE_TOKEN",
+      "content": {
+        "type": "PATTERN",
+        "value": "\\\\[^\\n\\r]"
+      }
     }
   },
   "extras": [
@@ -10991,6 +10991,10 @@
     {
       "type": "SYMBOL",
       "name": "_further_semicolon"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "_character_content"
     }
   ],
   "inline": [
@@ -11025,8 +11029,7 @@
     "_this_at",
     "_type_parameter_modifier",
     "_type_projection_modifier",
-    "_unary_expression",
-    "_uni_character_literal"
+    "_unary_expression"
   ],
   "supertypes": [],
   "reserved": {

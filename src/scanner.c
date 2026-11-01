@@ -33,6 +33,7 @@ enum TokenType {
   QUOTED_LABEL,
   COMPANION_OBJECT_HINT,
   FURTHER_SEMICOLON,
+  CHARACTER_CONTENT,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -1694,8 +1695,24 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
 // scan starts where the `;` before it ended, and Kotlin's lexer reads `;;` as one token,
 // DOUBLE_SEMICOLON, which its parser rejects. A comment between them (`;/*c*/;`) is no
 // whitespace here, so that pair is an error too, where Kotlin reads two semicolons.
+// The characters of a character literal up to its next escape, closing quote or line break
+// (CHARACTER_CONTENT valid, only inside one): any character, a NUL too, which the internal lexer
+// cannot carry through a character class. The scan starts right after the previous part, so a
+// space or a `/*` is content, as it is for Kotlin's lexer.
+static bool scan_character_content(TSLexer *lexer) {
+  bool content = false;
+  while (!lexer->eof(lexer) && lexer->lookahead != '\'' && lexer->lookahead != '\\' &&
+         lexer->lookahead != '\n' && lexer->lookahead != '\r') {
+    advance(lexer);
+    content = true;
+  }
+  lexer->result_symbol = CHARACTER_CONTENT;
+  return content;
+}
+
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
+  if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT]) return scan_character_content(lexer);
   if (valid_symbols[FURTHER_SEMICOLON] && !valid_symbols[STRING_CONTENT] &&
       (lexer->lookahead == ';' || iswspace(lexer->lookahead))) {
     if (lexer->lookahead == ';') return false;

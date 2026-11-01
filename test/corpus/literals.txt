@@ -854,3 +854,47 @@ val d = 'org.sample'
 --------------------------------------------------------------------------------
 
 (source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (character_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (character_literal)))
+
+================================================================================
+A character literal is one token: any escape, a NUL, a comment opener as text
+================================================================================
+
+val z = '\q'
+val n = ' '
+val s = 'a/*c*/b'
+val t = ' // '
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal
+      (character_escape_seq)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (character_literal)))
+
+================================================================================
+A character literal ends at its line
+:error
+================================================================================
+
+val x = 'a
+b'
+
+--------------------------------------------------------------------------------

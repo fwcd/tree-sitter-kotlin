@@ -420,6 +420,8 @@ module.exports = grammar({
     $._companion_object_hint,
     // A `;` after a separator, not right after another `;`, see _semis.
     $._further_semicolon,
+    // The characters of a character literal between its escapes, NUL included.
+    $._character_content,
   ],
 
   extras: $ => [
@@ -487,7 +489,6 @@ module.exports = grammar({
     $._type_parameter_modifier,
     $._type_projection_modifier,
     $._unary_expression,
-    $._uni_character_literal,
   ],
 
   rules: {
@@ -2393,11 +2394,15 @@ module.exports = grammar({
 
     // Kotlin's lexer reads any run of characters and escapes between the quotes as one character
     // literal (CHARACTER_LITERAL in Kotlin.flex), `''` and `'org.sample'` included, and leaves the
-    // count to the compiler; Groovy-style quotes in Gradle scripts are such literals.
+    // count to the compiler; Groovy-style quotes in Gradle scripts are such literals. It is one
+    // token there, so its parts here follow each other immediately: no line break, and no
+    // comment as an extra inside (`'a/*c*/b'` is text). An escape is a backslash and any
+    // character but a line break (ESCAPE_SEQUENCE), the compiler judging `'\q'`. The characters
+    // between the escapes are scanned externally, as the internal lexer cannot carry a NUL.
     character_literal: $ => seq(
       "'",
-      repeat(choice($.character_escape_seq, /[^\n\r'\\]/)),
-      "'"
+      repeat(choice($.character_escape_seq, $._character_content)),
+      token.immediate("'")
     ),
 
     character_escape_seq: $ => choice(
@@ -2422,12 +2427,9 @@ module.exports = grammar({
     // character class, and Kotlin allows one inside a quoted identifier.
     _backtick_identifier: $ => $._quoted_identifier,
 
-    _uni_character_literal: $ => seq(
-      "\\u",
-      /[0-9a-fA-F]{4}/
-    ),
+    _uni_character_literal: $ => token.immediate(/\\u[0-9a-fA-F]{4}/),
 
-    _escaped_identifier: $ => /\\[tbrn'"\\$]/,
+    _escaped_identifier: $ => token.immediate(/\\[^\n\r]/),
 
   }
 });
