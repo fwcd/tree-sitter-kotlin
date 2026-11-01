@@ -808,9 +808,12 @@ static bool where_type_constraint_follows(TSLexer *lexer, bool *newline) {
 }
 
 // Kotlin attaches a `{` on the next line to a call, never to a name, and an
-// open class delegate keeps the body that follows.
+// open class delegate keeps the body that follows. Nor does a property take one
+// after its name or type, where a backing field may follow (BACKING_FIELD_HINT):
+// parseProperty reads no body, so `var m: Long` then `{ … }` is a property and a
+// lambda statement.
 static bool brace_starts_statement(bool in_delegate, const bool *valid_symbols) {
-  return valid_symbols[EXPRESSION_END_HINT] && !in_delegate &&
+  return ((valid_symbols[EXPRESSION_END_HINT] && !in_delegate) || valid_symbols[BACKING_FIELD_HINT]) &&
          !valid_symbols[STRING_CONTENT];
 }
 

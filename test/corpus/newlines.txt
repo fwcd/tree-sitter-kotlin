@@ -711,3 +711,35 @@ fun f() {
                 (line_comment)
                 (statements
                   (simple_identifier))))))))))
+
+================================================================================
+A brace on the line after a local property's type starts a lambda statement
+================================================================================
+
+fun f() {
+  var m: Long
+  {
+    g()
+  }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier)
+            (user_type
+              (type_identifier))))
+        (lambda_literal
+          (statements
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (value_arguments)))))))))
