@@ -1143,16 +1143,18 @@ static bool semicolon_before_else(TSLexer *lexer) {
 // The scan at each line break of a run of modifier lines reads the rest of the run, so the run
 // it reads is capped at MODIFIER_CHAIN_MAX words: N lines of `private` would otherwise cost
 // about N²/2 steps (16,000 lines took 15 s), and with the cap each line break reads at most that
-// many words. Kotlin's parser has no such bound, so a run longer than the cap before its
-// declaration keyword takes the semicolon at its first line break where PSI reads one
-// declaration; no list of real modifiers comes near it (Kotlin has about thirty).
+// many words. Past the cap the run is taken as modifiers, as it is whenever it ends in a
+// declaration: a run of any length before its declaration keyword reads as PSI reads it, and a
+// line break of a run that ends otherwise is decided once the rest of the run is within the cap,
+// so only a run of more than MODIFIER_CHAIN_MAX modifier words that no declaration follows,
+// which the compiler rejects, keeps its first words as modifiers where PSI reads expressions.
 #define MODIFIER_CHAIN_MAX 256
 static bool semicolon_after_modifier_line(TSLexer *lexer, const bool *valid_symbols) {
   char word[16];
   bool after_modifier = false;
   for (unsigned modifiers = 0;; modifiers++) {
     if (lexer->lookahead == '@') return false;
-    if (modifiers == MODIFIER_CHAIN_MAX) return true;
+    if (modifiers == MODIFIER_CHAIN_MAX) return false;
     if (!constructor_word(lexer, word, sizeof(word))) return true;
     if (WORD_IN(word, DECLARATION_WORDS)) return false;
     // Context parameters are part of the modifier list too (`private` above `context(_: String)`
