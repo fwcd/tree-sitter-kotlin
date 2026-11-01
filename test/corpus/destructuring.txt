@@ -668,3 +668,51 @@ val l = { (@A a, b): Pair<Int, Int> -> a }
                 (type_identifier))))))
       (statements
         (simple_identifier)))))
+
+================================================================================
+A collection literal at the start of a lambda body against a positional parameter
+================================================================================
+
+val a = { [it] }
+val b = { [x, y] -> x }
+val c = { [val key, val value] -> key }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (statements
+        (collection_literal
+          (simple_identifier)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (lambda_parameters
+        (multi_variable_declaration
+          (variable_declaration
+            (simple_identifier))
+          (variable_declaration
+            (simple_identifier))))
+      (statements
+        (simple_identifier))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (lambda_parameters
+        (multi_variable_declaration
+          (variable_declaration
+            (binding_pattern_kind)
+            (simple_identifier))
+          (variable_declaration
+            (binding_pattern_kind)
+            (simple_identifier))))
+      (statements
+        (simple_identifier)))))

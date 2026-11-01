@@ -249,14 +249,15 @@ module.exports = grammar({
     // `( name` at statement start: a destructuring target or a parenthesized
     // expression. Nothing tells them apart until after the ')', so carry both.
     [$._name_based_destructuring_entry_expr, $._primary_expression],
+    [$._positional_destructuring_entry_expr, $._primary_expression],
+    [$._positional_destructuring_entry_expr, $._positional_destructuring_first_entry],
+    [$._positional_destructuring_entry_expr, $.prefix_expression, $._positional_destructuring_first_entry],
     // `{ (val a) ...` or `{ [val a] ...`: a lambda's destructured parameter or a destructuring
     // statement that must start with `val`/`var`; the `->` or the `=` decides.
     [$._name_based_destructuring_entry_expr, $._name_based_destructuring_first_entry],
-    [$._positional_destructuring_entry, $._positional_destructuring_first_entry],
     // An annotated destructuring entry against an annotated expression or an annotated type:
     // `[@A val x] = y` against `[@A x]`, `(@A x, y) ->` against `(@A x)`.
     [$._name_based_destructuring_entry_expr, $.prefix_expression, $._name_based_destructuring_first_entry],
-    [$._positional_destructuring_entry, $.prefix_expression, $._positional_destructuring_first_entry],
     [$._name_based_destructuring_entry, $._type_modifier],
     [$.prefix_expression, $._name_based_destructuring_first_entry],
     [$.prefix_expression, $._positional_destructuring_first_entry],
@@ -1080,6 +1081,15 @@ module.exports = grammar({
     )),
 
     // Entry in positional (bracketed) destructuring — supports optional val/var, NO renaming
+    // The statement-position variant, as for the name-based one: `{ [it] }` is a body holding a
+    // collection literal, `{ [a, b] -> }` a destructured parameter, and only the `->` tells.
+    _positional_destructuring_entry_expr: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      repeat($.annotation),
+      optional($.binding_pattern_kind),
+      $.simple_identifier,
+      optional(seq(":", $._type))
+    ))),
+
     _positional_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
       repeat($.annotation),
       optional($.binding_pattern_kind),
@@ -1720,12 +1730,12 @@ module.exports = grammar({
       optional(seq("=", $.simple_identifier))
     ))),
 
-    _positional_destructuring_first_entry: $ => prec.left(PREC.VAR_DECL, seq(
+    _positional_destructuring_first_entry: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
       repeat($.annotation),
       $.binding_pattern_kind,
       $.simple_identifier,
       optional(seq(":", $._type))
-    )),
+    ))),
 
     _multi_variable_declaration_expr: $ => choice(
       seq(
@@ -1736,7 +1746,7 @@ module.exports = grammar({
       ),
       seq(
         '[',
-        sep1(alias($._positional_destructuring_entry, $.variable_declaration), ','),
+        sep1(alias($._positional_destructuring_entry_expr, $.variable_declaration), ','),
         optional(','),
         ']'
       ),

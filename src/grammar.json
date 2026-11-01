@@ -3382,6 +3382,63 @@
         ]
       }
     },
+    "_positional_destructuring_entry_expr": {
+      "type": "PREC_DYNAMIC",
+      "value": 3,
+      "content": {
+        "type": "PREC_LEFT",
+        "value": 0,
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "annotation"
+              }
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "binding_pattern_kind"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "simple_identifier"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": ":"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "_type"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
     "_positional_destructuring_entry": {
       "type": "PREC_LEFT",
       "value": 3,
@@ -7003,48 +7060,52 @@
       }
     },
     "_positional_destructuring_first_entry": {
-      "type": "PREC_LEFT",
+      "type": "PREC_DYNAMIC",
       "value": 3,
       "content": {
-        "type": "SEQ",
-        "members": [
-          {
-            "type": "REPEAT",
-            "content": {
-              "type": "SYMBOL",
-              "name": "annotation"
-            }
-          },
-          {
-            "type": "SYMBOL",
-            "name": "binding_pattern_kind"
-          },
-          {
-            "type": "SYMBOL",
-            "name": "simple_identifier"
-          },
-          {
-            "type": "CHOICE",
-            "members": [
-              {
-                "type": "SEQ",
-                "members": [
-                  {
-                    "type": "STRING",
-                    "value": ":"
-                  },
-                  {
-                    "type": "SYMBOL",
-                    "name": "_type"
-                  }
-                ]
-              },
-              {
-                "type": "BLANK"
+        "type": "PREC_LEFT",
+        "value": 0,
+        "content": {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "annotation"
               }
-            ]
-          }
-        ]
+            },
+            {
+              "type": "SYMBOL",
+              "name": "binding_pattern_kind"
+            },
+            {
+              "type": "SYMBOL",
+              "name": "simple_identifier"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SEQ",
+                  "members": [
+                    {
+                      "type": "STRING",
+                      "value": ":"
+                    },
+                    {
+                      "type": "SYMBOL",
+                      "name": "_type"
+                    }
+                  ]
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            }
+          ]
+        }
       }
     },
     "_multi_variable_declaration_expr": {
@@ -7124,7 +7185,7 @@
                   "type": "ALIAS",
                   "content": {
                     "type": "SYMBOL",
-                    "name": "_positional_destructuring_entry"
+                    "name": "_positional_destructuring_entry_expr"
                   },
                   "named": true,
                   "value": "variable_declaration"
@@ -7142,7 +7203,7 @@
                         "type": "ALIAS",
                         "content": {
                           "type": "SYMBOL",
-                          "name": "_positional_destructuring_entry"
+                          "name": "_positional_destructuring_entry_expr"
                         },
                         "named": true,
                         "value": "variable_declaration"
@@ -10250,22 +10311,26 @@
       "_primary_expression"
     ],
     [
-      "_name_based_destructuring_entry_expr",
-      "_name_based_destructuring_first_entry"
+      "_positional_destructuring_entry_expr",
+      "_primary_expression"
     ],
     [
-      "_positional_destructuring_entry",
+      "_positional_destructuring_entry_expr",
       "_positional_destructuring_first_entry"
+    ],
+    [
+      "_positional_destructuring_entry_expr",
+      "prefix_expression",
+      "_positional_destructuring_first_entry"
+    ],
+    [
+      "_name_based_destructuring_entry_expr",
+      "_name_based_destructuring_first_entry"
     ],
     [
       "_name_based_destructuring_entry_expr",
       "prefix_expression",
       "_name_based_destructuring_first_entry"
-    ],
-    [
-      "_positional_destructuring_entry",
-      "prefix_expression",
-      "_positional_destructuring_first_entry"
     ],
     [
       "_name_based_destructuring_entry",
