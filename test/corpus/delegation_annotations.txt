@@ -378,3 +378,87 @@ class D : I by if (c) while (d) foo() else z {}
           (control_structure_body
             (simple_identifier)))))
     (class_body)))
+
+================================================================================
+A generic call in an if branch of a delegate
+================================================================================
+
+class C : I by if (c) x<T> else y<T> {}
+class D : I by if (c) x = if (d) y<T> else z<T> else z {}
+class E : I by if (c) x!! else y {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (type_arguments
+                  (type_projection
+                    (user_type
+                      (type_identifier)))))))
+          (control_structure_body
+            (call_expression
+              (simple_identifier)
+              (call_suffix
+                (type_arguments
+                  (type_projection
+                    (user_type
+                      (type_identifier))))))))))
+    (class_body))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (assignment
+              (directly_assignable_expression
+                (simple_identifier))
+              (if_expression
+                (simple_identifier)
+                (control_structure_body
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (type_arguments
+                        (type_projection
+                          (user_type
+                            (type_identifier)))))))
+                (control_structure_body
+                  (call_expression
+                    (simple_identifier)
+                    (call_suffix
+                      (type_arguments
+                        (type_projection
+                          (user_type
+                            (type_identifier))))))))))
+          (control_structure_body
+            (simple_identifier)))))
+    (class_body))
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (if_expression
+          (simple_identifier)
+          (control_structure_body
+            (postfix_expression
+              (simple_identifier)))
+          (control_structure_body
+            (simple_identifier)))))
+    (class_body)))

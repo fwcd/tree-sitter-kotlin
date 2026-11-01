@@ -300,6 +300,7 @@ module.exports = grammar({
 
     // "<x>.<y> = z assignment conflicts with <x>.<y>() function call"
     [$._postfix_unary_expression, $._expression],
+    [$._postfix_unary_expression_no_trailing_lambda, $._expression_no_trailing_lambda],
 
     // ambiguity between generics and comparison operations (foo < b > c)
     // _generic_call_expression is the prec.dynamic(1) variant with required type_arguments
@@ -828,12 +829,19 @@ module.exports = grammar({
     _cast_assignable_no_trailing_lambda: $ => prec(1, alias($._as_expression_no_trailing_lambda, $.as_expression)),
 
     // The left side of such an assignment, in the shape of directly_assignable_expression: a primary
-    // without trailing lambdas and its assignable suffixes, a name, or one in parentheses.
+    // without trailing lambdas and its assignable suffixes, a name, or one in parentheses. As
+    // there, the precedence sits on the whole and the suffixes are a rule of their own, which
+    // stays in conflict with the expression: a precedence on the suffixes themselves would shift
+    // the `<` after `x` as a selector's type arguments, so `by if (c) x<T> else y<T>` failed.
     _assignable_no_trailing_lambda: $ => prec(PREC.ASSIGNMENT, choice(
-      seq($._primary_expression_no_trailing_lambda, repeat1($._postfix_unary_suffix)),
+      $._postfix_unary_expression_no_trailing_lambda,
       $.simple_identifier,
       $.parenthesized_expression
     )),
+
+    _postfix_unary_expression_no_trailing_lambda: $ => seq(
+      $._primary_expression_no_trailing_lambda, repeat1($._postfix_unary_suffix)
+    ),
 
     // Call expression that only allows value_arguments, not trailing lambdas
     call_expression_no_trailing_lambda: $ => prec.left(PREC.POSTFIX, seq(

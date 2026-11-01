@@ -2097,20 +2097,8 @@
         "type": "CHOICE",
         "members": [
           {
-            "type": "SEQ",
-            "members": [
-              {
-                "type": "SYMBOL",
-                "name": "_primary_expression_no_trailing_lambda"
-              },
-              {
-                "type": "REPEAT1",
-                "content": {
-                  "type": "SYMBOL",
-                  "name": "_postfix_unary_suffix"
-                }
-              }
-            ]
+            "type": "SYMBOL",
+            "name": "_postfix_unary_expression_no_trailing_lambda"
           },
           {
             "type": "SYMBOL",
@@ -2122,6 +2110,22 @@
           }
         ]
       }
+    },
+    "_postfix_unary_expression_no_trailing_lambda": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "_primary_expression_no_trailing_lambda"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_postfix_unary_suffix"
+          }
+        }
+      ]
     },
     "call_expression_no_trailing_lambda": {
       "type": "PREC_LEFT",
@@ -10419,6 +10423,10 @@
     [
       "_postfix_unary_expression",
       "_expression"
+    ],
+    [
+      "_postfix_unary_expression_no_trailing_lambda",
+      "_expression_no_trailing_lambda"
     ],
     [
       "call_expression",
