@@ -1,6 +1,5 @@
 ==================
 JetBrains PSI: CallsInWhen
-:error
 ==================
 
 // COMPILATION_ERRORS
@@ -22,3 +21,5 @@ fun foo() {
 
 
 ---
+
+(source_file (line_comment) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (when_expression (when_subject (simple_identifier)) (when_entry (when_condition (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (control_structure_body (simple_identifier))) (when_entry (when_condition (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments)))) (control_structure_body (simple_identifier))) (when_entry (when_condition (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (type_arguments (type_projection (user_type (type_identifier))))))) (control_structure_body (simple_identifier))) (when_entry (when_condition (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments (value_argument (simple_identifier)))))) (control_structure_body (simple_identifier))) (when_entry (when_condition (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments (value_argument (simple_identifier)) (value_argument (simple_identifier)))))) (control_structure_body (simple_identifier))) (when_entry (when_condition (navigation_expression (simple_identifier) (navigation_suffix (lambda_literal (statements (simple_identifier)))))) (control_structure_body (simple_identifier))) (when_entry (when_condition (navigation_expression (simple_identifier) (navigation_suffix (lambda_literal (statements (prefix_expression (simple_identifier))))))) (control_structure_body (simple_identifier))) (when_entry (when_condition (navigation_expression (simple_identifier) (navigation_suffix (lambda_literal (statements (prefix_expression (simple_identifier))))))) (control_structure_body (simple_identifier))) (when_entry (control_structure_body (simple_identifier))))))))

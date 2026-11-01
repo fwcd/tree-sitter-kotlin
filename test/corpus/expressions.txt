@@ -2640,3 +2640,97 @@ fun l() { x?.class }
 
 --------------------------------------------------------------------------------
 
+
+================================================================================
+Type arguments without value arguments make a call
+================================================================================
+
+fun f() {
+    g(x<T>)
+    when (x) { a.foo<T> -> a }
+    x<T>(1)
+    Array<Array<T>>(3)
+    val c = y as a.B<C<D>>
+    try {} finally {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments
+              (value_argument
+                (call_expression
+                  (simple_identifier)
+                  (call_suffix
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier))))))))))
+        (when_expression
+          (when_subject
+            (simple_identifier))
+          (when_entry
+            (when_condition
+              (call_expression
+                (navigation_expression
+                  (simple_identifier)
+                  (navigation_suffix
+                    (simple_identifier)))
+                (call_suffix
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))
+            (control_structure_body
+              (simple_identifier))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier))))
+            (value_arguments
+              (value_argument
+                (integer_literal)))))
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (type_arguments
+              (type_projection
+                (user_type
+                  (type_identifier)
+                  (type_arguments
+                    (type_projection
+                      (user_type
+                        (type_identifier)))))))
+            (value_arguments
+              (value_argument
+                (integer_literal)))))
+        (property_declaration
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (as_expression
+            (simple_identifier)
+            (user_type
+              (type_identifier)
+              (type_identifier)
+              (type_arguments
+                (type_projection
+                  (user_type
+                    (type_identifier)
+                    (type_arguments
+                      (type_projection
+                        (user_type
+                          (type_identifier))))))))))
+        (try_expression
+          (finally_block))))))

@@ -1529,14 +1529,14 @@ module.exports = grammar({
     call_expression: $ => prec.left(PREC.POSTFIX, seq($._expression, $.call_suffix)),
 
     // Generic call expression: call with REQUIRED type_arguments.
-    // prec.dynamic(1) tells GLR to prefer the generic-call interpretation
+    // The prec.dynamic(1) of its suffix tells GLR to prefer the generic-call interpretation
     // (f<T>(x)) over the comparison interpretation (f < T > (x)).
     // Separated from call_expression so the dynamic boost only applies
     // when type_arguments are actually parsed, not for all calls.
-    _generic_call_expression: $ => prec.left(PREC.POSTFIX, prec.dynamic(1, seq(
+    _generic_call_expression: $ => prec.left(PREC.POSTFIX, seq(
       $._expression,
       alias($._generic_call_suffix, $.call_suffix)
-    ))),
+    )),
 
     indexing_expression: $ => UNARY_FORMS($, $._expression).indexing_expression,
 
@@ -1641,14 +1641,24 @@ module.exports = grammar({
       optional($._call_lambda_hint)
     )),
 
-    // Call suffix with REQUIRED type_arguments (used by _generic_call_expression)
-    _generic_call_suffix: $ => prec.left(seq(
-      $.type_arguments,
-      choice(
-        prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
-        $.value_arguments
-      ),
-      optional($._call_lambda_hint)
+    // Call suffix with REQUIRED type_arguments (used by _generic_call_expression). The arguments
+    // are optional: KotlinExpressionParsing.parseCallSuffix makes a call of type arguments that
+    // close with `>` whatever follows (`g(x<T>)`, `a.foo<T> -> a`), while `a < b > c`, which
+    // that reading leaves without an operator, stays a comparison. A suffix with arguments ranks
+    // its reading higher, one without lower: a reading that needs one is the wrong one wherever
+    // another reads the same tokens, as the comparison reading of `Array<Array<T>>(3)`
+    // (`Array < Array<T> > (3)`) and that of `x as a.B<C<D>>` above `try { … }` (a navigation
+    // after `x as a`, compared with `C<D>` and with the `try`) do.
+    _generic_call_suffix: $ => prec.right(choice(
+      prec.dynamic(1, seq(
+        $.type_arguments,
+        choice(
+          prec(PREC.ARGUMENTS, seq(optional($.value_arguments), $.annotated_lambda)),
+          $.value_arguments
+        ),
+        optional($._call_lambda_hint)
+      )),
+      prec.dynamic(-1, seq($.type_arguments, optional($._call_lambda_hint)))
     )),
 
     annotated_lambda: $ => seq(

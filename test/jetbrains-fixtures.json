@@ -5,8 +5,8 @@
   "comparedFixtures": 436,
   "fixtureContentHash": "946c62787d7d902c2881055f669ad81602fcee998bd5844f25c194bc329e4354",
   "parser": {
-    "src/parser.c": "8da7016bb2e3a2a80688f4aac673f733d23d4b692f900c32e3832fe310b71db3",
-    "src/scanner.c": "47b816ad20e6d0240854736e8255f7ce1163b134fb45a0396f57195ed27f2334"
+    "src/parser.c": "9e74dffe9463820d285e853adfc43518ec9f52e33bd9a339df8530386630c761",
+    "src/scanner.c": "0d86529027b950b43f595a9869e7c5f957ef7a8acc9f9d9c9271b771c1d091fe"
   },
   "excluded": [
     {
@@ -71,6 +71,7 @@
     "BabySteps",
     "ByClauses",
     "CallWithManyClosures",
+    "CallsInWhen",
     "CollectionLiterals",
     "CommentsBindingInLambda",
     "CommentsBindingInStatementBlock",
@@ -97,6 +98,7 @@
     "Enums",
     "ExtensionsWithQNReceiver",
     "FloatingPointLiteral",
+    "FunctionCalls",
     "FunctionLiterals",
     "FunctionTypes",
     "FunctionsWithoutName",
@@ -123,6 +125,7 @@
     "SemicolonAfterIf",
     "SimpleClassMembers",
     "SimpleExpressions",
+    "SoftKeywordsInTypeArguments",
     "TraitConstructor",
     "TypeAlias",
     "TypeConstraints",
@@ -490,13 +493,10 @@
     "varargArgumentWithFunctionalType"
   ],
   "expectedFailures": [
-    "CallsInWhen",
-    "FunctionCalls",
     "FunctionExpressions",
     "LocalDeclarations",
     "SimpleModifiers",
     "SoftKeywords",
-    "SoftKeywordsInTypeArguments",
     "annotation/Annotations",
     "annotation/modifiersMigration/newModifiers",
     "destructuring/danglingAnnotation",
