@@ -2537,3 +2537,27 @@ fun i() { value.null }
 --------------------------------------------------------------------------------
 
 (source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (string_literal (string_content)) (navigation_suffix (jump_expression)))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (null_literal)))))))
+
+================================================================================
+A when, an object literal or an anonymous function as a navigation selector
+================================================================================
+
+fun f() { x.fun() }
+fun g() { x.object{} }
+fun h() { x.when{} }
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (anonymous_function (function_value_parameters))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (object_literal (class_body))))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (when_expression)))))))
+
+================================================================================
+Neither class nor a number is a selector after a dot
+:error
+================================================================================
+
+fun j() { x.class() }
+fun k() { x.1 }
+fun l() { x?.class }
+
+--------------------------------------------------------------------------------
+

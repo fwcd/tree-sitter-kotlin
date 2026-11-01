@@ -1560,23 +1560,35 @@ module.exports = grammar({
       seq(
         // this introduces ambiguities with 'less than' for comparisons
         optional($.type_arguments),
-        $._member_access_operator,
+        choice(".", "?."),
         choice(
           seq($.simple_identifier, optional($._expression_end_hint)),
-          // `ArrayList.this`, `x.super`: Kotlin's selector is an atomic expression, so the reserved
-          // `this` and `super` are ones, and so are a literal and a jump, `value.null` and
-          // `"foo".return`, which the compiler rejects.
+          // Kotlin's selector is an atomic expression (parseSelectorCallExpression), so the
+          // reserved `this` and `super` are ones, and so are a literal, a jump, `value.null` and
+          // `"foo".return`, a `when`, an object literal and an anonymous function, which the
+          // compiler rejects. A number is not one: Kotlin's lexer reads `.1` as a real literal.
           $.this_expression,
           $.super_expression,
-          $._literal_constant,
+          $.boolean_literal,
+          $.null_literal,
+          $.character_literal,
           $.jump_expression,
           $.parenthesized_expression,
+          $.when_expression,
+          $.object_literal,
+          alias($._selector_function, $.anonymous_function),
           // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
           // compiler diagnostic; Kotlin's parser reads the lambda and PSI
           // builds a DOT_QUALIFIED_EXPRESSION whose selector is the call.
-          $.lambda_literal,
-          seq("class", optional($._expression_end_hint))
+          $.lambda_literal
         )
+      ),
+      // After `::` only a name or `class` (parseDoubleColonSuffix).
+      seq(
+        optional($.type_arguments),
+        "::",
+        choice($.simple_identifier, "class"),
+        optional($._expression_end_hint)
       ),
       // A callable reference on a nullable generic receiver type, `List<T>?::orEmpty`, read the
       // way `List<T>::size` is, with callable_reference's question marks.
@@ -1796,6 +1808,13 @@ module.exports = grammar({
     // where the annotation is a modifier of the declaration or a prefix of the expression. The
     // named form takes a body, so that after `fun <T> f()` the next line's `where@A T` stays a
     // type constraint rather than a label of a trailing lambda.
+    // `x.fun()`: an anonymous function as a selector, in its plain form only. The full form (a
+    // receiver, type parameters, a return type) cost 198 more states, a return type alone 81,
+    // for code no compiler accepts; tools/psi-gate/expected.json lists the difference.
+    _selector_function: $ => prec.right(seq(
+      "fun", $.function_value_parameters, optional($.function_body)
+    )),
+
     anonymous_function: $ => choice(
       prec.right(anonymousFunction($)),
       prec.dynamic(-1, anonymousFunction($, $.simple_identifier)),

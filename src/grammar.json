@@ -6048,8 +6048,17 @@
               ]
             },
             {
-              "type": "SYMBOL",
-              "name": "_member_access_operator"
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "STRING",
+                  "value": "."
+                },
+                {
+                  "type": "STRING",
+                  "value": "?."
+                }
+              ]
             },
             {
               "type": "CHOICE",
@@ -6085,7 +6094,15 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "_literal_constant"
+                  "name": "boolean_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "null_literal"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "character_literal"
                 },
                 {
                   "type": "SYMBOL",
@@ -6097,28 +6114,70 @@
                 },
                 {
                   "type": "SYMBOL",
-                  "name": "lambda_literal"
+                  "name": "when_expression"
                 },
                 {
-                  "type": "SEQ",
-                  "members": [
-                    {
-                      "type": "STRING",
-                      "value": "class"
-                    },
-                    {
-                      "type": "CHOICE",
-                      "members": [
-                        {
-                          "type": "SYMBOL",
-                          "name": "_expression_end_hint"
-                        },
-                        {
-                          "type": "BLANK"
-                        }
-                      ]
-                    }
-                  ]
+                  "type": "SYMBOL",
+                  "name": "object_literal"
+                },
+                {
+                  "type": "ALIAS",
+                  "content": {
+                    "type": "SYMBOL",
+                    "name": "_selector_function"
+                  },
+                  "named": true,
+                  "value": "anonymous_function"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "lambda_literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "SEQ",
+          "members": [
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "type_arguments"
+                },
+                {
+                  "type": "BLANK"
+                }
+              ]
+            },
+            {
+              "type": "STRING",
+              "value": "::"
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "simple_identifier"
+                },
+                {
+                  "type": "STRING",
+                  "value": "class"
+                }
+              ]
+            },
+            {
+              "type": "CHOICE",
+              "members": [
+                {
+                  "type": "SYMBOL",
+                  "name": "_expression_end_hint"
+                },
+                {
+                  "type": "BLANK"
                 }
               ]
             }
@@ -7455,6 +7514,35 @@
           ]
         }
       ]
+    },
+    "_selector_function": {
+      "type": "PREC_RIGHT",
+      "value": 0,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "fun"
+          },
+          {
+            "type": "SYMBOL",
+            "name": "function_value_parameters"
+          },
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "function_body"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          }
+        ]
+      }
     },
     "anonymous_function": {
       "type": "CHOICE",

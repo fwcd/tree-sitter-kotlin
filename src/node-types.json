@@ -6626,7 +6626,7 @@
       "required": false,
       "types": [
         {
-          "type": "bin_literal",
+          "type": "anonymous_function",
           "named": true
         },
         {
@@ -6638,14 +6638,6 @@
           "named": true
         },
         {
-          "type": "hex_literal",
-          "named": true
-        },
-        {
-          "type": "integer_literal",
-          "named": true
-        },
-        {
           "type": "jump_expression",
           "named": true
         },
@@ -6654,11 +6646,11 @@
           "named": true
         },
         {
-          "type": "long_literal",
+          "type": "null_literal",
           "named": true
         },
         {
-          "type": "null_literal",
+          "type": "object_literal",
           "named": true
         },
         {
@@ -6667,10 +6659,6 @@
         },
         {
           "type": "quest",
-          "named": true
-        },
-        {
-          "type": "real_literal",
           "named": true
         },
         {
@@ -6690,7 +6678,7 @@
           "named": true
         },
         {
-          "type": "unsigned_literal",
+          "type": "when_expression",
           "named": true
         }
       ]
