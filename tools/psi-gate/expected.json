@@ -6,7 +6,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -17,7 +17,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -28,7 +28,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 2,
         "idea": 1
@@ -40,7 +40,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -51,7 +51,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -62,7 +62,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -73,7 +73,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -84,7 +84,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -95,11 +95,11 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "corpus": 1,
         "snippets": 1,
-        "mutations": 20,
+        "mutations": 22,
         "kotlin": 1
       },
       "example": "corpus: jetbrains/recovery/InterfaceInExpressionPosition/0000.kt:4"
@@ -109,7 +109,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -120,7 +120,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -131,7 +131,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -142,7 +142,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -153,7 +153,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -164,7 +164,7 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "snippets": 1
       },
@@ -175,9 +175,9 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
-        "snippets": 2,
+        "snippets": 4,
         "mutations": 2
       },
       "example": "snippets: mutations/position-selector/0019.kt:2"
@@ -187,9 +187,9 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
-        "snippets": 2
+        "snippets": 4
       },
       "example": "snippets: mutations/position-selector/0020.kt:2"
     },
@@ -198,10 +198,10 @@
       "status": "deliberate",
       "reason": "A class, interface, object, property or type alias where an expression stands (`1 < interface I {}`, `x.val y = 1`): parseAtomicExpression reads a local declaration there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression (LOCAL_DECLARATION_FIRST)",
-      "cost": "Every binary and prefix rule repeated for declaration operands: about 43 MB of src/parser.c (measured in the first round).",
+      "cost": "Class, object and type alias declarations as operands, measured on the head of the fourth review round: 3,091 states (6,266 → 9,357) and 12.1 MB of src/parser.c (16.6 → 28.8 MB); properties conflict with `when (val …)` on top of that. On main these inputs have no ERROR only because main misreads them (`interface I { … }` as an infix call with a trailing lambda).",
       "counts": {
         "corpus": 1,
-        "mutations": 14,
+        "mutations": 12,
         "kotlin": 2
       },
       "example": "corpus: jetbrains/recovery/binaryExpression/SoftModifierAsInfixFunction/0000.kt:4"
@@ -211,10 +211,10 @@
       "status": "deliberate",
       "reason": "A named function without a body, or after an annotation with `suspend`, in an expression that is no control structure body (`val a = fun name()`, `g(@A suspend fun() {})`): at statement start the same form takes the `where@` of a type constraint as a label, and the annotated form conflicts in every expression context. The compiler rejects both.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression, KotlinParsing.parseLocalDeclaration",
-      "cost": "Conflicts in every expression context; not measured to the end.",
+      "cost": "Measured in the fourth round: reading a named function without a body wherever an expression starts takes fewer states but breaks valid code, as `fun <T> f()` above `where@A T : X {}` then reads `where@` as the label of a trailing lambda.",
       "counts": {
         "corpus": 1,
-        "mutations": 93,
+        "mutations": 103,
         "kotlin": 1
       },
       "example": "corpus: jetbrains/FunctionExpressions/0000.kt:5"
@@ -224,7 +224,7 @@
       "status": "deliberate",
       "reason": "A named function without a body, or after an annotation with `suspend`, in an expression that is no control structure body (`val a = fun name()`, `g(@A suspend fun() {})`): at statement start the same form takes the `where@` of a type constraint as a label, and the annotated form conflicts in every expression context. The compiler rejects both.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression, KotlinParsing.parseLocalDeclaration",
-      "cost": "Conflicts in every expression context; not measured to the end.",
+      "cost": "Measured in the fourth round: reading a named function without a body wherever an expression starts takes fewer states but breaks valid code, as `fun <T> f()` above `where@A T : X {}` then reads `where@` as the label of a trailing lambda.",
       "counts": {
         "idea": 1
       },
@@ -235,7 +235,7 @@
       "status": "deliberate",
       "reason": "A named function without a body, or after an annotation with `suspend`, in an expression that is no control structure body (`val a = fun name()`, `g(@A suspend fun() {})`): at statement start the same form takes the `where@` of a type constraint as a label, and the annotated form conflicts in every expression context. The compiler rejects both.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression, KotlinParsing.parseLocalDeclaration",
-      "cost": "Conflicts in every expression context; not measured to the end.",
+      "cost": "Measured in the fourth round: reading a named function without a body wherever an expression starts takes fewer states but breaks valid code, as `fun <T> f()` above `where@A T : X {}` then reads `where@` as the label of a trailing lambda.",
       "counts": {
         "snippets": 2
       },
@@ -246,9 +246,9 @@
       "status": "deliberate",
       "reason": "A named function without a body, or after an annotation with `suspend`, in an expression that is no control structure body (`val a = fun name()`, `g(@A suspend fun() {})`): at statement start the same form takes the `where@` of a type constraint as a label, and the annotated form conflicts in every expression context. The compiler rejects both.",
       "kotlin": "KotlinExpressionParsing.parseAtomicExpression, KotlinParsing.parseLocalDeclaration",
-      "cost": "Conflicts in every expression context; not measured to the end.",
+      "cost": "Measured in the fourth round: reading a named function without a body wherever an expression starts takes fewer states but breaks valid code, as `fun <T> f()` above `where@A T : X {}` then reads `where@` as the label of a trailing lambda.",
       "counts": {
-        "snippets": 1
+        "snippets": 2
       },
       "example": "snippets: mutations/position-argument/0009.kt:2"
     },
@@ -259,7 +259,7 @@
       "kotlin": "KotlinExpressionParsing.parseDoubleColonSuffix",
       "cost": "The general suffix conflicts with the parenthesized receiver; a wider receiver reshaped 46 real files.",
       "counts": {
-        "snippets": 28
+        "snippets": 32
       },
       "example": "snippets: mutations/position-nullable-reference-receiver/0022.kt:1"
     },
@@ -268,7 +268,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 2
       },
@@ -279,7 +279,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 3
       },
@@ -290,7 +290,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 1
       },
@@ -301,7 +301,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 4
       },
@@ -312,7 +312,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 2
       },
@@ -323,7 +323,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 6
       },
@@ -334,7 +334,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 3
       },
@@ -345,7 +345,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 3
       },
@@ -356,7 +356,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 3
       },
@@ -367,7 +367,7 @@
       "status": "deliberate",
       "reason": "A control structure, a loop or a declaration as a selector after a dot (`x.if (c) a else b`, `x.fun g() {}`): PSI reads any atomic expression there, the compiler rejects it.",
       "kotlin": "KotlinExpressionParsing.parseSelectorCallExpression",
-      "cost": "`if` and `try` as selectors cost 139 states, the full anonymous function form 198.",
+      "cost": "`if` and `try` as selectors cost 139 states (third round). The full anonymous function form is read since the fourth round (256 states), as main read it; a named one (`x.fun g() {}`) and the loops stay errors.",
       "counts": {
         "mutations": 4
       },
@@ -381,7 +381,7 @@
       "cost": "Listed as a deliberate difference in the pull request.",
       "counts": {
         "corpus": 1,
-        "mutations": 26,
+        "mutations": 34,
         "kotlin": 1
       },
       "example": "corpus: jetbrains/annotation/modifiersMigration/newModifiers/0000.kt:3"
@@ -394,7 +394,7 @@
       "cost": "Listed as a deliberate difference in the pull request.",
       "counts": {
         "corpus": 1,
-        "mutations": 83,
+        "mutations": 89,
         "kotlin": 1,
         "idea": 3
       },
@@ -419,7 +419,7 @@
       "cost": "Listed as a deliberate difference in the pull request.",
       "counts": {
         "corpus": 1,
-        "mutations": 17,
+        "mutations": 18,
         "kotlin": 1
       },
       "example": "corpus: jetbrains/annotation/Annotations/0000.kt:19"
@@ -431,10 +431,9 @@
       "kotlin": "KotlinParsing.parseModifierList",
       "cost": "A counter in the serialized scanner state, a new serialization format.",
       "counts": {
-        "mutations": 1,
         "kotlin": 1
       },
-      "example": "mutations: modifier-run/300x1/DoubleColon~1.kt:346"
+      "example": "kotlin: compiler/psi/psi-impl/testData/psi/annotation/at/validDeclarations.kt:31"
     },
     {
       "key": "^A\\ source_file\\ >\\ ERROR\\ \"in\"\\ \\|\\ psi\\ MODIFIER_LIST$",
@@ -444,7 +443,7 @@
       "cost": "Listed as a deliberate difference in the pull request.",
       "counts": {
         "corpus": 2,
-        "mutations": 46,
+        "mutations": 58,
         "kotlin": 2
       },
       "example": "corpus: jetbrains/SimpleModifiers/0000.kt:16"
@@ -457,21 +456,10 @@
       "cost": "Listed as a deliberate difference in the pull request.",
       "counts": {
         "corpus": 1,
-        "mutations": 20,
+        "mutations": 22,
         "kotlin": 1
       },
       "example": "corpus: jetbrains/LocalDeclarations/0000.kt:9"
-    },
-    {
-      "key": "^C\\*\\ @\\ KtFile:\\ psi\\ FILE_ANNOTATION_LIST\\ /\\ ts\\ CLASS$",
-      "status": "deliberate",
-      "reason": "A run of more than 256 modifier words before its declaration keyword: the scanner reads at most 256 words ahead (MODIFIER_CHAIN_MAX), which keeps a run of single-word lines linear.",
-      "kotlin": "KotlinParsing.parseModifierList",
-      "cost": "A counter in the serialized scanner state, a new serialization format.",
-      "counts": {
-        "mutations": 2
-      },
-      "example": "mutations: modifier-run/300x1/LineCommentAfterFileAnnotations~0.kt"
     },
     {
       "key": "^B\\ psi\\ BLOCK:\\ Unexpected\\ tokens\\ \\(use\\ ';'\\ to\\ separate\\ expressions\\ on\\ the\\ same\\ line\\)\\ \\|\\ ts\\ additive_expression$",
@@ -492,7 +480,7 @@
       "cost": "A separator token of their own: 2,113 states, 28 % of the table, 5.2 MB of src/parser.c.",
       "counts": {
         "snippets": 3,
-        "mutations": 4,
+        "mutations": 6,
         "kotlin": 1
       },
       "example": "snippets: mutations/after-brace-local/0002.kt:2"
@@ -538,7 +526,7 @@
       "kotlin": "KotlinParsing.parseStatements (\"Unexpected tokens\")",
       "cost": "A separator token of their own: 2,113 states, 28 % of the table, 5.2 MB of src/parser.c.",
       "counts": {
-        "snippets": 14
+        "snippets": 17
       },
       "example": "snippets: mutations/position-after-brace-same-line/0007.kt:2"
     },
@@ -549,7 +537,7 @@
       "kotlin": "KotlinParsing.parseStatements (\"Unexpected tokens\")",
       "cost": "A separator token of their own: 2,113 states, 28 % of the table, 5.2 MB of src/parser.c.",
       "counts": {
-        "snippets": 2
+        "snippets": 3
       },
       "example": "snippets: mutations/position-after-brace-same-line/0035.kt:2"
     },
@@ -560,7 +548,7 @@
       "kotlin": "KotlinParsing.parseStatements (\"Unexpected tokens\")",
       "cost": "A separator token of their own: 2,113 states, 28 % of the table, 5.2 MB of src/parser.c.",
       "counts": {
-        "snippets": 3
+        "snippets": 4
       },
       "example": "snippets: review-329/r3-4-same-line-locals.kt:1"
     },
@@ -583,20 +571,11 @@
       "example": "mutations: keyword-selector/as/DynamicReceiver~1.kt:17"
     },
     {
-      "key": "^A\\ anonymous_function\\ >\\ ERROR\\ ∅\\ \\|\\ psi\\ FUN$",
-      "status": "open",
-      "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
-      "counts": {
-        "mutations": 1
-      },
-      "example": "mutations: keyword-selector/fun/contextParameters/contextParametersOnTopLevelCallables~1.kt:21"
-    },
-    {
       "key": "^A\\ anonymous_function\\ >\\ ERROR\\ ∅\\ \\|\\ psi\\ IF$",
       "status": "open",
       "reason": "Found by the PSI gate (snippets 2), not fixed yet.",
       "counts": {
-        "snippets": 2
+        "snippets": 1
       },
       "example": "snippets: mutations/position-delegate-if-then/0009.kt:1"
     },
@@ -605,7 +584,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 4), not fixed yet.",
       "counts": {
-        "mutations": 4
+        "mutations": 5
       },
       "example": "mutations: keyword-selector/try/NewLinesValidOperations~0.kt:8"
     },
@@ -628,20 +607,11 @@
       "example": "snippets: mutations/label-call/0000.kt:1"
     },
     {
-      "key": "^A\\ assignment\\ >\\ ERROR\\ \"<\"\\ \\|\\ psi\\ OPERATION_REFERENCE$",
-      "status": "open",
-      "reason": "Found by the PSI gate (snippets 1), not fixed yet.",
-      "counts": {
-        "snippets": 1
-      },
-      "example": "snippets: mutations/position-comparison-right/0004.kt:2"
-    },
-    {
       "key": "^A\\ assignment\\ >\\ ERROR\\ \"=\"\\ \\|\\ psi\\ OPERATION_REFERENCE$",
       "status": "open",
       "reason": "Found by the PSI gate (snippets 2), not fixed yet.",
       "counts": {
-        "snippets": 2
+        "snippets": 3
       },
       "example": "snippets: mutations/position-delegate-if-assignment/0004.kt:1"
     },
@@ -926,17 +896,16 @@
       "status": "open",
       "reason": "Found by the PSI gate (kotlin 1, idea 1), not fixed yet.",
       "counts": {
-        "kotlin": 1,
         "idea": 1
       },
-      "example": "kotlin: compiler/testData/codegen/box/functions/kt873.kt:2"
+      "example": "idea: community/plugins/kotlin/idea/tests/testData/codeInsight/codeVision/TooManyUsagesAndInheritors.kt:12"
     },
     {
       "key": "^A\\ function_body\\ >\\ ERROR\\ integer_literal\\ \\|\\ psi\\ INTEGER_CONSTANT$",
       "status": "open",
       "reason": "Found by the PSI gate (snippets 22), not fixed yet.",
       "counts": {
-        "snippets": 22
+        "snippets": 23
       },
       "example": "snippets: mutations/position-comparison-right/0018.kt:2"
     },
@@ -954,7 +923,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 13, mutations 8), not fixed yet.",
       "counts": {
-        "snippets": 13,
+        "snippets": 26,
         "mutations": 8
       },
       "example": "snippets: mutations/position-selector/0018.kt:2"
@@ -964,7 +933,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 1), not fixed yet.",
       "counts": {
-        "snippets": 1
+        "snippets": 3
       },
       "example": "snippets: mutations/position-assignment-value/0004.kt:2"
     },
@@ -973,7 +942,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2), not fixed yet.",
       "counts": {
-        "mutations": 2
+        "mutations": 1
       },
       "example": "mutations: modifier-run/25x3/FunctionsWithoutName~0.kt:12"
     },
@@ -1016,15 +985,6 @@
       "example": "mutations: insert-piece/recovery/InterfaceInExpressionPosition~1.kt:1"
     },
     {
-      "key": "^A\\ if_expression\\ >\\ ERROR\\ \"<\"\\ \\|\\ psi\\ TYPE_ARGUMENT_LIST$",
-      "status": "open",
-      "reason": "Found by the PSI gate (snippets 12), not fixed yet.",
-      "counts": {
-        "snippets": 12
-      },
-      "example": "snippets: mutations/position-reference-receiver/0005.kt:1"
-    },
-    {
       "key": "^A\\ if_expression\\ >\\ ERROR\\ \"\\)\"\\ \\|\\ psi\\ IF$",
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
@@ -1061,21 +1021,11 @@
       "example": "kotlin: compiler/psi/psi-impl/testData/psi/propertyBackingField/explicitBackingField.kt:10"
     },
     {
-      "key": "^A\\ infix_expression\\ >\\ ERROR\\ \":\"\\ \\|\\ psi\\ TYPE_CONSTRAINT$",
-      "status": "open",
-      "reason": "Found by the PSI gate (mutations 21, kotlin 1), not fixed yet.",
-      "counts": {
-        "mutations": 21,
-        "kotlin": 1
-      },
-      "example": "mutations: join-lines/none/contracts/FunctionsWithTypeConstraintsAndContract~1.kt:22"
-    },
-    {
       "key": "^A\\ infix_expression\\ >\\ ERROR\\ \":\"\\ \\|\\ psi\\ VALUE_PARAMETER$",
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2, idea 1), not fixed yet.",
       "counts": {
-        "mutations": 2,
+        "mutations": 3,
         "idea": 1
       },
       "example": "mutations: break-before/contextParameters/contextParametersOnTopLevelCallables~0.kt:14"
@@ -1085,7 +1035,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 1, mutations 1), not fixed yet.",
       "counts": {
-        "snippets": 1,
+        "snippets": 2,
         "mutations": 1
       },
       "example": "snippets: mutations/position-reference-receiver/0004.kt:1"
@@ -1136,15 +1086,6 @@
       "example": "snippets: mutations/named-argument/0016.kt:2"
     },
     {
-      "key": "^A\\ lambda_literal\\ >\\ ERROR\\ \"<\"\\ \\|\\ psi\\ TYPE_ARGUMENT_LIST$",
-      "status": "open",
-      "reason": "Found by the PSI gate (snippets 2), not fixed yet.",
-      "counts": {
-        "snippets": 2
-      },
-      "example": "snippets: mutations/position-lambda-body/0000.kt:2"
-    },
-    {
       "key": "^A\\ multi_variable_declaration\\ >\\ ERROR\\ \"\\)\"\\ \\|\\ psi\\ VALUE_PARAMETER_LIST$",
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
@@ -1167,7 +1108,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2), not fixed yet.",
       "counts": {
-        "mutations": 2
+        "mutations": 1
       },
       "example": "mutations: keyword-selector/fun/NewLinesValidOperations~0.kt:8"
     },
@@ -1185,7 +1126,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2), not fixed yet.",
       "counts": {
-        "mutations": 2
+        "mutations": 1
       },
       "example": "mutations: modifier-run/25x3/ObjectLiteralAsStatement~1.kt:12"
     },
@@ -1249,7 +1190,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 1), not fixed yet.",
       "counts": {
-        "snippets": 1
+        "snippets": 2
       },
       "example": "snippets: mutations/position-nullable-reference-receiver/0004.kt:1"
     },
@@ -1296,7 +1237,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 5, kotlin 1), not fixed yet.",
       "counts": {
-        "mutations": 5,
+        "mutations": 6,
         "kotlin": 1
       },
       "example": "mutations: backtick-name/recovery/objects/expressions/Everything~1.kt:3"
@@ -1324,7 +1265,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
       "counts": {
-        "mutations": 1
+        "mutations": 3
       },
       "example": "mutations: insert-piece/contextParameters/contextReceiversCallableMembers~0.kt:4"
     },
@@ -1343,7 +1284,7 @@
       "reason": "Found by the PSI gate (corpus 1, mutations 121, kotlin 10, idea 3), not fixed yet.",
       "counts": {
         "corpus": 1,
-        "mutations": 121,
+        "mutations": 124,
         "kotlin": 10,
         "idea": 3
       },
@@ -1354,7 +1295,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2), not fixed yet.",
       "counts": {
-        "mutations": 2
+        "mutations": 1
       },
       "example": "mutations: break-before/contextParameters/functions~0.kt:9"
     },
@@ -1374,7 +1315,7 @@
       "counts": {
         "snippets": 9,
         "mutations": 3,
-        "kotlin": 12,
+        "kotlin": 11,
         "idea": 5
       },
       "example": "snippets: mutations/member-function/0013.kt:1"
@@ -1393,8 +1334,8 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 8, mutations 66, kotlin 4, idea 4), not fixed yet.",
       "counts": {
-        "snippets": 8,
-        "mutations": 66,
+        "snippets": 15,
+        "mutations": 67,
         "kotlin": 4,
         "idea": 4
       },
@@ -1444,7 +1385,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 9), not fixed yet.",
       "counts": {
-        "mutations": 9
+        "mutations": 7
       },
       "example": "mutations: modifier-run/2x2/recovery/objects/expressions/Everything~0.kt:3"
     },
@@ -1472,29 +1413,11 @@
       "reason": "Found by the PSI gate (corpus 1, mutations 14, kotlin 1, idea 1), not fixed yet.",
       "counts": {
         "corpus": 1,
-        "mutations": 14,
+        "mutations": 15,
         "kotlin": 1,
         "idea": 1
       },
       "example": "corpus: jetbrains/recovery/objects/expressions/Everything/0000.kt:3"
-    },
-    {
-      "key": "^A\\ source_file\\ >\\ ERROR\\ simple_identifier\\ \\|\\ psi\\ PsiElement\\(KDOC_TEXT\\)\\('\\ \\ some\\ doc '\\)$",
-      "status": "open",
-      "reason": "Found by the PSI gate (kotlin 1), not fixed yet.",
-      "counts": {
-        "kotlin": 1
-      },
-      "example": "kotlin: compiler/psi/psi-impl/testData/lexer/kotlin/whitespaceCharacters/lineSeparator/lineSeparatorInComments.kt:5"
-    },
-    {
-      "key": "^A\\ source_file\\ >\\ ERROR\\ simple_identifier\\ \\|\\ psi\\ PsiElement\\(KDOC_TEXT\\)\\('\\ \\ some\\ doc '\\)$",
-      "status": "open",
-      "reason": "Found by the PSI gate (kotlin 1), not fixed yet.",
-      "counts": {
-        "kotlin": 1
-      },
-      "example": "kotlin: compiler/psi/psi-impl/testData/lexer/kotlin/whitespaceCharacters/paragraphSeparator/paragraphSeparatorInComments.kt:5"
     },
     {
       "key": "^A\\ source_file\\ >\\ ERROR\\ simple_identifier\\ \\|\\ psi\\ REFERENCE_EXPRESSION$",
@@ -1510,22 +1433,9 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 6), not fixed yet.",
       "counts": {
-        "snippets": 6
+        "snippets": 4
       },
       "example": "snippets: mutations/comparison-operand/0004.kt:2"
-    },
-    {
-      "key": "^A\\ statements\\ >\\ ERROR\\ \"<\"\\ \\|\\ psi\\ TYPE_ARGUMENT_LIST$",
-      "status": "open",
-      "reason": "Found by the PSI gate (corpus 1, snippets 6, mutations 20, kotlin 1, idea 1), not fixed yet.",
-      "counts": {
-        "corpus": 1,
-        "snippets": 6,
-        "mutations": 20,
-        "kotlin": 1,
-        "idea": 1
-      },
-      "example": "corpus: jetbrains/SoftKeywordsInTypeArguments/0000.kt:8"
     },
     {
       "key": "^A\\ statements\\ >\\ ERROR\\ \"\\)\"\\ \\|\\ psi\\ BLOCK$",
@@ -1541,26 +1451,17 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 7, mutations 21), not fixed yet.",
       "counts": {
-        "snippets": 7,
-        "mutations": 21
+        "snippets": 9,
+        "mutations": 42
       },
       "example": "snippets: mutations/dot-selector/0004.kt:2"
-    },
-    {
-      "key": "^A\\ statements\\ >\\ ERROR\\ \"\\.\"\\ \\|\\ psi\\ FLOAT_CONSTANT$",
-      "status": "open",
-      "reason": "Found by the PSI gate (snippets 1), not fixed yet.",
-      "counts": {
-        "snippets": 1
-      },
-      "example": "snippets: mutations/position-after-completed-call/0024.kt:4"
     },
     {
       "key": "^A\\ statements\\ >\\ ERROR\\ \"\\?\\.\"\\ \\|\\ psi\\ SAFE_ACCESS_EXPRESSION$",
       "status": "open",
       "reason": "Found by the PSI gate (snippets 6, mutations 6), not fixed yet.",
       "counts": {
-        "snippets": 6,
+        "snippets": 4,
         "mutations": 6
       },
       "example": "snippets: mutations/safe-selector/0004.kt:2"
@@ -1584,21 +1485,11 @@
       "example": "kotlin: compiler/psi/psi-impl/testData/psi/recovery/kt5102.kt:6"
     },
     {
-      "key": "^A\\ statements\\ >\\ ERROR\\ integer_literal\\ \\|\\ psi\\ INTEGER_CONSTANT$",
-      "status": "open",
-      "reason": "Found by the PSI gate (mutations 18), not fixed yet.",
-      "counts": {
-        "mutations": 18
-      },
-      "example": "mutations: keyword-selector/do/PropertyInvokes~0.kt:5"
-    },
-    {
       "key": "^A\\ statements\\ >\\ ERROR\\ simple_identifier\\ \\|\\ psi\\ REFERENCE_EXPRESSION$",
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2, kotlin 1), not fixed yet.",
       "counts": {
-        "mutations": 2,
-        "kotlin": 1
+        "mutations": 2
       },
       "example": "mutations: keyword-selector/val/NewLinesValidOperations~0.kt:6"
     },
@@ -1619,18 +1510,6 @@
         "kotlin": 1
       },
       "example": "kotlin: analysis/symbol-light-classes/testData/lightClassByPsi/generics.kt:3"
-    },
-    {
-      "key": "^A\\ value_arguments\\ >\\ ERROR\\ \"<\"\\ \\|\\ psi\\ TYPE_ARGUMENT_LIST$",
-      "status": "open",
-      "reason": "Found by the PSI gate (corpus 1, snippets 2, mutations 79, kotlin 1), not fixed yet.",
-      "counts": {
-        "corpus": 1,
-        "snippets": 2,
-        "mutations": 79,
-        "kotlin": 1
-      },
-      "example": "corpus: jetbrains/FunctionCalls/0000.kt:28"
     },
     {
       "key": "^A\\ value_arguments\\ >\\ ERROR\\ \"break\"\\ \\|\\ psi\\ BREAK$",
@@ -1715,17 +1594,6 @@
       "example": "kotlin: compiler/tests-spec/testData/psi/linked/expressions/when-expression/p-2/neg/1.2.kt:11"
     },
     {
-      "key": "^A\\ when_entry\\ >\\ ERROR\\ \"<\"\\ \\|\\ psi\\ TYPE_ARGUMENT_LIST$",
-      "status": "open",
-      "reason": "Found by the PSI gate (corpus 1, mutations 41, kotlin 1), not fixed yet.",
-      "counts": {
-        "corpus": 1,
-        "mutations": 41,
-        "kotlin": 1
-      },
-      "example": "corpus: jetbrains/CallsInWhen/0000.kt:7"
-    },
-    {
       "key": "^A\\ when_entry\\ >\\ ERROR\\ \"\\->\"\\ \\|\\ psi\\ WHEN_ENTRY$",
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
@@ -1744,15 +1612,6 @@
       "example": "mutations: keyword-selector/object/contracts/good/returnsImplies/baseConditions~0.kt:37"
     },
     {
-      "key": "^A\\ when_expression\\ >\\ ERROR\\ \"<\"\\ \\|\\ psi\\ TYPE_ARGUMENT_LIST$",
-      "status": "open",
-      "reason": "Found by the PSI gate (snippets 2), not fixed yet.",
-      "counts": {
-        "snippets": 2
-      },
-      "example": "snippets: mutations/position-when-branch/0000.kt:2"
-    },
-    {
       "key": "^A\\ when_expression\\ >\\ ERROR\\ \"when\"\\ \\|\\ psi\\ WHEN$",
       "status": "open",
       "reason": "Found by the PSI gate (idea 2), not fixed yet.",
@@ -1766,7 +1625,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 160), not fixed yet.",
       "counts": {
-        "mutations": 160
+        "mutations": 231
       },
       "example": "mutations: break-before/packages/PackageModifiers~0.kt:3"
     },
@@ -1775,7 +1634,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 5), not fixed yet.",
       "counts": {
-        "mutations": 5
+        "mutations": 7
       },
       "example": "mutations: trivia-after/break/primaryConstructor/valid~0.kt:11"
     },
@@ -1784,7 +1643,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2), not fixed yet.",
       "counts": {
-        "mutations": 2
+        "mutations": 3
       },
       "example": "mutations: trivia-after/break/annotation/options/local~1.kt:5"
     },
@@ -1931,9 +1790,10 @@
       "status": "open",
       "reason": "Found by the PSI gate (kotlin 8), not fixed yet.",
       "counts": {
+        "mutations": 1,
         "kotlin": 8
       },
-      "example": "kotlin: libraries/tools/kotlin-gradle-plugin-integration-tests/src/test/resources/testProject/native-simple-project/build.gradle.kts:13"
+      "example": "mutations: insert-piece/stringTemplates/RawStringsWithManyQuotes~1.kt:19"
     },
     {
       "key": "^B\\ psi\\ BLOCK:\\ Unexpected\\ tokens\\ \\(use\\ ';'\\ to\\ separate\\ expressions\\ on\\ the\\ same\\ line\\)\\ \\|\\ ts\\ comparison_expression$",
@@ -1985,9 +1845,9 @@
       "status": "open",
       "reason": "Found by the PSI gate (idea 2), not fixed yet.",
       "counts": {
-        "idea": 2
+        "snippets": 32
       },
-      "example": "idea: community/plugins/kotlin/refactorings/rename.k2/testData/rename/labeledLoopByLabelRefInBreak/before/test.kt:4"
+      "example": "snippets: mutations/break-label-comment/0106.kt:2"
     },
     {
       "key": "^B\\ psi\\ BREAK:\\ There\\ should\\ be\\ no\\ space\\ or\\ comments\\ before\\ '@'\\ in\\ label\\ reference\\ \\|\\ ts\\ call_expression$",
@@ -2012,7 +1872,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 19, kotlin 5, idea 2), not fixed yet.",
       "counts": {
-        "mutations": 19,
+        "mutations": 21,
         "kotlin": 5,
         "idea": 2
       },
@@ -2055,15 +1915,6 @@
       "example": "mutations: break-before/examples/priorityqueues/BinaryHeap~1.kt:79"
     },
     {
-      "key": "^B\\ psi\\ CLASS_BODY:\\ Expecting\\ member\\ declaration\\ \\|\\ ts\\ value_arguments$",
-      "status": "open",
-      "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
-      "counts": {
-        "mutations": 1
-      },
-      "example": "mutations: break-before/examples/Stack~1.kt:5"
-    },
-    {
       "key": "^B\\ psi\\ COLLECTION_LITERAL_EXPRESSION:\\ Expecting\\ an\\ element\\ \\|\\ ts\\ multi_variable_declaration$",
       "status": "open",
       "reason": "Found by the PSI gate (snippets 2), not fixed yet.",
@@ -2080,15 +1931,6 @@
         "mutations": 1
       },
       "example": "mutations: insert-piece/contracts/good/callsInPlace/inPlaceLambda~1.kt:9"
-    },
-    {
-      "key": "^B\\ psi\\ CONTINUE:\\ Label\\ must\\ be\\ named\\ \\|\\ ts\\ jump_expression$",
-      "status": "open",
-      "reason": "Found by the PSI gate (idea 2), not fixed yet.",
-      "counts": {
-        "idea": 2
-      },
-      "example": "idea: community/plugins/kotlin/refactorings/rename.k2/testData/rename/labeledLoopByLabelRefInContinue/before/test.kt:3"
     },
     {
       "key": "^B\\ psi\\ CONTINUE:\\ There\\ should\\ be\\ no\\ space\\ or\\ comments\\ before\\ '@'\\ in\\ label\\ reference\\ \\|\\ ts\\ call_expression$",
@@ -2168,9 +2010,10 @@
       "status": "open",
       "reason": "Found by the PSI gate (kotlin 1), not fixed yet.",
       "counts": {
+        "snippets": 2,
         "kotlin": 1
       },
-      "example": "kotlin: compiler/psi/psi-impl/testData/psi/recovery/DeclarationAfterDotSelectorExpected.kt:4"
+      "example": "snippets: mutations/position-selector-break/0020.kt:2"
     },
     {
       "key": "^B\\ psi\\ FILE_ANNOTATION_LIST:\\ Expected\\ annotation\\ identifier\\ after\\ '@'\\ \\|\\ ts\\ annotation$",
@@ -2178,7 +2021,7 @@
       "reason": "Found by the PSI gate (snippets 8, mutations 21), not fixed yet.",
       "counts": {
         "snippets": 8,
-        "mutations": 21
+        "mutations": 31
       },
       "example": "snippets: mutations/annotation/0036.kt:1"
     },
@@ -2187,7 +2030,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 38), not fixed yet.",
       "counts": {
-        "mutations": 38
+        "mutations": 55
       },
       "example": "mutations: trivia-after/break/script/manyAnnotationsOnFile~0.kts:1"
     },
@@ -2196,7 +2039,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 3), not fixed yet.",
       "counts": {
-        "mutations": 3
+        "mutations": 4
       },
       "example": "mutations: comment-between-tokens/functionReceivers/FunctionsWithFunctionReceiversAnnotations~0.kt:5"
     },
@@ -2277,7 +2120,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 169, kotlin 2), not fixed yet.",
       "counts": {
-        "mutations": 169,
+        "mutations": 249,
         "kotlin": 2
       },
       "example": "mutations: trivia-after/break/annotation/targeted/onAll~0.kt:3"
@@ -2287,7 +2130,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2), not fixed yet.",
       "counts": {
-        "mutations": 2
+        "mutations": 3
       },
       "example": "mutations: trivia-after/break/annotationValues~1.kt:25"
     },
@@ -2342,8 +2185,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (corpus 2, mutations 1), not fixed yet.",
       "counts": {
-        "corpus": 2,
-        "mutations": 1
+        "corpus": 2
       },
       "example": "corpus: types/0009.kt:1"
     },
@@ -2379,7 +2221,8 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 1), not fixed yet.",
       "counts": {
-        "snippets": 1
+        "snippets": 1,
+        "kotlin": 6
       },
       "example": "snippets: mutations/position-reference-receiver/0044.kt:1"
     },
@@ -2420,15 +2263,6 @@
         "mutations": 1
       },
       "example": "mutations: insert-piece/propertyBackingField/properties~0.kt:15"
-    },
-    {
-      "key": "^B\\ psi\\ RETURN:\\ Label\\ must\\ be\\ named\\ \\|\\ ts\\ jump_expression$",
-      "status": "open",
-      "reason": "Found by the PSI gate (idea 3), not fixed yet.",
-      "counts": {
-        "idea": 3
-      },
-      "example": "idea: community/plugins/kotlin/refactorings/rename.k2/testData/rename/labeledLambdaByLabelRef/before/test.kt:4"
     },
     {
       "key": "^B\\ psi\\ RETURN:\\ There\\ should\\ be\\ no\\ space\\ or\\ comments\\ before\\ '@'\\ in\\ label\\ reference\\ \\|\\ ts\\ jump_expression$",
@@ -2617,7 +2451,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 6), not fixed yet.",
       "counts": {
-        "mutations": 6
+        "mutations": 9
       },
       "example": "mutations: trivia-after/break/contextParameters/properties~0.kt:6"
     },
@@ -2635,7 +2469,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 4), not fixed yet.",
       "counts": {
-        "mutations": 4
+        "mutations": 6
       },
       "example": "mutations: trivia-after/break/contextParameters/contextParametersOnTopLevelCallables~1.kt:17"
     },
@@ -2721,15 +2555,6 @@
       "example": "snippets: mutations/after-brace-top/0018.kt"
     },
     {
-      "key": "^C\\ @\\ KtFile:\\ psi\\ \\(none\\)\\ /\\ ts\\ PROPERTY_ACCESSOR$",
-      "status": "open",
-      "reason": "Found by the PSI gate (snippets 2), not fixed yet.",
-      "counts": {
-        "snippets": 2
-      },
-      "example": "snippets: mutations/script-statement/0036.kts"
-    },
-    {
       "key": "^C\\ @\\ KtFile\\ >\\ CLASS\\ >\\ DELEGATED_SUPER_TYPE_ENTRY:\\ psi\\ DOT_QUALIFIED_EXPRESSION\\ /\\ ts\\ \\(none\\)$",
       "status": "open",
       "reason": "Found by the PSI gate (snippets 3), not fixed yet.",
@@ -2743,7 +2568,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 2), not fixed yet.",
       "counts": {
-        "snippets": 2
+        "snippets": 5
       },
       "example": "snippets: mutations/position-selector/0045.kt"
     },
@@ -2770,7 +2595,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 4), not fixed yet.",
       "counts": {
-        "snippets": 4
+        "snippets": 10
       },
       "example": "snippets: mutations/position-selector/0036.kt"
     },
@@ -2779,7 +2604,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (snippets 31), not fixed yet.",
       "counts": {
-        "snippets": 31
+        "snippets": 36
       },
       "example": "snippets: mutations/position-reference-receiver/0022.kt"
     },
@@ -3099,24 +2924,6 @@
       "example": "snippets: mutations/position-when-branch/0021.kt"
     },
     {
-      "key": "^C\\ comment\\ only\\ in\\ psi\\ @\\ ts\\ value_argument\\ /\\ psi\\ BLOCK$",
-      "status": "open",
-      "reason": "Found by the PSI gate (idea 1), not fixed yet.",
-      "counts": {
-        "idea": 1
-      },
-      "example": "idea: plugins/stormGlass/tests/testSrc/com/intellij/stormGlass/tests/overlay/StormGlassBootstrapTest.kt:56"
-    },
-    {
-      "key": "^C\\*\\ @\\ KtFile:\\ psi\\ FUN\\ /\\ ts\\ ANNOTATED_EXPRESSION$",
-      "status": "open",
-      "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
-      "counts": {
-        "mutations": 1
-      },
-      "example": "mutations: insert-piece/contracts/operator~0.kt"
-    },
-    {
       "key": "^C\\*\\ @\\ KtFile\\ >\\ PACKAGE_DIRECTIVE\\ >\\ ANNOTATION_ENTRY:\\ psi\\ \\(none\\)\\ /\\ ts\\ USER_TYPE$",
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
@@ -3124,15 +2931,6 @@
         "mutations": 1
       },
       "example": "mutations: insert-piece/packages/PackageModifiers~1.kt"
-    },
-    {
-      "key": "^C\\*\\ @\\ KtFile\\ >\\ PROPERTY:\\ psi\\ PROPERTY_ACCESSOR\\ /\\ ts\\ \\(none\\)$",
-      "status": "open",
-      "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
-      "counts": {
-        "mutations": 1
-      },
-      "example": "mutations: insert-piece/propertyAccessors~0.kt"
     },
     {
       "key": "^C\\*\\ @\\ KtFile\\ >\\ PROPERTY\\ >\\ DOT_QUALIFIED_EXPRESSION:\\ psi\\ CALL_EXPRESSION\\ /\\ ts\\ BOOLEAN_CONSTANT$",
@@ -3562,7 +3360,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 2), not fixed yet.",
       "counts": {
-        "mutations": 2
+        "mutations": 4
       },
       "example": "mutations: keyword-selector/true/contracts/good/returnsImplies/baseConditions~0.kt"
     },
@@ -3571,7 +3369,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
       "counts": {
-        "mutations": 1
+        "mutations": 2
       },
       "example": "mutations: keyword-selector/null/contracts/good/returnsImplies/baseConditions~0.kt"
     },
@@ -3580,7 +3378,7 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
       "counts": {
-        "mutations": 1
+        "mutations": 2
       },
       "example": "mutations: keyword-selector/super/contracts/good/returnsImplies/baseConditions~0.kt"
     },
@@ -3589,9 +3387,259 @@
       "status": "open",
       "reason": "Found by the PSI gate (mutations 1), not fixed yet.",
       "counts": {
-        "mutations": 1
+        "mutations": 2
       },
       "example": "mutations: keyword-selector/this/contracts/good/returnsImplies/baseConditions~0.kt"
+    },
+    {
+      "key": "^C\\ declaration\\ start\\ only\\ in\\ ts:\\ PROPERTY_ACCESSOR\\ @\\ ts\\ getter\\ /\\ psi\\ REFERENCE_EXPRESSION$",
+      "status": "open",
+      "reason": "A getter or setter on the line after an explicit `;` that ends a property (`val a: Int;` above `get() = 42`): PSI never attaches it, an error in a file or a class, an expression in a script or a block; the grammar reads accessors on lines of their own as entries of their own whatever separator came before. The compiler rejects both readings. Not measured.",
+      "counts": {
+        "corpus": 1,
+        "snippets": 1,
+        "mutations": 28,
+        "kotlin": 2
+      },
+      "example": "corpus: jetbrains/script/topLevelPropertiesWithGetSet/0000.kt:22"
+    },
+    {
+      "key": "^A\\ function_body\\ >\\ ERROR\\ \"\\.\"\\ \\|\\ psi\\ DOT_QUALIFIED_EXPRESSION$",
+      "status": "open",
+      "reason": "A dot at the end of a line before a declaration keyword (`x.` above `suspend fun g() {}`): PSI reads the next line's atomic expression as the selector. Compiler-rejected.",
+      "counts": {
+        "snippets": 2
+      },
+      "example": "snippets: mutations/position-selector-break/0011.kt:2"
+    },
+    {
+      "key": "^A\\ type_arguments\\ >\\ MISSING\\ \">\"\\ \\|\\ psi\\ BINARY_EXPRESSION$",
+      "status": "open",
+      "reason": "`1 < E` with a form that reads as the start of type arguments (`1 < x<T>()`): the generic reading of a call without arguments meets the comparison. Compiler-rejected snippet.",
+      "counts": {
+        "snippets": 1
+      },
+      "example": "snippets: mutations/position-comparison-right/0004.kt:2"
+    },
+    {
+      "key": "^A\\ value_arguments\\ >\\ ERROR\\ \"=\"\\ \\|\\ psi\\ OPERATION_REFERENCE$",
+      "status": "open",
+      "reason": "`g(x as T = y)`: a cast assignment as an argument, which PSI reads as a binary expression. Compiler-rejected.",
+      "counts": {
+        "snippets": 1
+      },
+      "example": "snippets: mutations/position-argument/0046.kt:2"
+    },
+    {
+      "key": "^B\\ psi\\ BLOCK:\\ Unexpected\\ tokens\\ \\(use\\ ';'\\ to\\ separate\\ expressions\\ on\\ the\\ same\\ line\\)\\ \\|\\ ts\\ navigation_suffix$",
+      "status": "deliberate",
+      "reason": "A number right after a dot (`x.1`): Kotlin's lexer reads `.1` as a real literal and PSI errs, while tree-sitter's lexer tries only the tokens valid in its state, where a real literal is none, so the number reads as a selector as it does after a space (`x. 1`, PSI-clean). The compiler rejects both.",
+      "kotlin": "KotlinLexer (FLOAT_LITERAL `.1`); KotlinExpressionParsing.parseSelectorCallExpression",
+      "cost": "Telling `.1` apart needs the dot scanned externally before every selector.",
+      "counts": {
+        "snippets": 7
+      },
+      "example": "snippets: review-329/r3-2-number-selector.kt:1"
+    },
+    {
+      "key": "^C\\ @\\ KtFile\\ >\\ FUN\\ >\\ BLOCK:\\ psi\\ CALL_EXPRESSION\\ /\\ ts\\ DOT_QUALIFIED_EXPRESSION$",
+      "status": "open",
+      "reason": "`.1` on the line after a completed call: PSI reads a real literal, the grammar a selector `foo().1`, as `x.1`.",
+      "counts": {
+        "snippets": 1
+      },
+      "example": "snippets: mutations/position-after-completed-call/0024.kt"
+    },
+    {
+      "key": "^C\\ @\\ KtFile\\ >\\ PROPERTY\\ >\\ IF:\\ psi\\ CALLABLE_REFERENCE_EXPRESSION\\ /\\ ts\\ BINARY_EXPRESSION$",
+      "status": "open",
+      "reason": "`if (d) y<T> else z<T>::x`: the callable reference takes the whole if in PSI, the else branch in the grammar.",
+      "counts": {
+        "snippets": 1
+      },
+      "example": "snippets: mutations/position-reference-receiver/0005.kt"
+    },
+    {
+      "key": "^C\\ @\\ KtFile\\ >\\ PROPERTY\\ >\\ IF:\\ psi\\ CALLABLE_REFERENCE_EXPRESSION\\ /\\ ts\\ DOT_QUALIFIED_EXPRESSION$",
+      "status": "open",
+      "reason": "`if (d) y<T> else z<T>::x`: the callable reference takes the whole if in PSI, the else branch in the grammar.",
+      "counts": {
+        "snippets": 1
+      },
+      "example": "snippets: mutations/position-nullable-reference-receiver/0005.kt"
+    },
+    {
+      "key": "^C\\ @\\ …\\ >\\ BLOCK\\ >\\ BINARY_EXPRESSION\\ >\\ BINARY_WITH_TYPE:\\ psi\\ DOT_QUALIFIED_EXPRESSION\\ /\\ ts\\ USER_TYPE$",
+      "status": "open",
+      "reason": "`x?.x as T = y`: the cast's operand differs. Compiler-rejected snippet.",
+      "counts": {
+        "snippets": 1
+      },
+      "example": "snippets: mutations/position-safe-selector/0046.kt"
+    },
+    {
+      "key": "^C\\ declaration\\ start\\ only\\ in\\ ts:\\ PROPERTY_ACCESSOR\\ @\\ ts\\ setter\\ /\\ psi\\ REFERENCE_EXPRESSION$",
+      "status": "open",
+      "reason": "A setter on the line after an explicit `;` that ends a property, as the getter entry above. Not measured.",
+      "counts": {
+        "snippets": 1,
+        "mutations": 2
+      },
+      "example": "snippets: mutations/script-statement/0042.kts:1"
+    },
+    {
+      "key": "^A\\ anonymous_function\\ >\\ ERROR\\ \"set\"\\ \\|\\ psi\\ FUN$",
+      "status": "open",
+      "reason": "A keyword selector `x.fun` before a line starting with `set`: PSI reads an anonymous function with its accessor-like tail differently. Compiler-rejected mutant.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: keyword-selector/fun/contextParameters/contextParametersOnTopLevelCallables~1.kt:21"
+    },
+    {
+      "key": "^A\\ assignment\\ >\\ ERROR\\ simple_identifier\\ \\|\\ psi\\ REFERENCE_EXPRESSION$",
+      "status": "open",
+      "reason": "A keyword selector `.fun` inside an assignment, compiler-rejected mutant.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: keyword-selector/fun/examples/Queue~1.kt:25"
+    },
+    {
+      "key": "^A\\ function_body\\ >\\ ERROR\\ \"class\"\\ \\|\\ psi\\ CLASS$",
+      "status": "open",
+      "reason": "A name with an emoji suffix before `class` in a block (bad-name mutant): the first errors are on different lines.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: bad-name/emoji-suffix/EOLsOnRollback~0.kt:4"
+    },
+    {
+      "key": "^A\\ source_file\\ >\\ ERROR\\ \"\\{\"\\ \\|\\ psi\\ CLASS_BODY$",
+      "status": "open",
+      "reason": "A name with an emoji suffix in an enum header (bad-name mutant): the first errors are on different lines.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: bad-name/emoji-suffix/EnumEntrySemicolonInlineMember~1.kt:1"
+    },
+    {
+      "key": "^A\\ statements\\ >\\ ERROR\\ simple_identifier\\ \\|\\ psi\\ BLOCK$",
+      "status": "open",
+      "reason": "A name starting with an Arabic-Indic digit after nested comments (bad-name mutant): the first errors are on different lines.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: bad-name/digit-start/NestedComments~1.kt:19"
+    },
+    {
+      "key": "^B\\ psi\\ ANNOTATED_EXPRESSION:\\ Expecting\\ an\\ expression\\ \\|\\ ts\\ statements$",
+      "status": "open",
+      "reason": "A name starting with an Arabic-Indic digit after an annotation (bad-name mutant): PSI errs on an earlier line.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: bad-name/digit-start/contracts/operator~1.kt:8"
+    },
+    {
+      "key": "^C\\*\\ declaration\\ start\\ only\\ in\\ ts:\\ OBJECT_DECLARATION\\ @\\ ts\\ visibility_modifier\\ /\\ psi\\ OBJECT_DECLARATION$",
+      "status": "open",
+      "reason": "Two modifier words on a line of their own before `companion object` in a class body: the declaration starts at different tokens (NamedClassObject mutants).",
+      "counts": {
+        "mutations": 5
+      },
+      "example": "mutations: modifier-run/2x2/NamedClassObject~1.kt:12"
+    },
+    {
+      "key": "^C\\*\\ declaration\\ start\\ only\\ in\\ ts:\\ PROPERTY_ACCESSOR\\ @\\ ts\\ getter\\ /\\ psi\\ REFERENCE_EXPRESSION$",
+      "status": "open",
+      "reason": "A getter or setter on the line after an explicit `;` that ends a property (`val a: Int;` above `get() = 42`): PSI never attaches it, an error in a file or a class, an expression in a script or a block; the grammar reads accessors on lines of their own as entries of their own whatever separator came before. The compiler rejects both readings. Not measured.",
+      "counts": {
+        "mutations": 2
+      },
+      "example": "mutations: double-semi/space/propertyDelegate/GetterInSameLine~0.kt:3"
+    },
+    {
+      "key": "^C\\*\\ @\\ KtFile\\ >\\ FUN\\ >\\ BLOCK:\\ psi\\ DOT_QUALIFIED_EXPRESSION\\ /\\ ts\\ BINARY_EXPRESSION$",
+      "status": "open",
+      "reason": "A run of modifier lines before an object literal at statement start (`private` above `object : Thread() {}.run()`): PSI reads the run as expressions and the literal's call, the grammar an infix chain.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: modifier-run/300x1/ObjectLiteralAsStatement~1.kt"
+    },
+    {
+      "key": "^C\\*\\ @\\ …\\ >\\ ANNOTATION_ENTRY\\ >\\ VALUE_ARGUMENT_LIST\\ >\\ VALUE_ARGUMENT:\\ psi\\ CLASS_LITERAL_EXPRESSION\\ /\\ ts\\ \\(none\\)$",
+      "status": "open",
+      "reason": "A comment after `::` in an annotation argument (`X::/*c*/class`): the class literal differs.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: trivia-after/comment/returnsResultOfContract~1.kt"
+    },
+    {
+      "key": "^C\\*\\ declaration\\ start\\ only\\ in\\ psi:\\ FUN\\ @\\ ts\\ annotation\\ /\\ psi\\ ANNOTATION_ENTRY$",
+      "status": "open",
+      "reason": "An `import` after declarations, read again as a script (a multi-file test concatenated into one file): PSI takes the import and the annotated function after it, the grammar reads `import X @Ann(...)` as an infix expression.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: insert-piece/contracts/operator~0.kt:6"
+    },
+    {
+      "key": "^C\\*\\ declaration\\ start\\ only\\ in\\ psi:\\ PROPERTY_ACCESSOR\\ @\\ ts\\ simple_identifier\\ /\\ psi\\ MODIFIER_LIST$",
+      "status": "open",
+      "reason": "A piece inserted before an accessor's modifiers (insert-piece mutant).",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: insert-piece/propertyAccessors~0.kt:2"
+    },
+    {
+      "key": "^C\\ declaration\\ start\\ only\\ in\\ psi:\\ FUN\\ @\\ ts\\ simple_identifier\\ /\\ psi\\ MODIFIER_LIST$",
+      "status": "open",
+      "reason": "Modifier words on a line of their own before an anonymous function at statement start (`private private` above `fun ()`): parseLocalDeclaration keeps them as the function's modifiers, the grammar reads them as an infix expression over the function. Compiler-rejected (FunctionsWithoutName).",
+      "counts": {
+        "mutations": 11
+      },
+      "example": "mutations: modifier-run/2x2/FunctionsWithoutName~0.kt:3"
+    },
+    {
+      "key": "^C\\ declaration\\ start\\ only\\ in\\ ts:\\ FUN\\ @\\ ts\\ prefix_expression\\ /\\ psi\\ OPERATION_REFERENCE$",
+      "status": "open",
+      "reason": "A piece inserted before a parameter type (insert-piece mutant): a function starts at different tokens.",
+      "counts": {
+        "mutations": 1
+      },
+      "example": "mutations: insert-piece/ParameterType~1.kt:21"
+    },
+    {
+      "key": "^A\\ source_file\\ >\\ ERROR\\ simple_identifier\\ \\|\\ psi\\ FILE$",
+      "status": "open",
+      "reason": "A line separator (U+2028) inside a comment of the lexer test lineSeparatorInComments: PSI reads the comment whole, the grammar errs after the separator.",
+      "counts": {
+        "kotlin": 2
+      },
+      "example": "kotlin: compiler/psi/psi-impl/testData/lexer/kotlin/whitespaceCharacters/lineSeparator/lineSeparatorInComments.kt:5"
+    },
+    {
+      "key": "^B\\ psi\\ CALLABLE_REFERENCE_EXPRESSION:\\ Type\\ arguments\\ are\\ not\\ allowed\\ \\|\\ ts\\ type_arguments$",
+      "status": "open",
+      "reason": "A callable reference with type arguments after it (`::C<T>`), an error test: PSI reports the type arguments, the grammar reads a call of them.",
+      "counts": {
+        "kotlin": 1
+      },
+      "example": "kotlin: analysis/analysis-api/testData/components/resolver/allByPsi/withErrors/callableReferenceForConstructorWithTypeArguments.kt:8"
+    },
+    {
+      "key": "^C\\ declaration\\ start\\ only\\ in\\ psi:\\ FUN\\ @\\ ts\\ annotation\\ /\\ psi\\ ANNOTATION_ENTRY$",
+      "status": "open",
+      "reason": "An `import` after declarations, read again as a script (a multi-file test concatenated into one file): PSI takes the import and the annotated function after it, the grammar reads `import X @Ann(...)` as an infix expression.",
+      "counts": {
+        "kotlin": 2,
+        "idea": 1
+      },
+      "example": "kotlin: compiler/testData/codegen/box/innerNested/considerPropertyInitValueFromNestedClass.kt:17"
     }
   ]
 }
