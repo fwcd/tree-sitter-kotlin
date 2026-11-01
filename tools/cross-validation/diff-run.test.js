@@ -120,11 +120,21 @@ describe('mutants and the registry', () => {
 
   it('splits the gated buckets into registered and unexpected', () => {
     const summary = summarize(records, ['head'], origins);
-    const expected = [{ key: /^B psi BLOCK: m /, reason: 'r' }, { key: /^A never/, reason: 'unused' }];
+    const expected = [{ key: /^B psi BLOCK: m /, status: 'open', reason: 'r' }, { key: /^A never/, status: 'deliberate', reason: 'unused' }];
     const { unexpected, registered, unused } = triage(summary, expected, 'head');
     expect(unexpected.map(bucket => bucket.key)).toEqual(['C* @ KtFile: psi FUN / ts BINARY_EXPRESSION']);
     expect(registered.map(({ bucket }) => bucket.key)).toEqual(['B psi BLOCK: m | ts statements']);
     expect(unused.map(entry => entry.reason)).toEqual(['unused']);
+  });
+
+  it('takes an entry with counts for the inputs it covers in the corpus', () => {
+    const summary = summarize(records, ['head'], origins);
+    const entry = { key: /^B psi BLOCK: m /, status: 'open', reason: 'r', counts: { mutations: 1 } };
+    const unexpected = corpus => triage(summary, [entry], 'head', false, corpus).unexpected.map(b => b.key);
+    expect(unexpected('mutations')).not.toContain('B psi BLOCK: m | ts statements');
+    expect(unexpected('kotlin')).toContain('B psi BLOCK: m | ts statements');
+    entry.counts.mutations = 0;
+    expect(unexpected('mutations')).toContain('B psi BLOCK: m | ts statements');
   });
 });
 

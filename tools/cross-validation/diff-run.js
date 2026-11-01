@@ -518,15 +518,21 @@ function markMutants(records, labels, origins) {
 const gatedKey = (key, strict = false) => (strict ? /^(A|B|C\*?) / : /^(A|B|C\*|C comment) /).test(key);
 
 /**
- * Read the registry of accepted differences.
+ * Read the registry of known differences. A `deliberate` one is a difference the grammar keeps,
+ * with its reason and the cost of matching PSI; an `open` one is a gap the gate found and nobody
+ * fixed yet, listed so that the gate fails only on what is new.
  *
- * @param {string} file - JSON `{ differences: [{ key, reason, kotlin?, cost? }] }`, `key` a regex.
- * @returns {Array<{ key: RegExp, reason: string }>}
+ * @param {string} file - JSON `{ differences: [{ key, status, reason, counts?, kotlin?, cost?, example? }] }`,
+ *   `key` a regex over bucket keys, `status` `deliberate` or `open`, `counts` the inputs per corpus
+ *   (`--corpus` name) the entry covers; a bucket with more, or in a corpus it does not name, is
+ *   unexpected.
+ * @returns {Array<{ key: RegExp, status: string, reason: string }>}
  */
 function loadExpected(file) {
   const { differences } = JSON.parse(fs.readFileSync(file, 'utf8'));
   return differences.map(entry => {
     if (!entry.key || !entry.reason) throw new Error(`${file}: every difference needs a key and a reason`);
+    if (!['deliberate', 'open'].includes(entry.status)) throw new Error(`${file}: ${entry.key}: status is deliberate or open`);
     return { ...entry, key: new RegExp(entry.key) };
   });
 }
@@ -536,12 +542,15 @@ function loadExpected(file) {
  *
  * @returns {{ unexpected: object[], registered: Array<{ bucket: object, entry: object }>, unused: object[] }}
  */
-function triage(summary, expected, label, strict = false) {
+function triage(summary, expected, label, strict = false, corpus = null) {
   const unexpected = [], registered = [], used = new Set();
   for (const bucket of summary.buckets) {
     if (!bucket.counts[label] || !gatedKey(bucket.key, strict)) continue;
     const entry = expected.find(candidate => candidate.key.test(bucket.key));
-    if (entry) { registered.push({ bucket, entry }); used.add(entry); } else unexpected.push(bucket);
+    // One bucket key can stand for several causes, so an entry with counts covers the inputs it
+    // was registered with: more in this corpus is a new difference under an old key.
+    const allowed = entry && entry.counts && corpus ? entry.counts[corpus] ?? 0 : Infinity;
+    if (entry && bucket.counts[label] <= allowed) { registered.push({ bucket, entry }); used.add(entry); } else unexpected.push(bucket);
   }
   return { unexpected, registered, unused: expected.filter(entry => !used.has(entry)) };
 }
@@ -563,8 +572,11 @@ function renderReport({ corpus, meta, summary, labels, triaged = null }) {
   };
   if (triaged) {
     table(`Not in the registry (${triaged.unexpected.length})`, triaged.unexpected);
-    out.push('', `## Registered (${triaged.registered.length})`, '');
-    for (const { bucket, entry } of triaged.registered) out.push(`- \`${bucket.key.replace(/`/g, 'ˋ')}\` (${bucket.counts[labels[0]]}): ${entry.reason}`);
+    for (const status of ['deliberate', 'open']) {
+      const entries = triaged.registered.filter(({ entry }) => entry.status === status);
+      out.push('', `## Registered, ${status} (${entries.length})`, '');
+      for (const { bucket, entry } of entries) out.push(`- \`${bucket.key.replace(/`/g, 'ˋ')}\` (${bucket.counts[labels[0]]}): ${entry.reason}`);
+    }
     if (triaged.unused.length) {
       out.push('', '## Registered differences this corpus did not show', '');
       for (const entry of triaged.unused) out.push(`- \`${entry.key.source}\`: ${entry.reason}`);
@@ -659,7 +671,7 @@ async function main(argv) {
   const origins = options.origins ? JSON.parse(fs.readFileSync(options.origins, 'utf8')) : null;
   const summary = summarize(readShards(options.out), labels, origins);
   const gateLabel = labels.find(label => label !== 'base') || labels[0];
-  const triaged = options.expect ? triage(summary, loadExpected(options.expect), gateLabel, options.strict) : null;
+  const triaged = options.expect ? triage(summary, loadExpected(options.expect), gateLabel, options.strict, options.corpus) : null;
   fs.writeFileSync(path.join(options.out, 'buckets.json'), JSON.stringify(summary, null, 2) + '\n');
   fs.writeFileSync(path.join(options.out, 'report.md'), renderReport({ corpus: options.corpus, meta, summary, labels, triaged }));
   console.log(JSON.stringify({ corpus: options.corpus, out: options.out, totals: summary.totals, buckets: summary.buckets.length,

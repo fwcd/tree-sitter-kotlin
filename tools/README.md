@@ -193,5 +193,10 @@ zsh tools/psi-gate/run.sh --base origin/main kotlin mutations snippets corpus
 IDEA_ROOT=~/idea zsh tools/psi-gate/run.sh idea
 ```
 
-An entry of the registry names a difference the grammar keeps: the key pattern, the reason, the
-rule of `KotlinParsing` it departs from and what matching it would cost. Anything else is fixed.
+An entry of the registry is `deliberate`, a difference the grammar keeps (the key pattern, the
+reason, the rule of `KotlinParsing` it departs from and what matching it would cost), or `open`, a
+gap the gate found and nobody fixed yet, with the smallest example of its bucket. Each entry
+also counts the inputs per corpus it covers, as one bucket key can stand for several causes. The
+gate fails on every gated bucket no entry names and on one with more inputs than its entry, so a
+new difference or a regression shows at once; a fix removes its `open` entry, and the report lists
+the entries a corpus no longer shows.
