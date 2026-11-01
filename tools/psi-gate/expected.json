@@ -1,0 +1,4 @@
+{
+  "about": "Accepted differences from Kotlin's PSI parser. Each entry: key, a regular expression over a bucket key of diff-run.js; reason; kotlin, the rule of KotlinParsing or KotlinExpressionParsing it departs from; cost, what matching PSI would cost. A gated bucket no entry names fails tools/psi-gate/run.sh.",
+  "differences": []
+}

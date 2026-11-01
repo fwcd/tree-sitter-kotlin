@@ -123,19 +123,37 @@ against its base in one pass:
 ```sh
 npm run psi-diff:mutations   # local/psi-diff/corpora/{mutations,review-329}
 npm run psi-diff -- --corpus mutations --root local/psi-diff/corpora/mutations \
-  --grammar head=. --grammar base=../base-checkout
+  --grammar head=. --grammar base=../base-checkout --expect tools/psi-gate/expected.json
 npm run psi-diff:minimize -- --run local/psi-diff/runs/mutations
 ```
 
-Each input gets a verdict per grammar: `A` (tree-sitter ERROR or MISSING, PSI
-clean), `B` (tree-sitter clean, PSI `PsiErrorElement`), `C` (both clean,
-normalized structures differ), `ok` or `both-error`. A, B and C carry a bucket
-key — the first ERROR node with its parent and the PSI node at that offset, the
-first PSI error with its parent and message, or the first diverging node — and
-`report.md` lists each bucket's count per grammar with its smallest example.
-Without `--list`, a git work tree contributes the `.kt`/`.kts` files it tracks;
-`--exclude REGEX` drops paths. The run is sharded (`--shard-size`, `--jobs`)
-and resumes from the shards already written under `local/psi-diff/runs/NAME`.
+Each input gets a verdict per grammar:
+
+| verdict | meaning |
+|---|---|
+| `A` | tree-sitter has an ERROR or MISSING node, PSI is clean |
+| `B` | tree-sitter is clean, PSI has a `PsiErrorElement` |
+| `A-prefix`, `B-prefix` | both have errors, and one side's first error is on an earlier line |
+| `B-script` | a `B` of a `.kt` file that is clean PSI as a `.kts` script (the grammar reads scripts too) |
+| `C` | both clean, but the comments or the normalized structures differ |
+| `C-mutant` | a `C` of a mutant whose original is `ok` |
+| `ok`, `both-error` | agreement; errors on the same line |
+
+A, B and C carry a bucket key — the first ERROR node with its parent and the
+PSI node at that offset, the first PSI error with its parent and message, the
+first comment one side reads and the other does not, or the first diverging
+node — and `report.md` lists each bucket's count per grammar with its smallest
+example. The prefix verdicts share the keys of `A` and `B`, so a cause shows
+whether its file has other errors or not. Without `--list`, a git work tree
+contributes the `.kt`/`.kts` files it tracks; `--exclude REGEX` drops paths.
+The run is sharded (`--shard-size`, `--jobs`) and resumes from the shards
+already written under `local/psi-diff/runs/NAME`.
+
+`--expect REGISTRY` gates the run: an `A`, `A-prefix`, `B`, `B-prefix`,
+`C-mutant` or `C comment` bucket that no entry of the registry names is listed
+under "Not in the registry" and makes the run exit 1; `--strict` gates every
+`C` too, for corpora whose every input is deliberate. A grammar labelled `base`
+adds the buckets that grew in the other.
 
 `minimize.js` shrinks each bucket's smallest example by deleting lines, then
 tokens, while the bucket key holds; one warm oracle JVM (`PsiOracle --serve`)
@@ -144,19 +162,36 @@ deletes that directory on every rebuild.
 
 ## PSI gate
 
-`psi-gate/run.sh` runs the differential where its verdicts say most: the whole Kotlin
-repository at the oracle's commit (66,875 files, the `diagnostics`, `codegen/box` and spec test
-data included), an IntelliJ checkout (`IDEA_ROOT`), and the generic mutations of
-`psi-gate/mutate.js` over Kotlin's PSI test data: a comment between any two tokens of a line, a
-line break before the tokens that decide statement termination, a Unicode suffix on every name,
-and each hard keyword in place of a selector. `psi-gate/unmarked.py` leaves out files with IDE
-test markup (`<caret>`, `<selection>`, highlighting tags), which Kotlin's parser reads as code.
+`psi-gate/run.sh [--base REV] CORPUS...` runs the differential, gated by the registry
+`psi-gate/expected.json`, over these corpora:
+
+| corpus | inputs |
+|---|---|
+| `kotlin` | the whole Kotlin repository at the oracle's commit (the `diagnostics`, `codegen/box` and spec test data included) |
+| `idea` | an IntelliJ checkout (`IDEA_ROOT`) |
+| `mutations` | `psi-gate/mutate.js` over the PSI-clean files of Kotlin's PSI test data |
+| `snippets` | `cross-validation/mutations.js`: name holes, expression positions × forms, the review snippets; `--strict` |
+| `corpus` | the inputs of `test/corpus`, through `psi-gate/corpus.js` |
+
+`psi-gate/unmarked.py` leaves out files with IDE test markup (`<caret>`, `<selection>`,
+highlighting tags), which Kotlin's parser reads as code. `--base REV` exports the grammar of
+REV with `git archive` and compares both.
+
+A mutant of `mutate.js` changes one place of its original, so the change is not lost behind an
+error the file has elsewhere: a comment between two tokens, a line break before a token that
+decides statement termination, a space or a line break after `@`, `::`, `?.`, `.` or a label,
+a name in backticks, a keyword after a dot, a receiver in parentheses, two statements joined by
+`;`, `;;` or nothing, a doubled `;`, a run of modifiers over lines, other contents of a character
+literal, a function without its body, and one inserted piece at a token boundary (as
+kotlin-syntax's `parse-fuzz.py` does); Unicode suffixes rename every name at once.
+`origins.json` maps each mutant to its original, so `C-mutant` is a divergence the mutation made.
+`corpus.js` checks each case's claim: PSI contradicts a case without `:error` with a `B` and a case
+with `:error` with an `A`.
 
 ```sh
-zsh tools/psi-gate/run.sh kotlin mutations
+zsh tools/psi-gate/run.sh --base origin/main kotlin mutations snippets corpus
 IDEA_ROOT=~/idea zsh tools/psi-gate/run.sh idea
 ```
 
-An `A` verdict on code the compiler accepts is a grammar gap. An `A` on code only PSI accepts,
-and a `B`, is either fixed where that is cheap or one of the deliberate differences the pull
-request lists.
+An entry of the registry names a difference the grammar keeps: the key pattern, the reason, the
+rule of `KotlinParsing` it departs from and what matching it would cost. Anything else is fixed.
