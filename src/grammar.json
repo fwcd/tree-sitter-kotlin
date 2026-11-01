@@ -5745,6 +5745,10 @@
                 },
                 {
                   "type": "SYMBOL",
+                  "name": "super_expression"
+                },
+                {
+                  "type": "SYMBOL",
                   "name": "parenthesized_expression"
                 },
                 {

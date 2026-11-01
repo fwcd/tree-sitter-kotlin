@@ -2484,3 +2484,22 @@ val d = a?
       (type_identifier)
       (quest)
       (simple_identifier))))
+
+================================================================================
+A super expression as a navigation selector
+================================================================================
+
+fun f() { x.super }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (super_expression)))))))
