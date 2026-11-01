@@ -177,7 +177,8 @@ const TS_TO_PSI = {
   interpolation_expression_end: null,
   interpolation_identifier_start: null,
   character_literal: 'CHARACTER_CONSTANT',
-  character_escape_seq: 'ESCAPE_STRING_TEMPLATE_ENTRY',
+  // PSI's CHARACTER_CONSTANT is one leaf, its escapes included: no template entry.
+  character_escape_seq: null,
   integer_literal: 'INTEGER_CONSTANT',
   real_literal: 'FLOAT_CONSTANT',
   long_literal: null,
