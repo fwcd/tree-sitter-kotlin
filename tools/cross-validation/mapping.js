@@ -177,7 +177,8 @@ const TS_TO_PSI = {
   interpolation_expression_end: null,
   interpolation_identifier_start: null,
   character_literal: 'CHARACTER_CONSTANT',
-  character_escape_seq: 'ESCAPE_STRING_TEMPLATE_ENTRY',
+  // PSI's CHARACTER_CONSTANT is one leaf, its escapes included: no template entry.
+  character_escape_seq: null,
   integer_literal: 'INTEGER_CONSTANT',
   real_literal: 'FLOAT_CONSTANT',
   long_literal: null,
@@ -196,6 +197,9 @@ const TS_TO_PSI = {
 
   // Other
   anonymous_initializer: 'CLASS_INITIALIZER',
+  companion_block: 'COMPANION_BLOCK',
+  backing_field: 'BACKING_FIELD',
+  contract_effect_list: 'CONTRACT_EFFECT_LIST',
   shebang_line: null,
 };
 
@@ -307,6 +311,9 @@ const SKIP_PSI_NODES = new Set([
 
   // KDOC_SECTION — documentation nodes
   'KDOC_SECTION',
+
+  // Each effect of a contract — tree-sitter puts the expressions in the list directly
+  'CONTRACT_EFFECT',
 
   // Receiver entries are transparent; preserve the containing parameter list.
   'CONTEXT_RECEIVER',
@@ -486,6 +493,10 @@ const ALL_TS_NAMED_NODES = new Set([
 
 /** @type {Set<string>} */
 const ALL_PSI_COMPOSITE_NODES = new Set([
+  'BACKING_FIELD',
+  'COMPANION_BLOCK',
+  'CONTRACT_EFFECT',
+  'CONTRACT_EFFECT_LIST',
   'ANNOTATED_EXPRESSION',
   'ANNOTATION',
   'ANNOTATION_ENTRY',

@@ -10,10 +10,8 @@ const fs = require('fs');
 const path = require('path');
 const { parseFiles, parseOne } = require('./ts-driver');
 const { listFixtureNames, fixturePaths } = require('./fixture-files');
-const { parseTreeSitter } = require('./parser-ts');
-const { parsePsi } = require('./parser-psi');
-const { normalizeTs, normalizePsi } = require('./normalizer');
-const { compareTrees, Status } = require('./comparator');
+const { compareWithPsi } = require('./pipeline');
+const { Status } = require('./comparator');
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -121,19 +119,8 @@ function runAll() {
         continue;
       }
 
-      // 3. Parse tree-sitter output into Node tree
-      const tsTree = parseTreeSitter(tsResult.output);
-
-      // 4. Parse PSI .txt file into Node tree
-      const psiText = fs.readFileSync(psiFile, 'utf-8');
-      const psiTree = parsePsi(psiText);
-
-      // 5. Normalize both trees
-      const tsNorm = normalizeTs(tsTree);
-      const psiNorm = normalizePsi(psiTree);
-
-      // 6. Compare
-      const compareResult = compareTrees(tsNorm, psiNorm);
+      // 3. Parse, normalize and compare the tree-sitter output and the PSI .txt file
+      const { result: compareResult } = compareWithPsi(tsResult.output, fs.readFileSync(psiFile, 'utf-8'));
 
       results.push(new FileResult(
         basename,
@@ -167,21 +154,9 @@ function runOne(name) {
 
   // Parse tree-sitter
   const tsResult = _runTreeSitterParse(ktFile);
-  let tsTree = null;
-  let tsNorm = null;
-
-  if (tsResult && !tsResult.hasErrors) {
-    tsTree = parseTreeSitter(tsResult.output);
-    tsNorm = normalizeTs(tsTree);
-  }
-
-  // Parse PSI
-  const psiText = fs.readFileSync(psiFile, 'utf-8');
-  const psiTree = parsePsi(psiText);
-  const psiNorm = normalizePsi(psiTree);
-
-  // Compare
-  const compareResult = compareTrees(tsNorm, psiNorm);
+  const tsSexp = tsResult && !tsResult.hasErrors ? tsResult.output : null;
+  const { tsTree, psiTree, tsNorm, psiNorm, result: compareResult } =
+    compareWithPsi(tsSexp, fs.readFileSync(psiFile, 'utf-8'));
   const result = new FileResult(
     name,
     compareResult.status,

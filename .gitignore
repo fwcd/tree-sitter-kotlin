@@ -40,3 +40,6 @@ tools/cross-validation/fixtures/
 
 # Generated cross-validation report (regenerated via npm run cross-validate)
 tools/cross-validation/report.md
+
+# PSI oracle jars (fetched on demand via npm run psi-oracle:fetch)
+tools/psi-oracle/lib/
