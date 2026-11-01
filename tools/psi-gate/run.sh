@@ -10,7 +10,7 @@
 # The kotlin and idea corpora leave out files with IDE test markup. --base REV adds the grammar
 # of REV (exported with git archive, its binding built against this checkout's node_modules)
 # as `base`; each report then lists the buckets that grew. Every corpus is gated by the registry
-# tools/psi-gate/expected.json: a bucket of A, A-prefix, B, B-prefix, C-mutant or C comment
+# tools/psi-gate/expected.json: a bucket of A, A-prefix, B, B-prefix, C-mutant, C comment or C declaration
 # verdicts that no entry names fails the run. Reports land in $PSI_GATE_HOME/runs/CORPUS-SHA.
 set -e
 SLOT=$PWD; G=${PSI_GATE_HOME:-~/.cache/psi-gate}; mkdir -p $G/runs

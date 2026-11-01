@@ -24,7 +24,7 @@
  *     [--jobs N] [--out DIR] [--report-only] [--expect REGISTRY] [--origins FILE] [--strict]
  *
  * `--expect` names the registry of accepted differences (`tools/psi-gate/expected.json`): the
- * report lists the `A`, `A-prefix`, `B`, `B-prefix`, `C-mutant` and `C comment` buckets of the
+ * report lists the `A`, `A-prefix`, `B`, `B-prefix`, `C-mutant`, `C comment` and `C declaration` buckets of the
  * first non-`base` grammar that no entry matches, and the run exits 1 when there is one.
  * `--origins` maps each mutant to its original (written by `psi-gate/mutate.js`), see
  * `markMutants`. `--strict` gates every `C` as well. A grammar labelled `base` gets a section of
@@ -81,10 +81,12 @@ function leafLength(leaf, source, offset) {
  *
  * @param {string} dump - `DebugUtil.psiToString(file, true, false)` output.
  * @param {string|null} [source] - The parsed text, which makes the offsets exact, see `leafLength`.
- * @returns {{ composites: Array<{ type: string, start: number, end: number, depth: number }>,
+ * @returns {{ composites: Array<{ type: string, parent: string, start: number, end: number, depth: number, token: number|null }>,
  *   errors: Array<{ offset: number, parent: string, message: string }>, comments: number[] }}
- *   Composites in document order; `end` is exclusive. `comments` holds the start of every comment
- *   (a `PsiComment` leaf or a `KDoc`). Offsets count UTF-16 code units, as Java and JavaScript do.
+ *   Composites in document order, `parent` the type of the enclosing one; `end` is exclusive, `token` is the start of the composite's first
+ *   leaf that is no whitespace, comment or KDoc (null when it has none). `comments` holds the start
+ *   of every comment (a `PsiComment` leaf or a `KDoc`). Offsets count UTF-16 code units, as Java
+ *   and JavaScript do.
  */
 function psiLayout(dump, source = null) {
   const composites = [];
@@ -103,18 +105,21 @@ function psiLayout(dump, source = null) {
     const leaf = LEAF_RE.exec(node);
     if (leaf) {
       if (leaf[1] === 'PsiComment') comments.push(offset);
+      if (leaf[1] === 'PsiElement' && !open.some(o => o.entry.type === 'KDoc')) {
+        for (let i = open.length - 1; i >= 0 && open[i].entry.token === null; i--) open[i].entry.token = offset;
+      }
       offset += leafLength(leaf[3], source, offset);
       continue;
     }
     const parent = open.length ? open[open.length - 1].entry.type : 'FILE';
     if (node.startsWith('PsiErrorElement')) {
       errors.push({ offset, parent, message: node.replace(/^PsiErrorElement:?/, '') });
-      const entry = { type: 'PsiErrorElement', start: offset, end: offset, depth: open.length };
+      const entry = { type: 'PsiErrorElement', start: offset, end: offset, depth: open.length, token: null };
       open.push({ indent, entry });
       continue;
     }
     if (node === 'KDoc') comments.push(offset);
-    const entry = { type: node, start: offset, end: offset, depth: open.length };
+    const entry = { type: node, parent, start: offset, end: offset, depth: open.length, token: null };
     composites.push(entry);
     open.push({ indent, entry });
   }
@@ -228,6 +233,49 @@ function tsComments(root) {
   return out;
 }
 
+// Declarations whose first token both trees must agree on, by tree-sitter type. The structure
+// comparison skips names and modifiers, so a modifier read as a statement of its own (`private`
+// on the line above `private fun f() {}`) normalizes to the same tree as PSI's FUN with its
+// MODIFIER_LIST; where the declaration starts tells them apart.
+// Left out on both sides: the anonymous OBJECT_DECLARATION inside an OBJECT_LITERAL, a destructuring
+// declaration (a PROPERTY in tree-sitter, its entries elsewhere in PSI) and the PROPERTY of a `when`
+// subject, which tree-sitter has no declaration node for.
+const DECLARATIONS = new Map(Object.entries({
+  function_declaration: 'FUN', anonymous_function: 'FUN', class_declaration: 'CLASS',
+  object_declaration: 'OBJECT_DECLARATION', companion_object: 'OBJECT_DECLARATION',
+  property_declaration: 'PROPERTY', type_alias: 'TYPEALIAS', secondary_constructor: 'SECONDARY_CONSTRUCTOR',
+  getter: 'PROPERTY_ACCESSOR', setter: 'PROPERTY_ACCESSOR',
+}));
+const PSI_DECLARATIONS = new Set(DECLARATIONS.values());
+const PSI_NO_DECLARATION_IN = { OBJECT_DECLARATION: 'OBJECT_LITERAL', PROPERTY: 'WHEN' };
+
+/** `TYPE@offset` of each declaration's first token that is no comment, in document order. */
+function tsDeclarationStarts(root) {
+  const out = [];
+  const cursor = root.walk();
+  let descend = true;
+  for (;;) {
+    const type = descend && DECLARATIONS.get(cursor.nodeType);
+    const node = type && cursor.currentNode;
+    if (node && !(type === 'PROPERTY' && node.namedChildren.some(child => child.type === 'multi_variable_declaration'))) {
+      let first = node.firstChild;
+      while (first && COMMENT_TYPES.has(first.type)) first = first.nextSibling;
+      out.push(`${type}@${(first || node).startIndex}`);
+    }
+    if (descend && cursor.gotoFirstChild()) continue;
+    if (cursor.gotoNextSibling()) { descend = true; continue; }
+    if (!cursor.gotoParent()) break;
+    descend = false;
+  }
+  return out.sort();
+}
+
+function psiDeclarationStarts(layout) {
+  return layout.composites.filter(c => PSI_DECLARATIONS.has(c.type) && c.token !== null
+    && PSI_NO_DECLARATION_IN[c.type] !== c.parent)
+    .map(c => `${c.type}@${c.token}`).sort();
+}
+
 const lineAt = (text, offset) => text.slice(0, offset).split('\n').length;
 
 function aKey(tree, layout) {
@@ -261,7 +309,9 @@ function bKey(text, tree, psi, layout) {
  * error on an earlier line is `B-prefix`; on the same line the input is `both-error`. Their keys
  * are those of `A` and `B`, so one cause yields one bucket whether the file has other errors or
  * not. When both are clean, comments are compared before the structure: a comment one side reads
- * where the other reads literal text or none (`'a/*c*\/b'`) is a `C comment` divergence.
+ * where the other reads literal text or none (`'a/*c*\/b'`) is a `C comment` divergence. Then the first
+ * token of every declaration: one that starts elsewhere (a modifier left behind as a statement of
+ * its own) is a `C declaration start` divergence, which the normalized structures cannot show.
  *
  * @param {{ text: string, tree: object, psi: { psiErrors?: number, failure?: string }, dump: string|null }} input
  * @returns {{ verdict: string, key?: string, line?: number }}
@@ -294,6 +344,19 @@ function classify({ text, tree, psi, dump }) {
       const side = ts[i] === offset ? (psiComments.includes(offset) ? 'both' : 'ts') : 'psi';
       const node = tree.rootNode.descendantForIndex(offset);
       return { verdict: 'C', key: `C comment only in ${side} @ ts ${namedAncestorType(node.parent)} / psi ${psiTypeAt(layout, offset)}`,
+        line: lineAt(text, offset) };
+    }
+  }
+  if (layout) {
+    const ts = tsDeclarationStarts(tree.rootNode), psiStarts = psiDeclarationStarts(layout);
+    const only = (a, b) => a.filter(x => !b.includes(x));
+    const tsOnly = only(ts, psiStarts), psiOnly = only(psiStarts, ts);
+    if (tsOnly.length || psiOnly.length) {
+      const offsetOf = entry => Number(entry.split('@')[1]);
+      const first = [...tsOnly, ...psiOnly].sort((x, y) => offsetOf(x) - offsetOf(y))[0];
+      const offset = offsetOf(first), side = tsOnly.includes(first) ? 'ts' : 'psi';
+      const node = tree.rootNode.descendantForIndex(offset);
+      return { verdict: 'C', key: `C declaration start only in ${side}: ${first.split('@')[0]} @ ts ${namedAncestorType(node.parent)} / psi ${psiTypeAt(layout, offset)}`,
         line: lineAt(text, offset) };
     }
   }
@@ -515,7 +578,7 @@ function markMutants(records, labels, origins) {
  * True for a bucket the gate requires to be fixed or registered. `strict` gates every `C` too,
  * for corpora whose every input is deliberate (review snippets, corpus cases).
  */
-const gatedKey = (key, strict = false) => (strict ? /^(A|B|C\*?) / : /^(A|B|C\*|C comment) /).test(key);
+const gatedKey = (key, strict = false) => (strict ? /^(A|B|C\*?) / : /^(A|B|C\*|C comment|C declaration) /).test(key);
 
 /**
  * Read the registry of known differences. A `deliberate` one is a difference the grammar keeps,

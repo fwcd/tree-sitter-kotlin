@@ -47,6 +47,12 @@ describe('psiLayout', () => {
     expect(layout.errors).toEqual([]);
   });
 
+  it('records the first token of a composite, past whitespace, comments and KDoc', () => {
+    const dump = ['KtFile: a.kt', '  FUN', '    KDoc', "      PsiElement(KDOC_START)('/**')", "      PsiElement(KDOC_END)('*/')",
+      "    PsiWhiteSpace('\\n')", "    PsiComment(EOL_COMMENT)('//')", "    PsiWhiteSpace('\\n')", "    PsiElement(fun)('fun')"].join('\n');
+    expect(psiLayout(dump).composites.find(entry => entry.type === 'FUN')).toMatchObject({ start: 0, token: 9 });
+  });
+
   it('counts a backslash of the source as itself, and resolves \\n against the source', () => {
     const dump = ['KtFile: a.kt', "  PsiElement(A)('\\!')", "  PsiElement(B)('\\n')", "  PsiComment(EOL_COMMENT)('//')"].join('\n');
     expect(psiLayout(dump, '\\!\n//').comments).toEqual([3]);
@@ -177,6 +183,22 @@ describe.skipIf(binding.error)('classify', () => {
     const dump = CLEAN_DUMP.replace("  PsiWhiteSpace('\\n')", "  PsiWhiteSpace(' ')\n  PsiWhiteSpace('// c')\n  PsiWhiteSpace('\\n')");
     expect(classify({ text, tree: parseText(parser, text), psi: { psiErrors: 0, firstError: null }, dump }))
       .toMatchObject({ verdict: 'C', key: expect.stringMatching(/^C comment only in ts @ /) });
+  });
+
+  it('reports a declaration that starts elsewhere, which the normalized structures hide', () => {
+    // 257 words exceed the scanner's lookahead, so the first `private` may be left as a statement.
+    const text = 'private\n' + 'private '.repeat(256) + 'fun f() {}\n';
+    const tree = parseText(parser, text);
+    if (tree.rootNode.child(0).type === 'function_declaration') return; // a grammar that keeps them together
+    const words = Array.from({ length: 257 }, (_, i) =>
+      `      PsiElement(private)('private')\n      PsiWhiteSpace('${i === 0 ? '\\n' : ' '}')`).join('\n');
+    const dump = ['KtFile: a.kt', '  PACKAGE_DIRECTIVE', '    <empty list>', '  IMPORT_LIST', '    <empty list>',
+      '  FUN', '    MODIFIER_LIST', words, "    PsiElement(fun)('fun')", "    PsiWhiteSpace(' ')",
+      "    PsiElement(IDENTIFIER)('f')", '    VALUE_PARAMETER_LIST', "      PsiElement(LPAR)('(')",
+      "      PsiElement(RPAR)(')')", "    PsiWhiteSpace(' ')", '    BLOCK', "      PsiElement(LBRACE)('{')",
+      "      PsiElement(RBRACE)('}')", "  PsiWhiteSpace('\\n')"].join('\n');
+    expect(classify({ text, tree, psi: { psiErrors: 0, firstError: null }, dump }))
+      .toMatchObject({ verdict: 'C', key: expect.stringMatching(/^C declaration start only in psi: FUN /) });
   });
 
   it('reports ok when both are clean and agree', () => {

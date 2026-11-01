@@ -141,8 +141,10 @@ Each input gets a verdict per grammar:
 
 A, B and C carry a bucket key — the first ERROR node with its parent and the
 PSI node at that offset, the first PSI error with its parent and message, the
-first comment one side reads and the other does not, or the first diverging
-node — and `report.md` lists each bucket's count per grammar with its smallest
+first comment one side reads and the other does not, the first declaration
+whose first token differs (a modifier left behind as a statement of its own,
+which the normalized structures, without names and modifiers, cannot show),
+or the first diverging node — and `report.md` lists each bucket's count per grammar with its smallest
 example. The prefix verdicts share the keys of `A` and `B`, so a cause shows
 whether its file has other errors or not. Without `--list`, a git work tree
 contributes the `.kt`/`.kts` files it tracks; `--exclude REGEX` drops paths.
@@ -150,7 +152,7 @@ The run is sharded (`--shard-size`, `--jobs`) and resumes from the shards
 already written under `local/psi-diff/runs/NAME`.
 
 `--expect REGISTRY` gates the run: an `A`, `A-prefix`, `B`, `B-prefix`,
-`C-mutant` or `C comment` bucket that no entry of the registry names is listed
+`C-mutant`, `C comment` or `C declaration` bucket that no entry of the registry names is listed
 under "Not in the registry" and makes the run exit 1; `--strict` gates every
 `C` too, for corpora whose every input is deliberate. A grammar labelled `base`
 adds the buckets that grew in the other.
