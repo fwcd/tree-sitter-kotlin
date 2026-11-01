@@ -354,28 +354,59 @@ fun f() {
           (function_body))))))
 
 ==================
-Anonymous suspend function with body
+A named function without a body as the body of an if
+==================
+
+fun f() {
+    if (c) fun g()
+    if (d) fun <T> h(): T else y
+}
+
+---
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (simple_identifier)
+              (function_value_parameters))))
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (type_parameters
+                (type_parameter
+                  (type_identifier)))
+              (simple_identifier)
+              (function_value_parameters)
+              (user_type
+                (type_identifier))))
+          alternative: (control_structure_body
+            (simple_identifier)))))))
+
+==================
+suspend before a named function where an expression starts
+:error
+==================
+
+fun h() { if (c) suspend fun g() {} }
+
+---
+
+==================
+suspend is no part of an anonymous function
+:error
 ==================
 
 val anon = suspend fun() { assert(true) }
 
 ---
-
-(source_file
-  (property_declaration
-    (binding_pattern_kind)
-    (variable_declaration
-      (simple_identifier))
-    (anonymous_function
-      (function_value_parameters)
-      (function_body
-        (statements
-          (call_expression
-            (simple_identifier)
-            (call_suffix
-              (value_arguments
-                (value_argument
-                  (boolean_literal))))))))))
 
 ==================
 Function with backticked name

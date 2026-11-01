@@ -330,11 +330,9 @@ module.exports = grammar({
     [$.function_modifier, $.simple_identifier],
     [$._type_modifier, $.simple_identifier],
     [$.delegation_specifier, $._type_modifier, $.simple_identifier],
-    [$.anonymous_function, $.function_modifier],
     // `fun T.` at statement start: the receiver of a declaration or of an anonymous function.
     [$._anonymous_receiver_type, $.receiver_type],
     [$._anonymous_receiver_type, $.nullable_type],
-    [$.anonymous_function, $.simple_identifier],
 
 
     // ambiguity between simple identifier 'set/get' with actual setter/getter functions.
@@ -1425,7 +1423,17 @@ module.exports = grammar({
     // (parseControlStructureBody -> parseBlockLevelExpression), where a modifier word is an
     // identifier and a declaration is no statement. Kotlin parses a keyword-led one there
     // (`if (c) val x = 1`) and rejects it; none occurs in the IntelliJ monorepo.
-    control_structure_body: $ => choice($._block, $._expression_statement),
+    control_structure_body: $ => choice(
+      $._block,
+      $._expression_statement,
+      alias($._bodyless_named_function, $.anonymous_function)
+    ),
+
+    // `if (c) fun g()`: a named function without a body, which parseAtomicExpression reads as a
+    // local function wherever an expression starts. Only here: elsewhere at statement start it
+    // would take the `where@` of a type constraint as a label, see anonymous_function; in an
+    // operand or an argument it stays a difference (tools/psi-gate/expected.json).
+    _bodyless_named_function: $ => prec.dynamic(-1, anonymousFunction($, $.simple_identifier, true)),
 
     _block: $ => prec(PREC.BLOCK, seq(
       "{", $._delegate_end_hint, optional(";"), optional($.statements), "}",
@@ -1806,15 +1814,6 @@ module.exports = grammar({
           optional(seq(":", $._type)))
     ),
 
-    // A `fun` where Kotlin expects an expression, with or without a name: `if (c) fun g() {}`,
-    // `1 < fun g() {}`. `fun` starts an expression (EXPRESSION_FIRST) and parseAtomicExpression
-    // reads a named one as a local function; the compiler rejects the name later
-    // (ANONYMOUS_FUNCTION_WITH_NAME). At statement start the same text is a function_declaration,
-    // which wins by the lower precedence of the named form from its name on; the receiver before
-    // it keeps the conflicts of the anonymous form. The dynamic precedence settles `@A fun g()`,
-    // where the annotation is a modifier of the declaration or a prefix of the expression. The
-    // named form takes a body, so that after `fun <T> f()` the next line's `where@A T` stays a
-    // type constraint rather than a label of a trailing lambda.
     // `x.fun()`: an anonymous function as a selector, in its plain form only. The full form (a
     // receiver, type parameters, a return type) cost 198 more states, a return type alone 81,
     // for code no compiler accepts; tools/psi-gate/expected.json lists the difference.
@@ -1822,6 +1821,19 @@ module.exports = grammar({
       "fun", $.function_value_parameters, optional($.function_body)
     )),
 
+    // A `fun` where Kotlin expects an expression, with or without a name: `if (c) fun g() {}`,
+    // `1 < fun g() {}`. `fun` starts an expression (EXPRESSION_FIRST) and parseAtomicExpression
+    // reads a named one as a local function; the compiler rejects the name later
+    // (ANONYMOUS_FUNCTION_WITH_NAME). At statement start the same text is a function_declaration,
+    // which wins by the lower precedence of the named form from its name on; the receiver before
+    // it keeps the conflicts of the anonymous form. The dynamic precedence settles `@A fun g()`,
+    // where the annotation is a modifier of the declaration or a prefix of the expression.
+    // Neither form takes `suspend`: parseAtomicExpression reads a word before `fun` as an
+    // expression of its own, so `val x = suspend fun() {}` is "Unexpected tokens". A context
+    // before an anonymous function is one of its parts (`context(a: A) fun () {}`); before a
+    // named one it is a call. The named form takes a body here, so that after `fun <T> f()` at
+    // statement start the next line's `where@A T` stays a type constraint rather than a label of
+    // a trailing lambda; without one it is a control structure body, `if (c) fun g()`.
     anonymous_function: $ => choice(
       prec.right(anonymousFunction($)),
       prec.dynamic(-1, anonymousFunction($, $.simple_identifier)),
@@ -2439,7 +2451,7 @@ function wordExcept(words) {
 
 // An anonymous function, or with `name` before its parameters a named one, which takes a body and
 // the lower precedence from its name on (see `anonymous_function`).
-function anonymousFunction($, name) {
+function anonymousFunction($, name, bodyless = false) {
   // The receiver is a type as for a function declaration (`fun Any?.() = this`,
   // `fun @[a] T.(a: foo)`), but not one in parentheses: `fun (b) {}` is a parameter
   // list, and `(b)` cannot be told from a receiver until the `.` that never comes.
@@ -2455,12 +2467,12 @@ function anonymousFunction($, name) {
   const head = name
     ? [choice(seq(optional($.type_parameters), receiver), seq(field("receiver", alias($._anonymous_receiver_type, $.receiver_type)), ".", $.type_parameters))]
     : [receiver, optional($.type_parameters)];
+  const body = bodyless ? [] : [$.function_body];
   const tail = name
-    ? [prec.right(-1, seq(name, $.function_value_parameters, optional(seq(":", $._type)), $.function_body))]
+    ? [prec.right(-1, seq(name, $.function_value_parameters, optional(seq(":", $._type)), ...body))]
     : [$.function_value_parameters, optional(seq(":", $._type)), optional($.function_body)];
   return seq(
-    optional($.context_receiver),
-    optional("suspend"),
+    ...(name ? [] : [optional($.context_receiver)]),
     "fun",
     ...head,
     ...tail
