@@ -110,9 +110,13 @@ typedef struct {
   PendingComment comment;
   // Set after `by` in a class header, cleared at the next `{` or automatic semicolon.
   bool in_delegate;
-  // Set by a block comment right after a separator, cleared by the next scan: a `;` right after
-  // the comment is a further semicolon (`a();/*c*/; b()`), see the scan's FURTHER_SEMICOLON.
-  bool comment_after_semi;
+  // Set by a block comment right after a separator: a `;` right after the comment is a further
+  // semicolon (`a();/*c*/; b()`), see the scan's FURTHER_SEMICOLON. The state restored for a scan
+  // is that after the last external token, so a token of the internal lexer clears neither flag.
+  bool after_comment;
+  // Set by a block comment right after a label's `@`: a name right after the comment is no label
+  // (`break@/*c*/lab`). Not kept inside a string template, whose serialized form has no bit left.
+  bool label_comment;
 } Scanner;
 
 static inline void stack_push(Stack *stack, char chr, bool triple, uint16_t prefix_len) {
@@ -1722,7 +1726,7 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
 // A `;` after a separator (FURTHER_SEMICOLON valid) is one only with whitespace or a comment
 // before it: the scan starts where the `;` before it ended, and Kotlin's lexer reads `;;` as one
 // token, DOUBLE_SEMICOLON, which its parser rejects, while `;/*c*/;` is two semicolons. A block
-// comment is a token of its own, so the scan that reads it leaves comment_after_semi for the next.
+// comment is a token of its own, so the scan that reads it leaves after_comment for the next.
 // The characters of a character literal up to its next escape, closing quote or line break
 // (CHARACTER_CONTENT valid, only inside one): any character, a NUL too, which the internal lexer
 // cannot carry through a character class. The scan starts right after the previous part, so a
@@ -1748,10 +1752,20 @@ static const char *const HARD_KEYWORD_WORDS[] = {
 // The name right after `break@`, `return@`, `this@` and the like (LABEL_IDENTIFIER valid): a
 // whole word at the scan's start, which is where the `@` ended, and no hard keyword. Anything
 // else leaves the position to the internal lexer, which has no token for it.
+// A label name of ASCII characters; one with another character is the internal lexer's, which
+// knows the Unicode letters (`labé`, while `lab💩` and `١lab` are no names), see _label_name.
 static bool scan_label_identifier(TSLexer *lexer) {
   if (!constructor_word_char(lexer->lookahead) || iswdigit(lexer->lookahead)) return false;
   char word[16];
-  if (constructor_word(lexer, word, sizeof(word)) && WORD_IN(word, HARD_KEYWORD_WORDS)) return false;
+  unsigned length = 0;
+  while (!lexer->eof(lexer) && constructor_word_char(lexer->lookahead)) {
+    if (lexer->lookahead >= 128) return false;
+    if (length + 1 < sizeof(word)) word[length] = (char)lexer->lookahead;
+    length++;
+    advance(lexer);
+  }
+  word[length < sizeof(word) ? length : sizeof(word) - 1] = '\0';
+  if (length < sizeof(word) && WORD_IN(word, HARD_KEYWORD_WORDS)) return false;
   lexer->mark_end(lexer);
   lexer->result_symbol = LABEL_IDENTIFIER;
   return true;
@@ -1759,18 +1773,27 @@ static bool scan_label_identifier(TSLexer *lexer) {
 
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
-  bool comment_after_semi = scanner->comment_after_semi;
-  scanner->comment_after_semi = false;
+  bool after_comment = scanner->after_comment;
+  bool label_comment = scanner->label_comment;
+  scanner->after_comment = false;
+  scanner->label_comment = false;
   // Nothing read leaves the cursor where it was: a line break ends the literal, and the
   // separator after it is the scan's below.
   if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT] && scan_character_content(lexer)) return true;
   if (valid_symbols[LABEL_IDENTIFIER] && !valid_symbols[STRING_CONTENT] && lexer->lookahead != '`') {
+    // The name follows the `@` directly: a comment before it leaves the label unnamed, as
+    // whitespace does. The comment is scanned here, so the next scan knows it came first.
+    if (label_comment) return false;
+    if (lexer->lookahead == '/' && valid_symbols[MULTILINE_COMMENT] && scan_multiline_comment(lexer, NULL, NULL)) {
+      scanner->label_comment = true;
+      return true;
+    }
     return scan_label_identifier(lexer);
   }
   if (valid_symbols[FURTHER_SEMICOLON] && !valid_symbols[STRING_CONTENT] &&
       (lexer->lookahead == ';' || iswspace(lexer->lookahead))) {
     if (lexer->lookahead == ';') {
-      if (!comment_after_semi) return false;
+      if (!after_comment) return false;
       advance(lexer);
       lexer->result_symbol = FURTHER_SEMICOLON;
       return true;
@@ -1788,7 +1811,7 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   if (found && lexer->result_symbol == AUTOMATIC_SEMICOLON) scanner->in_delegate = false;
   if (found && lexer->result_symbol == MULTILINE_COMMENT && valid_symbols[FURTHER_SEMICOLON] &&
       !valid_symbols[STRING_CONTENT]) {
-    scanner->comment_after_semi = true;
+    scanner->after_comment = true;
   }
   return found;
 }
@@ -1839,7 +1862,7 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     // unambiguously identify this format, including an empty string stack.
     buffer[0] = 8 | (scanner->constructor_newline ? 4 : 0) |
       (scanner->comment.semi_owed ? 16 : 0) | (scanner->in_delegate ? 32 : 0) |
-      (scanner->comment_after_semi ? 64 : 0);
+      (scanner->after_comment ? 64 : 0) | (scanner->label_comment ? 128 : 0);
     buffer[1] = (char)frames;
     buffer[2] = (char)(frames >> 8);
     write_u32(buffer + 3, scanner->comment.start_byte);
@@ -1858,14 +1881,14 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     return length;
   }
   // in_delegate is bit 16 here and bit 32 in the pending form, where 16 is taken.
-  // comment_after_semi is bit 8 over a string delimiter, whose low bits are never 0, and bit 64
-  // alone, where bit 8 would mark the pending form.
+  // after_comment is bit 8 over a string delimiter, whose low bits are never 0, and bit 64
+  // alone, where bit 8 would mark the pending form; label_comment is bit 128 alone.
   uint8_t flags = (scanner->constructor_newline ? 4 : 0) | (scanner->in_delegate ? 16 : 0);
   if (n > 0) {
     memcpy(buffer, stack->contents, n);
-    buffer[0] |= flags | (scanner->comment_after_semi ? 8 : 0);
-  } else if (flags || scanner->comment_after_semi) {
-    buffer[0] = flags | (scanner->comment_after_semi ? 64 : 0);
+    buffer[0] |= flags | (scanner->after_comment ? 8 : 0);
+  } else if (flags || scanner->after_comment || scanner->label_comment) {
+    buffer[0] = flags | (scanner->after_comment ? 64 : 0) | (scanner->label_comment ? 128 : 0);
     return 1;
   }
   return n;
@@ -1878,11 +1901,12 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
   scanner->constructor_newline = false;
   scanner->comment = (PendingComment){0};
   scanner->in_delegate = false;
-  scanner->comment_after_semi = false;
+  scanner->after_comment = false;
+  scanner->label_comment = false;
   if (!length || length > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) return;
   uint8_t flags = (uint8_t)buffer[0];
   if ((flags & 3) == 0 && (flags & 8)) {
-    if (length < PENDING_HEADER_BYTES || (flags & ~124u)) return;
+    if (length < PENDING_HEADER_BYTES || (flags & ~252u)) return;
     unsigned frames = (uint8_t)buffer[1] | ((unsigned)(uint8_t)buffer[2] << 8);
     if (frames > MAX_STRING_FRAMES ||
         length != PENDING_HEADER_BYTES + (frames * PENDING_FRAME_BITS + 7) / 8) return;
@@ -1899,14 +1923,16 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
     }
     scanner->constructor_newline = (flags & 4) != 0;
     scanner->in_delegate = (flags & 32) != 0;
-    scanner->comment_after_semi = (flags & 64) != 0;
+    scanner->after_comment = (flags & 64) != 0;
+    scanner->label_comment = (flags & 128) != 0;
     scanner->comment = (PendingComment){true, start, end, (flags & 16) != 0};
     return;
   }
-  if (length == 1 && (flags & ~84u) == 0) {
+  if (length == 1 && (flags & ~212u) == 0) {
     scanner->constructor_newline = (flags & 4) != 0;
     scanner->in_delegate = (flags & 16) != 0;
-    scanner->comment_after_semi = (flags & 64) != 0;
+    scanner->after_comment = (flags & 64) != 0;
+    scanner->label_comment = (flags & 128) != 0;
     return;
   }
   if (length % 2) return;
@@ -1916,5 +1942,5 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
   stack->size = length;
   scanner->constructor_newline = (flags & 4) != 0;
   scanner->in_delegate = (flags & 16) != 0;
-  scanner->comment_after_semi = (flags & 8) != 0;
+  scanner->after_comment = (flags & 8) != 0;
 }

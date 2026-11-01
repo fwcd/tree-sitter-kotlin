@@ -2358,7 +2358,15 @@ module.exports = grammar({
     // reads it as a whole word, so a hard keyword is none (`return@as`), where an immediate token
     // of the internal lexer took the longest word it accepted, `a` of `as`. A quoted name keeps
     // any whitespace before it.
-    _label_name: $ => choice($._label_identifier, $._backtick_identifier),
+    // A name with a character outside ASCII is the internal lexer's, which knows the Unicode
+    // letters: a letter first and no character that is neither a letter nor a digit (`labé`, while
+    // `lab💩` and `١lab` are none); the scanner declines it.
+    _label_name: $ => choice($._label_identifier, $._unicode_label_identifier, $._backtick_identifier),
+
+    _unicode_label_identifier: $ => token.immediate(new RustRegex(
+      `(?:[[\\p{L}${UNICODE_LETTER_SUPPLEMENT}]&&[^\\x00-\\x7f]]` +
+      `|[A-Za-z_][A-Za-z0-9_]*[[\\p{L}\\p{Nd}${UNICODE_LETTER_SUPPLEMENT}]&&[^\\x00-\\x7f]])` +
+      `[\\p{L}\\p{Nd}_${UNICODE_LETTER_SUPPLEMENT}]*`)),
 
     _return_at: $ => seq(
       "return@",
