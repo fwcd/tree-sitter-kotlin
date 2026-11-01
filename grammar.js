@@ -241,6 +241,7 @@ module.exports = grammar({
     // declaration prefix or an ordinary call whose callee is named `context`.
     // GLR explores both and keeps whichever yields a valid parse.
     [$.context_receiver, $.simple_identifier],
+    [$._type_context_receiver, $.simple_identifier],
 
     // `l@` may begin a labelled expression or, now, a labelled declaration;
     // which it is only becomes clear at the token after the label.
@@ -713,7 +714,7 @@ module.exports = grammar({
       seq(alias($._context_type_modifiers, $.type_modifiers), $.function_type)
     )),
 
-    _context_type_modifiers: $ => repeat1($.context_receiver),
+    _context_type_modifiers: $ => repeat1(alias($._type_context_receiver, $.context_receiver)),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
 
@@ -1021,13 +1022,12 @@ module.exports = grammar({
     // prefix on a callable declaration. Entries are either context parameters
     // (`name: Type`) or bare receiver types (`Type`). Complexity-neutral, but the
     // enclosing declaration must parse so its body is scored.
-    context_receiver: $ => seq(
-      "context",
-      "(",
-      sep1(choice(seq(optional($.parameter_modifiers), $.parameter), $._type), ","),
-      optional(","),
-      ")"
-    ),
+    // A receiver of a declaration may carry a label (`context(s@String)`), which
+    // KotlinParsing.parseContextReceiver reads as LABEL_QUALIFIER before the type; one of a
+    // function type may not (`context(label@String) () -> Unit` is an error for PSI).
+    context_receiver: $ => contextReceiver($, true),
+
+    _type_context_receiver: $ => contextReceiver($, false),
 
     // `public fun Foo.bar() { … }` once had a complete second reading as an infix
     // expression over soft-keyword modifiers (#277). With the hard keywords
@@ -2139,7 +2139,7 @@ module.exports = grammar({
 
     type_modifiers: $ => repeat1($._type_modifier),
 
-    _type_modifier: $ => choice($.annotation, $.context_receiver, "suspend"),
+    _type_modifier: $ => choice($.annotation, alias($._type_context_receiver, $.context_receiver), "suspend"),
 
     class_modifier: $ => choice(
       "sealed",
@@ -2478,6 +2478,18 @@ function wordExcept(words) {
     return depth > 0 && !node[''] ? `${body}?` : body;
   };
   return new RustRegex(suffix(trie, 0));
+}
+
+// `context(...)` before a declaration or a function type, see context_receiver.
+function contextReceiver($, labelled) {
+  const receiver = labelled ? seq(optional($.label), $._type) : $._type;
+  return seq(
+    "context",
+    "(",
+    sep1(choice(seq(optional($.parameter_modifiers), $.parameter), receiver), ","),
+    optional(","),
+    ")"
+  );
 }
 
 // An anonymous function, or with `name` before its parameters a named one, which takes a body and

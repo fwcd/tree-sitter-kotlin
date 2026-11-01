@@ -2318,6 +2318,10 @@
           "named": true
         },
         {
+          "type": "label",
+          "named": true
+        },
+        {
           "type": "not_nullable_type",
           "named": true
         },
