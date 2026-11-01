@@ -1466,6 +1466,82 @@ fun f() {
           (integer_literal))))))
 
 ================================================================================
+A run of modifiers over lines, several on each line, before a declaration
+================================================================================
+
+private private private
+private private private
+private private private
+private private private
+private private private
+private private private
+private private private
+private private private
+private fun f(){}
+fun g() {
+    private private
+    private private
+    val x = 1
+    open open
+    foo()
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (modifiers
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier)
+      (visibility_modifier))
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body))
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (property_declaration
+          (modifiers
+            (visibility_modifier)
+            (visibility_modifier)
+            (visibility_modifier)
+            (visibility_modifier))
+          (binding_pattern_kind)
+          (variable_declaration
+            (simple_identifier))
+          (integer_literal))
+        (infix_expression
+          (simple_identifier)
+          (simple_identifier)
+          (call_expression
+            (simple_identifier)
+            (call_suffix
+              (value_arguments))))))))
+================================================================================
 Comments between modifiers on lines of their own
 ================================================================================
 

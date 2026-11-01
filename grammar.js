@@ -2068,10 +2068,16 @@ module.exports = grammar({
     // annotation, across line breaks, and keeps them when a declaration keyword follows
     // (KotlinParsing.parseLocalDeclaration), so `private` alone on a line before `fun x()` is a
     // modifier, not an expression statement.
+    // A word read as a modifier ranks its reading one higher. A run of modifier words over lines
+    // also reads as infix expressions ending at any of its line breaks, then a declaration with
+    // the rest (`private private private` above `private fun f() {}`); Kotlin's parser takes the
+    // whole run as the declaration's modifiers (parseLocalDeclaration), and so does the reading
+    // with the most modifiers. Without the ranking GLR kept the readings unordered, and past its
+    // version limit a run of 25 words split.
     modifiers: $ => repeat1(choice(
       prec.right(PREC.MODIFIERS, $.annotation),
       prec.right(PREC.MODIFIERS, $.context_receiver),
-      seq($._modifier, optional($._modifier_hint))
+      prec.dynamic(1, seq($._modifier, optional($._modifier_hint)))
     )),
 
     parameter_modifiers: $ => repeat1(choice($.annotation, $.parameter_modifier)),
