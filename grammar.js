@@ -1254,7 +1254,8 @@ module.exports = grammar({
       "{",
       $._delegate_end_hint,
       optional($._enum_entries),
-      optional(seq(";", repeat(";"), optional($._class_member_declarations))),
+      // Further semicolons as in _semis: `A;;` is Kotlin's DOUBLE_SEMICOLON, an error.
+      optional(seq(";", repeat(alias($._further_semicolon, ";")), optional($._class_member_declarations))),
       "}",
       optional($._block_end_hint)
     ),

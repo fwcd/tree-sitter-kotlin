@@ -4531,7 +4531,12 @@
                 {
                   "type": "REPEAT",
                   "content": {
-                    "type": "STRING",
+                    "type": "ALIAS",
+                    "content": {
+                      "type": "SYMBOL",
+                      "name": "_further_semicolon"
+                    },
+                    "named": false,
                     "value": ";"
                   }
                 },

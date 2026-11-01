@@ -110,6 +110,9 @@ typedef struct {
   PendingComment comment;
   // Set after `by` in a class header, cleared at the next `{` or automatic semicolon.
   bool in_delegate;
+  // Set by a block comment right after a separator, cleared by the next scan: a `;` right after
+  // the comment is a further semicolon (`a();/*c*/; b()`), see the scan's FURTHER_SEMICOLON.
+  bool comment_after_semi;
 } Scanner;
 
 static inline void stack_push(Stack *stack, char chr, bool triple, uint16_t prefix_len) {
@@ -1716,10 +1719,10 @@ static bool scan_token(Scanner *scanner, TSLexer *lexer, const bool *valid_symbo
   return false;
 }
 
-// A `;` after a separator (FURTHER_SEMICOLON valid) is one only with whitespace before it: the
-// scan starts where the `;` before it ended, and Kotlin's lexer reads `;;` as one token,
-// DOUBLE_SEMICOLON, which its parser rejects. A comment between them (`;/*c*/;`) is no
-// whitespace here, so that pair is an error too, where Kotlin reads two semicolons.
+// A `;` after a separator (FURTHER_SEMICOLON valid) is one only with whitespace or a comment
+// before it: the scan starts where the `;` before it ended, and Kotlin's lexer reads `;;` as one
+// token, DOUBLE_SEMICOLON, which its parser rejects, while `;/*c*/;` is two semicolons. A block
+// comment is a token of its own, so the scan that reads it leaves comment_after_semi for the next.
 // The characters of a character literal up to its next escape, closing quote or line break
 // (CHARACTER_CONTENT valid, only inside one): any character, a NUL too, which the internal lexer
 // cannot carry through a character class. The scan starts right after the previous part, so a
@@ -1756,6 +1759,8 @@ static bool scan_label_identifier(TSLexer *lexer) {
 
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
+  bool comment_after_semi = scanner->comment_after_semi;
+  scanner->comment_after_semi = false;
   // Nothing read leaves the cursor where it was: a line break ends the literal, and the
   // separator after it is the scan's below.
   if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT] && scan_character_content(lexer)) return true;
@@ -1764,7 +1769,12 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   }
   if (valid_symbols[FURTHER_SEMICOLON] && !valid_symbols[STRING_CONTENT] &&
       (lexer->lookahead == ';' || iswspace(lexer->lookahead))) {
-    if (lexer->lookahead == ';') return false;
+    if (lexer->lookahead == ';') {
+      if (!comment_after_semi) return false;
+      advance(lexer);
+      lexer->result_symbol = FURTHER_SEMICOLON;
+      return true;
+    }
     // Whitespace, then maybe a `;`. No token valid after a separator depends on a line break
     // before it (the separator itself is not valid here), so the scan below goes on from there.
     while (iswspace(lexer->lookahead)) skip(lexer);
@@ -1776,6 +1786,10 @@ bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, con
   }
   bool found = scan_token(scanner, lexer, valid_symbols);
   if (found && lexer->result_symbol == AUTOMATIC_SEMICOLON) scanner->in_delegate = false;
+  if (found && lexer->result_symbol == MULTILINE_COMMENT && valid_symbols[FURTHER_SEMICOLON] &&
+      !valid_symbols[STRING_CONTENT]) {
+    scanner->comment_after_semi = true;
+  }
   return found;
 }
 
@@ -1824,7 +1838,8 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     // A legacy delimiter has low bits 2/3, so low bits 0 plus bit 3
     // unambiguously identify this format, including an empty string stack.
     buffer[0] = 8 | (scanner->constructor_newline ? 4 : 0) |
-      (scanner->comment.semi_owed ? 16 : 0) | (scanner->in_delegate ? 32 : 0);
+      (scanner->comment.semi_owed ? 16 : 0) | (scanner->in_delegate ? 32 : 0) |
+      (scanner->comment_after_semi ? 64 : 0);
     buffer[1] = (char)frames;
     buffer[2] = (char)(frames >> 8);
     write_u32(buffer + 3, scanner->comment.start_byte);
@@ -1843,12 +1858,14 @@ unsigned tree_sitter_kotlin_external_scanner_serialize(void *payload, char *buff
     return length;
   }
   // in_delegate is bit 16 here and bit 32 in the pending form, where 16 is taken.
+  // comment_after_semi is bit 8 over a string delimiter, whose low bits are never 0, and bit 64
+  // alone, where bit 8 would mark the pending form.
   uint8_t flags = (scanner->constructor_newline ? 4 : 0) | (scanner->in_delegate ? 16 : 0);
   if (n > 0) {
     memcpy(buffer, stack->contents, n);
-    buffer[0] |= flags;
-  } else if (flags) {
-    buffer[0] = flags;
+    buffer[0] |= flags | (scanner->comment_after_semi ? 8 : 0);
+  } else if (flags || scanner->comment_after_semi) {
+    buffer[0] = flags | (scanner->comment_after_semi ? 64 : 0);
     return 1;
   }
   return n;
@@ -1861,10 +1878,11 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
   scanner->constructor_newline = false;
   scanner->comment = (PendingComment){0};
   scanner->in_delegate = false;
+  scanner->comment_after_semi = false;
   if (!length || length > TREE_SITTER_SERIALIZATION_BUFFER_SIZE) return;
   uint8_t flags = (uint8_t)buffer[0];
   if ((flags & 3) == 0 && (flags & 8)) {
-    if (length < PENDING_HEADER_BYTES || (flags & ~60u)) return;
+    if (length < PENDING_HEADER_BYTES || (flags & ~124u)) return;
     unsigned frames = (uint8_t)buffer[1] | ((unsigned)(uint8_t)buffer[2] << 8);
     if (frames > MAX_STRING_FRAMES ||
         length != PENDING_HEADER_BYTES + (frames * PENDING_FRAME_BITS + 7) / 8) return;
@@ -1881,19 +1899,22 @@ void tree_sitter_kotlin_external_scanner_deserialize(void *payload, const char *
     }
     scanner->constructor_newline = (flags & 4) != 0;
     scanner->in_delegate = (flags & 32) != 0;
+    scanner->comment_after_semi = (flags & 64) != 0;
     scanner->comment = (PendingComment){true, start, end, (flags & 16) != 0};
     return;
   }
-  if (length == 1 && (flags & ~20u) == 0) {
+  if (length == 1 && (flags & ~84u) == 0) {
     scanner->constructor_newline = (flags & 4) != 0;
     scanner->in_delegate = (flags & 16) != 0;
+    scanner->comment_after_semi = (flags & 64) != 0;
     return;
   }
   if (length % 2) return;
   array_reserve(stack, length);
   memcpy(stack->contents, buffer, length);
-  stack->contents[0] &= (Delimiter)~20;
+  stack->contents[0] &= (Delimiter)~28;
   stack->size = length;
   scanner->constructor_newline = (flags & 4) != 0;
   scanner->in_delegate = (flags & 16) != 0;
+  scanner->comment_after_semi = (flags & 8) != 0;
 }

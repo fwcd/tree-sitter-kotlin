@@ -1646,3 +1646,49 @@ fun g() { a();; b() }
 val x = 1;;
 
 --------------------------------------------------------------------------------
+
+================================================================================
+A comment between two semicolons keeps them two
+================================================================================
+
+fun g() { a();/*c*/; b() }
+
+enum class E { A;/*c*/; fun f() {} }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments)))
+        (multiline_comment)
+        (call_expression
+          (simple_identifier)
+          (call_suffix
+            (value_arguments))))))
+  (class_declaration
+    (type_identifier)
+    (enum_class_body
+      (enum_entry
+        (simple_identifier))
+      (multiline_comment)
+      (function_declaration
+        (simple_identifier)
+        (function_value_parameters)
+        (function_body)))))
+
+================================================================================
+Two adjacent semicolons after the last enum entry are one token
+:error
+================================================================================
+
+enum class E { A;; fun f() {} }
+
+--------------------------------------------------------------------------------
+
