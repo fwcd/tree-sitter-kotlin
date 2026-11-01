@@ -2008,6 +2008,15 @@
         {
           "type": "SYMBOL",
           "name": "_loop_statement"
+        },
+        {
+          "type": "ALIAS",
+          "content": {
+            "type": "SYMBOL",
+            "name": "_bodyless_named_function"
+          },
+          "named": true,
+          "value": "anonymous_function"
         }
       ]
     },

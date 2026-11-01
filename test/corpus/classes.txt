@@ -2324,3 +2324,28 @@ class A : context(String) () -> Unit {}
         (user_type
           (type_identifier))))
     (class_body)))
+
+================================================================================
+A named function without a body as an if branch of a delegate
+================================================================================
+
+class C : I by if (c) fun g() else z {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (explicit_delegation
+        (user_type
+          (type_identifier))
+        (if_expression
+          condition: (simple_identifier)
+          consequence: (control_structure_body
+            (anonymous_function
+              (simple_identifier)
+              (function_value_parameters)))
+          alternative: (control_structure_body
+            (simple_identifier)))))
+    (class_body)))

@@ -828,7 +828,8 @@ module.exports = grammar({
       $._block,
       $._expression_no_trailing_lambda,
       alias($._assignment_no_trailing_lambda, $.assignment),
-      $._loop_statement
+      $._loop_statement,
+      alias($._bodyless_named_function, $.anonymous_function)
     ),
 
     _assignment_no_trailing_lambda: $ => assignmentForms(
