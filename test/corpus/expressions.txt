@@ -2503,3 +2503,26 @@ fun f() { x.super }
           (simple_identifier)
           (navigation_suffix
             (super_expression)))))))
+
+================================================================================
+A when subject variable declared with var
+================================================================================
+
+fun g() { when (var i = 2) { else -> i } }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (when_expression
+          (when_subject
+            (variable_declaration
+              (simple_identifier))
+            (integer_literal))
+          (when_entry
+            (control_structure_body
+              (simple_identifier))))))))

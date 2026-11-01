@@ -317,7 +317,6 @@ module.exports = grammar({
     // _statement_annotation vs annotation (in prefix_expression and modifiers):
     // both parse @Identifier but route through different rules.
     [$._statement_annotation, $.annotation],
-    [$.prefix_expression, $._when_subject_variable],
     [$.prefix_expression, $.value_argument],
     // ambiguity between prefix unary operators and other expression types
     [$.call_expression, $._generic_call_expression, $.navigation_expression, $.prefix_expression, $.comparison_expression],
@@ -1853,9 +1852,10 @@ module.exports = grammar({
     // compiler object, so the subject variable can destructure or carry a
     // receiver just like any other `val`: `when (val (a, b) = foo) {}`,
     // `when (val T.x = foo) {}`.
+    // `when (var i = 2)` too: Kotlin's parser takes either keyword, the compiler rejects `var`.
     _when_subject_variable: $ => seq(
       repeat($.annotation),
-      "val",
+      choice("val", "var"),
       optional(seq(field("receiver", $._declaration_receiver_type), optional('.'))),
       choice($.variable_declaration, $.multi_variable_declaration)
     ),
