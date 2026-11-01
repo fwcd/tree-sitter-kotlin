@@ -8761,6 +8761,27 @@
         }
       ]
     },
+    "_callable_reference_parenthesized": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "parenthesized_expression"
+        },
+        {
+          "type": "REPEAT1",
+          "content": {
+            "type": "ALIAS",
+            "content": {
+              "type": "SYMBOL",
+              "name": "_callable_reference_quest"
+            },
+            "named": true,
+            "value": "quest"
+          }
+        }
+      ]
+    },
     "callable_reference": {
       "type": "SEQ",
       "members": [
@@ -8777,6 +8798,10 @@
                 {
                   "type": "SYMBOL",
                   "name": "_callable_reference_nullable"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "_callable_reference_parenthesized"
                 }
               ]
             },

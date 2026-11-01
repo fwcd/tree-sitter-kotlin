@@ -1118,6 +1118,10 @@
       "required": false,
       "types": [
         {
+          "type": "parenthesized_expression",
+          "named": true
+        },
+        {
           "type": "quest",
           "named": true
         },

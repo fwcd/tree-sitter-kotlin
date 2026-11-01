@@ -2014,8 +2014,17 @@ module.exports = grammar({
       repeat1(alias($._callable_reference_quest, $.quest))
     ),
 
+    // `(X)?::x`: an expression in parentheses with question marks, which Kotlin's parser reads
+    // as a nullable receiver of the reference (CALLABLE_REFERENCE_EXPRESSION over PARENTHESIZED).
+    // Without question marks `(X)::x` stays a navigation; a type in parentheses is no expression,
+    // so `((Int) -> Unit)?::invoke` stays an error.
+    _callable_reference_parenthesized: $ => seq(
+      $.parenthesized_expression,
+      repeat1(alias($._callable_reference_quest, $.quest))
+    ),
+
     callable_reference: $ => seq(
-      optional(choice($._callable_reference_name, $._callable_reference_nullable)),
+      optional(choice($._callable_reference_name, $._callable_reference_nullable, $._callable_reference_parenthesized)),
       "::",
       choice($.simple_identifier, "class")
     ),

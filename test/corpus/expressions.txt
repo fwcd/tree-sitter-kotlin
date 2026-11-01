@@ -2532,6 +2532,38 @@ val d = a?
       (simple_identifier))))
 
 ================================================================================
+A nullable callable-reference receiver in parentheses
+================================================================================
+
+val f = (X)?::x
+val g = (a.b)??::class
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (parenthesized_expression
+        (simple_identifier))
+      (quest)
+      (simple_identifier)))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (callable_reference
+      (parenthesized_expression
+        (navigation_expression
+          (simple_identifier)
+          (navigation_suffix
+            (simple_identifier))))
+      (quest)
+      (quest))))
+
+================================================================================
 A super expression as a navigation selector
 ================================================================================
 
