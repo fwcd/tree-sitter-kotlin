@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const { runIfMain } = require('./cli');
 const { grammarRoot } = require('./grammar-root');
 const { listFixtureNames, fixturePaths, FIXTURES_DIR } = require('./cross-validation/fixture-files');
 const binding = require('./cross-validation/binding-errors');
@@ -82,7 +83,5 @@ function main(args) {
     expectedFailures: report.gaps.length, structuralTests: report.generated.length - report.gaps.length,
     detector: report.detector }, null, 2));
 }
-if (require.main === module) {
-  try { main(process.argv.slice(2)); } catch (error) { console.error(error.message); process.exitCode = 1; }
-}
+runIfMain(module, main);
 module.exports = { generate };

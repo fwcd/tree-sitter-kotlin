@@ -30,11 +30,10 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { runIfMain } = require('../cli');
 const { execFileSync, fork } = require('child_process');
-const { parseTreeSitter } = require('./parser-ts');
-const { parsePsi } = require('./parser-psi');
-const { normalizeTs, normalizePsi } = require('./normalizer');
-const { compareTrees, Status } = require('./comparator');
+const { compareWithPsi } = require('./pipeline');
+const { Status } = require('./comparator');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const DEFAULT_OUT = path.join(REPO_ROOT, 'local', 'psi-diff');
@@ -210,9 +209,7 @@ function classify({ text, tree, psi, dump }) {
       line: psi.firstError ? psi.firstError.line : 1,
     };
   }
-  const tsNorm = normalizeTs(parseTreeSitter(tree.rootNode.toString()));
-  const psiNorm = normalizePsi(parsePsi(dump));
-  const result = compareTrees(tsNorm, psiNorm);
+  const { tsNorm, psiNorm, result } = compareWithPsi(tree.rootNode.toString(), dump);
   if (result.status === Status.MATCH) return { verdict: 'ok' };
   const first = firstDivergence(tsNorm, psiNorm) || { path: result.differences[0].path, psi: '?', ts: '?' };
   return { verdict: 'C', key: `C @ ${trimPath(first.path)}: psi ${first.psi} / ts ${first.ts}` };
@@ -461,9 +458,4 @@ async function main(argv) {
 module.exports = { psiLayout, psiTypeAt, firstTsError, firstDivergence, classify, summarize, renderReport, readShards,
   loadParsers, parseText, listInputs, trimPath };
 
-if (require.main === module) {
-  main(process.argv.slice(2)).catch(error => {
-    console.error(error.stack || error.message);
-    process.exit(1);
-  });
-}
+runIfMain(module, main);

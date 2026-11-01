@@ -6,6 +6,7 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 const { execFileSync } = require('child_process');
+const { runIfMain } = require('./cli');
 const { SOURCE_ROOTS, METADATA_FILE, goldenHasPsiError, verifyGoldenFormat, preprocessSource } = require('./psi-fixture-sources');
 const { buildManifest, writeManifest } = require('./cross-validation/manifest');
 const { contextExclusion, exclusionPaths, requiredContextIds } = require('./psi-fixture-context');
@@ -225,7 +226,5 @@ function main(args) {
     rejectedPsiInvalid: report.rejected.length, sources: report.sourceRoots }, null, 2));
 }
 
-if (require.main === module) {
-  try { main(process.argv.slice(2)); } catch (error) { console.error(error.message); process.exitCode = 1; }
-}
+runIfMain(module, main);
 module.exports = { vendor, vendorOracleCorpus, exportOracleCorpus, copyFiles, listFilesRecursive };

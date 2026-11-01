@@ -21,9 +21,13 @@
 const fs = require('fs');
 const path = require('path');
 
+// Kotlin's hard keywords. grammar.js reserves the same list, but the mutations must also run
+// against a grammar without `reserved` (the comparison base), so the list is Kotlin's, kept here.
+// jscpd:ignore-start: the second home of the list is deliberate, see above
 const HARD_KEYWORDS = ['as', 'break', 'class', 'continue', 'do', 'else', 'false', 'for', 'fun', 'if', 'in',
   'interface', 'is', 'null', 'object', 'package', 'return', 'super', 'this', 'throw', 'true', 'try',
   'typealias', 'typeof', 'val', 'var', 'when', 'while'];
+// jscpd:ignore-end
 const SOFT_KEYWORDS = ['by', 'catch', 'constructor', 'delegate', 'dynamic', 'field', 'file', 'finally', 'get',
   'import', 'init', 'param', 'property', 'receiver', 'set', 'setparam', 'value', 'where', 'context', 'it'];
 const MODIFIERS = ['abstract', 'actual', 'annotation', 'companion', 'const', 'crossinline', 'data', 'enum',

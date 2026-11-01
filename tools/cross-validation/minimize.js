@@ -22,6 +22,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { runIfMain } = require('../cli');
 
 /**
  * Candidates for one round: every contiguous chunk deletion for chunk counts
@@ -184,9 +185,4 @@ async function main(argv) {
 
 module.exports = { candidatesOf, reduce, tokenize, minimizeText, bucketPredicate };
 
-if (require.main === module) {
-  main(process.argv.slice(2)).catch(error => {
-    console.error(error.stack || error.message);
-    process.exit(1);
-  });
-}
+runIfMain(module, main);
