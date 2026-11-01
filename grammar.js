@@ -422,6 +422,8 @@ module.exports = grammar({
     $._further_semicolon,
     // The characters of a character literal between its escapes, NUL included.
     $._character_content,
+    // The name right after `break@`, `return@` and the like, see _label_name.
+    $._label_identifier,
   ],
 
   extras: $ => [
@@ -2320,9 +2322,11 @@ module.exports = grammar({
     // ==========
 
     // The name after `break@`, `return@`, `this@` and the like follows the `@` directly, as
-    // Kotlin's lexer reads them; `break@ lab` is an error ("Label must be named"). A quoted name
-    // is scanned externally and keeps any whitespace before it.
-    _label_name: $ => choice(token.immediate(wordExcept(HARD_KEYWORDS)), $._backtick_identifier),
+    // Kotlin's lexer reads them; `break@ lab` is an error ("Label must be named"). The scanner
+    // reads it as a whole word, so a hard keyword is none (`return@as`), where an immediate token
+    // of the internal lexer took the longest word it accepted, `a` of `as`. A quoted name keeps
+    // any whitespace before it.
+    _label_name: $ => choice($._label_identifier, $._backtick_identifier),
 
     _return_at: $ => seq(
       "return@",

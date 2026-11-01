@@ -34,6 +34,7 @@ enum TokenType {
   COMPANION_OBJECT_HINT,
   FURTHER_SEMICOLON,
   CHARACTER_CONTENT,
+  LABEL_IDENTIFIER,
 };
 
 /* Pretty much all of this code is taken from the Julia tree-sitter
@@ -1710,9 +1711,31 @@ static bool scan_character_content(TSLexer *lexer) {
   return content;
 }
 
+// Kotlin's hard keywords, which grammar.js reserves: none is the name of a label.
+static const char *const HARD_KEYWORD_WORDS[] = {
+  "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in", "interface",
+  "is", "null", "object", "package", "return", "super", "this", "throw", "true", "try", "typealias",
+  "typeof", "val", "var", "when", "while",
+};
+
+// The name right after `break@`, `return@`, `this@` and the like (LABEL_IDENTIFIER valid): a
+// whole word at the scan's start, which is where the `@` ended, and no hard keyword. Anything
+// else leaves the position to the internal lexer, which has no token for it.
+static bool scan_label_identifier(TSLexer *lexer) {
+  if (!constructor_word_char(lexer->lookahead) || iswdigit(lexer->lookahead)) return false;
+  char word[16];
+  if (constructor_word(lexer, word, sizeof(word)) && WORD_IN(word, HARD_KEYWORD_WORDS)) return false;
+  lexer->mark_end(lexer);
+  lexer->result_symbol = LABEL_IDENTIFIER;
+  return true;
+}
+
 bool tree_sitter_kotlin_external_scanner_scan(void *payload, TSLexer *lexer, const bool *valid_symbols) {
   Scanner *scanner = payload;
   if (valid_symbols[CHARACTER_CONTENT] && !valid_symbols[STRING_CONTENT]) return scan_character_content(lexer);
+  if (valid_symbols[LABEL_IDENTIFIER] && !valid_symbols[STRING_CONTENT] && lexer->lookahead != '`') {
+    return scan_label_identifier(lexer);
+  }
   if (valid_symbols[FURTHER_SEMICOLON] && !valid_symbols[STRING_CONTENT] &&
       (lexer->lookahead == ';' || iswspace(lexer->lookahead))) {
     if (lexer->lookahead == ';') return false;

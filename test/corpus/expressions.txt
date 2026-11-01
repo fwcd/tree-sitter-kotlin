@@ -2348,6 +2348,7 @@ A label name follows its at sign directly
 fun f() { break@ lab }
 fun g() { run { return@ run } }
 class C { fun h() = this@ C }
+fun i() { run { return@as } }
 
 --------------------------------------------------------------------------------
 
