@@ -1014,8 +1014,33 @@
                 "name": "function_type"
               }
             ]
+          },
+          {
+            "type": "SEQ",
+            "members": [
+              {
+                "type": "ALIAS",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "_context_type_modifiers"
+                },
+                "named": true,
+                "value": "type_modifiers"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "function_type"
+              }
+            ]
           }
         ]
+      }
+    },
+    "_context_type_modifiers": {
+      "type": "REPEAT1",
+      "content": {
+        "type": "SYMBOL",
+        "name": "context_receiver"
       }
     },
     "constructor_invocation": {

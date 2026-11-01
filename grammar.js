@@ -696,8 +696,13 @@ module.exports = grammar({
       // The grammar doesn't explicitly define it, but parenthesized function
       // types seem to work!
       seq('(', $.function_type, ')'),
-      seq("suspend", $.function_type)
+      seq("suspend", $.function_type),
+      // A function type with a context, `class A : context(String) () -> Unit`, as in a type
+      // position. Annotations before a supertype stay those of _annotated_delegation_specifier.
+      seq(alias($._context_type_modifiers, $.type_modifiers), $.function_type)
     )),
+
+    _context_type_modifiers: $ => repeat1($.context_receiver),
 
     constructor_invocation: $ => seq($.user_type, $.value_arguments),
 

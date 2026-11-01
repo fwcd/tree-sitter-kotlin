@@ -2302,3 +2302,25 @@ class C { companion object Named }
     (class_body
       (companion_object
         (type_identifier)))))
+
+================================================================================
+A function type with a context as a supertype
+================================================================================
+
+class A : context(String) () -> Unit {}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (class_declaration
+    (type_identifier)
+    (delegation_specifier
+      (type_modifiers
+        (context_receiver
+          (user_type
+            (type_identifier))))
+      (function_type
+        (function_type_parameters)
+        (user_type
+          (type_identifier))))
+    (class_body)))
