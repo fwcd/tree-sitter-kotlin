@@ -2267,11 +2267,16 @@ module.exports = grammar({
   }
 });
 
-// An ASCII identifier other than `words`, built from their trie: at each prefix, either stop (when
-// the prefix is no word), or go on with a character no word continues with, or follow a word.
+// An identifier other than the ASCII `words`, built from their trie: at each prefix, either stop
+// (when the prefix is no word), or go on with a character no word continues with, or follow a
+// word. A character no word continues with is any other identifier character, so a Unicode letter
+// or digit (`labé@`) leads off the trie at once. Classes are intersected with `&&`, which tree-sitter
+// reads (regex-syntax) and JavaScript accepts under the `v` flag.
 function wordExcept(words) {
   const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_';
   const rest = letters + '0123456789';
+  const nonAscii = classes => `[[${classes}${UNICODE_LETTER_SUPPLEMENT}]&&[^\\x00-\\x7f]]`;
+  const identifierRest = `[\\p{L}_\\p{Nd}${UNICODE_LETTER_SUPPLEMENT}]*`;
   const trie = {};
   for (const word of words) {
     let node = trie;
@@ -2281,10 +2286,11 @@ function wordExcept(words) {
   const suffix = (node, depth) => {
     const next = Object.keys(node).filter(key => key !== '');
     const others = [...(depth === 0 ? letters : rest)].filter(char => !next.includes(char)).join('');
-    const body = `(${[`[${others}][${rest}]*`, ...next.map(char => char + suffix(node[char], depth + 1))].join('|')})`;
+    const leave = `(?:[${others}]|${nonAscii(depth === 0 ? '\\p{L}' : '\\p{L}\\p{Nd}')})${identifierRest}`;
+    const body = `(${[leave, ...next.map(char => char + suffix(node[char], depth + 1))].join('|')})`;
     return depth > 0 && !node[''] ? `${body}?` : body;
   };
-  return new RegExp(suffix(trie, 0));
+  return new RegExp(suffix(trie, 0), 'v');
 }
 
 // An anonymous function, or with `name` before its parameters a named one, which takes a body and

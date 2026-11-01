@@ -978,6 +978,39 @@ fun foo(e: Any) {
               (integer_literal))))))))
 
 ================================================================================
+A label of Unicode letters
+================================================================================
+
+fun f() {
+    labé@ while (true) {}
+    名前@ for (x in y) {}
+    classé@ while (true) {}
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (label)
+        (while_statement
+          (boolean_literal)
+          (control_structure_body))
+        (label)
+        (for_statement
+          (variable_declaration
+            (simple_identifier))
+          (simple_identifier)
+          (control_structure_body))
+        (label)
+        (while_statement
+          (boolean_literal)
+          (control_structure_body))))))
+
+================================================================================
 Label before a property declaration
 ================================================================================
 
