@@ -10206,17 +10206,20 @@
           "value": "'"
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "SYMBOL",
-              "name": "character_escape_seq"
-            },
-            {
-              "type": "PATTERN",
-              "value": "[^\\n\\r'\\\\]"
-            }
-          ]
+          "type": "REPEAT",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "character_escape_seq"
+              },
+              {
+                "type": "PATTERN",
+                "value": "[^\\n\\r'\\\\]"
+              }
+            ]
+          }
         },
         {
           "type": "STRING",

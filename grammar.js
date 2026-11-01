@@ -2322,9 +2322,12 @@ module.exports = grammar({
 
     boolean_literal: $ => choice("true", "false"),
 
+    // Kotlin's lexer reads any run of characters and escapes between the quotes as one character
+    // literal (CHARACTER_LITERAL in Kotlin.flex), `''` and `'org.sample'` included, and leaves the
+    // count to the compiler; Groovy-style quotes in Gradle scripts are such literals.
     character_literal: $ => seq(
       "'",
-      choice($.character_escape_seq, /[^\n\r'\\]/),
+      repeat(choice($.character_escape_seq, /[^\n\r'\\]/)),
       "'"
     ),
 

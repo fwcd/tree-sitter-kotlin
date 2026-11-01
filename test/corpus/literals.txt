@@ -843,3 +843,14 @@ val s = "$`if` and $`x`"
       (string_content)
       (interpolation_identifier_start)
       (interpolated_identifier))))
+
+================================================================================
+A character literal of no character or of several
+================================================================================
+
+val c = ''
+val d = 'org.sample'
+
+--------------------------------------------------------------------------------
+
+(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (character_literal)) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (character_literal)))
