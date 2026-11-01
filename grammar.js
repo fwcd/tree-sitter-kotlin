@@ -1850,12 +1850,10 @@ module.exports = grammar({
           optional(seq(":", $._type)))
     ),
 
-    // `x.fun()`: an anonymous function as a selector, in its plain form only. The full form (a
-    // receiver, type parameters, a return type) cost 198 more states, a return type alone 81,
-    // for code no compiler accepts; tools/psi-gate/expected.json lists the difference.
-    _selector_function: $ => prec.right(seq(
-      "fun", $.function_value_parameters, optional($.function_body)
-    )),
+    // `x.fun()`, `x.fun(): T {}`, `x.fun<T>() {}`, `x.fun R.() {}`: an anonymous function as a
+    // selector, in its full form but for a context, as parseAtomicExpression reads it there. No
+    // compiler accepts one; the form main already read costs 256 states over the plain one.
+    _selector_function: $ => prec.right(anonymousFunction($, undefined, false, false)),
 
     // A `fun` where Kotlin expects an expression, with or without a name: `if (c) fun g() {}`,
     // `1 < fun g() {}`. `fun` starts an expression (EXPRESSION_FIRST) and parseAtomicExpression
