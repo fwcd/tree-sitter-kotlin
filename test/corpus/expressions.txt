@@ -2526,3 +2526,14 @@ fun g() { when (var i = 2) { else -> i } }
           (when_entry
             (control_structure_body
               (simple_identifier))))))))
+
+================================================================================
+A literal or a jump as a navigation selector
+================================================================================
+
+fun h() { "foo".return }
+fun i() { value.null }
+
+--------------------------------------------------------------------------------
+
+(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (string_literal (string_content)) (navigation_suffix (jump_expression)))))) (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (navigation_expression (simple_identifier) (navigation_suffix (null_literal)))))))

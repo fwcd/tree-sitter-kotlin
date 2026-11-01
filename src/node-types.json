@@ -6626,7 +6626,39 @@
       "required": false,
       "types": [
         {
+          "type": "bin_literal",
+          "named": true
+        },
+        {
+          "type": "boolean_literal",
+          "named": true
+        },
+        {
+          "type": "character_literal",
+          "named": true
+        },
+        {
+          "type": "hex_literal",
+          "named": true
+        },
+        {
+          "type": "integer_literal",
+          "named": true
+        },
+        {
+          "type": "jump_expression",
+          "named": true
+        },
+        {
           "type": "lambda_literal",
+          "named": true
+        },
+        {
+          "type": "long_literal",
+          "named": true
+        },
+        {
+          "type": "null_literal",
           "named": true
         },
         {
@@ -6635,6 +6667,10 @@
         },
         {
           "type": "quest",
+          "named": true
+        },
+        {
+          "type": "real_literal",
           "named": true
         },
         {
@@ -6651,6 +6687,10 @@
         },
         {
           "type": "type_arguments",
+          "named": true
+        },
+        {
+          "type": "unsigned_literal",
           "named": true
         }
       ]

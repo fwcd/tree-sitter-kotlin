@@ -6081,6 +6081,14 @@
                 },
                 {
                   "type": "SYMBOL",
+                  "name": "_literal_constant"
+                },
+                {
+                  "type": "SYMBOL",
+                  "name": "jump_expression"
+                },
+                {
+                  "type": "SYMBOL",
                   "name": "parenthesized_expression"
                 },
                 {

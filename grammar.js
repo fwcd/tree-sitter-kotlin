@@ -1556,9 +1556,12 @@ module.exports = grammar({
         choice(
           seq($.simple_identifier, optional($._expression_end_hint)),
           // `ArrayList.this`, `x.super`: Kotlin's selector is an atomic expression, so the reserved
-          // `this` and `super` are ones.
+          // `this` and `super` are ones, and so are a literal and a jump, `value.null` and
+          // `"foo".return`, which the compiler rejects.
           $.this_expression,
           $.super_expression,
+          $._literal_constant,
+          $.jump_expression,
           $.parenthesized_expression,
           // `a.{ b }()` — a lambda as the selector. ILLEGAL_SELECTOR is a
           // compiler diagnostic; Kotlin's parser reads the lambda and PSI
