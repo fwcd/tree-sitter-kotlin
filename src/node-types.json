@@ -9511,6 +9511,10 @@
       "required": true,
       "types": [
         {
+          "type": "annotation",
+          "named": true
+        },
+        {
           "type": "binding_pattern_kind",
           "named": true
         },

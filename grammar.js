@@ -253,6 +253,13 @@ module.exports = grammar({
     // statement that must start with `val`/`var`; the `->` or the `=` decides.
     [$._name_based_destructuring_entry_expr, $._name_based_destructuring_first_entry],
     [$._positional_destructuring_entry, $._positional_destructuring_first_entry],
+    // An annotated destructuring entry against an annotated expression or an annotated type:
+    // `[@A val x] = y` against `[@A x]`, `(@A x, y) ->` against `(@A x)`.
+    [$._name_based_destructuring_entry_expr, $.prefix_expression, $._name_based_destructuring_first_entry],
+    [$._positional_destructuring_entry, $.prefix_expression, $._positional_destructuring_first_entry],
+    [$._name_based_destructuring_entry, $._type_modifier],
+    [$.prefix_expression, $._name_based_destructuring_first_entry],
+    [$.prefix_expression, $._positional_destructuring_first_entry],
 
     // @Type(... — `(` after an annotation name is usually constructor args, but
     // in a type `@A (Int) -> Unit` annotates a function type. Kept as a GLR
@@ -1035,14 +1042,18 @@ module.exports = grammar({
     // competitor — a parenthesized receiver type, as in `val (A).foo` — that
     // the static precedence is needed to beat.
     _name_based_destructuring_entry_expr: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      repeat($.annotation),
       optional($.binding_pattern_kind),
       $.simple_identifier,
       optional(seq(":", $._type)),
       optional(seq("=", $.simple_identifier))
     ))),
 
-    // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming
+    // Entry in name-based (parenthesized) destructuring — supports optional val/var and renaming.
+    // Each entry of a destructuring may carry annotations, as Kotlin's parseMultiDeclarationEntry
+    // reads a modifier list first: `val (@A x, @B y) = two`, `for ((@A x, y) in z)`.
     _name_based_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      repeat($.annotation),
       optional($.binding_pattern_kind),
       $.simple_identifier,
       optional(seq(":", $._type)),
@@ -1051,6 +1062,7 @@ module.exports = grammar({
 
     // Entry in positional (bracketed) destructuring — supports optional val/var, NO renaming
     _positional_destructuring_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      repeat($.annotation),
       optional($.binding_pattern_kind),
       $.simple_identifier,
       optional(seq(":", $._type))
@@ -1680,6 +1692,7 @@ module.exports = grammar({
     ),
 
     _name_based_destructuring_first_entry: $ => prec.dynamic(PREC.VAR_DECL, prec.left(seq(
+      repeat($.annotation),
       $.binding_pattern_kind,
       $.simple_identifier,
       optional(seq(":", $._type)),
@@ -1687,6 +1700,7 @@ module.exports = grammar({
     ))),
 
     _positional_destructuring_first_entry: $ => prec.left(PREC.VAR_DECL, seq(
+      repeat($.annotation),
       $.binding_pattern_kind,
       $.simple_identifier,
       optional(seq(":", $._type))

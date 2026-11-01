@@ -3105,6 +3105,13 @@
           "type": "SEQ",
           "members": [
             {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "annotation"
+              }
+            },
+            {
               "type": "CHOICE",
               "members": [
                 {
@@ -3173,6 +3180,13 @@
         "type": "SEQ",
         "members": [
           {
+            "type": "REPEAT",
+            "content": {
+              "type": "SYMBOL",
+              "name": "annotation"
+            }
+          },
+          {
             "type": "CHOICE",
             "members": [
               {
@@ -3239,6 +3253,13 @@
       "content": {
         "type": "SEQ",
         "members": [
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "SYMBOL",
+              "name": "annotation"
+            }
+          },
           {
             "type": "CHOICE",
             "members": [
@@ -6762,6 +6783,13 @@
           "type": "SEQ",
           "members": [
             {
+              "type": "REPEAT",
+              "content": {
+                "type": "SYMBOL",
+                "name": "annotation"
+              }
+            },
+            {
               "type": "SYMBOL",
               "name": "binding_pattern_kind"
             },
@@ -6821,6 +6849,13 @@
       "content": {
         "type": "SEQ",
         "members": [
+          {
+            "type": "REPEAT",
+            "content": {
+              "type": "SYMBOL",
+              "name": "annotation"
+            }
+          },
           {
             "type": "SYMBOL",
             "name": "binding_pattern_kind"
@@ -10061,6 +10096,28 @@
     ],
     [
       "_positional_destructuring_entry",
+      "_positional_destructuring_first_entry"
+    ],
+    [
+      "_name_based_destructuring_entry_expr",
+      "prefix_expression",
+      "_name_based_destructuring_first_entry"
+    ],
+    [
+      "_positional_destructuring_entry",
+      "prefix_expression",
+      "_positional_destructuring_first_entry"
+    ],
+    [
+      "_name_based_destructuring_entry",
+      "_type_modifier"
+    ],
+    [
+      "prefix_expression",
+      "_name_based_destructuring_first_entry"
+    ],
+    [
+      "prefix_expression",
       "_positional_destructuring_first_entry"
     ],
     [

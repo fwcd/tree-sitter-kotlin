@@ -588,3 +588,83 @@ fun f() {
 }
 
 --------------------------------------------------------------------------------
+
+
+
+================================================================================
+Annotations on destructuring entries
+================================================================================
+
+fun bar(two: Two) {
+    val (@Ann x, @Ann("y") y) = two
+    for ((@A x, y) in pairs) {}
+}
+val l = { (@A a, b): Pair<Int, Int> -> a }
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters
+      (parameter
+        (simple_identifier)
+        (user_type
+          (type_identifier))))
+    (function_body
+      (statements
+        (property_declaration
+          (binding_pattern_kind)
+          (multi_variable_declaration
+            (variable_declaration
+              (annotation
+                (user_type
+                  (type_identifier)))
+              (simple_identifier))
+            (variable_declaration
+              (annotation
+                (constructor_invocation
+                  (user_type
+                    (type_identifier))
+                  (value_arguments
+                    (value_argument
+                      (string_literal
+                        (string_content))))))
+              (simple_identifier)))
+          (simple_identifier))
+        (for_statement
+          (multi_variable_declaration
+            (variable_declaration
+              (annotation
+                (user_type
+                  (type_identifier)))
+              (simple_identifier))
+            (variable_declaration
+              (simple_identifier)))
+          (simple_identifier)
+          (control_structure_body)))))
+  (property_declaration
+    (binding_pattern_kind)
+    (variable_declaration
+      (simple_identifier))
+    (lambda_literal
+      (lambda_parameters
+        (multi_variable_declaration
+          (variable_declaration
+            (annotation
+              (user_type
+                (type_identifier)))
+            (simple_identifier))
+          (variable_declaration
+            (simple_identifier)))
+        (user_type
+          (type_identifier)
+          (type_arguments
+            (type_projection
+              (user_type
+                (type_identifier)))
+            (type_projection
+              (user_type
+                (type_identifier))))))
+      (statements
+        (simple_identifier)))))
