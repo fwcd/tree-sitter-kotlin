@@ -2558,10 +2558,10 @@ function assignmentForms(
 ) {
   return choice(
     prec.left(PREC.ASSIGNMENT, seq(target, $._assignment_and_operator, value)),
-    // Kotlin's parser reads `+=` and the other augmented assignments as binary operators of the
-    // lowest precedence, so a cast may stand left of them: `c as MutableList<T> += x` calls
-    // plusAssign on the cast.
-    prec.left(PREC.ASSIGNMENT, seq(castTarget, $._assignment_and_operator, value)),
+    // Kotlin's parser reads `=` and the augmented assignments as binary operators of the lowest
+    // precedence, so a cast may stand left of them: `c as MutableList<T> += x` calls plusAssign on
+    // the cast, and `x as T = y` is PSI-clean, which the compiler rejects.
+    prec.left(PREC.ASSIGNMENT, seq(castTarget, choice($._assignment_and_operator, "="), value)),
     prec.left(PREC.ASSIGNMENT, seq(target, "=", value)),
   );
 }

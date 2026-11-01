@@ -179,3 +179,42 @@ fun f() {
                           (user_type
                             (type_identifier)))))))
                 (simple_identifier)))))))))
+
+================================================================================
+A cast on the left of a plain assignment
+================================================================================
+
+fun f() {
+    x as T = y
+    when (a) { 1 -> x as T = y }
+}
+
+--------------------------------------------------------------------------------
+
+(source_file
+  (function_declaration
+    (simple_identifier)
+    (function_value_parameters)
+    (function_body
+      (statements
+        (assignment
+          (directly_assignable_expression
+            (as_expression
+              (simple_identifier)
+              (user_type
+                (type_identifier))))
+          (simple_identifier))
+        (when_expression
+          (when_subject
+            (simple_identifier))
+          (when_entry
+            (when_condition
+              (integer_literal))
+            (control_structure_body
+              (assignment
+                (directly_assignable_expression
+                  (as_expression
+                    (simple_identifier)
+                    (user_type
+                      (type_identifier))))
+                (simple_identifier)))))))))

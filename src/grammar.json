@@ -2056,8 +2056,17 @@
                 "value": "directly_assignable_expression"
               },
               {
-                "type": "SYMBOL",
-                "name": "_assignment_and_operator"
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_assignment_and_operator"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "="
+                  }
+                ]
               },
               {
                 "type": "SYMBOL",
@@ -5855,8 +5864,17 @@
                 "value": "directly_assignable_expression"
               },
               {
-                "type": "SYMBOL",
-                "name": "_assignment_and_operator"
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "SYMBOL",
+                    "name": "_assignment_and_operator"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "="
+                  }
+                ]
               },
               {
                 "type": "SYMBOL",
