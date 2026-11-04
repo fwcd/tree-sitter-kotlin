@@ -47,13 +47,14 @@ function run(command, args, options = {}) {
     throw new Error(`${command} failed: ${String(error.stderr || error.message).trim().slice(0, 8192)}`);
   }
 }
-function javaExecutable() {
+function javaDetails() {
   const java = process.env.PSI_JAVA || 'java';
   const result = spawnSync(java, ['-version'], { encoding: 'utf8', timeout: 10000 });
   const version = /version "(?:1\.)?(\d+)/.exec((result.stderr || '') + (result.stdout || ''));
   if (result.error || result.status !== 0 || !version || Number(version[1]) < 17) {
     throw new Error('A JDK 17+ is required. Install a JDK and put java on PATH, or set PSI_JAVA to its executable.');
   }
-  return java;
+  return { executable: java, version: ((result.stderr || '') + (result.stdout || '')).split(/\r?\n/).filter(line => /^(?:openjdk|java|Java|OpenJDK)/.test(line)).join('\n') };
 }
-module.exports = { sha256, inside, canonical, confined, resetOutput, positive, run, javaExecutable };
+function javaExecutable() { return javaDetails().executable; }
+module.exports = { sha256, inside, canonical, confined, resetOutput, positive, run, javaExecutable, javaDetails };

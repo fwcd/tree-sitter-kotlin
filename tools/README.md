@@ -83,7 +83,7 @@ For an offline/reference workflow, explicitly record base's observations:
     npm run psi-gate -- update-expected --corpora snippets --expected local/snippets.expected.json
 
 Snapshots contain the input-membership/content digest, generator provenance,
-comparison/oracle code identity, runtime pin, reference grammar identity, and
+comparison/oracle code identity, runtime source/binary/JDK identity and locale/options digest, reference grammar identity, and
 exact path/source/signature entries for differences. A fixed old input cannot
 cancel a new bad input under the same bucket. Changing the corpus or tools makes
 an old snapshot incompatible rather than silently broadening its allowances.

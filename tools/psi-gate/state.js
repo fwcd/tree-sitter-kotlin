@@ -1,7 +1,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { sha256, confined, inside, canonical } = require('../safety');
+const { sha256, confined, inside, canonical, javaDetails } = require('../safety');
 const REPO = path.resolve(__dirname, '../..');
 const hashFile = file => fs.existsSync(file) ? sha256(fs.readFileSync(file)) : null;
 const digest = value => sha256(JSON.stringify(value));
@@ -21,6 +21,13 @@ function treeFiles(root) {
   }
   return files.sort().map(file => [path.relative(root, file), hashFile(file)]);
 }
+function runtimeIdentity(root) {
+  const entry = require.resolve('tree-sitter', { paths: [root] });
+  const directory = path.dirname(entry);
+  const native = ['build/Release', 'prebuilds'].flatMap(dir => require('../vendor-fixtures').listFilesRecursive(path.join(directory, dir))
+    .filter(file => file.endsWith('.node')).map(file => [path.join(dir, file), hashFile(path.join(directory, dir, file))]));
+  return digest([hashFile(entry), hashFile(path.join(directory, 'package.json')), native]);
+}
 function identity(options, files) {
   const sources = files.map(file => ({ path: file, sha256: hashFile(confined(options.root, file)) }));
   if (!sources.length) throw new Error('No Kotlin inputs found; refusing an empty run');
@@ -28,7 +35,9 @@ function identity(options, files) {
     'tools/cross-validation/normalizer.js', 'tools/cross-validation/mapping.js', 'tools/cross-validation/pipeline.js',
     'tools/cross-validation/parser-psi.js', 'tools/cross-validation/parser-ts.js', 'tools/cross-validation/comparator.js',
     'tools/cross-validation/models.js', 'tools/psi-oracle/oracle.js', 'tools/psi-oracle/fetch.js', 'tools/psi-oracle/PsiOracle.java'];
-  const context = { corpus: options.corpus, parseTimeoutMs: options.parseTimeoutMs, inputs: digest(sources),
+  const context = { corpus: options.corpus, java: javaDetails(), runtimeContent: runtimeIdentity(options.runtime || REPO),
+    environment: digest(['JAVA_TOOL_OPTIONS','JDK_JAVA_OPTIONS','LC_ALL','LC_CTYPE','LANG','NODE_OPTIONS','LD_LIBRARY_PATH','DYLD_LIBRARY_PATH'].map(k => [k,process.env[k] || ''])),
+    parseTimeoutMs: options.parseTimeoutMs, inputs: digest(sources),
     tools: digest(toolFiles.map(name => [name, hashFile(path.join(REPO, name))])),
     runtime: require(require.resolve('tree-sitter/package.json', { paths: [options.runtime || REPO] })).version,
     origins: options.origins ? hashFile(options.origins) : null,
@@ -98,4 +107,4 @@ function loadExpected(file, context) {
 function checkOutput(out, root, files) {
   if (files.some(file => inside(canonical(out), canonical(confined(root, file))))) throw new Error('Output directory would replace corpus inputs');
 }
-module.exports = { digest, hashFile, identity, validateShard, complete, gate, snapshot, loadExpected, checkOutput, signature };
+module.exports = { digest, hashFile, identity, runtimeIdentity, validateShard, complete, gate, snapshot, loadExpected, checkOutput, signature };
