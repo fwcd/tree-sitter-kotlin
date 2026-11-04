@@ -1,68 +1,80 @@
-// The inputs of the tree-sitter corpus (`test/corpus/**/*.txt`) as `.kt` files, so the PSI
-// differential checks each case's claim against Kotlin's parser: a case without `:error` claims
-// the input is Kotlin, a case with `:error` claims it is not. Through `diff-run.js --expect`, a
-// case PSI contradicts — `B` for a clean case, `A` for an error case — fails the gate unless the
-// registry names the difference. Usage: node tools/psi-gate/corpus.js CORPUS_DIR OUTPUT_DIR
-// writes OUTPUT_DIR/<corpus file>/<NNNN>.kt and OUTPUT_DIR/cases.json (file → case name, error).
 'use strict';
+
+// Extract corpus inputs and their CST expectations. :error is a grammar expectation;
+// generated JetBrains tests remain PSI-positive even when the grammar rejects them.
 const fs = require('fs');
 const path = require('path');
-const { resetOutput, positive } = require('../safety');
+const { resetOutput, sha256 } = require('../safety');
+const { runIfMain } = require('../cli');
 
 const HEADER = /^={3,}\s*$/;
 const DIVIDER = /^-{3,}\s*$/;
 
-/**
- * The cases of one corpus file.
- *
- * @param {string} text
- * @returns {Array<{ name: string, error: boolean, input: string }>}
- */
+/** Read source and ERROR/MISSING expectations from a tree-sitter corpus file. */
 function parseCorpus(text) {
   const lines = text.split('\n');
   const cases = [];
   let i = 0;
   while (i < lines.length) {
-    if (!HEADER.test(lines[i])) { i++; continue; }
+    if (!HEADER.test(lines[i])) {
+      i++;
+      continue;
+    }
     const head = [];
     for (i++; i < lines.length && !HEADER.test(lines[i]); i++) head.push(lines[i]);
+    if (i === lines.length) throw new Error('Unterminated corpus case header');
     const input = [];
     for (i++; i < lines.length && !DIVIDER.test(lines[i]); i++) input.push(lines[i]);
-    while (i < lines.length && !HEADER.test(lines[i])) i++;
-    const attributes = head.filter(line => line.startsWith(':')).map(line => line.trim());
+    if (i === lines.length) throw new Error('Corpus case is missing its expected-CST divider');
+    const expected = [];
+    for (i++; i < lines.length && !HEADER.test(lines[i]); i++) expected.push(lines[i]);
+    const attributes = head.filter((line) => line.startsWith(':')).map((line) => line.trim());
     cases.push({
-      name: head.filter(line => !line.startsWith(':')).join(' ').trim(),
-      error: attributes.includes(':error'),
-      input: input.join('\n').replace(/^\n+/, '').replace(/\s+$/, '') + '\n',
+      name: head
+        .filter((line) => !line.startsWith(':'))
+        .join(' ')
+        .trim(),
+      error: attributes.includes(':error') || /\(\s*(?:ERROR|MISSING)\b/.test(expected.join('\n')),
+      input: input.join('\n').replace(/^\n+/, '').replace(/\n+$/, '') + '\n',
     });
   }
   return cases;
 }
 
+/** Stable across insertion/reordering of other cases; binds claims to exact source. */
+function fingerprint(claim) {
+  return sha256(
+    JSON.stringify([claim.file, claim.name, claim.inputSha256, claim.error, claim.psiClean]),
+  );
+}
+
 function main([corpus, output]) {
+  if (!corpus || !output) throw new Error('Usage: corpus.js SOURCE_DIR OUTPUT_DIR');
   resetOutput(output, corpus);
-  const files = [];
-  const walk = dir => {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      const p = path.join(dir, e.name);
-      if (e.isDirectory()) walk(p); else if (e.name.endsWith('.txt')) files.push(p);
-    }
-  };
-  walk(corpus);
+  const files = require('../vendor-fixtures')
+    .listFilesRecursive(corpus)
+    .filter((file) => file.endsWith('.txt'));
   const index = {};
-  for (const file of files.sort()) {
-    const rel = path.relative(corpus, file).replace(/\.txt$/, '');
-    parseCorpus(fs.readFileSync(file, 'utf8')).forEach(({ name, error, input }, n) => {
-      const out = path.join(rel, `${String(n).padStart(4, '0')}.kt`);
-      fs.mkdirSync(path.join(output, rel), { recursive: true });
-      fs.writeFileSync(path.join(output, out), input);
-      index[out] = { file: path.relative(path.dirname(corpus), file), name, error };
-    });
+  for (const relative of files) {
+    const rel = relative.replace(/\.txt$/, '');
+    parseCorpus(fs.readFileSync(path.join(corpus, relative), 'utf8')).forEach(
+      ({ name, error, input }, n) => {
+        const out = path.join(rel, `${String(n).padStart(4, '0')}.kt`);
+        fs.mkdirSync(path.join(output, rel), { recursive: true });
+        fs.writeFileSync(path.join(output, out), input);
+        index[out] = {
+          file: relative,
+          name,
+          error,
+          psiClean: relative.startsWith('jetbrains/') || !error,
+          inputSha256: sha256(input),
+        };
+      },
+    );
   }
   fs.writeFileSync(path.join(output, 'cases.json'), JSON.stringify(index, null, 2) + '\n');
   console.error(`corpus: ${Object.keys(index).length} cases of ${files.length} files`);
 }
 
-module.exports = { parseCorpus };
-
-if (require.main === module) main(process.argv.slice(2));
+module.exports = { parseCorpus, fingerprint, main };
+runIfMain(module, main);

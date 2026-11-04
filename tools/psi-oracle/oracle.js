@@ -141,4 +141,4 @@ class OracleServer {
   }
 }
 
-module.exports = { runOracle, runOracleAsync, readIndex, OracleServer };
+module.exports = { runOracle, runOracleAsync, readIndex, OracleServer, SOURCE };
