@@ -23,6 +23,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { runIfMain } = require('../cli');
+const { positive } = require('../safety');
 
 /**
  * Candidates for one round: every contiguous chunk deletion for chunk counts
@@ -87,9 +88,19 @@ function tokenize(text) {
  * @returns {Promise<string>}
  */
 async function minimizeText(text, holds) {
-  const byLines = await reduce(text.split('\n'), candidates => holds(candidates.map(lines => lines.join('\n'))));
-  const byTokens = await reduce(tokenize(byLines.join('\n')), candidates => holds(candidates.map(tokens => tokens.join(''))));
-  return byTokens.join('').replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+  const byLines = await reduce(text.split('\n'), (candidates) =>
+    holds(candidates.map((lines) => lines.join('\n'))),
+  );
+  const byTokens = await reduce(tokenize(byLines.join('\n')), (candidates) =>
+    holds(candidates.map((tokens) => tokens.join(''))),
+  );
+  return (
+    byTokens
+      .join('')
+      .replace(/[ \t]+$/gm, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim() + '\n'
+  );
 }
 
 /**
@@ -99,7 +110,7 @@ async function minimizeText(text, holds) {
  */
 function bucketPredicate({ server, parser, key, extension }) {
   const { classify, parseText } = require('./diff-run');
-  return async texts => {
+  return async (texts) => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-min-'));
     try {
       const files = texts.map((text, i) => {
@@ -114,7 +125,10 @@ function bucketPredicate({ server, parser, key, extension }) {
         const normalized = psi.crlf ? text.replace(/\r\n?/g, '\n') : text;
         try {
           const dump = fs.readFileSync(path.join(root, 'out', psi.dump), 'utf8');
-          return classify({ text: normalized, tree: parseText(parser, normalized), psi, dump }).key === key;
+          return (
+            classify({ text: normalized, tree: parseText(parser, normalized), psi, dump }).key ===
+            key
+          );
         } catch {
           return false;
         }
@@ -129,21 +143,39 @@ function renderMinimized(entries) {
   const out = ['# Minimized buckets', ''];
   for (const entry of entries) {
     out.push(`## ${entry.verdict}: \`${entry.key.replace(/`/g, 'ˋ')}\``, '');
-    out.push(`Counts: ${Object.entries(entry.counts).map(([label, count]) => `${label} ${count}`).join(', ')}. From \`${entry.example}\`${entry.line ? `:${entry.line}` : ''} (${entry.label}).`, '');
+    out.push(
+      `Counts: ${Object.entries(entry.counts)
+        .map(([label, count]) => `${label} ${count}`)
+        .join(
+          ', ',
+        )}. From \`${entry.example}\`${entry.line ? `:${entry.line}` : ''} (${entry.label}).`,
+      '',
+    );
     out.push('```kotlin', entry.snippet.trimEnd(), '```', '');
   }
   return out.join('\n');
 }
 
 async function main(argv) {
+  if (argv.includes('--help') || argv.includes('-h')) {
+    console.log(
+      'Usage: psi-diff:minimize --run DIR [--label LABEL] [--limit N] [--verdict A,B,C] [--failing]\nFailing gate.json paths are prioritized; --failing restricts output to those paths.',
+    );
+    return { exitCode: 0 };
+  }
   const args = [...argv];
-  let run, label, verdicts = ['A', 'B', 'C'], limit = Infinity;
+  let run,
+    label,
+    verdicts = ['A', 'B', 'C'],
+    limit = Infinity,
+    failingOnly = false;
   while (args.length) {
     const arg = args.shift();
-    if (arg === '--run') run = path.resolve(args.shift());
+    if (arg === '--failing') failingOnly = true;
+    else if (arg === '--run') run = path.resolve(args.shift());
     else if (arg === '--label') label = args.shift();
     else if (arg === '--verdict') verdicts = args.shift().split(',');
-    else if (arg === '--limit') limit = Number(args.shift());
+    else if (arg === '--limit') limit = positive(args.shift(), '--limit', 10000);
     else throw new Error(`unknown argument ${arg}`);
   }
   if (!run) throw new Error('--run is required');
@@ -151,26 +183,58 @@ async function main(argv) {
   const { OracleServer } = require('../psi-oracle/oracle');
   const meta = JSON.parse(fs.readFileSync(path.join(run, 'meta.json'), 'utf8'));
   require('../psi-gate/state').complete(run, meta.identity);
+  const gateFile = path.join(run, 'gate.json');
+  if (failingOnly && !fs.existsSync(gateFile))
+    throw new Error('--failing requires a complete run with gate.json');
+  const failed = fs.existsSync(gateFile)
+    ? JSON.parse(fs.readFileSync(gateFile, 'utf8')).failures
+    : [];
+  const paths = new Set(
+    failed.filter((f) => !label || !f.grammar || f.grammar === label).map((f) => f.path),
+  );
+  const isFailure = (bucket) =>
+    Object.values(bucket.examples)
+      .flat()
+      .some((example) => paths.has(example.path));
   const { buckets } = JSON.parse(fs.readFileSync(path.join(run, 'buckets.json'), 'utf8'));
-  if (label && !meta.grammars.some(g => g.label === label)) throw new Error(`Unknown grammar label: ${label}`);
-  const parsers = Object.fromEntries(loadParsers(meta.grammars, meta.runtime || path.resolve(__dirname, '..', '..', 'psi-gate')).map(entry => [entry.label, entry.parser]));
+  if (label && !meta.grammars.some((g) => g.label === label))
+    throw new Error(`Unknown grammar label: ${label}`);
+  const parsers = Object.fromEntries(
+    loadParsers(meta.grammars, meta.runtime || path.resolve(__dirname, '..', '..', 'psi-gate')).map(
+      (entry) => [entry.label, entry.parser],
+    ),
+  );
   const outFile = path.join(run, 'minimized.json');
   const done = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, 'utf8')) : [];
-  const known = new Set(done.map(entry => entry.key));
+  const known = new Set(done.map((entry) => entry.key));
   const server = new OracleServer();
   let count = 0;
   try {
-    for (const bucket of buckets) {
+    for (const bucket of [...buckets].sort((a, b) => Number(isFailure(b)) - Number(isFailure(a)))) {
+      if (failingOnly && !isFailure(bucket)) continue;
       if (!verdicts.includes(bucket.verdict) || known.has(bucket.key) || count >= limit) continue;
       if (label && !bucket.counts[label]) continue;
-      const use = label || meta.grammars.map(g => g.label).find(l => bucket.counts[l] > 0);
+      const use = label || meta.grammars.map((g) => g.label).find((l) => bucket.counts[l] > 0);
       const example = bucket.examples[use][0];
       const text = fs.readFileSync(path.join(meta.root, example.path), 'utf8');
-      const holds = bucketPredicate({ server, parser: parsers[use], key: bucket.key, extension: path.extname(example.path) });
+      const holds = bucketPredicate({
+        server,
+        parser: parsers[use],
+        key: bucket.key,
+        extension: path.extname(example.path),
+      });
       const [original] = await holds([text]);
       const snippet = original ? await minimizeText(text, holds) : text;
-      done.push({ key: bucket.key, verdict: bucket.verdict, counts: bucket.counts, label: use, example: example.path,
-        line: example.line, reproduced: original, snippet });
+      done.push({
+        key: bucket.key,
+        verdict: bucket.verdict,
+        counts: bucket.counts,
+        label: use,
+        example: example.path,
+        line: example.line,
+        reproduced: original,
+        snippet,
+      });
       fs.writeFileSync(outFile, JSON.stringify(done, null, 2) + '\n');
       count++;
       process.stderr.write(`\rminimized ${count} buckets`);
