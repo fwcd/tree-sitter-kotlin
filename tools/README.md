@@ -1,208 +1,157 @@
-# JetBrains PSI test tools
+# Kotlin PSI tools
 
-The tools run on Node.js. The importer requires git; `--source-repo` also uses
-tar to read a pinned local checkout. Install the native parser dependencies
-with `npm install` before generation.
+The gate compares the **generated native parser** with Kotlin 2.4.21 syntax PSI.
+It checks fresh inputs and parser changes; ordinary corpus tests still check CST
+expectations. Regenerate your grammar before checking it.
 
-## Import and regenerate
+## Common jobs
 
-```sh
-npm run vendor-fixtures
-npm run vendor-jetbrains
-npm test
-npm run cross-validate:test
+Install Node 22+, a JDK 17+, git, curl, tar, Python 3 and native C/C++ build tools
+(make on Linux/macOS; MSVC build tools on Windows). Set PSI_JAVA if java on PATH
+is older than 17. The launcher checks these before downloading or building.
+Linux is verified; the Node entry point supports macOS and Windows build setups,
+but those platforms have not been tested here.
 
-# Optional existing JetBrains checkout containing the pinned commit.
-npm run vendor-fixtures -- --source-repo /path/to/kotlin
-```
+From a fresh checkout, one command checks generated snippets against the current
+upstream main (fetched read-only):
 
-`vendor-fixtures.js` reads `cross-validation/.fixtures-version`. The approved
-source roots are `compiler/psi/psi-impl/testData/psi` (`.kt` and `.kts`) and
-`compiler/tests-spec/testData/psi` (spec `.kt` files under a `spec/` namespace).
-Each input must have a sibling file-PSI golden. Goldens containing a real
-`PsiErrorElement` node are filtered before import; filenames and compiler-error
-comments do not decide eligibility. Seven block/expression-fragment contexts
-require separate adapters and are outside these whole-file roots.
+    npm run psi-gate -- quick
 
-The Kotlin 2.4.21 pin has 789 paired candidates, 342 PSI-invalid rejections and 447
-PSI-clean originals. The 438 eligible inputs comprise 365 existing `.kt` files,
-13 scripts and 60 linked spec files. Script extensions and all relative paths
-are preserved. Spec headers use the upstream metadata filter; unsupported
-preprocessing directives fail with a profile-review message.
+For an existing local base, use:
 
-## Explicit policy exclusions
+    npm run psi-gate -- quick --base origin/main
 
-The nine exclusions are recorded in `cross-validation/fixtures.manifest.json`
-and `.import.json`, with their source/golden SHA256 and upstream paths.
+Run the broader inputs and audit corpus assertions:
 
-| Policy | Files | Reason |
-|---|---:|---|
-| `multifile-file-annotation-v1` |2| FILE sections put `@file` inside a following function's PSI modifiers; splitting needs different node parents and chunk expectations. |
-| `experimental-syntax-v1` |7| Two CompanionBlocksAndExtensions cases and five ContractSyntaxV2 cases are outside the supported feature set. |
+    npm run psi-gate -- full
 
-The source and golden bytes are retained under
-`cross-validation/fixtures/.context-exclusions/`. Multi-file records include
-preamble/chunk names, half-open UTF-8 byte ranges, boundary line numbers and
-hashes. Policies match full upstream paths and exact hashes; a changed input
-requires a reviewed policy update. Other files with the same basename are
-unaffected. Required policies, retained artifact membership and the complete
-content digest are verified before corpus generation.
+Full adds the pinned Kotlin checkout, one-site mutations of its PSI-clean test
+inputs, and extracted test/corpus assertions. Kotlin is fetched only for selected
+repository/mutation corpora. The repository has existing PSI disagreements,
+including corpus assertions: a full/conformance failure can expose an existing
+issue. Inspect the named test and report; do not make it green by increasing a
+count allowance. Quick is a relative grammar check; it does not audit corpus
+assertions.
 
-Schema 3 records 438 compared pairs and 447 retained PSI-positive pairs. The
-content hash includes the retained exclusions and their policy metadata.
-Re-importing the same pin must reproduce the manifest exactly. Existing fixture
-and generated corpus trees are backed up under `build/` before replacement.
+The launcher installs its own locked tree-sitter 0.25.1/node-gyp dependencies in
+tools/psi-gate/node_modules. It never replaces the project's runtime or runs an
+unpinned npx package. Jars use pinned SHA-256, HTTPS-only curl downloads, standard
+or npm HTTPS proxy settings, bounded retries, and a verified shared cache under
+~/.cache/kotlin-psi-oracle (PSI_ORACLE_CACHE overrides it). A fresh checkout can
+reuse this cache, but every jar is verified again before launching Java.
 
-## Structural tests and known parser failures
+Reports are local/psi-gate/snippets.md, corpus.md, mutations.md and kotlin.md.
+Detailed, checksummed artifacts live in local/psi-gate/runs/CORPUS/CONTENT_HASH.
+The working parser and base are built separately from exact source bytes. A new
+input, generated parser, runtime or comparison-tool version gets a new cache;
+repeated unchanged checks reuse complete results. --fresh reruns the selected
+content; --home DIR selects another owned cache. Existing unmarked directories
+and source directories are never recursively replaced.
 
-`vendor-jetbrains-tests.js` uses the parser's native `rootNode.hasError` flag,
-which also detects missing anonymous tokens absent from a printed tree. Binding
-or verdict unavailability fails generation. It creates a corpus case for every
-eligible fixture:
+Workers default to two (maximum four). Each oracle has a 1 GiB heap and a bounded
+stack. --timeout-ms controls its wall timeout (default 120000). Builds, downloads
+and git operations also have time limits.
 
-- 399 parse-clean fixtures currently have CST expectations.
-- 39 known parser failures currently use `:error` and an empty CST expectation.
+### Result meaning
 
-Both categories run under `npm test`. Known failures are never silently omitted
-or marked `:skip`; a newly clean parse requires promotion to a structural test.
-The committed `test/jetbrains-fixtures.json` records both ID lists, exclusions,
-fixture digest and parser/scanner fingerprints. The detailed import manifest
-links every input to its pinned source and golden.
+- PASS (per-input regression): no new or changed PSI disagreement relative to
+  the same input on base. Existing differences remain visible.
+- FAIL: execution did not complete, input/metadata is missing or corrupt, a corpus
+  claim contradicts PSI, or a candidate has a new/changed disagreement. The first
+  failing paths and corpus test names are printed. Read the report, fix the grammar
+  or assertion, regenerate when needed, then rerun.
+- --strict requires conformance: every A/B/C difference fails, including an
+  unchanged base difference. Script-compatible .kt inputs are separately reported
+  as B-script. Both parsers failing at the same offset is reported as both-error;
+  earlier errors are A-prefix/B-prefix, including positions on the same line.
 
-After a grammar change, rebuild the binding and regenerate:
+No execution failure or bad corpus claim can be registered as an expected result.
+The gate detects errors/missing tokens via the native binding, normalized tree
+shape, comment/declaration starts, and changed native CST signatures. Unknown
+node types fail and require an explicit mapping. This is syntax PSI, not type
+checking or proof that every accepted program compiles.
 
-```sh
-npm run generate
-npm exec -- node-gyp rebuild
-npm run vendor-jetbrains
-npm test
-```
+## Optional reviewed snapshots
 
-Review changes in the original fixture, generated CST and expected-failure
-list. A no-error tree alone does not establish structural agreement with PSI;
-`npm run cross-validate` provides a separate normalized comparison.
+The old 385-entry regex/count ledger is removed. Normal checks measure base on
+exactly the same inputs, so no project-wide open-gap registry needs upkeep.
 
-## Structural cross-validation
+For an offline/reference workflow, explicitly record base's observations:
 
-`cross-validation/` compares the tree-sitter CST with the imported PSI goldens.
-Use `npm run cross-validate:debug -- <relative-fixture-name>` to inspect one
-fixture and `npm run cross-validate:test` to exercise importer/generator and
-comparison helpers. Goldens, imports, exclusions and generated parser failures
-are separate records; a grammar failure is not a fixture-policy exclusion.
+    npm run psi-gate -- update-expected --corpora snippets --expected local/snippets.expected.json
 
-## Live PSI oracle
+Snapshots contain the input-membership/content digest, generator provenance,
+comparison/oracle code identity, runtime pin, reference grammar identity, and
+exact path/source/signature entries for differences. A fixed old input cannot
+cancel a new bad input under the same bucket. Changing the corpus or tools makes
+an old snapshot incompatible rather than silently broadening its allowances.
 
-The goldens cover only the pinned testData. `psi-oracle/` runs the Kotlin
-2.4.21 parser itself on any `.kt`/`.kts` file, so new input — hand-written
-edge cases, generated mutations, whole repositories — gets a PSI verdict too.
-It needs a JDK (17 or newer), no Gradle or kotlinc:
+To use a snapshot without remeasuring a base, use the lower-level runner with
+one grammar and --expect FILE. The launcher always measures base; an expectation
+never overrides a regression observed against base. update-expected is an
+explicit data change, not a repair for regressions. Review its diff and reference
+revision before sharing it. The workflow owner maintains any snapshot they elect
+to version; maintainers must review a pin/input-policy update. Snapshots stay out
+of the grammar repository by default.
 
-```sh
-npm run psi-oracle:fetch    # kotlin-compiler-embeddable 2.4.21 + runtime, SHA-256 pinned, into psi-oracle/lib/
-npm run psi-oracle:verify   # every paired testData input, PSI-clean or not, against its golden
-```
+## Individual inputs and minimization
 
-`PsiOracle.java` runs as a single-file Java program on the fetched jars. For a
-file list it writes `DebugUtil.psiToString(file, true, false)` — the text the
-Kotlin parsing tests compare — and an `index.jsonl` line per file with the
-`PsiErrorElement` count and the first error's offset, line and message.
+The runner consumes built grammar checkouts. --runtime selects the pinned gate
+runtime when comparing newer grammar ABIs. --help lists all options.
 
-`vendor-fixtures.js --oracle-corpus DIR` exports all 789 paired inputs of the
-pin, including the 342 the comparison fixtures leave out because their golden
-holds a `PsiErrorElement`. `psi-oracle:verify` reproduces 788 of them byte for
-byte. The 789th, `spec/linked/expressions/when-expression/p-6/neg/1.2`, is a
-spec test marked `EXCEPTION: compiler`; upstream never compares its golden,
-which is a truncated artefact, so it is reported as skipped.
+    npm run psi-diff -- --corpus sample --root /path/to/inputs --grammar head=/path/to/built-head --grammar base=/path/to/built-base --runtime tools/psi-gate --out local/sample-run
+    npm run psi-diff:minimize -- --run local/sample-run --label head --limit 1
 
-## PSI differential run
+The minimizer respects --label; it does not reduce a base-only bucket when head
+was requested. Use the exact printed run directory (default direct-run output:
+local/psi-diff/NAME). Explicit --out reuse requires unchanged content, complete
+shards and valid checksums; --fresh safely replaces only marked generated output.
+The launcher chooses content directories automatically.
 
-`cross-validation/diff-run.js` compares tree-sitter with the oracle on any
-corpus and for several grammar checkouts at once, so a branch is measured
-against its base in one pass:
+An optional IntelliJ corpus requires an exact clean revision, not an ambient,
+unpinned checkout:
 
-```sh
-npm run psi-diff:mutations   # local/psi-diff/corpora/{mutations,review-329}
-npm run psi-diff -- --corpus mutations --root local/psi-diff/corpora/mutations \
-  --grammar head=. --grammar base=../base-checkout --expect tools/psi-gate/expected.json
-npm run psi-diff:minimize -- --run local/psi-diff/runs/mutations
-```
+    IDEA_ROOT=/path/to/idea IDEA_REV=FULL_40_CHARACTER_COMMIT npm run psi-gate -- full --corpora idea
 
-Each input gets a verdict per grammar:
+The textual markup filter excludes IDE/diagnostics markup and foreign-language
+FILE sections; it is conservative and can exclude otherwise legitimate literals.
 
-| verdict | meaning |
-|---|---|
-| `A` | tree-sitter has an ERROR or MISSING node, PSI is clean |
-| `B` | tree-sitter is clean, PSI has a `PsiErrorElement` |
-| `A-prefix`, `B-prefix` | both have errors, and one side's first error is on an earlier line |
-| `B-script` | a `B` of a `.kt` file that is clean PSI as a `.kts` script (the grammar reads scripts too) |
-| `C` | both clean, but the comments or the normalized structures differ |
-| `C-mutant` | a `C` of a mutant whose original is `ok` |
-| `ok`, `both-error` | agreement; errors on the same line |
+## Fixture import and oracle verification
 
-A, B and C carry a bucket key — the first ERROR node with its parent and the
-PSI node at that offset, the first PSI error with its parent and message, the
-first comment one side reads and the other does not, the first declaration
-whose first token differs (a modifier left behind as a statement of its own,
-which the normalized structures, without names and modifiers, cannot show),
-or the first diverging node — and `report.md` lists each bucket's count per grammar with its smallest
-example. The prefix verdicts share the keys of `A` and `B`, so a cause shows
-whether its file has other errors or not. Without `--list`, a git work tree
-contributes the `.kt`/`.kts` files it tracks; `--exclude REGEX` drops paths.
-The run is sharded (`--shard-size`, `--jobs`) and resumes from the shards
-already written under `local/psi-diff/runs/NAME`.
+The importer pins cross-validation/.fixtures-version. It preserves .kt/.kts paths
+from compiler/psi/psi-impl/testData/psi and linked spec inputs. At the current pin:
+789 paired candidates, 342 PSI-invalid goldens, 447 retained positive pairs;
+436 eligible comparisons and 11 hash-scoped context exclusions. Unsupported
+fragment/multi-file/experimental contexts are not silently treated as whole files.
+The detailed manifests are authoritative when refreshing this pin.
 
-`--expect REGISTRY` gates the run: an `A`, `A-prefix`, `B`, `B-prefix`,
-`C-mutant`, `C comment` or `C declaration` bucket that no entry of the registry names is listed
-under "Not in the registry" and makes the run exit 1; `--strict` gates every
-`C` too, for corpora whose every input is deliberate. A grammar labelled `base`
-adds the buckets that grew in the other.
+    npm install
+    npm run vendor-fixtures
+    npm exec -- node-gyp rebuild
+    npm run vendor-jetbrains
+    npm test
+    npm run cross-validate
 
-`minimize.js` shrinks each bucket's smallest example by deleting lines, then
-tokens, while the bucket key holds; one warm oracle JVM (`PsiOracle --serve`)
-answers every candidate batch. Keep run artefacts out of `build/`: node-gyp
-deletes that directory on every rebuild.
+Rebuild after every generated-parser change before regenerating corpus trees.
+Review promoted :error cases and parser/scanner fingerprints. Cross-validation
+is the existing static fixture report; its match percentage is not the new gate.
 
-## PSI gate
+Verify the live oracle against all positive and negative upstream goldens:
 
-`psi-gate/run.sh [--base REV] CORPUS...` runs the differential, gated by the registry
-`psi-gate/expected.json`, over these corpora:
+    npm run psi-oracle:fetch
+    npm run psi-oracle:verify
 
-| corpus | inputs |
-|---|---|
-| `kotlin` | the whole Kotlin repository at the oracle's commit (the `diagnostics`, `codegen/box` and spec test data included) |
-| `idea` | an IntelliJ checkout (`IDEA_ROOT`) |
-| `mutations` | `psi-gate/mutate.js` over the PSI-clean files of Kotlin's PSI test data |
-| `snippets` | `cross-validation/mutations.js`: name holes, expression positions × forms, the review snippets; `--strict` |
-| `corpus` | the inputs of `test/corpus`, through `psi-gate/corpus.js` |
+The oracle reproduces 788 comparable goldens exactly; one upstream spec EXCEPTION
+golden is intentionally excluded. The verification and mutation inputs are pinned
+to Kotlin 2.4.21. Full runs should be accompanied by this oracle check when changing
+its implementation or fixture/compiler pin.
 
-`psi-gate/unmarked.py` leaves out files with IDE test markup (`<caret>`, `<selection>`,
-highlighting tags), which Kotlin's parser reads as code. `--base REV` exports the grammar of
-REV with `git archive` and compares both.
+## Tests
 
-A mutant of `mutate.js` changes one place of its original, so the change is not lost behind an
-error the file has elsewhere: a comment between two tokens, a line break before a token that
-decides statement termination, a space, a line break or a comment after `@`, `::`, `?.`, `.` or
-a label, a name in backticks, a name Kotlin's lexer does not take whole (a non-letter suffix, a
-digit of another script first), a keyword after a dot, a receiver in parentheses with or without
-type arguments, two statements joined by `;`, `;;` or nothing, a second `;` with or without a
-comment or a space before it, a run of modifiers over lines, other contents of a character
-literal, a function without its body, and one inserted piece at a token boundary (as
-kotlin-syntax's `parse-fuzz.py` does); Unicode suffixes rename every name at once. The oracle
-reads a carriage return as a line break, as kotlinc does when it loads a file, and the
-differential gives tree-sitter the same text.
-`origins.json` maps each mutant to its original, so `C-mutant` is a divergence the mutation made.
-`corpus.js` checks each case's claim: PSI contradicts a case without `:error` with a `B` and a case
-with `:error` with an `A`.
+    npm run cross-validate:test
 
-```sh
-zsh tools/psi-gate/run.sh --base origin/main kotlin mutations snippets corpus
-IDEA_ROOT=~/idea zsh tools/psi-gate/run.sh idea
-```
-
-An entry of the registry is `deliberate`, a difference the grammar keeps (the key pattern, the
-reason, the rule of `KotlinParsing` it departs from and what matching it would cost), or `open`, a
-gap the gate found and nobody fixed yet, with the smallest example of its bucket. Each entry
-also counts the inputs per corpus it covers, as one bucket key can stand for several causes. The
-gate fails on every gated bucket no entry names and on one with more inputs than its entry, so a
-new difference or a regression shows at once; a fix removes its `open` entry, and the report lists
-the entries a corpus no longer shows.
+The tools tests cover count swaps, stale input reuse, incomplete/corrupt shards,
+worker/oracle failures and timeouts, corpus claims, digest mismatch, path escapes,
+cleanup refusal and unknown nodes. Actual oracle integration tests require the
+fetched jars and built native binding; unavailable integration tests are skipped
+explicitly. No Java or PSI tools are needed for the ordinary grammar tests.
