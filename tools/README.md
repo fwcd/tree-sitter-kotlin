@@ -57,9 +57,11 @@ paths, case names, report and gate.json; fix the source/expectation and rerun.
 Comparison preserves named PSI structure, comments, declaration starts and native
 leaf text/ranges. Lexer-hidden delimiters have explicit ownership rules; nullable
 question tokens remain strictly checked. Unknown native node types require an
-explicit mapping. Compact fingerprints cover leaf text/ranges and comments. For
-error-bearing native trees they also cover node types, naming, ERROR/MISSING,
-ranges and nesting, so identical first errors cannot hide changed recovery.
+explicit mapping. Each input's compact identity covers the complete normalized
+named trees and every structural, comment, declaration-start and token-span
+discrepancy, on clean and recovery paths. Native leaf/comment ranges and recovery
+ERROR/MISSING topology remain checked. The first bucket key is a report label;
+an unchanged first discrepancy cannot hide a later changed comparison.
 Composite text and fields are not serialized. This is syntax/range checking,
 not type checking or public CST compatibility verification.
 
@@ -153,7 +155,11 @@ The tools tests cover count swaps, stale input reuse, incomplete/corrupt shards,
 worker/oracle failures and timeouts, corpus claims, digest mismatch, path escapes,
 cleanup refusal and unknown nodes. Actual oracle integration tests require the
 fetched jars and built native binding; unavailable integration tests are skipped
-explicitly. For the complete failure-mode suite, prepare the native binding and oracle first:
+explicitly. Variant builds resolve node-addon-api and node-gyp-build from the
+project's installed dependencies; a previous psi-gate run is not required. Their
+shared prerequisite resolver supplies both the availability guard and builder.
+For the complete failure-mode suite, use Node, a JDK 17+ and native build tools,
+then prepare the native binding and oracle:
 
     npm install
     npm run psi-oracle:fetch

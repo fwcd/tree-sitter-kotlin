@@ -8,7 +8,8 @@ import { spawnSync } from 'child_process';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const api = require('../cross-validation/diff-run');
-const state = require('./state');
+const { variantBuild } = require('./test-prerequisites');
+const buildSetup = variantBuild(ROOT);
 const output = (result) => result.stdout + result.stderr;
 const invoke = (script, args, env = {}) => spawnSync(process.execPath, [path.join(ROOT, script), ...args], {
   cwd: ROOT, encoding: 'utf8', timeout: 60000, env: { ...process.env, ...env },
@@ -19,7 +20,7 @@ const diff = (source, out, grammars, extra = [], env = {}) => invoke('tools/cros
 ], env);
 const minimize = (out) => invoke('tools/cross-validation/minimize.js', ['--run', out, '--label', 'head', '--failing', '--limit', '1']);
 function build(root) {
-  const result = spawnSync(process.execPath, [require.resolve('node-gyp/bin/node-gyp.js', { paths: [path.join(ROOT, 'tools/psi-gate'), ROOT] }), 'rebuild'], {
+  const result = spawnSync(process.execPath, [buildSetup.nodeGyp, 'rebuild'], {
     cwd: root, encoding: 'utf8', timeout: 180000,
   });
   expect(result.status, output(result)).toBe(0);
@@ -31,7 +32,7 @@ function variant(dir, name, modify) {
   for (const name of ['package.json', 'binding.gyp']) fs.copyFileSync(path.join(ROOT, name), path.join(root, name));
   fs.mkdirSync(path.join(root, 'node_modules'));
   for (const name of ['node-addon-api', 'node-gyp-build'])
-    fs.cpSync(path.join(ROOT, 'tools/psi-gate/node_modules', name), path.join(root, 'node_modules', name), { recursive: true });
+    fs.cpSync(buildSetup.dependencies[name], path.join(root, 'node_modules', name), { recursive: true });
   modify(root);
   build(root);
   return root;
@@ -56,23 +57,33 @@ function correctQuest(root) {
   expect(source.slice(at)).toContain(needle);
   fs.writeFileSync(file, source.slice(0, at) + source.slice(at).replace(needle, needle.replace('skip(lexer)', 'advance(lexer)')));
 }
-let available = false;
-try {
-  available = Boolean(require('../safety').javaExecutable()) && require('../psi-oracle/fetch').isFetched() && fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node'));
-} catch {}
-if (!available) process.stderr.write('Reviewer native regressions skipped; run npm install and npm run psi-oracle:fetch with JDK 17+\n');
+let hasJava = false;
+try { hasJava = Boolean(require('../safety').javaExecutable()); } catch {}
+const missing = [
+  !hasJava && 'JDK 17+',
+  !require('../psi-oracle/fetch').isFetched() && 'npm run psi-oracle:fetch',
+  !fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node')) &&
+    'npm install (native binding)',
+  ...buildSetup.missing,
+].filter(Boolean);
+const available = missing.length === 0;
+if (!available)
+  process.stderr.write('Reviewer native regressions skipped; missing: ' + missing.join(', ') + '\n');
 
 describe.skipIf(!available)('permanent reviewer native reproductions', () => {
   it('detects identical-leaf ERROR recovery structure and retained-comment loss', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-recovery-'));
     try {
+      // A hermetic visibility variant pins the real a806574 recovery change without fetching history.
       const unwrapped = variant(dir, 'unwrapped', (root) => replace(path.join(root, 'src/parser.c'),
         '[sym_type_projection] = {\n    .visible = true,', '[sym_type_projection] = {\n    .visible = false,'));
       const hiddenComment = variant(dir, 'hidden-comment', (root) => replace(path.join(root, 'src/parser.c'),
         '[sym_line_comment] = {\n    .visible = true,', '[sym_line_comment] = {\n    .visible = false,'));
       const source = input(dir, 'structure', 'fun f() {\n    1 < x = y\n}\n');
       const text = fs.readFileSync(path.join(source, 'a.kt'), 'utf8');
-      const trees = api.loadParsers([{ label: 'base', root: unwrapped }, { label: 'head', root: ROOT }]).map(({ parser }) => parser.parse(text).rootNode);
+      const trees = api.loadParsers([
+        { label: 'base', root: unwrapped }, { label: 'head', root: ROOT },
+      ]).map(({ parser }) => parser.parse(text).rootNode);
       expect(trees.every((tree) => tree.hasError)).toBe(true);
       expect(trees[0].toString()).not.toBe(trees[1].toString());
       expect(api.lexicalFacts(trees[0]).tokens).toEqual(api.lexicalFacts(trees[1]).tokens);
@@ -87,6 +98,66 @@ describe.skipIf(!available)('permanent reviewer native reproductions', () => {
         expect(result.status, output(result)).toBe(1);
         expect(JSON.parse(fs.readFileSync(path.join(out, 'gate.json'))).failures).toHaveLength(1);
       }
+    } finally { fs.rmSync(dir, { recursive: true }); }
+  }, 180000);
+
+  it('detects a new clean named-tree mismatch behind the same old comment discrepancy', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-clean-masked-'));
+    try {
+      const hideComment = (root) => replace(path.join(root, 'src/parser.c'),
+        '[sym_line_comment] = {\n    .visible = true,',
+        '[sym_line_comment] = {\n    .visible = false,');
+      const base = variant(dir, 'old-comment-gap', hideComment);
+      const head = variant(dir, 'new-named-gap', (root) => {
+        hideComment(root);
+        replace(path.join(root, 'src/parser.c'),
+          '[sym_type_projection] = {\n    .visible = true,',
+          '[sym_type_projection] = {\n    .visible = false,');
+      });
+      const text = 'val ref: List<Int> = xs // retained comment\n';
+      const source = input(dir, 'input', text);
+      const out = path.join(dir, 'run');
+      const result = diff(source, out, [['head', head], ['base', base]]);
+      expect(result.status, output(result)).toBe(1);
+      const meta = JSON.parse(fs.readFileSync(path.join(out, 'meta.json')));
+      const [record] = require('./state').complete(out, meta.identity);
+      expect(record.psiErrors).toBe(0);
+      expect(record.results.head.hasError).toBe(false);
+      expect(record.results.base.hasError).toBe(false);
+      expect(record.results.head.key).toBe(record.results.base.key);
+      expect(record.results.head.treeHash).not.toBe(record.results.base.treeHash);
+      const facts = api.loadParsers([{ label: 'base', root: base }, { label: 'head', root: head }])
+        .map(({ parser }) => api.lexicalFacts(parser.parse(text).rootNode));
+      expect(facts[0]).toEqual(facts[1]);
+      expect(output(result)).toMatch(/Complete comparison changed behind the same first bucket/);
+    } finally { fs.rmSync(dir, { recursive: true }); }
+  }, 180000);
+
+  it('builds a documented-setup clone from project dependencies without the gate runtime', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-setup-clone-'));
+    try {
+      const clone = path.join(dir, 'clone');
+      const result = spawnSync('git', ['clone', '--shared', ROOT, clone], {
+        encoding: 'utf8', timeout: 30000,
+      });
+      expect(result.status, output(result)).toBe(0);
+      expect(fs.existsSync(path.join(clone, 'tools/psi-gate/node_modules'))).toBe(false);
+      // npm install provides these public packages at the project prefix. Copy the
+      // installed packages for this hermetic test; the complete recipe is run separately.
+      fs.mkdirSync(path.join(clone, 'node_modules'));
+      for (const name of ['node-addon-api', 'node-gyp-build'])
+        fs.cpSync(buildSetup.dependencies[name], path.join(clone, 'node_modules', name), { recursive: true });
+      const setup = variantBuild(clone, buildSetup.nodeGyp);
+      expect(setup.missing).toEqual([]);
+      for (const file of Object.values(setup.dependencies))
+        expect(file.startsWith(path.join(clone, 'node_modules') + path.sep)).toBe(true);
+      const built = spawnSync(process.execPath, [setup.nodeGyp, 'rebuild'], {
+        cwd: clone, encoding: 'utf8', timeout: 180000,
+      });
+      expect(built.status, output(built)).toBe(0);
+      const [{ parser }] = api.loadParsers([{ label: 'clone', root: clone }]);
+      expect(parser.parse('val x=1').rootNode.hasError).toBe(false);
+      expect(fs.existsSync(path.join(clone, 'tools/psi-gate/node_modules'))).toBe(false);
     } finally { fs.rmSync(dir, { recursive: true }); }
   }, 180000);
 
@@ -232,7 +303,12 @@ describe.skipIf(!available)('permanent reviewer native reproductions', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-jvm-crash-'));
     try {
       const java = path.join(dir, 'java');
-      fs.writeFileSync(java, '#!/usr/bin/env node\nif(process.argv.includes("-version")){console.error(\'openjdk version "17.0.1"\')}else{console.error("Injected JVM crash");process.exit(23)}\n');
+      fs.writeFileSync(java, [
+        '#!/usr/bin/env node',
+        'if(process.argv.includes("-version")){console.error(\'openjdk version "17.0.1"\')}',
+        'else{console.error("Injected JVM crash");process.exit(23)}',
+        '',
+      ].join('\n'));
       fs.chmodSync(java, 0o755);
       const source = input(dir, 'input', 'val x=1\n');
       const result = diff(source, path.join(dir, 'run'), [['head', ROOT]], [], { PSI_JAVA: java });
