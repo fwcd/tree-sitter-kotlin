@@ -382,32 +382,38 @@ function classify({ text, tree, psi, dump, cst }) {
   return { verdict: 'C', key: `C @ ${trimPath(first.path)}: psi ${first.psi} / ts ${first.ts}` };
 }
 
-/** Include anonymous nodes, fields, ranges and leaf text; omit volatile native IDs. */
-function fullCst(root) {
+/** Capture only leaf lexemes and the spans needed to account for hidden delimiters. */
+function lexicalFacts(root) {
+  const ownerTypes = new Set([
+    'string_literal',
+    'primary_constructor',
+    'secondary_constructor',
+    'character_literal',
+    'long_literal',
+    'integer_literal',
+    'hex_literal',
+    'binary_literal',
+    'identifier',
+    'user_type',
+  ]);
+  const tokens = [];
+  const owners = [];
   const cursor = root.walk();
-  const nodes = [];
-  const parents = [];
   for (;;) {
     const node = cursor.currentNode;
-    const id = nodes.length;
-    nodes.push({
-      parent: parents.length ? parents[parents.length - 1] : null,
-      field: cursor.currentFieldName || null,
-      type: node.type,
-      named: node.isNamed,
-      extra: node.isExtra,
-      missing: node.isMissing,
-      start: node.startIndex,
-      end: node.endIndex,
-      text: node.childCount === 0 ? node.text : null,
-    });
-    if (cursor.gotoFirstChild()) {
-      parents.push(id);
-      continue;
+    if (ownerTypes.has(node.type))
+      owners.push({ type: node.type, start: node.startIndex, end: node.endIndex });
+    if (
+      node.childCount === 0 &&
+      node !== root &&
+      !['line_comment', 'multiline_comment', 'shebang_line'].includes(node.type) &&
+      !node.isMissing
+    ) {
+      tokens.push({ type: node.type, start: node.startIndex, end: node.endIndex, text: node.text });
     }
+    if (cursor.gotoFirstChild()) continue;
     while (!cursor.gotoNextSibling()) {
-      if (!cursor.gotoParent()) return nodes;
-      parents.pop();
+      if (!cursor.gotoParent()) return { tokens, owners };
     }
   }
 }
@@ -421,15 +427,20 @@ function hiddenTokenOwners(nodes) {
   const integers = new Set();
   const identifiers = [];
   for (const node of nodes) {
+    // String quote delimiters are hidden external tokens, owned by the literal range.
     if (node.type === 'string_literal') {
       starts.quotes.add(node.start);
       ends.add(node.end);
     }
+    // The constructor keyword can be hidden inside its constructor node.
     if (['primary_constructor', 'secondary_constructor'].includes(node.type))
       starts.constructors.add(node.start);
+    // Character contents are hidden; PSI represents the whole quoted token.
     if (node.type === 'character_literal') characters.add(`${node.start}:${node.end}`);
+    // Numeric suffixes such as L are hidden under the atomic literal.
     if (['long_literal', 'integer_literal', 'hex_literal', 'binary_literal'].includes(node.type))
       integers.add(`${node.start}:${node.end}`);
+    // Qualified-name separators may be hidden inside identifier/user-type nodes.
     if (['identifier', 'user_type'].includes(node.type)) identifiers.push([node.start, node.end]);
   }
   identifiers.sort((a, b) => a[0] - b[0]);
@@ -452,16 +463,9 @@ function hiddenTokenOwners(nodes) {
 }
 
 function tokenDifference(text, root, layout, cst) {
-  const nodes = cst || fullCst(root);
-  const hiddenOwner = hiddenTokenOwners(nodes);
-  const spans = nodes.filter(
-    (node) =>
-      node.parent !== null &&
-      node.text !== null &&
-      !node.extra &&
-      !node.missing &&
-      node.end > node.start,
-  );
+  const facts = cst || lexicalFacts(root);
+  const hiddenOwner = hiddenTokenOwners(facts.owners);
+  const spans = facts.tokens.filter((node) => node.end > node.start);
   spans.sort((a, b) => a.start - b.start || a.end - b.end);
   let index = 0;
   for (const token of layout.tokens) {
@@ -475,12 +479,6 @@ function tokenDifference(text, root, layout, cst) {
           verdict: 'C',
           key: `C token span: PSI ${token.type} is not represented`,
           line: lineAt(text, offset),
-          tokenFacts: {
-            expected: { ...token, text: text.slice(token.start, token.end) },
-            actual: (cst || fullCst(root)).filter(
-              (node) => node.text !== null && node.start <= token.end && node.end >= token.start,
-            ),
-          },
         };
       }
       if (span.text !== text.slice(span.start, span.end))
@@ -547,6 +545,6 @@ module.exports = {
   firstDivergence,
   classify,
   trimPath,
-  fullCst,
+  lexicalFacts,
   tokenDifference,
 };

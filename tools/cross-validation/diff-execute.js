@@ -5,7 +5,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { runOracleAsync } = require('../psi-oracle/oracle');
-const { classify, fullCst } = require('./diff-classify');
+const { classify, lexicalFacts } = require('./diff-classify');
 const { confined, sha256 } = require('../safety');
 const { listFilesRecursive } = require('../vendor-fixtures');
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -119,11 +119,11 @@ async function runShard({ files, root, shardFile, parsers, claims, timeoutMs }) 
       for (const { label, parser } of parsers) {
         try {
           const tree = parseText(parser, text);
-          const cst = fullCst(tree.rootNode);
+          const cst = lexicalFacts(tree.rootNode);
           record.results[label] = {
             ...classify({ text, tree, psi, dump, cst }),
             hasError: tree.rootNode.hasError,
-            treeHash: sha256(JSON.stringify(cst)),
+            treeHash: sha256(JSON.stringify(cst.tokens)),
           };
         } catch (error) {
           record.results[label] = {

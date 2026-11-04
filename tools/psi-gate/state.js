@@ -211,7 +211,12 @@ function gate(
         });
     }
     const result = record.results[label];
-    const prior = base ? record.results[base] : null;
+    const observed = expected?.observations?.[record.path];
+    const prior = base
+      ? record.results[base]
+      : observed?.sha256 === record.sha256
+        ? observed.result
+        : null;
     if (agreement(result)) {
       if (prior && agreement(prior) && result.treeHash !== prior.treeHash) {
         failures.push({
@@ -219,7 +224,7 @@ function gate(
           kind: 'changed-cst',
           grammar: label,
           message:
-            'CST tokens/fields/ranges changed despite normalized agreement; review the full CST facts',
+            'Native leaf text/ranges changed despite normalized agreement; inspect the input and token span diagnostics',
         });
       }
       continue;
@@ -252,6 +257,12 @@ function snapshot(current, records, label, grammar) {
     schemaVersion: 1,
     context: current.context,
     grammar,
+    observations: Object.fromEntries(
+      records.map((record) => [
+        record.path,
+        { sha256: record.sha256, result: record.results[label] },
+      ]),
+    ),
     claims: Object.fromEntries(
       records
         .filter((r) => claimProblems(r, label).length)

@@ -150,3 +150,11 @@ describe('complete cache and confined output', () => {
     }
   });
 });
+
+it('checks agreeing leaf hashes in an exact offline snapshot', () => {
+  const row = record('a.kt', result('ok'), result('ok'));
+  const snapshot = state.snapshot({ context: {} }, [row], 'base', {});
+  expect(state.gate([row], 'head', { expected: snapshot }).failures).toEqual([]);
+  row.results.head.treeHash = 'changed leaf ranges';
+  expect(state.gate([row], 'head', { expected: snapshot }).failures[0].kind).toBe('changed-cst');
+});
