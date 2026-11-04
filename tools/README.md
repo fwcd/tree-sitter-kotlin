@@ -67,7 +67,7 @@ and git operations also have time limits.
 
 No execution failure or bad corpus claim can be registered as an expected result.
 The gate detects errors/missing tokens via the native binding, normalized tree
-shape, comment/declaration starts, and changed native CST signatures. Unknown
+shape, comment spans/declaration starts, and changed native CST signatures. Changed recovery trees also require review when both parsers reject an input. Unknown
 node types fail and require an explicit mapping. This is syntax PSI, not type
 checking or proof that every accepted program compiles.
 

@@ -52,6 +52,9 @@ function argumentsOf(argv) {
 }
 function prerequisites(options) {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('Install Node.js 22+ before running the PSI gate');
+  if (options.corpora.includes('idea') && (!process.env.IDEA_ROOT || !/^[0-9a-f]{40}$/i.test(process.env.IDEA_REV || ''))) {
+    throw new Error('Set IDEA_ROOT to an IntelliJ checkout and IDEA_REV to its full pinned commit');
+  }
   javaExecutable();
   const required = [['git',['--version'],'Install git'], ['curl',['--version'],'Install curl for proxy-aware HTTPS downloads'],
     ['tar',['--version'],'Install tar'], [process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3'),['--version'],'Install Python 3 for node-gyp'],
@@ -61,9 +64,7 @@ function prerequisites(options) {
     const result = spawnSync(command, args, { timeout: 10000, stdio: 'ignore' });
     if (result.error || result.signal) throw new Error(`${hint}; ${command} is unavailable`);
   }
-  if (options.corpora.includes('idea') && (!process.env.IDEA_ROOT || !/^[0-9a-f]{40}$/i.test(process.env.IDEA_REV || ''))) {
-    throw new Error('Set IDEA_ROOT to an IntelliJ checkout and IDEA_REV to its full pinned commit');
-  }
+
 }
 function runtime() {
   const lock = fs.readFileSync(path.join(__dirname, 'package-lock.json'));

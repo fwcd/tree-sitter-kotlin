@@ -94,6 +94,7 @@ function psiLayout(dump, source = null) {
   const composites = [];
   const errors = [];
   const comments = [];
+  const commentSpans = [];
   const open = []; // { indent, entry }
   let offset = 0;
   const close = indent => {
@@ -106,7 +107,7 @@ function psiLayout(dump, source = null) {
     close(indent);
     const leaf = LEAF_RE.exec(node);
     if (leaf) {
-      if (leaf[1] === 'PsiComment') comments.push(offset);
+      if (leaf[1] === 'PsiComment') { comments.push(offset); commentSpans.push({ start: offset, end: offset + leafLength(leaf[3], source, offset) }); }
       if (leaf[1] === 'PsiElement' && !open.some(o => o.entry.type === 'KDoc')) {
         for (let i = open.length - 1; i >= 0 && open[i].entry.token === null; i--) open[i].entry.token = offset;
       }
@@ -123,10 +124,11 @@ function psiLayout(dump, source = null) {
     if (node === 'KDoc') comments.push(offset);
     const entry = { type: node, parent, start: offset, end: offset, depth: open.length, token: null };
     composites.push(entry);
+    if (node === 'KDoc') commentSpans.push(entry);
     open.push({ indent, entry });
   }
   close(-1);
-  return { composites, errors, comments };
+  return { composites, errors, comments, commentSpans };
 }
 
 /** Innermost PSI composite that starts at or covers `offset`. */
@@ -221,12 +223,12 @@ const COMMENT_TYPES = new Set(['line_comment', 'multiline_comment', 'shebang_lin
  * Start offsets of every comment node of a tree, in document order. The Node binding parses a
  * JavaScript string as UTF-16, so its indexes are the UTF-16 offsets PSI reports.
  */
-function tsComments(root) {
+function tsComments(root, spans = false) {
   const out = [];
   const cursor = root.walk();
   let descend = true;
   for (;;) {
-    if (descend && COMMENT_TYPES.has(cursor.nodeType)) out.push(cursor.startIndex);
+    if (descend && COMMENT_TYPES.has(cursor.nodeType)) out.push(spans ? [cursor.startIndex, cursor.endIndex] : cursor.startIndex);
     if (descend && cursor.gotoFirstChild()) continue;
     if (cursor.gotoNextSibling()) { descend = true; continue; }
     if (!cursor.gotoParent()) break;
@@ -360,6 +362,11 @@ function classify({ text, tree, psi, dump }) {
       return { verdict: 'C', key: `C comment only in ${side} @ ts ${namedAncestorType(node.parent)} / psi ${psiTypeAt(layout, offset)}`,
         line: lineAt(text, offset) };
     }
+  }
+  if (layout) {
+    const ts = tsComments(tree.rootNode, true), psi = layout.commentSpans.map(c => [c.start, c.end]);
+    const at = ts.findIndex((span, i) => JSON.stringify(span) !== JSON.stringify(psi[i]));
+    if (at >= 0) return { verdict: 'C', key: 'C comment extent differs from PSI', line: lineAt(text, ts[at][0]) };
   }
   if (layout) {
     const ts = tsDeclarationStarts(tree.rootNode), psiStarts = psiDeclarationStarts(layout);

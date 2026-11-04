@@ -15,6 +15,10 @@ describe('per-input gating', () => {
     const records = [record('fixed.kt',result('A'),result('ok')),record('regressed.kt',result('ok'),result('A'))];
     expect(state.gate(records,'head',{base:'base'}).failures.map(f => f.path)).toEqual(['regressed.kt']);
   });
+  it('does not hide changed recovery behind the same first error', () => {
+    const r = record('a.kt', result('both-error'), result('both-error', 'A same bucket', 'different'));
+    expect(state.gate([r], 'head', {base:'base'}).failures[0].kind).toBe('changed-recovery');
+  });
   it('fails oracle/harness failures on either grammar, and cannot snapshot them', () => {
     for (const failure of ['oracle-failure','harness-error']) {
       const records = [record('a.kt',result(failure),result('ok'))];

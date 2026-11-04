@@ -69,8 +69,11 @@ function gate(records, label, { base = null, expected = null, conformance = fals
       failures.push({ path: record.path, kind: 'corpus-claim', message: `${record.claim.name}: expected PSI ${record.claim.error ? 'error' : 'clean'}, got ${record.scriptPsiErrors ?? record.psiErrors} errors` });
     }
     const result = record.results[label];
-    if (agreement(result) || ['oracle-failure', 'harness-error'].includes(result.verdict)) continue;
     const prior = base ? record.results[base] : null;
+    if (result.verdict === 'both-error' && prior?.verdict === 'both-error' && result.treeHash !== prior.treeHash) {
+      failures.push({ path: record.path, kind: 'changed-recovery', message: 'Both parsers reject input, but candidate error-recovery CST changed; review it' });
+    }
+    if (agreement(result) || ['oracle-failure', 'harness-error'].includes(result.verdict)) continue;
     const allowed = expected && expected.differences[record.path];
     if (!conformance && ((prior && !agreement(prior) && signature(prior) === signature(result))
         || (!prior && allowed && allowed.sha256 === record.sha256 && allowed.signature === signature(result)))) existing.push(record.path);

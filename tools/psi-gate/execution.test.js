@@ -21,8 +21,29 @@ it('rejects an empty or missing input inventory before starting workers',()=>{
     expect(()=>listInputs({root:dir,list:path.join(dir,'list')})).toThrow(/Missing/);
   }finally{fs.rmSync(dir,{recursive:true});}
 });
-const available=isFetched() && fs.existsSync(path.join(ROOT,'build/Release/tree_sitter_kotlin_binding.node'));
+let hasJava=false;try {hasJava=Boolean(require('../safety').javaExecutable());}catch {}
+const available=hasJava && isFetched() && fs.existsSync(path.join(ROOT,'build/Release/tree_sitter_kotlin_binding.node'));
 describe.skipIf(!available)('actual oracle and worker failures',()=>{
+  it('detects a comment with matching start but an incorrect end',()=>{
+    const dir=fs.mkdtempSync(path.join(os.tmpdir(),'psi-comment-'));
+    fs.writeFileSync(path.join(dir,'a.kt'),'val x=1 //c\n');
+    try {
+      const api=require('../cross-validation/diff-run');
+      const [{parser}]=api.loadParsers([{label:'head',root:ROOT}]);
+      const text=fs.readFileSync(path.join(dir,'a.kt'),'utf8'),tree=api.parseText(parser,text);
+      const out=path.join(dir,'out'),[psi]=require('../psi-oracle/oracle').runOracle(['a.kt'],{root:dir,out});
+      const dump=fs.readFileSync(path.join(out,psi.dump),'utf8');
+      expect(api.classify({text,tree,psi,dump}).verdict).toBe('ok');
+      const node=tree.rootNode;
+      const changed={rootNode:{hasError:node.hasError,toString:node.toString.bind(node),walk:()=>{
+        const cursor=node.walk();return new Proxy(cursor,{get:(target,key)=>{
+          if(key==='endIndex' && cursor.nodeType==='line_comment')return cursor.endIndex+1;
+          const value=cursor[key];return typeof value==='function'?value.bind(cursor):value;
+        }});
+      }}};
+      expect(api.classify({text,tree:changed,psi,dump})).toMatchObject({verdict:'C',key:'C comment extent differs from PSI'});
+    }finally{fs.rmSync(dir,{recursive:true});}
+  },10000);
   it('rejects edited cached inputs, incomplete reports and incorrect corpus claims',()=>{
     const dir=fs.mkdtempSync(path.join(os.tmpdir(),'psi-execution-')),input=path.join(dir,'input'),out=path.join(dir,'run');
     fs.mkdirSync(input);const file=path.join(input,'a.kt');fs.writeFileSync(file,'val x=1\n');
