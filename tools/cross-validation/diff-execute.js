@@ -123,7 +123,7 @@ async function runShard({ files, root, shardFile, parsers, claims, timeoutMs }) 
           record.results[label] = {
             ...classify({ text, tree, psi, dump, cst }),
             hasError: tree.rootNode.hasError,
-            treeHash: sha256(JSON.stringify(cst.tokens)),
+            treeHash: sha256(JSON.stringify([cst.tokens, cst.comments, cst.recovery])),
           };
         } catch (error) {
           record.results[label] = {
