@@ -17,12 +17,16 @@ const SOURCE = [
   '',
 ].join('\n');
 
-const byDir = (mutants, dir) => mutants.filter(mutant => mutant.dir === dir).map(mutant => mutant.text);
+const byDir = (mutants, dir) =>
+  mutants.filter((mutant) => mutant.dir === dir).map((mutant) => mutant.text);
 
 describe('tokenize', () => {
   it('keeps a range a number and records lines', () => {
-    expect(tokenize('1..2').map(t => t.text)).toEqual(['1', '..', '2']);
-    expect(tokenize("a\n'b'").map(t => [t.kind, t.line])).toEqual([['word', 1], ['char', 2]]);
+    expect(tokenize('1..2').map((t) => t.text)).toEqual(['1', '..', '2']);
+    expect(tokenize("a\n'b'").map((t) => [t.kind, t.line])).toEqual([
+      ['word', 1],
+      ['char', 2],
+    ]);
   });
 });
 
@@ -30,45 +34,69 @@ describe('mutantsOf', () => {
   const mutants = mutantsOf(SOURCE, { perFile: 100 });
 
   it('changes one place per mutant', () => {
-    for (const text of byDir(mutants, 'comment-between-tokens')) expect(text.split('/*c*/')).toHaveLength(2);
-    for (const text of byDir(mutants, 'break-before')) expect(text.split('\n')).toHaveLength(SOURCE.split('\n').length + 1);
+    for (const text of byDir(mutants, 'comment-between-tokens'))
+      expect(text.split('/*c*/')).toHaveLength(2);
+    for (const text of byDir(mutants, 'break-before'))
+      expect(text.split('\n')).toHaveLength(SOURCE.split('\n').length + 1);
   });
 
   it('puts keywords only in selectors of expressions, not of the header', () => {
     const selectors = byDir(mutants, 'keyword-selector/fun');
     expect(selectors).toContain(SOURCE.replace('x.ok', 'x.fun'));
     expect(selectors).toContain(SOURCE.replace('x?.y', 'x?.fun'));
-    expect(selectors.some(text => text.includes('a.fun') || text.includes('c.fun'))).toBe(false);
+    expect(selectors.some((text) => text.includes('a.fun') || text.includes('c.fun'))).toBe(false);
   });
 
   it('covers the trivia, names, separators, modifiers, literals and bodies of the operators', () => {
-    expect(byDir(mutants, 'trivia-after/space')).toContain(SOURCE.replace('break@loop', 'break@ loop'));
-    expect(byDir(mutants, 'backtick-name')).toContain(SOURCE.replace('loop@ while', '`loop`@ while'));
+    expect(byDir(mutants, 'trivia-after/space')).toContain(
+      SOURCE.replace('break@loop', 'break@ loop'),
+    );
+    expect(byDir(mutants, 'backtick-name')).toContain(
+      SOURCE.replace('loop@ while', '`loop`@ while'),
+    );
     expect(byDir(mutants, 'parenthesize')).toContain(SOURCE.replace('x?.y', '(x)?.y'));
     expect(byDir(mutants, 'double-semi')).toContain(SOURCE.replace('g(); h()', 'g();; h()'));
-    expect(byDir(mutants, 'join-lines/double-semi').some(text => text.includes('h();; x?.y'))).toBe(true);
-    expect(byDir(mutants, 'modifier-run/9x3')).toContain(SOURCE.replace('    val c',
-      '    private private private\n    private private private\n    private private private\n    val c'));
+    expect(
+      byDir(mutants, 'join-lines/double-semi').some((text) => text.includes('h();; x?.y')),
+    ).toBe(true);
+    expect(byDir(mutants, 'modifier-run/9x3')).toContain(
+      SOURCE.replace(
+        '    val c',
+        '    private private private\n    private private private\n    private private private\n    val c',
+      ),
+    );
     expect(byDir(mutants, 'char-content/0')).toContain(SOURCE.replace("'a'", "'\\q'"));
     expect(byDir(mutants, 'drop-body')).toContain('package a.b\nimport c.d\n\nfun f(x: X)\n');
     expect(byDir(mutants, 'unicode-latin')).toHaveLength(1);
   });
 
   it('puts a comment where trivia goes, between semicolons, and names Kotlin does not take whole', () => {
-    expect(byDir(mutants, 'trivia-after/comment')).toContain(SOURCE.replace('break@loop', 'break@/*c*/loop'));
-    expect(byDir(mutants, 'double-semi/comment')).toContain(SOURCE.replace('g(); h()', 'g();/*c*/; h()'));
-    expect(byDir(mutants, 'bad-name/emoji-suffix')).toContain(SOURCE.replace('break@loop', 'break@loop💩'));
-    expect(byDir(mutants, 'bad-name/digit-start')).toContain(SOURCE.replace('loop@ while', '١loop@ while'));
+    expect(byDir(mutants, 'trivia-after/comment')).toContain(
+      SOURCE.replace('break@loop', 'break@/*c*/loop'),
+    );
+    expect(byDir(mutants, 'double-semi/comment')).toContain(
+      SOURCE.replace('g(); h()', 'g();/*c*/; h()'),
+    );
+    expect(byDir(mutants, 'bad-name/emoji-suffix')).toContain(
+      SOURCE.replace('break@loop', 'break@loop💩'),
+    );
+    expect(byDir(mutants, 'bad-name/digit-start')).toContain(
+      SOURCE.replace('loop@ while', '١loop@ while'),
+    );
     expect(byDir(mutants, 'char-content/3')).toContain(SOURCE.replace("'a'", "'\\\u0000'"));
   });
 
   it('parenthesizes a receiver with type arguments', () => {
     const text = 'fun f() {\n    val r = X<T, U>?::x\n}\n';
-    expect(byDir(mutantsOf(text, { perFile: 100 }), 'parenthesize')).toContain(text.replace('X<T, U>', '(X<T, U>)'));
+    expect(byDir(mutantsOf(text, { perFile: 100 }), 'parenthesize')).toContain(
+      text.replace('X<T, U>', '(X<T, U>)'),
+    );
   });
 
   it('picks sites by a seeded generator, the same each run', () => {
-    expect(mutantsOf(SOURCE, { perFile: 1, rel: 'a.kt' })).toEqual(mutantsOf(SOURCE, { perFile: 1, rel: 'a.kt' }));
+    expect(mutantsOf(SOURCE, { perFile: 1, rel: 'a.kt' })).toEqual(
+      mutantsOf(SOURCE, { perFile: 1, rel: 'a.kt' }),
+    );
     expect(pick([1, 2, 3, 4, 5], 2, generator('s'))).toHaveLength(2);
     expect(pick([1, 2], 5, generator('s'))).toEqual([1, 2]);
   });

@@ -4,7 +4,7 @@
 //
 // Run as a single-file source program on the jars of tools/psi-oracle/lib:
 //
-//   java -Xss512m -cp 'tools/psi-oracle/lib/*' tools/psi-oracle/PsiOracle.java \
+//   java -Xss64m -Xmx1g -cp PINNED_JAR_CLASSPATH tools/psi-oracle/PsiOracle.java \
 //     --list files.txt --root DIR --out DUMP_DIR [--trim]
 //
 // The dump is DebugUtil.psiToString(file, showWhitespaces=true, showRanges=false),

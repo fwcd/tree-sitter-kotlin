@@ -26,10 +26,13 @@ Run the broader inputs and audit corpus assertions:
     npm run psi-gate -- full
 
 Full adds the pinned Kotlin checkout, one-site mutations of its PSI-clean test
-inputs, and extracted test/corpus assertions. Kotlin is fetched only for selected
+inputs, and extracted test/corpus expectations. :error and expected ERROR/MISSING nodes
+describe the expected tree-sitter CST; they do not declare invalid Kotlin. The
+generated jetbrains/ subtree remains PSI-positive even for recorded grammar gaps. Kotlin is fetched only for selected
 repository/mutation corpora. The repository has existing PSI disagreements,
-including corpus assertions: a full/conformance failure can expose an existing
-issue. Inspect the named test and report; do not make it green by increasing a
+including corpus expectations. Full is a relative gate: unchanged known corpus
+discrepancies are listed separately and do not fail it. New or changed corpus
+expectation problems fail; --strict audits all discrepancies, including old ones. Inspect the named test and report; do not make it green by increasing a
 count allowance. Quick is a relative grammar check; it does not audit corpus
 assertions.
 
@@ -40,13 +43,17 @@ or npm HTTPS proxy settings, bounded retries, and a verified shared cache under
 ~/.cache/kotlin-psi-oracle (PSI_ORACLE_CACHE overrides it). A fresh checkout can
 reuse this cache, but every jar is verified again before launching Java.
 
-Reports are local/psi-gate/snippets.md, corpus.md, mutations.md and kotlin.md.
+Reports are local/psi-gate/snippets.md, corpus.md, mutations.md and kotlin.md. Failed complete runs are written to
+CORPUS.failed.md; failed jobs preserve the last successful report.
 Detailed, checksummed artifacts live in local/psi-gate/runs/CORPUS/CONTENT_HASH.
 The working parser and base are built separately from exact source bytes. A new
 input, generated parser, runtime or comparison-tool version gets a new cache;
 repeated unchanged checks reuse complete results. --fresh reruns the selected
 content; --home DIR selects another owned cache. Existing unmarked directories
 and source directories are never recursively replaced.
+
+Each --home has an exclusive .run.lock. Concurrent use fails before any build or
+extraction; remove a stale lock only after confirming its process has stopped.
 
 Workers default to two (maximum four). Each oracle has a 1 GiB heap and a bounded
 stack. Native parsing has a 10-second per-file budget (--parse-timeout-ms, up to
@@ -67,7 +74,8 @@ and git operations also have time limits.
   as B-script. Both parsers failing at the same offset is reported as both-error;
   earlier errors are A-prefix/B-prefix, including positions on the same line.
 
-No execution failure or bad corpus claim can be registered as an expected result.
+Execution failures cannot be registered. Explicit reference snapshots may retain
+reviewed known corpus discrepancies by exact input/expectation fingerprint.
 The gate detects errors/missing tokens via the native binding, normalized tree
 shape, comment spans/declaration starts, and changed native CST signatures. Changed recovery trees also require review when both parsers reject an input. Unknown
 node types fail and require an explicit mapping. This is syntax PSI, not type
@@ -83,7 +91,7 @@ For an offline/reference workflow, explicitly record base's observations:
     npm run psi-gate -- update-expected --corpora snippets --expected local/snippets.expected.json
 
 Snapshots contain the input-membership/content digest, generator provenance,
-comparison/oracle code identity, runtime source/binary/JDK identity and locale/options digest, reference grammar identity, and
+comparison/oracle code identity, runtime source/binary and Java feature-version identity plus locale/options digest, reference grammar identity, and
 exact path/source/signature entries for differences. A fixed old input cannot
 cancel a new bad input under the same bucket. Changing the corpus or tools makes
 an old snapshot incompatible rather than silently broadening its allowances.
@@ -104,7 +112,8 @@ runtime when comparing newer grammar ABIs. --help lists all options.
     npm run psi-diff -- --corpus sample --root /path/to/inputs --grammar head=/path/to/built-head --grammar base=/path/to/built-base --runtime tools/psi-gate --out local/sample-run
     npm run psi-diff:minimize -- --run local/sample-run --label head --limit 1
 
-The minimizer respects --label; it does not reduce a base-only bucket when head
+The minimizer supports --help and validates --limit. It prioritizes failures from
+gate.json; --failing restricts it to failing gate paths. It respects --label; it does not reduce a base-only bucket when head
 was requested. Use the exact printed run directory (default direct-run output:
 local/psi-diff/NAME). Explicit --out reuse requires unchanged content, complete
 shards and valid checksums; --fresh safely replaces only marked generated output.
@@ -156,4 +165,14 @@ The tools tests cover count swaps, stale input reuse, incomplete/corrupt shards,
 worker/oracle failures and timeouts, corpus claims, digest mismatch, path escapes,
 cleanup refusal and unknown nodes. Actual oracle integration tests require the
 fetched jars and built native binding; unavailable integration tests are skipped
-explicitly. No Java or PSI tools are needed for the ordinary grammar tests.
+explicitly. For the complete failure-mode suite, prepare the native binding and oracle first:
+
+    npm install
+    npm run psi-oracle:fetch
+    npm run cross-validate:test
+
+For golden-sample integration as well, run npm run psi-oracle:verify before the
+suite. Without this setup, oracle/native integration tests skip and print the
+missing prerequisite. The test count therefore depends on whether those inputs
+are present; a skipped failure-mode suite is not verification of the fixes.
+No Java or PSI tools are needed for the ordinary grammar tests.
