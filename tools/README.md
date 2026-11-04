@@ -57,8 +57,10 @@ paths, case names, report and gate.json; fix the source/expectation and rerun.
 Comparison preserves named PSI structure, comments, declaration starts and native
 leaf text/ranges. Lexer-hidden delimiters have explicit ownership rules; nullable
 question tokens remain strictly checked. Unknown native node types require an
-explicit mapping. Compact lexical fingerprints guard range changes without
-serializing/hashing every CST composite and field. This is syntax/range checking,
+explicit mapping. Compact fingerprints cover leaf text/ranges and comments. For
+error-bearing native trees they also cover node types, naming, ERROR/MISSING,
+ranges and nesting, so identical first errors cannot hide changed recovery.
+Composite text and fields are not serialized. This is syntax/range checking,
 not type checking or public CST compatibility verification.
 
 ## Optional reviewed snapshots
@@ -72,7 +74,9 @@ For an offline/reference workflow, explicitly record base's observations:
 
 Snapshots contain the input-membership/content digest, generator provenance,
 comparison/oracle code identity, runtime source/binary and Java feature-version identity plus locale/options digest, reference grammar identity, and
-exact path/source/signature entries for differences. A fixed old input cannot
+one compact path/source/verdict/key/fingerprint observation per input (schema 2).
+Difference allowances are derived from those observations; schema 1 snapshots
+require an explicit reviewed update. A fixed old input cannot
 cancel a new bad input under the same bucket. Changing the corpus or tools makes
 an old snapshot incompatible rather than silently broadening its allowances.
 
@@ -98,7 +102,10 @@ to those witnesses, and --limit bounds reductions. It respects --label; it does 
 was requested. Use the exact printed run directory (default direct-run output:
 local/psi-diff/NAME). Explicit --out reuse requires unchanged content, complete
 shards and valid checksums; --fresh safely replaces only marked generated output.
-The launcher chooses content directories automatically.
+The launcher chooses content directories automatically. Minimization checks live
+input inventory, grammar source/binary, runtime and tool identity against the run
+before loading any cached minimum. It rechecks both the original witness and
+cached snippet; after changing inputs or rebuilding a grammar, rerun the gate.
 
 An optional IntelliJ corpus requires an exact clean revision, not an ambient,
 unpinned checkout:

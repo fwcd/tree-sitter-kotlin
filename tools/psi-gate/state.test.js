@@ -60,6 +60,8 @@ describe('per-input gating', () => {
   it('uses only exact source/signature snapshots and rejects changed input identity', () => {
     const r = record('a.kt', result('A'), result('A'));
     const snap = state.snapshot({ context: { inputs: 'pinned' } }, [r], 'base', {});
+    expect(snap.schemaVersion).toBe(2);
+    expect(snap).not.toHaveProperty('differences');
     expect(state.gate([r], 'head', { expected: snap }).failures).toEqual([]);
     r.sha256 = 'changed';
     expect(state.gate([r], 'head', { expected: snap }).failures).toHaveLength(1);

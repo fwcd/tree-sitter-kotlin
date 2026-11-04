@@ -130,7 +130,7 @@ describe.skipIf(!available)('actual oracle and worker failures', () => {
         ]);
         expect(run.status, output(run)).toBe(1);
         const failures = JSON.parse(fs.readFileSync(path.join(out, 'gate.json'), 'utf8')).failures;
-        expect(failures.some((f) => f.grammar === 'head2')).toBe(true);
+        expect(failures.filter((f) => f.grammar === 'head2').map((f) => f.path).sort()).toEqual(['1.kt', '2.kt', '3.kt']);
         const minimize = spawnSync(
           process.execPath,
           [

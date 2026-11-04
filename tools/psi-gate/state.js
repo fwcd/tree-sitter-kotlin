@@ -224,18 +224,16 @@ function gate(
           kind: 'changed-cst',
           grammar: label,
           message:
-            'Native leaf text/ranges changed despite normalized agreement; inspect the input and token span diagnostics',
+            'Native structure, token or comment ranges changed despite normalized agreement; inspect the recovery tree and span diagnostics',
         });
       }
       continue;
     }
     if (['oracle-failure', 'harness-error'].includes(result.verdict)) continue;
-    const allowed = expected?.differences?.[record.path];
+
     if (
       !conformance &&
-      (reference ||
-        (prior && !agreement(prior) && signature(prior) === signature(result)) ||
-        (!prior && allowed?.sha256 === record.sha256 && allowed.signature === signature(result)))
+      (reference || (prior && !agreement(prior) && signature(prior) === signature(result)))
     ) {
       existing.push(record.path);
     } else
@@ -254,13 +252,20 @@ function snapshot(current, records, label, grammar) {
   if (status.failures.length)
     throw new Error('Cannot update expectations from an execution failure');
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     context: current.context,
     grammar,
     observations: Object.fromEntries(
       records.map((record) => [
         record.path,
-        { sha256: record.sha256, result: record.results[label] },
+        {
+          sha256: record.sha256,
+          result: {
+            verdict: record.results[label].verdict,
+            ...(record.results[label].key ? { key: record.results[label].key } : {}),
+            treeHash: record.results[label].treeHash,
+          },
+        },
       ]),
     ),
     claims: Object.fromEntries(
@@ -268,24 +273,11 @@ function snapshot(current, records, label, grammar) {
         .filter((r) => claimProblems(r, label).length)
         .map((r) => [r.path, { sha256: r.sha256, problems: claimProblems(r, label) }]),
     ),
-    differences: Object.fromEntries(
-      records
-        .filter((r) => !agreement(r.results[label]))
-        .map((r) => [
-          r.path,
-          {
-            sha256: r.sha256,
-            signature: signature(r.results[label]),
-            verdict: r.results[label].verdict,
-            key: r.results[label].key,
-          },
-        ]),
-    ),
   };
 }
 function loadExpected(file, context) {
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (data.schemaVersion !== 1 || !data.differences || digest(data.context) !== digest(context)) {
+  if (data.schemaVersion !== 2 || !data.observations || digest(data.context) !== digest(context)) {
     throw new Error(
       'Expected snapshot does not match these inputs/tools. Review and update it explicitly; count registries are unsupported.',
     );

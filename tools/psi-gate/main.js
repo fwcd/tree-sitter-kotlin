@@ -189,6 +189,11 @@ function revision(base) {
   return run('git', ['rev-parse', '--verify', `${base}^{commit}`], { cwd: ROOT }).trim();
 }
 function grammar(root, home, revision) {
+  const residue = path.join(home, 'grammars/tools');
+  if (fs.existsSync(residue)) {
+    // Retain old generated residue for inspection, outside the grammar-key namespace.
+    fs.renameSync(residue, path.join(home, 'legacy-build-residue-' + Date.now()));
+  }
   const inputs = revision
     ? sha256(
         run('git', ['archive', revision, 'src', 'bindings/node', 'binding.gyp', 'package.json'], {
@@ -198,6 +203,7 @@ function grammar(root, home, revision) {
       )
     : state.digest(sourceFiles(root).map((f) => [f, state.hashFile(path.join(root, f))]));
   const key = state.digest([
+    'local-addon-build-v2',
     inputs,
     state.hashFile(path.join(__dirname, 'package-lock.json')),
     process.version,
@@ -237,11 +243,11 @@ function grammar(root, home, revision) {
       run('git', ['rev-parse', 'HEAD'], { cwd: ROOT }).trim() + '\n',
     );
   }
-  fs.symlinkSync(
-    path.join(__dirname, 'node_modules'),
-    path.join(target, 'node_modules'),
-    process.platform === 'win32' ? 'junction' : 'dir',
-  );
+  // Gyp resolves a symlinked addon dependency outside build/, leaving stamp files in
+  // sibling grammar directories. A small local copy keeps all build products owned.
+  fs.mkdirSync(path.join(target, 'node_modules'), { recursive: true });
+  for (const name of ['node-addon-api', 'node-gyp-build'])
+    fs.cpSync(path.join(__dirname, 'node_modules', name), path.join(target, 'node_modules', name), { recursive: true });
   run(
     process.execPath,
     [path.join(__dirname, 'node_modules/node-gyp/bin/node-gyp.js'), 'rebuild'],
