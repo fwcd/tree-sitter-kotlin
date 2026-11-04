@@ -47,7 +47,7 @@ const missing = [
   !fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node')) &&
     'npm install (native binding)',
 ].filter(Boolean);
-if (missing.length) console.error('PSI integration tests skipped; missing: ' + missing.join(', '));
+if (missing.length) process.stderr.write('PSI integration tests skipped; missing: ' + missing.join(', ') + '\n');
 const available =
   hasJava &&
   isFetched() &&
