@@ -156,6 +156,46 @@ function renderMinimized(entries) {
   return out.join('\n');
 }
 
+/** Select witnesses from complete records; report samples are deliberately lossy. */
+function witnesses(records, gate, buckets, labels, requested, failingOnly) {
+  const failed = new Set(
+    gate.failures.flatMap((failure) =>
+      (failure.grammar ? [failure.grammar] : labels).map((label) => `${label}\0${failure.path}`),
+    ),
+  );
+  const byKey = new Map();
+  for (const record of records) {
+    for (const label of requested ? [requested] : labels) {
+      const result = record.results[label];
+      if (!result?.key) continue;
+      const match = {
+        label,
+        path: record.path,
+        bytes: record.bytes,
+        sha256: record.sha256,
+        line: result.line,
+        key: result.key,
+        failing: failed.has(`${label}\0${record.path}`),
+      };
+      for (const key of result.verdict === 'C'
+        ? [result.key, 'C* ' + result.key.slice(2)]
+        : [result.key]) {
+        if (!byKey.has(key)) byKey.set(key, []);
+        byKey.get(key).push(match);
+      }
+    }
+  }
+  return buckets
+    .flatMap((bucket) => {
+      const matches = byKey.get(bucket.key) || [];
+      const failures = matches.filter((match) => match.failing);
+      const choices = failures.length ? failures : failingOnly ? [] : matches;
+      choices.sort((a, b) => a.bytes - b.bytes || a.path.localeCompare(b.path));
+      return choices.length ? [{ ...choices[0], bucket }] : [];
+    })
+    .sort((a, b) => Number(b.failing) - Number(a.failing));
+}
+
 async function main(argv) {
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(
@@ -182,20 +222,13 @@ async function main(argv) {
   const { loadParsers } = require('./diff-run');
   const { OracleServer } = require('../psi-oracle/oracle');
   const meta = JSON.parse(fs.readFileSync(path.join(run, 'meta.json'), 'utf8'));
-  require('../psi-gate/state').complete(run, meta.identity);
+  const records = require('../psi-gate/state').complete(run, meta.identity);
   const gateFile = path.join(run, 'gate.json');
   if (failingOnly && !fs.existsSync(gateFile))
     throw new Error('--failing requires a complete run with gate.json');
-  const failed = fs.existsSync(gateFile)
-    ? JSON.parse(fs.readFileSync(gateFile, 'utf8')).failures
-    : [];
-  const paths = new Set(
-    failed.filter((f) => !label || !f.grammar || f.grammar === label).map((f) => f.path),
-  );
-  const isFailure = (bucket) =>
-    Object.values(bucket.examples)
-      .flat()
-      .some((example) => paths.has(example.path));
+  const gate = fs.existsSync(gateFile)
+    ? JSON.parse(fs.readFileSync(gateFile, 'utf8'))
+    : { failures: [] };
   const { buckets } = JSON.parse(fs.readFileSync(path.join(run, 'buckets.json'), 'utf8'));
   if (label && !meta.grammars.some((g) => g.label === label))
     throw new Error(`Unknown grammar label: ${label}`);
@@ -205,25 +238,48 @@ async function main(argv) {
     ),
   );
   const outFile = path.join(run, 'minimized.json');
-  const done = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, 'utf8')) : [];
-  const known = new Set(done.map((entry) => entry.key));
+  const cached = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, 'utf8')) : [];
+  const plans = witnesses(
+    records,
+    gate,
+    buckets,
+    meta.grammars.map((g) => g.label),
+    label,
+    failingOnly,
+  );
+  const identity = (entry) => `${entry.key}\0${entry.label}\0${entry.example}`;
+  const selected = new Set(plans.map((plan) => `${plan.bucket.key}\0${plan.label}\0${plan.path}`));
+  const done = cached.filter((entry) => entry.reproduced && selected.has(identity(entry)));
+  const known = new Set(done.map(identity));
+  if (
+    failingOnly &&
+    gate.failures.some((f) => !label || !f.grammar || f.grammar === label) &&
+    !plans.length
+  ) {
+    throw new Error('Gate failures have no reducible PSI bucket; inspect gate.json');
+  }
   const server = new OracleServer();
   let count = 0;
   try {
-    for (const bucket of [...buckets].sort((a, b) => Number(isFailure(b)) - Number(isFailure(a)))) {
-      if (failingOnly && !isFailure(bucket)) continue;
-      if (!verdicts.includes(bucket.verdict) || known.has(bucket.key) || count >= limit) continue;
-      if (label && !bucket.counts[label]) continue;
-      const use = label || meta.grammars.map((g) => g.label).find((l) => bucket.counts[l] > 0);
-      const example = bucket.examples[use][0];
+    for (const plan of plans) {
+      const { bucket, label: use } = plan;
+      const example = plan;
+      if (
+        !verdicts.includes(bucket.verdict) ||
+        known.has(`${bucket.key}\0${use}\0${example.path}`) ||
+        count >= limit
+      )
+        continue;
       const text = fs.readFileSync(path.join(meta.root, example.path), 'utf8');
       const holds = bucketPredicate({
         server,
         parser: parsers[use],
-        key: bucket.key,
+        key: plan.key,
         extension: path.extname(example.path),
       });
       const [original] = await holds([text]);
+      if (plan.failing && !original)
+        throw new Error(`Failing witness no longer reproduces: ${example.path}; rerun the gate`);
       const snippet = original ? await minimizeText(text, holds) : text;
       done.push({
         key: bucket.key,

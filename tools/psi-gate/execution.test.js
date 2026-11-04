@@ -47,7 +47,8 @@ const missing = [
   !fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node')) &&
     'npm install (native binding)',
 ].filter(Boolean);
-if (missing.length) process.stderr.write('PSI integration tests skipped; missing: ' + missing.join(', ') + '\n');
+if (missing.length)
+  process.stderr.write('PSI integration tests skipped; missing: ' + missing.join(', ') + '\n');
 const available =
   hasJava &&
   isFetched() &&
@@ -148,6 +149,88 @@ describe.skipIf(!available)('actual oracle and worker failures', () => {
         const reduced = JSON.parse(fs.readFileSync(path.join(out, 'minimized.json'), 'utf8'));
         expect(reduced).toHaveLength(1);
         expect(failures.some((f) => f.path === reduced[0].example)).toBe(true);
+      }
+      // Preserve the short old gap but fix the long reference only in base.
+      const conditional = fs
+        .readFileSync(scanner, 'utf8')
+        .replace(
+          "while (lexer->lookahead == ' ' || lexer->lookahead == '\\t') advance(lexer);",
+          "while (lexer->lookahead == ' ' || lexer->lookahead == '\\t') { if (lexer->get_column(lexer) > 30) advance(lexer); else skip(lexer); }",
+        );
+      fs.writeFileSync(scanner, conditional);
+      const rebuild = spawnSync(
+        process.execPath,
+        [
+          process.env.npm_config_node_gyp ||
+            require.resolve('node-gyp/bin/node-gyp.js', {
+              paths: [path.join(ROOT, 'tools/psi-gate'), ROOT],
+            }),
+          'rebuild',
+        ],
+        { cwd: dir, encoding: 'utf8', timeout: 180000 },
+      );
+      expect(rebuild.status, output(rebuild)).toBe(0);
+      for (const oldCount of [5, 3]) {
+        const source = path.join(dir, 'mixed-' + oldCount);
+        fs.mkdirSync(source);
+        for (let n = 0; n < oldCount; n++)
+          fs.writeFileSync(
+            path.join(source, 'old' + n + '.kt'),
+            'val x' + n + ' = String? ::plus\n',
+          );
+        fs.writeFileSync(
+          path.join(source, 'regressed.kt'),
+          'val deliberately_long_variable_name_for_failure = String? ::plus\n',
+        );
+        const runDir = path.join(dir, 'mixed-run-' + oldCount);
+        const run = invoke(source, runDir, [
+          '--grammar',
+          'head=' + ROOT,
+          '--grammar',
+          'base=' + dir,
+        ]);
+        expect(run.status, output(run)).toBe(1);
+        const gate = JSON.parse(fs.readFileSync(path.join(runDir, 'gate.json'), 'utf8'));
+        expect([...new Set(gate.failures.map((f) => f.path))]).toEqual(['regressed.kt']);
+        const bucket = JSON.parse(
+          fs.readFileSync(path.join(runDir, 'buckets.json'), 'utf8'),
+        ).buckets.find((b) => b.counts.head);
+        fs.writeFileSync(
+          path.join(runDir, 'minimized.json'),
+          JSON.stringify([
+            {
+              key: bucket.key,
+              label: 'head',
+              example: 'old0.kt',
+              reproduced: true,
+              counts: bucket.counts,
+              verdict: bucket.verdict,
+              snippet: 'old unchanged witness',
+            },
+          ]),
+        );
+        const minimize = spawnSync(
+          process.execPath,
+          [
+            path.join(ROOT, 'tools/cross-validation/minimize.js'),
+            '--run',
+            runDir,
+            '--label',
+            'head',
+            '--failing',
+            '--limit',
+            '1',
+          ],
+          { cwd: ROOT, encoding: 'utf8', timeout: 30000 },
+        );
+        expect(minimize.status, output(minimize)).toBe(0);
+        const reduced = JSON.parse(fs.readFileSync(path.join(runDir, 'minimized.json'), 'utf8'));
+        expect(reduced).toHaveLength(1);
+        expect(reduced[0]).toMatchObject({
+          example: 'regressed.kt',
+          label: 'head',
+          reproduced: true,
+        });
       }
     } finally {
       fs.rmSync(dir, { recursive: true });
