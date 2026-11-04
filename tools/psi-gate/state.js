@@ -28,7 +28,7 @@ function identity(options, files) {
     'tools/cross-validation/normalizer.js', 'tools/cross-validation/mapping.js', 'tools/cross-validation/pipeline.js',
     'tools/cross-validation/parser-psi.js', 'tools/cross-validation/parser-ts.js', 'tools/cross-validation/comparator.js',
     'tools/cross-validation/models.js', 'tools/psi-oracle/oracle.js', 'tools/psi-oracle/fetch.js', 'tools/psi-oracle/PsiOracle.java'];
-  const context = { corpus: options.corpus, inputs: digest(sources),
+  const context = { corpus: options.corpus, parseTimeoutMs: options.parseTimeoutMs, inputs: digest(sources),
     tools: digest(toolFiles.map(name => [name, hashFile(path.join(REPO, name))])),
     runtime: require(require.resolve('tree-sitter/package.json', { paths: [options.runtime || REPO] })).version,
     origins: options.origins ? hashFile(options.origins) : null,

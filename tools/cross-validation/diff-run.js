@@ -397,21 +397,26 @@ function classify({ text, tree, psi, dump }) {
  *
  * @param {Array<{ label: string, root: string }>} grammars
  */
-function loadParsers(grammars, runtime = REPO_ROOT) {
+function loadParsers(grammars, runtime = REPO_ROOT, parseTimeoutMs = 10000) {
   const Parser = require(require.resolve('tree-sitter', { paths: [runtime] }));
   return grammars.map(({ label, root }) => {
     const language = require(path.join(root, 'bindings', 'node'));
     const parser = new Parser();
     parser.setLanguage(language);
-    parser.setTimeoutMicros(1000000);
+    parser.setTimeoutMicros(parseTimeoutMs * 1000);
     return { label, root, parser };
   });
 }
 
 function parseText(parser, text) {
   const bufferSize = Math.max(32 * 1024, Buffer.byteLength(text, 'utf8') * 2 + 1024);
+  const started = process.hrtime.bigint();
   const tree = parser.parse(text, undefined, { bufferSize });
-  if (!tree) throw new Error('Native parser timed out');
+  const limit = parser.getTimeoutMicros();
+  if (!tree || (limit && Number(process.hrtime.bigint() - started) / 1000 >= limit)) {
+    parser.reset();
+    throw new Error('Native parser timed out; increase --parse-timeout-ms for large inputs');
+  }
   return tree;
 }
 
@@ -654,12 +659,13 @@ const HELP = `Usage: node tools/cross-validation/diff-run.js --corpus NAME --roo
   --report-only         Report an already COMPLETE, content-matching run
   --jobs N              Workers, 1..4 (default 2)
   --shard-size N        Inputs per JVM, 1..10000 (default 2000)
+  --parse-timeout-ms N  Native parse budget per file, default 10000
   --timeout-ms N        Oracle timeout, default 120000
 Exit 0: no new per-input differences (or no differences in conformance mode).
 Exit 1: differences, failed assertions, incomplete execution, or invalid setup.
 `;
 function parseArgs(argv) {
-  const options = { grammars: [], shardSize: 2000, jobs: 2, timeoutMs: 120000 };
+  const options = { grammars: [], shardSize: 2000, jobs: 2, timeoutMs: 120000, parseTimeoutMs: 10000 };
   const args = [...argv];
   const value = flag => { const v = args.shift(); if (!v || v.startsWith('--')) throw new Error(`${flag} requires a value`); return v; };
   while (args.length) {
@@ -672,8 +678,8 @@ function parseArgs(argv) {
       const input = value(arg), split = input.indexOf('=');
       if (split < 1 || split === input.length - 1) throw new Error('--grammar needs LABEL=DIR');
       options.grammars.push({ label: input.slice(0, split), root: path.resolve(input.slice(split + 1)) });
-    } else if (['--jobs', '--shard-size', '--timeout-ms'].includes(arg)) {
-      const key = {'--jobs':'jobs','--shard-size':'shardSize','--timeout-ms':'timeoutMs'}[arg];
+    } else if (['--jobs', '--shard-size', '--timeout-ms', '--parse-timeout-ms'].includes(arg)) {
+      const key = {'--jobs':'jobs','--shard-size':'shardSize','--timeout-ms':'timeoutMs','--parse-timeout-ms':'parseTimeoutMs'}[arg];
       options[key] = positive(value(arg), arg, arg === '--jobs' ? 4 : arg === '--shard-size' ? 10000 : 3600000);
     } else if (['--root', '--list', '--out', '--origins', '--expect', '--runtime', '--cases', '--update-expected'].includes(arg)) {
       options[arg === '--update-expected' ? 'updateExpected' : arg.slice(2)] = path.resolve(value(arg));
@@ -690,7 +696,7 @@ function parseArgs(argv) {
 async function worker(options) {
   const [k, n] = options.worker.split('/').map(Number);
   if (!Number.isInteger(k) || !Number.isInteger(n) || k < 0 || k >= n || n > 4) throw new Error('Invalid worker assignment');
-  const parsers = loadParsers(options.grammars, options.runtime);
+  const parsers = loadParsers(options.grammars, options.runtime, options.parseTimeoutMs);
   const meta = JSON.parse(fs.readFileSync(path.join(options.out, 'meta.json'), 'utf8'));
   const claims = options.cases ? JSON.parse(fs.readFileSync(options.cases, 'utf8')) : null;
   for (let shard = k; shard < Math.ceil(meta.files / options.shardSize); shard += n) {

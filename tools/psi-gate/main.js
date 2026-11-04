@@ -18,6 +18,7 @@ const HELP = `Usage: npm run psi-gate -- quick|full|update-expected [options]
   --expected FILE        Snapshot to compare, or destination for update-expected
   --home DIR             Owned cache/report directory (default local/psi-gate)
   --jobs N               1..4 oracle workers (default 2)
+  --parse-timeout-ms N   Native per-file timeout (default 10000, max 60000)
   --timeout-ms N         Oracle timeout (default 120000)
   --fresh                Discard marked run results, never source directories
   --strict               Require conformance; known base differences also fail
@@ -28,7 +29,7 @@ IDEA inputs require IDEA_ROOT and an exact 40-character IDEA_REV.
 function argumentsOf(argv) {
   const args = [...argv], command = args.shift() || 'quick';
   if (!['quick', 'full', 'update-expected'].includes(command)) throw new Error(`Unknown job ${command}; use --help`);
-  const options = { command, jobs: 2, timeoutMs: 120000, home: path.join(ROOT, 'local/psi-gate'),
+  const options = { command, jobs: 2, timeoutMs: 120000, parseTimeoutMs: 10000, home: path.join(ROOT, 'local/psi-gate'),
     corpora: command === 'full' ? ['snippets', 'corpus', 'mutations', 'kotlin'] : ['snippets'] };
   while (args.length) {
     const flag = args.shift();
@@ -40,6 +41,7 @@ function argumentsOf(argv) {
     else if (flag === '--expected') options.expected = path.resolve(value);
     else if (flag === '--home') options.home = path.resolve(value);
     else if (flag === '--jobs') options.jobs = positive(value, flag, 4);
+    else if (flag === '--parse-timeout-ms') options.parseTimeoutMs = positive(value, flag, 60000);
     else if (flag === '--timeout-ms') options.timeoutMs = positive(value, flag);
     else throw new Error(`Unknown option ${flag}; use --help`);
   }
@@ -177,7 +179,7 @@ async function main(argv) {
     if (provenance) fs.writeFileSync(path.join(root,'provenance.json'),JSON.stringify(provenance));
     const out = path.join(options.home, 'runs', corpus);
     const args = ['--corpus',corpus,'--root',root,'--grammar','head='+head,'--grammar','base='+base,'--runtime',__dirname,
-      '--out',out,'--jobs',String(options.jobs),'--timeout-ms',String(options.timeoutMs),...extra];
+      '--out',out,'--jobs',String(options.jobs),'--timeout-ms',String(options.timeoutMs),'--parse-timeout-ms',String(options.parseTimeoutMs),...extra];
     if (options.fresh) args.push('--fresh');
     if (options.strict) args.push('--strict');
     if (options.expected) args.push(options.command === 'update-expected' ? '--update-expected' : '--expect',options.expected);

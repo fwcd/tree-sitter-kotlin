@@ -49,7 +49,9 @@ content; --home DIR selects another owned cache. Existing unmarked directories
 and source directories are never recursively replaced.
 
 Workers default to two (maximum four). Each oracle has a 1 GiB heap and a bounded
-stack. --timeout-ms controls its wall timeout (default 120000). Builds, downloads
+stack. Native parsing has a 10-second per-file budget (--parse-timeout-ms, up to
+60 seconds); interrupted parsers are reset before processing another input.
+--timeout-ms controls its wall timeout (default 120000). Builds, downloads
 and git operations also have time limits.
 
 ### Result meaning

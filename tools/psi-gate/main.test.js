@@ -18,3 +18,10 @@ it('checks invalid arguments and missing IDEA prerequisites before work',()=>{
 it('requires an explicit mapping for unknown grammar nodes',()=>{
   expect(()=>normalizeTs(new Node('unrecognized_new_rule'))).toThrow(/Unknown tree-sitter node/);
 });
+
+it('resets an interrupted native parser before the next input',()=>{
+  let reset=false;
+  const parser={parse:()=>null,getTimeoutMicros:()=>1000,reset:()=>{reset=true;}};
+  expect(()=>require('../cross-validation/diff-run').parseText(parser,'val x=1')).toThrow(/Native parser timed out/);
+  expect(reset).toBe(true);
+});
