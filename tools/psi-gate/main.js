@@ -74,6 +74,10 @@ function argumentsOf(argv) {
     throw new Error('Choose distinct supported corpora (see --help)');
   if (options.command === 'update-expected' && !options.expected)
     throw new Error('update-expected requires --expected FILE');
+  if (options.expected && options.command !== 'update-expected')
+    throw new Error(
+      'The launcher measures a base; --expected cannot override it. Use the direct psi-diff runner with --expect and no base.',
+    );
   if (options.expected && options.corpora.length !== 1)
     throw new Error('Use one --corpora NAME with an expected snapshot');
   if (inside(canonical(options.home), canonical(ROOT)))
@@ -343,7 +347,10 @@ function publishReport(home, corpus, result, report) {
   const destination = path.join(home, corpus + (result.exitCode ? '.failed.md' : '.md'));
   fs.copyFileSync(report, destination);
   console.log(
-    (result.exitCode ? 'Failed report: ' : 'Latest report: ') + path.relative(ROOT, destination),
+    (result.exitCode ? 'Failed report: ' : 'Latest report: ') +
+      (inside(ROOT, path.resolve(destination))
+        ? path.relative(ROOT, destination)
+        : path.resolve(destination)),
   );
   return destination;
 }
@@ -410,7 +417,7 @@ function baseCorpus(home, revision) {
   const cases = path.join(directory, 'inputs', 'cases.json');
   const receipt = path.join(directory, 'claims.sha256');
   if (fs.existsSync(cases)) {
-    if (fs.readFileSync(receipt, 'utf8') !== state.hashFile(cases))
+    if (!fs.existsSync(receipt) || fs.readFileSync(receipt, 'utf8') !== state.hashFile(cases))
       throw new Error('Base corpus cache is corrupt; choose a new --home');
     return cases;
   }

@@ -6,80 +6,60 @@ expectations. Regenerate your grammar before checking it.
 
 ## Common jobs
 
-Install Node 22+, a JDK 17+, git, curl, tar, Python 3 and native C/C++ build tools
-(make on Linux/macOS; MSVC build tools on Windows). Set PSI_JAVA if java on PATH
-is older than 17. The launcher checks these before downloading or building.
-Linux is verified; the Node entry point supports macOS and Windows build setups,
-but those platforms have not been tested here.
+Requires Node 22+, JDK 17+, git, curl, tar, Python 3.8+ and a C++17 compiler
+(GCC/Clang 8+, or MSVC 19.20+). Linux/macOS also need make. Prerequisites and
+cache ownership are checked before downloading/building. Linux is verified;
+macOS/Windows native builds have not been tested here.
 
-From a fresh checkout, one command checks generated snippets against the current
-upstream main (fetched read-only):
+One command from a bare checkout compares snippets against current upstream main:
 
     npm run psi-gate -- quick
 
-For an existing local base, use:
+Check a local base revision without fetching upstream:
 
     npm run psi-gate -- quick --base origin/main
 
-Run the broader inputs and audit corpus assertions:
+Run all four reproducible corpora, including base-relative corpus expectations:
 
     npm run psi-gate -- full
 
-Full adds the pinned Kotlin checkout, one-site mutations of its PSI-clean test
-inputs, and extracted test/corpus expectations. :error and expected ERROR/MISSING nodes
-describe the expected tree-sitter CST; they do not declare invalid Kotlin. The
-generated jetbrains/ subtree remains PSI-positive even for recorded grammar gaps. Kotlin is fetched only for selected
-repository/mutation corpora. The repository has existing PSI disagreements,
-including corpus expectations. Full is a relative gate: unchanged known corpus
-discrepancies are listed separately and do not fail it. New or changed corpus
-expectation problems fail; --strict audits all discrepancies, including old ones. Inspect the named test and report; do not make it green by increasing a
-count allowance. Quick is a relative grammar check; it does not audit corpus
-assertions.
+Full adds Kotlin at its pinned revision, single-site mutations, and test/corpus
+expectations. :error and expected ERROR/MISSING nodes describe tree-sitter's
+expected CST. Generated JetBrains inputs remain PSI-positive even when the grammar
+rejects them. Existing exact-base discrepancies are listed separately; new or
+changed discrepancies fail. --strict audits all differences, including old ones.
 
-The launcher installs its own locked tree-sitter 0.25.1/node-gyp dependencies in
-tools/psi-gate/node_modules. It never replaces the project's runtime or runs an
-unpinned npx package. Jars use pinned SHA-256, HTTPS-only curl downloads, standard
-or npm HTTPS proxy settings, bounded retries, and a verified shared cache under
-~/.cache/kotlin-psi-oracle (PSI_ORACLE_CACHE overrides it). A fresh checkout can
-reuse this cache, but every jar is verified again before launching Java.
+The gate installs a separate locked runtime in tools/psi-gate/node_modules. It
+never replaces project dependencies. Maven jars use HTTPS-only proxy-aware
+bounded downloads and a digest-verified cache (~/.cache/kotlin-psi-oracle or
+PSI_ORACLE_CACHE). Every oracle launch rechecks its pinned jar hashes.
 
-Reports are local/psi-gate/snippets.md, corpus.md, mutations.md and kotlin.md. Failed complete runs are written to
-CORPUS.failed.md; failed jobs preserve the last successful report.
-Detailed, checksummed artifacts live in local/psi-gate/runs/CORPUS/CONTENT_HASH.
-The working parser and base are built separately from exact source bytes. A new
-input, generated parser, runtime or comparison-tool version gets a new cache;
-repeated unchanged checks reuse complete results. --fresh reruns the selected
-content; --home DIR selects another owned cache. Existing unmarked directories
-and source directories are never recursively replaced.
+Successful reports are local/psi-gate/CORPUS.md. Complete failed runs go to
+CORPUS.failed.md, preserving the successful report. Detailed/checksummed results
+are under local/psi-gate/runs/CORPUS/CONTENT_HASH. New input, tool, runtime or
+parser bytes select new results; --fresh reruns the current content. --home DIR
+selects another marked cache. Source and unowned directories are never replaced.
 
-Each --home has an exclusive .run.lock. Concurrent use fails before any build or
-extraction; remove a stale lock only after confirming its process has stopped.
-
-Workers default to two (maximum four). Each oracle has a 1 GiB heap and a bounded
-stack. Native parsing has a 10-second per-file budget (--parse-timeout-ms, up to
-60 seconds); interrupted parsers are reset before processing another input.
---timeout-ms controls its wall timeout (default 120000). Builds, downloads
-and git operations also have time limits.
+An exclusive home lock rejects concurrent work. A dead owner's lock is reclaimed
+after checking its PID; a live or uninspectable owner remains protected. Workers
+default to two (maximum four). Oracle heap/stack, downloads, builds, workers and
+native parsing have bounded budgets. Native per-file parsing defaults to 10s
+(--parse-timeout-ms up to 60s); interrupted parsers are reset. --timeout-ms sets
+the oracle deadline (default 120000ms).
 
 ### Result meaning
 
-- PASS (per-input regression): no new or changed PSI disagreement relative to
-  the same input on base. Existing differences remain visible.
-- FAIL: execution did not complete, input/metadata is missing or corrupt, a corpus
-  claim contradicts PSI, or a candidate has a new/changed disagreement. The first
-  failing paths and corpus test names are printed. Read the report, fix the grammar
-  or assertion, regenerate when needed, then rerun.
-- --strict requires conformance: every A/B/C difference fails, including an
-  unchanged base difference. Script-compatible .kt inputs are separately reported
-  as B-script. Both parsers failing at the same offset is reported as both-error;
-  earlier errors are A-prefix/B-prefix, including positions on the same line.
+PASS (per-input regression) means no new/changed discrepancy against the same
+input on base. It does not claim conformance. FAIL reports new differences,
+failed corpus expectations, or incomplete/invalid execution. Inspect the printed
+paths, case names, report and gate.json; fix the source/expectation and rerun.
 
-Execution failures cannot be registered. Explicit reference snapshots may retain
-reviewed known corpus discrepancies by exact input/expectation fingerprint.
-The gate detects errors/missing tokens via the native binding, normalized tree
-shape, comment spans/declaration starts, and changed native CST signatures. Changed recovery trees also require review when both parsers reject an input. Unknown
-node types fail and require an explicit mapping. This is syntax PSI, not type
-checking or proof that every accepted program compiles.
+Comparison preserves named PSI structure, comments, declaration starts and native
+leaf text/ranges. Lexer-hidden delimiters have explicit ownership rules; nullable
+question tokens remain strictly checked. Unknown native node types require an
+explicit mapping. Compact lexical fingerprints guard range changes without
+serializing/hashing every CST composite and field. This is syntax/range checking,
+not type checking or public CST compatibility verification.
 
 ## Optional reviewed snapshots
 
@@ -97,8 +77,8 @@ cancel a new bad input under the same bucket. Changing the corpus or tools makes
 an old snapshot incompatible rather than silently broadening its allowances.
 
 To use a snapshot without remeasuring a base, use the lower-level runner with
-one grammar and --expect FILE. The launcher always measures base; an expectation
-never overrides a regression observed against base. update-expected is an
+one grammar and --expect FILE. The launcher always measures base and rejects --expected on quick/full. Use the
+direct runner with --expect and no base for snapshot checking. update-expected is an
 explicit data change, not a repair for regressions. Review its diff and reference
 revision before sharing it. The workflow owner maintains any snapshot they elect
 to version; maintainers must review a pin/input-policy update. Snapshots stay out
@@ -112,8 +92,9 @@ runtime when comparing newer grammar ABIs. --help lists all options.
     npm run psi-diff -- --corpus sample --root /path/to/inputs --grammar head=/path/to/built-head --grammar base=/path/to/built-base --runtime tools/psi-gate --out local/sample-run
     npm run psi-diff:minimize -- --run local/sample-run --label head --limit 1
 
-The minimizer supports --help and validates --limit. It prioritizes failures from
-gate.json; --failing restricts it to failing gate paths. It respects --label; it does not reduce a base-only bucket when head
+The minimizer selects exact per-label failing witnesses from complete shard
+records and gate.json, not the five-example report sample. --failing restricts it
+to those witnesses, and --limit bounds reductions. It respects --label; it does not reduce a base-only bucket when head
 was requested. Use the exact printed run directory (default direct-run output:
 local/psi-diff/NAME). Explicit --out reuse requires unchanged content, complete
 shards and valid checksums; --fresh safely replaces only marked generated output.

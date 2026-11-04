@@ -186,3 +186,43 @@ it('preserves the successful report when a complete run fails', () => {
     fs.rmSync(dir, { recursive: true });
   }
 });
+
+it('reclaims the lock of a SIGKILLed owner', async () => {
+  const { spawn } = require('child_process');
+  const dir = temporary();
+  const module = path.join(ROOT, 'tools/psi-gate/home.js');
+  const child = spawn(process.execPath, [
+    '-e',
+    "require(process.argv[1]).withHome(process.argv[2],()=>new Promise(()=>{console.log('ready');setInterval(()=>{},1000)}))",
+    module,
+    dir,
+  ]);
+  try {
+    await new Promise((resolve, reject) => {
+      child.stdout.once('data', resolve);
+      child.once('error', reject);
+    });
+    const exited = new Promise((resolve) => child.once('exit', resolve));
+    child.kill('SIGKILL');
+    await exited;
+    expect(fs.existsSync(path.join(dir, '.run.lock'))).toBe(true);
+    await withHome(dir, () => {});
+    expect(fs.existsSync(path.join(dir, '.run.lock'))).toBe(false);
+  } finally {
+    child.kill('SIGKILL');
+    fs.rmSync(dir, { recursive: true });
+  }
+});
+it('rejects an inert launcher snapshot and explains a missing base receipt', () => {
+  const { argumentsOf, baseCorpus } = require('./main');
+  expect(() => argumentsOf(['quick', '--expected', 'snapshot.json'])).toThrow(/cannot override/);
+  const dir = temporary(),
+    revision = '0'.repeat(40);
+  try {
+    fs.mkdirSync(path.join(dir, 'base-corpus', revision, 'inputs'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'base-corpus', revision, 'inputs', 'cases.json'), '{}');
+    expect(() => baseCorpus(dir, revision)).toThrow(/corrupt/);
+  } finally {
+    fs.rmSync(dir, { recursive: true });
+  }
+});

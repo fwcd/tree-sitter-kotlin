@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { resetOutput, sha256 } = require('../safety');
 const { runIfMain } = require('../cli');
+const { CORPUS_NAMESPACE } = require('../vendor-jetbrains-tests');
 
 const HEADER = /^={3,}\s*$/;
 const DIVIDER = /^-{3,}\s*$/;
@@ -66,7 +67,7 @@ function main([corpus, output]) {
           file: relative,
           name,
           error,
-          psiClean: relative.startsWith('jetbrains/') || !error,
+          psiClean: relative.split(path.sep)[0] === CORPUS_NAMESPACE || !error,
           inputSha256: sha256(input),
         };
       },
