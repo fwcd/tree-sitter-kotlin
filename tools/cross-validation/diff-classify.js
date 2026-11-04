@@ -413,8 +413,48 @@ function fullCst(root) {
 }
 
 /** Different lexers may split/merge tokens, but no PSI token character may disappear. */
+/** Index token owners once: hidden lexer delimiters are not visible CST leaves. */
+function hiddenTokenOwners(nodes) {
+  const starts = { quotes: new Set(), constructors: new Set() };
+  const ends = new Set();
+  const characters = new Set();
+  const integers = new Set();
+  const identifiers = [];
+  for (const node of nodes) {
+    if (node.type === 'string_literal') {
+      starts.quotes.add(node.start);
+      ends.add(node.end);
+    }
+    if (['primary_constructor', 'secondary_constructor'].includes(node.type))
+      starts.constructors.add(node.start);
+    if (node.type === 'character_literal') characters.add(`${node.start}:${node.end}`);
+    if (['long_literal', 'integer_literal', 'hex_literal', 'binary_literal'].includes(node.type))
+      integers.add(`${node.start}:${node.end}`);
+    if (['identifier', 'user_type'].includes(node.type)) identifiers.push([node.start, node.end]);
+  }
+  identifiers.sort((a, b) => a[0] - b[0]);
+  let index = 0,
+    extent = -1;
+  return (token) => {
+    if (token.type === 'SEMICOLON') return true; // _semi is intentionally hidden.
+    if (token.type === 'OPEN_QUOTE') return starts.quotes.has(token.start);
+    if (token.type === 'CLOSING_QUOTE') return ends.has(token.end);
+    if (token.type === 'constructor') return starts.constructors.has(token.start);
+    if (token.type === 'CHARACTER_LITERAL') return characters.has(`${token.start}:${token.end}`);
+    if (token.type === 'INTEGER_LITERAL') return integers.has(`${token.start}:${token.end}`);
+    if (token.type === 'DOT') {
+      while (index < identifiers.length && identifiers[index][0] <= token.start)
+        extent = Math.max(extent, identifiers[index++][1]);
+      return extent >= token.end;
+    }
+    return false;
+  };
+}
+
 function tokenDifference(text, root, layout, cst) {
-  const spans = (cst || fullCst(root)).filter(
+  const nodes = cst || fullCst(root);
+  const hiddenOwner = hiddenTokenOwners(nodes);
+  const spans = nodes.filter(
     (node) =>
       node.parent !== null &&
       node.text !== null &&
@@ -425,6 +465,7 @@ function tokenDifference(text, root, layout, cst) {
   spans.sort((a, b) => a.start - b.start || a.end - b.end);
   let index = 0;
   for (const token of layout.tokens) {
+    if (hiddenOwner(token)) continue;
     let offset = token.start;
     while (offset < token.end) {
       while (index < spans.length && spans[index].end <= offset) index++;
