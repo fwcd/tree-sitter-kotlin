@@ -86,13 +86,8 @@ function _normalizeTsMulti(node, parentName = null) {
   // Look up mapping
   const psiName = TS_TO_PSI[tsName];
 
-  // Unknown TS node — transparent
   if (psiName === undefined) {
-    const kids = [];
-    for (const child of node.children) {
-      kids.push(..._normalizeTsMulti(child, tsName));
-    }
-    return kids;
+    throw new Error(`Unknown tree-sitter node type '${tsName}'; add an explicit mapping or transparent wrapper in tools/cross-validation/mapping.js`);
   }
 
   // Null mapping — transparent wrapper

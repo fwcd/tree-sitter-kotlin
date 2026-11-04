@@ -176,6 +176,8 @@ const TS_TO_PSI = {
   interpolation_expression_start: null,
   interpolation_expression_end: null,
   interpolation_identifier_start: null,
+  // The legacy grammar's named alias for '?' is a PSI token, not a composite.
+  quest: null,
   character_literal: 'CHARACTER_CONSTANT',
   // PSI's CHARACTER_CONSTANT is one leaf, its escapes included: no template entry.
   character_escape_seq: null,

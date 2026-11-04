@@ -150,8 +150,10 @@ async function main(argv) {
   const { loadParsers } = require('./diff-run');
   const { OracleServer } = require('../psi-oracle/oracle');
   const meta = JSON.parse(fs.readFileSync(path.join(run, 'meta.json'), 'utf8'));
+  require('../psi-gate/state').complete(run, meta.identity);
   const { buckets } = JSON.parse(fs.readFileSync(path.join(run, 'buckets.json'), 'utf8'));
-  const parsers = Object.fromEntries(loadParsers(meta.grammars).map(entry => [entry.label, entry.parser]));
+  if (label && !meta.grammars.some(g => g.label === label)) throw new Error(`Unknown grammar label: ${label}`);
+  const parsers = Object.fromEntries(loadParsers(meta.grammars, meta.runtime || path.resolve(__dirname, '..', '..', 'psi-gate')).map(entry => [entry.label, entry.parser]));
   const outFile = path.join(run, 'minimized.json');
   const done = fs.existsSync(outFile) ? JSON.parse(fs.readFileSync(outFile, 'utf8')) : [];
   const known = new Set(done.map(entry => entry.key));
@@ -160,7 +162,8 @@ async function main(argv) {
   try {
     for (const bucket of buckets) {
       if (!verdicts.includes(bucket.verdict) || known.has(bucket.key) || count >= limit) continue;
-      const use = label && bucket.counts[label] ? label : meta.grammars.map(g => g.label).find(l => bucket.counts[l] > 0);
+      if (label && !bucket.counts[label]) continue;
+      const use = label || meta.grammars.map(g => g.label).find(l => bucket.counts[l] > 0);
       const example = bucket.examples[use][0];
       const text = fs.readFileSync(path.join(meta.root, example.path), 'utf8');
       const holds = bucketPredicate({ server, parser: parsers[use], key: bucket.key, extension: path.extname(example.path) });

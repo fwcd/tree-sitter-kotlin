@@ -20,6 +20,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resetOutput, confined } = require('../safety');
 
 // Kotlin's hard keywords. grammar.js reserves the same list, but the mutations must also run
 // against a grammar without `reserved` (the comparison base), so the list is Kotlin's, kept here.
@@ -236,9 +237,9 @@ const REVIEW_329 = [
 ].map(([id, text]) => ({ id, group: 'review-329', text, extension: '.kt' }));
 
 function writeCorpus(dir, snippets) {
-  fs.rmSync(dir, { recursive: true, force: true });
+  resetOutput(dir);
   for (const snippet of snippets) {
-    const file = path.join(dir, snippet.id + snippet.extension);
+    const file = confined(dir, snippet.id + snippet.extension);
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, snippet.text);
   }

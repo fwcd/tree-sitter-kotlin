@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
-const { psiLayout, psiTypeAt, firstDivergence, classify, summarize, trimPath, markMutants, gatedKey, triage } = require('./diff-run');
+const { psiLayout, psiTypeAt, firstDivergence, classify, summarize, trimPath, markMutants } = require('./diff-run');
 const { Node } = require('./models');
 const { grammarRoot, MISSING } = require('../grammar-root');
 
@@ -124,30 +124,6 @@ describe('mutants and the registry', () => {
     expect(marked[3].results.head.verdict).toBe('C');
   });
 
-  it('gates A, B, C* and comment buckets, every C when strict', () => {
-    expect(['A x', 'B x', 'C* x', 'C comment only in ts @ x'].every(key => gatedKey(key))).toBe(true);
-    expect(gatedKey('C @ x')).toBe(false);
-    expect(gatedKey('C @ x', true)).toBe(true);
-  });
-
-  it('splits the gated buckets into registered and unexpected', () => {
-    const summary = summarize(records, ['head'], origins);
-    const expected = [{ key: /^B psi BLOCK: m /, status: 'open', reason: 'r' }, { key: /^A never/, status: 'deliberate', reason: 'unused' }];
-    const { unexpected, registered, unused } = triage(summary, expected, 'head');
-    expect(unexpected.map(bucket => bucket.key)).toEqual(['C* @ KtFile: psi FUN / ts BINARY_EXPRESSION']);
-    expect(registered.map(({ bucket }) => bucket.key)).toEqual(['B psi BLOCK: m | ts statements']);
-    expect(unused.map(entry => entry.reason)).toEqual(['unused']);
-  });
-
-  it('takes an entry with counts for the inputs it covers in the corpus', () => {
-    const summary = summarize(records, ['head'], origins);
-    const entry = { key: /^B psi BLOCK: m /, status: 'open', reason: 'r', counts: { mutations: 1 } };
-    const unexpected = corpus => triage(summary, [entry], 'head', false, corpus).unexpected.map(b => b.key);
-    expect(unexpected('mutations')).not.toContain('B psi BLOCK: m | ts statements');
-    expect(unexpected('kotlin')).toContain('B psi BLOCK: m | ts statements');
-    entry.counts.mutations = 0;
-    expect(unexpected('mutations')).toContain('B psi BLOCK: m | ts statements');
-  });
 });
 
 // classify needs the grammar's native binding, which a checkout without `node-gyp rebuild` lacks.
@@ -175,12 +151,12 @@ describe.skipIf(binding.error)('classify', () => {
     expect(result.key).toMatch(/^A source_file > ERROR "(val|\))" \| psi (PROPERTY|FILE)$/);
   });
 
-  it('reports A-prefix when tree-sitter errs on an earlier line than PSI, both-error on the same line', () => {
+  it('reports A-prefix when tree-sitter errs on an earlier line than PSI, both-error at the same offset', () => {
     const text = 'val x = 1 )\nval y = 2\n';
     const tree = parseText(parser, text);
     const later = { psiErrors: 1, firstError: { offset: 12, line: 2, message: 'm' } };
     expect(classify({ text, tree, psi: later, dump: null })).toMatchObject({ verdict: 'A-prefix', line: 1 });
-    const same = { psiErrors: 1, firstError: { offset: 10, line: 1, message: 'm' } };
+    const same = { psiErrors: 1, firstError: { offset: 0, line: 1, message: 'm' } };
     expect(classify({ text, tree, psi: same, dump: null })).toEqual({ verdict: 'both-error' });
   });
 

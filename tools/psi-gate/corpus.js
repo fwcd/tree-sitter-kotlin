@@ -7,6 +7,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { resetOutput, positive } = require('../safety');
 
 const HEADER = /^={3,}\s*$/;
 const DIVIDER = /^-{3,}\s*$/;
@@ -39,6 +40,7 @@ function parseCorpus(text) {
 }
 
 function main([corpus, output]) {
+  resetOutput(output, corpus);
   const files = [];
   const walk = dir => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -47,7 +49,6 @@ function main([corpus, output]) {
     }
   };
   walk(corpus);
-  fs.rmSync(output, { recursive: true, force: true });
   const index = {};
   for (const file of files.sort()) {
     const rel = path.relative(corpus, file).replace(/\.txt$/, '');

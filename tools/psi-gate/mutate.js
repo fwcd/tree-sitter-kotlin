@@ -12,6 +12,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { resetOutput, positive } = require('../safety');
 
 const { HARD_KEYWORDS: HARD, SOFT_KEYWORDS, MODIFIERS } = require('../cross-validation/mutations');
 const KEYWORDS = new Set([...HARD, ...SOFT_KEYWORDS, ...MODIFIERS]);
@@ -278,14 +279,16 @@ function mutantsOf(text, { perFile = 2, seed = 'psi-gate', rel = '' } = {}) {
 /** True when the input's PSI golden (`NAME.txt` beside `NAME.kt`) holds an error element. */
 function goldenHasError(file) {
   const golden = file.replace(/\.kts?$/, '.txt');
-  return fs.existsSync(golden) && fs.readFileSync(golden, 'utf8').includes('PsiErrorElement');
+  if (!fs.existsSync(golden)) throw new Error(`Missing PSI golden: ${golden}`);
+  return require('../psi-fixture-sources').goldenHasPsiError(fs.readFileSync(golden, 'utf8'));
 }
 
 function main(args) {
   const option = (name, fallback) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : fallback; };
   const [input, output] = args.filter((arg, i) => !arg.startsWith('--') && !args[i - 1]?.startsWith('--'));
-  const perFile = Number(option('--per-file', 2));
+  const perFile = positive(option('--per-file', 2), '--per-file', 100);
   const seed = option('--seed', 'psi-gate');
+  resetOutput(output, input);
   const files = [];
   const walk = dir => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
