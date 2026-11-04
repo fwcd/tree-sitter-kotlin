@@ -182,6 +182,12 @@ async function main(argv) {
       files: files.length,
       grammars: options.grammars.map((g) => ({ ...g, head: gitHead(g.root) })),
       identity: current,
+      options: Object.fromEntries(
+        [
+          'corpus', 'root', 'list', 'exclude', 'origins', 'cases', 'baseCases',
+          'parseTimeoutMs', 'shardSize', 'grammars', 'runtime',
+        ].map((key) => [key, options[key]]),
+      ),
       runtime: options.runtime,
     };
     fs.writeFileSync(metaFile, JSON.stringify(meta, null, 2) + '\n');

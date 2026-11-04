@@ -12,7 +12,7 @@
  *     [--label LABEL] [--verdict A,B,C] [--limit N]
  *
  * Writes `minimized.json` and `minimized.md` next to the run's report; buckets
- * already minimized are skipped.
+ * already minimized are rechecked before reuse.
  *
  * @module cross-validation/minimize
  */
@@ -219,10 +219,22 @@ async function main(argv) {
     else throw new Error(`unknown argument ${arg}`);
   }
   if (!run) throw new Error('--run is required');
-  const { loadParsers } = require('./diff-run');
+  const { loadParsers, listInputs } = require('./diff-run');
+  const state = require('../psi-gate/state');
   const { OracleServer } = require('../psi-oracle/oracle');
   const meta = JSON.parse(fs.readFileSync(path.join(run, 'meta.json'), 'utf8'));
-  const records = require('../psi-gate/state').complete(run, meta.identity);
+  const assertCurrent = () => {
+    if (
+      !meta.options ||
+      state.digest(meta.identity) !== state.digest(state.identity(meta.options, listInputs(meta.options)))
+    )
+      throw new Error(
+        'Minimizer run is stale: inputs, grammar, runtime or tools changed; rerun the gate',
+      );
+  };
+  assertCurrent();
+  const records = state.complete(run, meta.identity);
+  const runIdentity = state.digest(meta.identity);
   const gateFile = path.join(run, 'gate.json');
   if (failingOnly && !fs.existsSync(gateFile))
     throw new Error('--failing requires a complete run with gate.json');
@@ -233,7 +245,7 @@ async function main(argv) {
   if (label && !meta.grammars.some((g) => g.label === label))
     throw new Error(`Unknown grammar label: ${label}`);
   const parsers = Object.fromEntries(
-    loadParsers(meta.grammars, meta.runtime || path.resolve(__dirname, '..', '..', 'psi-gate')).map(
+    loadParsers(meta.grammars, meta.runtime, meta.options.parseTimeoutMs).map(
       (entry) => [entry.label, entry.parser],
     ),
   );
@@ -249,8 +261,12 @@ async function main(argv) {
   );
   const identity = (entry) => `${entry.key}\0${entry.label}\0${entry.example}`;
   const selected = new Set(plans.map((plan) => `${plan.bucket.key}\0${plan.label}\0${plan.path}`));
-  const done = cached.filter((entry) => entry.reproduced && selected.has(identity(entry)));
-  const known = new Set(done.map(identity));
+  const reusable = new Map(
+    cached
+      .filter((entry) => entry.reproduced && entry.runIdentity === runIdentity && selected.has(identity(entry)))
+      .map((entry) => [identity(entry), entry]),
+  );
+  const done = [];
   if (
     failingOnly &&
     gate.failures.some((f) => !label || !f.grammar || f.grammar === label) &&
@@ -264,12 +280,7 @@ async function main(argv) {
     for (const plan of plans) {
       const { bucket, label: use } = plan;
       const example = plan;
-      if (
-        !verdicts.includes(bucket.verdict) ||
-        known.has(`${bucket.key}\0${use}\0${example.path}`) ||
-        count >= limit
-      )
-        continue;
+      if (!verdicts.includes(bucket.verdict) || count >= limit) continue;
       const text = fs.readFileSync(path.join(meta.root, example.path), 'utf8');
       const holds = bucketPredicate({
         server,
@@ -280,7 +291,14 @@ async function main(argv) {
       const [original] = await holds([text]);
       if (plan.failing && !original)
         throw new Error(`Failing witness no longer reproduces: ${example.path}; rerun the gate`);
-      const snippet = original ? await minimizeText(text, holds) : text;
+      const previous = reusable.get(`${bucket.key}\0${use}\0${example.path}`);
+      // Recheck both the live witness and cached snippet under the current native parser.
+      let snippet;
+      if (original && previous && (await holds([previous.snippet]))[0]) snippet = previous.snippet;
+      else {
+        snippet = original ? await minimizeText(text, holds) : text;
+        if (original && !(await holds([snippet]))[0]) snippet = text;
+      }
       done.push({
         key: bucket.key,
         verdict: bucket.verdict,
@@ -289,6 +307,7 @@ async function main(argv) {
         example: example.path,
         line: example.line,
         reproduced: original,
+        runIdentity,
         snippet,
       });
       fs.writeFileSync(outFile, JSON.stringify(done, null, 2) + '\n');
@@ -298,6 +317,7 @@ async function main(argv) {
   } finally {
     server.close();
   }
+  assertCurrent();
   process.stderr.write('\n');
   const order = new Map(buckets.map((bucket, i) => [bucket.key, i]));
   done.sort((a, b) => (order.get(a.key) ?? 1e9) - (order.get(b.key) ?? 1e9));
