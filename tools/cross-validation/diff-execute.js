@@ -5,7 +5,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { runOracleAsync } = require('../psi-oracle/oracle');
-const { classify, lexicalFacts } = require('./diff-classify');
+const { compareInput } = require('./diff-classify');
 const { confined, sha256 } = require('../safety');
 const { listFilesRecursive } = require('../vendor-fixtures');
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -119,11 +119,9 @@ async function runShard({ files, root, shardFile, parsers, claims, timeoutMs }) 
       for (const { label, parser } of parsers) {
         try {
           const tree = parseText(parser, text);
-          const cst = lexicalFacts(tree.rootNode);
           record.results[label] = {
-            ...classify({ text, tree, psi, dump, cst }),
+            ...compareInput({ text, tree, psi, dump }),
             hasError: tree.rootNode.hasError,
-            treeHash: sha256(JSON.stringify([cst.tokens, cst.comments, cst.recovery])),
           };
         } catch (error) {
           record.results[label] = {
@@ -180,11 +178,11 @@ async function rereadAsScripts({ records, texts, parsers, timeoutMs }) {
       for (const { label, parser } of parsers) {
         const result = records[i].results[label];
         if (!SCRIPT_REREAD.has(result.verdict)) continue;
-        const again = classify({ text: texts[i], tree: parseText(parser, texts[i]), psi, dump });
+        const again = compareInput({ text: texts[i], tree: parseText(parser, texts[i]), psi, dump });
         records[i].results[label] = {
-          ...(again.verdict === 'ok' ? { verdict: 'B-script' } : again),
+          ...again,
+          ...(again.verdict === 'ok' ? { verdict: 'B-script' } : {}),
           hasError: result.hasError,
-          treeHash: result.treeHash,
         };
       }
     });

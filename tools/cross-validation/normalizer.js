@@ -74,6 +74,12 @@ function _normalizeTsMulti(node, parentName = null) {
     return [new Node('CONTEXT_PARAMETER_LIST', entries.concat(modifiers))];
   }
 
+  // Recovery markers are explicit comparison nodes, including their named children.
+  // The native fingerprint separately retains anonymous tokens and MISSING ranges.
+  if (['ERROR', 'MISSING', 'UNEXPECTED'].includes(tsName)) {
+    return [new Node(tsName, node.children.flatMap(child => _normalizeTsMulti(child, tsName)))];
+  }
+
   // Nodes to skip entirely — transparent: promote children
   if (SKIP_TS_NODES.has(tsName)) {
     const kids = [];

@@ -94,7 +94,8 @@ function hiddenTokenOwners(nodes) {
 }
 
 /** Different lexers may split/merge tokens, but no PSI token character may disappear. */
-function tokenDifference(text, root, layout, cst) {
+function tokenDifferences(text, root, layout, cst) {
+  const differences = [];
   const facts = cst || lexicalFacts(root);
   const hiddenOwner = hiddenTokenOwners(facts.owners);
   const spans = facts.tokens.filter((node) => node.end > node.start);
@@ -107,18 +108,27 @@ function tokenDifference(text, root, layout, cst) {
       while (index < spans.length && spans[index].end <= offset) index++;
       const span = spans[index];
       if (!span || span.start > offset) {
-        return {
+        const end = Math.min(token.end, span?.start ?? token.end);
+        differences.push({
+          start: offset,
+          end,
           verdict: 'C',
           key: `C token span: PSI ${token.type} is not represented`,
           line: lineAt(text, offset),
-        };
+        });
+        offset = end;
+        continue;
       }
       if (span.text !== text.slice(span.start, span.end))
         throw new Error('Native token text/range is inconsistent');
       offset = Math.min(token.end, span.end);
     }
   }
-  return null;
+  return differences;
 }
 
-module.exports = { lexicalFacts, tokenDifference };
+function tokenDifference(...args) {
+  return tokenDifferences(...args)[0] || null;
+}
+
+module.exports = { lexicalFacts, tokenDifference, tokenDifferences };

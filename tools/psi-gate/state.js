@@ -224,7 +224,7 @@ function gate(
           kind: 'changed-cst',
           grammar: label,
           message:
-            'Native structure, token or comment ranges changed despite normalized agreement; inspect the recovery tree and span diagnostics',
+            'Complete normalized comparison, recovery or source spans changed despite agreement; inspect the input with both grammars',
         });
       }
       continue;
@@ -241,7 +241,9 @@ function gate(
         path: record.path,
         kind: 'difference',
         grammar: label,
-        message: result.key || result.verdict,
+        message: prior?.key === result.key && prior?.treeHash !== result.treeHash
+          ? `Complete comparison changed behind the same first bucket: ${result.key || result.verdict}`
+          : result.key || result.verdict,
       });
   }
   return { failures, existing, existingClaims };

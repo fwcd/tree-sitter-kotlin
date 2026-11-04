@@ -6,7 +6,8 @@ const { Status } = require('./comparator');
 const { psiLayout, psiTypeAt } = require('./psi-layout');
 const { firstTsError, leafLabel, namedAncestorType } = require('./error-location');
 const { lexicalFacts, tokenDifference } = require('./native-facts');
-const { layoutDifference } = require('./native-layout');
+const { layoutDifference, layoutDifferences } = require('./native-layout');
+const { sha256 } = require('../safety');
 
 function trimPath(diffPath, keep = 3) {
   const parts = diffPath.split(' > ');
@@ -88,11 +89,11 @@ function bKey(text, tree, psi, layout) {
  * @param {{ text: string, tree: object, psi: { psiErrors?: number, failure?: string }, dump: string|null }} input
  * @returns {{ verdict: string, key?: string, line?: number }}
  */
-function classify({ text, tree, psi, dump, cst }) {
+function classify({ text, tree, psi, dump, cst, layout: suppliedLayout, comparison, differences }) {
   if (psi.failure) return { verdict: 'oracle-failure', key: psi.failure.slice(0, 120) };
   const tsError = tree.rootNode.hasError;
   const psiError = psi.psiErrors > 0;
-  const layout = dump ? psiLayout(dump, text) : null;
+  const layout = suppliedLayout || (dump ? psiLayout(dump, text) : null);
   if (tsError && psiError) {
     const a = aKey(tree, layout),
       b = bKey(text, tree, psi, layout);
@@ -109,10 +110,10 @@ function classify({ text, tree, psi, dump, cst }) {
     return { verdict: 'B', key, line };
   }
   if (layout) {
-    const difference = layoutDifference(text, tree.rootNode, layout, cst);
-    if (difference) return difference;
+    const difference = differences ? differences[0] : layoutDifference(text, tree.rootNode, layout, cst);
+    if (difference) return { verdict: difference.verdict, key: difference.key, line: difference.line };
   }
-  const { tsNorm, psiNorm, result } = compareWithPsi(tree.rootNode.toString(), dump);
+  const { tsNorm, psiNorm, result } = comparison || compareWithPsi(tree.rootNode.toString(), dump);
   if (result.status === Status.MATCH) return { verdict: 'ok' };
   const first = firstDivergence(tsNorm, psiNorm) || {
     path: result.differences[0].path,
@@ -122,12 +123,47 @@ function classify({ text, tree, psi, dump, cst }) {
   return { verdict: 'C', key: `C @ ${trimPath(first.path)}: psi ${first.psi} / ts ${first.ts}` };
 }
 
+/** Preorder names and child counts encode the entire normalized named tree. */
+function normalizedShape(root) {
+  if (!root) return null;
+  const shape = [], pending = [root];
+  while (pending.length) {
+    const node = pending.pop();
+    shape.push([node.name, node.children.length]);
+    for (let i = node.children.length - 1; i >= 0; i--) pending.push(node.children[i]);
+  }
+  return shape;
+}
+
+/**
+ * Gate identity covers the complete comparison on every path. A first bucket key
+ * is a reporting/minimization label and must never stand in for that identity.
+ */
+function compareInput({ text, tree, psi, dump }) {
+  if (psi.failure) return { ...classify({ text, tree, psi, dump }), treeHash: null };
+  const cst = lexicalFacts(tree.rootNode);
+  const layout = psiLayout(dump, text);
+  const comparison = compareWithPsi(tree.rootNode.toString(), dump);
+  const differences = layoutDifferences(text, tree.rootNode, layout, cst);
+  const classification = classify({ text, tree, psi, dump, cst, layout, comparison, differences });
+  return {
+    ...classification,
+    treeHash: sha256(JSON.stringify([
+      cst.tokens, cst.comments, cst.recovery,
+      normalizedShape(comparison.tsNorm), normalizedShape(comparison.psiNorm),
+      comparison.result.status, comparison.result.differences,
+      differences, layout.errors,
+    ])),
+  };
+}
+
 module.exports = {
   psiLayout,
   psiTypeAt,
   firstTsError,
   firstDivergence,
   classify,
+  compareInput,
   trimPath,
   lexicalFacts,
   tokenDifference,

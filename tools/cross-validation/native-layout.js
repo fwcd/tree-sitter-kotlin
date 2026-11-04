@@ -2,7 +2,7 @@
 
 const { psiTypeAt } = require('./psi-layout');
 const { namedAncestorType } = require('./error-location');
-const { tokenDifference } = require('./native-facts');
+const { tokenDifferences } = require('./native-facts');
 const lineAt = (text, offset) => text.slice(0, offset).split('\n').length;
 
 // PSI reads a shebang as a comment.
@@ -111,53 +111,50 @@ function psiDeclarationStarts(layout) {
     .sort();
 }
 
-function layoutDifference(text, root, layout, cst) {
-  {
-    const ts = tsComments(root),
-      psiComments = layout.comments;
-    const at = ts.findIndex((offset, i) => offset !== psiComments[i]);
-    if (at >= 0 || ts.length !== psiComments.length) {
-      const i = at >= 0 ? at : Math.min(ts.length, psiComments.length);
-      const offset = Math.min(ts[i] ?? Infinity, psiComments[i] ?? Infinity);
-      const side = ts[i] === offset ? (psiComments.includes(offset) ? 'both' : 'ts') : 'psi';
-      const node = root.descendantForIndex(offset);
-      return {
-        verdict: 'C',
-        key: `C comment only in ${side} @ ts ${namedAncestorType(node.parent)} / psi ${psiTypeAt(layout, offset)}`,
-        line: lineAt(text, offset),
-      };
-    }
+/** Collect every layout discrepancy; reporting may still choose the first. */
+function layoutDifferences(text, root, layout, cst) {
+  const differences = [];
+  const ts = tsComments(root), psi = layout.comments;
+  for (let i = 0; i < Math.max(ts.length, psi.length); i++) {
+    if (ts[i] === psi[i]) continue;
+    const offset = Math.min(ts[i] ?? Infinity, psi[i] ?? Infinity);
+    const side = ts[i] === offset ? (psi.includes(offset) ? 'both' : 'ts') : 'psi';
+    const node = root.descendantForIndex(offset);
+    differences.push({
+      verdict: 'C',
+      key: `C comment only in ${side} @ ts ${namedAncestorType(node.parent)} / psi ${psiTypeAt(layout, offset)}`,
+      line: lineAt(text, offset),
+      offset,
+    });
   }
-  {
-    const ts = tsComments(root, true),
-      psi = layout.commentSpans.map((c) => [c.start, c.end]);
-    const at = ts.findIndex((span, i) => JSON.stringify(span) !== JSON.stringify(psi[i]));
-    if (at >= 0)
-      return {
-        verdict: 'C',
-        key: 'C comment extent differs from PSI',
-        line: lineAt(text, ts[at][0]),
-      };
+  const tsSpans = tsComments(root, true);
+  const psiSpans = layout.commentSpans.map((c) => [c.start, c.end]);
+  for (let i = 0; i < Math.max(tsSpans.length, psiSpans.length); i++) {
+    if (JSON.stringify(tsSpans[i]) === JSON.stringify(psiSpans[i])) continue;
+    const offset = (tsSpans[i] || psiSpans[i])[0];
+    differences.push({
+      verdict: 'C', key: 'C comment extent differs from PSI', line: lineAt(text, offset),
+      native: tsSpans[i] || null, psi: psiSpans[i] || null,
+    });
   }
-  {
-    const ts = tsDeclarationStarts(root),
-      psiStarts = psiDeclarationStarts(layout);
-    const only = (a, b) => a.filter((x) => !b.includes(x));
-    const tsOnly = only(ts, psiStarts),
-      psiOnly = only(psiStarts, ts);
-    if (tsOnly.length || psiOnly.length) {
-      const offsetOf = (entry) => Number(entry.split('@')[1]);
-      const first = [...tsOnly, ...psiOnly].sort((x, y) => offsetOf(x) - offsetOf(y))[0];
-      const offset = offsetOf(first),
-        side = tsOnly.includes(first) ? 'ts' : 'psi';
-      const node = root.descendantForIndex(offset);
-      return {
-        verdict: 'C',
-        key: `C declaration start only in ${side}: ${first.split('@')[0]} @ ts ${namedAncestorType(node.parent)} / psi ${psiTypeAt(layout, offset)}`,
-        line: lineAt(text, offset),
-      };
-    }
+  const tsStarts = tsDeclarationStarts(root), psiStarts = psiDeclarationStarts(layout);
+  const only = (a, b) => a.filter((x) => !b.includes(x));
+  const tsOnly = only(tsStarts, psiStarts), psiOnly = only(psiStarts, tsStarts);
+  const offsetOf = (entry) => Number(entry.split('@')[1]);
+  for (const entry of [...tsOnly, ...psiOnly].sort((x, y) => offsetOf(x) - offsetOf(y))) {
+    const offset = offsetOf(entry), side = tsOnly.includes(entry) ? 'ts' : 'psi';
+    const node = root.descendantForIndex(offset);
+    differences.push({
+      verdict: 'C',
+      key: `C declaration start only in ${side}: ${entry.split('@')[0]} @ ts ${namedAncestorType(node.parent)} / psi ${psiTypeAt(layout, offset)}`,
+      line: lineAt(text, offset), offset,
+    });
   }
-  return tokenDifference(text, root, layout, cst);
+  return differences.concat(tokenDifferences(text, root, layout, cst));
 }
-module.exports = { layoutDifference };
+
+function layoutDifference(...args) {
+  return layoutDifferences(...args)[0] || null;
+}
+
+module.exports = { layoutDifference, layoutDifferences };
