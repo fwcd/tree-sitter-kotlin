@@ -14,6 +14,8 @@ const os = require('os');
 const path = require('path');
 const { execFile, execFileSync, spawn } = require('child_process');
 const { jarPaths, isFetched } = require('./fetch');
+const { confined, javaExecutable, positive } = require('../safety');
+const JVM = ['-Xss64m', '-Xmx1g'];
 
 const SOURCE = path.join(__dirname, 'PsiOracle.java');
 
@@ -24,18 +26,23 @@ const SOURCE = path.join(__dirname, 'PsiOracle.java');
  */
 
 function javaArgs(listFile, { root, out, trim }) {
-  const args = ['-Xss512m', '-Xmx4g', '-cp', jarPaths().join(path.delimiter), SOURCE,
+  const args = [...JVM, '-cp', jarPaths().join(path.delimiter), SOURCE,
     '--list', listFile, '--root', root, '--out', out];
   if (trim) args.push('--trim');
   return args;
 }
 
 function readIndex(out) {
-  return fs.readFileSync(path.join(out, 'index.jsonl'), 'utf8').split('\n').filter(Boolean).map(line => JSON.parse(line));
+  const entries = fs.readFileSync(path.join(out, 'index.jsonl'), 'utf8').split('\n').filter(Boolean).map(line => JSON.parse(line));
+  entries.forEach(entry => { confined(out, entry.dump); });
+  return entries;
 }
 
-function prepare(files, options) {
-  if (!isFetched()) throw new Error('PSI oracle jars are missing; run npm run psi-oracle:fetch');
+function prepare(files, options, verify = true) {
+  if (/[\r\n\t\0]/.test(options.root + options.out)) throw new Error('Root/output paths cannot contain control characters');
+  if (!files.length || new Set(files).size !== files.length) throw new Error('Oracle inputs must be nonempty and unique');
+  files.forEach(file => confined(options.root, file));
+  if (verify && !isFetched()) throw new Error('PSI oracle jars are missing or their SHA-256 does not match; run npm run psi-oracle:fetch');
   fs.mkdirSync(options.out, { recursive: true });
   const listFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'psi-oracle-')), 'files.txt');
   fs.writeFileSync(listFile, files.join('\n') + '\n');
@@ -53,7 +60,7 @@ function prepare(files, options) {
 function runOracle(files, options) {
   const listFile = prepare(files, options);
   try {
-    execFileSync('java', javaArgs(listFile, options), { stdio: ['ignore', 'ignore', 'inherit'] });
+    execFileSync(javaExecutable(), javaArgs(listFile, options), { timeout: positive(options.timeoutMs || 120000, 'timeout-ms'), killSignal: 'SIGKILL', stdio: ['ignore', 'ignore', 'inherit'] });
     return readIndex(options.out);
   } finally {
     fs.rmSync(path.dirname(listFile), { recursive: true, force: true });
@@ -62,12 +69,13 @@ function runOracle(files, options) {
 
 /** Asynchronous `runOracle`, for running several shards at once. */
 function runOracleAsync(files, options) {
+  const java = javaExecutable();
   const listFile = prepare(files, options);
   return new Promise((resolve, reject) => {
-    execFile('java', javaArgs(listFile, options), { maxBuffer: 64 * 1024 * 1024 }, (error, _stdout, stderr) => {
+    execFile(java, javaArgs(listFile, options), { timeout: positive(options.timeoutMs || 120000, 'timeout-ms'), killSignal: 'SIGKILL', maxBuffer: 64 * 1024 * 1024 }, (error, _stdout, stderr) => {
       fs.rmSync(path.dirname(listFile), { recursive: true, force: true });
       if (error) reject(new Error(`PsiOracle failed: ${stderr || error.message}`));
-      else resolve(readIndex(options.out));
+      else { try { resolve(readIndex(options.out)); } catch (failure) { reject(failure); } }
     });
   });
 }
@@ -78,10 +86,14 @@ function runOracleAsync(files, options) {
  */
 class OracleServer {
   constructor() {
-    if (!isFetched()) throw new Error('PSI oracle jars are missing; run npm run psi-oracle:fetch');
-    this.child = spawn('java', ['-Xss512m', '-Xmx4g', '-cp', jarPaths().join(path.delimiter), SOURCE, '--serve'],
+    if (!isFetched()) throw new Error('PSI oracle jars are missing or their SHA-256 does not match; run npm run psi-oracle:fetch');
+    this.child = spawn(javaExecutable(), [...JVM, '-cp', jarPaths().join(path.delimiter), SOURCE, '--serve'],
       { stdio: ['pipe', 'pipe', 'inherit'] });
     this.pending = [];
+    this.queue = Promise.resolve();
+    this.failure = null;
+    this.child.on('error', error => this.fail(error));
+    this.child.stdin.on('error', error => this.fail(error));
     this.buffer = '';
     this.child.stdout.setEncoding('utf8');
     this.child.stdout.on('data', chunk => {
@@ -92,14 +104,25 @@ class OracleServer {
         this.pending.shift()?.resolve();
       }
     });
-    this.child.on('exit', code => {
-      for (const waiter of this.pending.splice(0)) waiter.reject(new Error(`PsiOracle server exited ${code}`));
-    });
+    this.child.on('exit', code => this.fail(new Error(`PsiOracle server exited ${code}`)));
+  }
+
+  fail(error) {
+    this.failure = error;
+    for (const waiter of this.pending.splice(0)) waiter.reject(error);
   }
 
   /** Same contract as `runOracle`. */
-  async run(files, options) {
-    const listFile = prepare(files, options);
+  run(files, options) {
+    const work = this.queue.then(() => this.runOnce(files, options));
+    this.queue = work.catch(() => {});
+    return work;
+  }
+
+  async runOnce(files, options) {
+    if (this.failure) throw this.failure;
+    const listFile = prepare(files, options, false);
+    const timer = setTimeout(() => { this.fail(new Error('PSI oracle timed out')); this.child.kill('SIGKILL'); }, positive(options.timeoutMs || 120000, 'timeout-ms'));
     try {
       await new Promise((resolve, reject) => {
         this.pending.push({ resolve, reject });
@@ -107,12 +130,14 @@ class OracleServer {
       });
       return readIndex(options.out);
     } finally {
+      clearTimeout(timer);
       fs.rmSync(path.dirname(listFile), { recursive: true, force: true });
     }
   }
 
   close() {
-    this.child.stdin.end();
+    this.child.kill();
+    this.fail(new Error('PSI oracle closed'));
   }
 }
 

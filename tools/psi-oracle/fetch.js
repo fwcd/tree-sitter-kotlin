@@ -13,10 +13,12 @@
 
 const crypto = require('crypto');
 const fs = require('fs');
-const https = require('https');
+const { run } = require('../safety');
 const path = require('path');
+const os = require('os');
+const CACHE_DIR = process.env.PSI_ORACLE_CACHE || path.join(os.homedir(), '.cache', 'kotlin-psi-oracle');
 
-const MAVEN = 'https://repo1.maven.org/maven2';
+const MAVEN = 'https://repo.maven.apache.org/maven2';
 const LIB_DIR = path.join(__dirname, 'lib');
 
 /** Pinned artifacts: group, artifact, version, SHA-256 of the jar. */
@@ -35,25 +37,12 @@ function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
-function download(url, redirects = 5) {
-  return new Promise((resolve, reject) => {
-    https.get(url, response => {
-      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location && redirects > 0) {
-        response.resume();
-        resolve(download(response.headers.location, redirects - 1));
-        return;
-      }
-      if (response.statusCode !== 200) {
-        response.resume();
-        reject(new Error(`${url}: HTTP ${response.statusCode}`));
-        return;
-      }
-      const chunks = [];
-      response.on('data', chunk => chunks.push(chunk));
-      response.on('end', () => resolve(Buffer.concat(chunks)));
-      response.on('error', reject);
-    }).on('error', reject);
-  });
+function download(url) {
+  // curl honors standard proxy settings on supported development platforms.
+  const proxy = process.env.https_proxy || process.env.HTTPS_PROXY || process.env.npm_config_https_proxy || process.env.npm_config_proxy;
+  const env = { ...process.env, ...(proxy ? { https_proxy: proxy } : {}) };
+  return run('curl', ['--fail', '--silent', '--show-error', '--location', '--max-time', '120', '--retry', '2', '--retry-delay', '2', '--retry-max-time', '60',
+    '--proto', '=https', '--proto-redir', '=https', url], { encoding: null, timeout: 125000, env });
 }
 
 /** @returns {string[]} Absolute paths of the pinned jars, in classpath order. */
@@ -61,24 +50,32 @@ function jarPaths() {
   return JARS.map(([, artifact, version]) => path.join(LIB_DIR, `${artifact}-${version}.jar`));
 }
 
-/** True when every pinned jar is present; hashes are checked by `fetchAll`. */
+/** Never put an unverified cached jar on the classpath. */
 function isFetched() {
-  return jarPaths().every(file => fs.existsSync(file));
+  return jarPaths().every((file, i) => fs.existsSync(file) && fs.statSync(file).isFile() && sha256(file) === JARS[i][3]);
 }
 
-async function fetchAll({ log = console.error } = {}) {
+async function fetchAll({ log = console.error, downloadJar = download } = {}) {
   fs.mkdirSync(LIB_DIR, { recursive: true });
   for (const [group, artifact, version, expected] of JARS) {
     const file = path.join(LIB_DIR, `${artifact}-${version}.jar`);
     if (fs.existsSync(file) && sha256(file) === expected) continue;
+    const cached = path.join(CACHE_DIR, `${artifact}-${version}.jar`);
+    if (fs.existsSync(cached) && sha256(cached) === expected) { fs.copyFileSync(cached, file); continue; }
     const url = `${MAVEN}/${group.replace(/\./g, '/')}/${artifact}/${version}/${artifact}-${version}.jar`;
     log(`fetching ${url}`);
-    const bytes = await download(url);
+    const bytes = await downloadJar(url);
     const actual = crypto.createHash('sha256').update(bytes).digest('hex');
     if (actual !== expected) {
       throw new Error(`${artifact}-${version}.jar: SHA-256 ${actual}, expected ${expected}`);
     }
-    fs.writeFileSync(file, bytes);
+    const temporary = `${file}.${process.pid}.tmp`;
+    fs.writeFileSync(temporary, bytes, { flag: 'wx' });
+    fs.renameSync(temporary, file);
+    fs.mkdirSync(CACHE_DIR, { recursive: true });
+    const cachedTemporary = `${cached}.${process.pid}.tmp`;
+    fs.writeFileSync(cachedTemporary, bytes, { flag: 'wx' });
+    fs.renameSync(cachedTemporary, cached);
   }
   return jarPaths();
 }

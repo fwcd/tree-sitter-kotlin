@@ -93,7 +93,7 @@ public class PsiOracle {
       } catch (Throwable t) {
         failure[0] = t;
       }
-    }, "psi-oracle", 1L << 30);
+    }, "psi-oracle", 64L << 20);
     worker.start();
     worker.join();
     if (failure[0] != null) {
@@ -120,10 +120,16 @@ public class PsiOracle {
   }
 
   private static void run(KtPsiFactory factory, List<String> paths, Path root, Path out, boolean trim) throws IOException {
+    root = root.toRealPath();
     Files.createDirectories(out);
-    try (BufferedWriter index = Files.newBufferedWriter(out.resolve("index.jsonl"), StandardCharsets.UTF_8)) {
+    out = out.toRealPath();
+    if (Files.isSymbolicLink(out.resolve("index.jsonl"))) throw new IOException("Unsafe output index symlink");
+    try (BufferedWriter index = Files.newBufferedWriter(out.resolve("index.jsonl"), StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
       for (String entry : paths) {
-        Path source = root.resolve(entry);
+        if (Path.of(entry).isAbsolute() || entry.contains("\\") || entry.contains("\t")
+            || java.util.Arrays.asList(entry.split("/")).contains("..")) throw new IOException("Unsafe input path: " + entry);
+        Path source = root.resolve(entry).normalize();
+        if (!source.toRealPath().startsWith(root)) throw new IOException("Input escapes root: " + entry);
         String relative = root.toAbsolutePath().normalize().relativize(source.toAbsolutePath().normalize()).toString();
         String dumpName = relative + ".psi.txt";
         StringBuilder line = new StringBuilder("{\"path\":").append(json(relative))
@@ -137,9 +143,11 @@ public class PsiOracle {
           if (trim) text = text.strip();
           KtFile file = factory.createFile(source.getFileName().toString(), text);
           String dump = DebugUtil.psiToString(file, true, false).trim();
-          Path dumpPath = out.resolve(dumpName);
+          Path dumpPath = out.resolve(dumpName).normalize();
+          if (!dumpPath.startsWith(out)) throw new IOException("Output escapes root");
           Files.createDirectories(dumpPath.getParent());
-          Files.writeString(dumpPath, dump, StandardCharsets.UTF_8);
+          if (!dumpPath.getParent().toRealPath().startsWith(out) || Files.isSymbolicLink(dumpPath)) throw new IOException("Unsafe output symlink");
+          Files.writeString(dumpPath, dump, StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.TRUNCATE_EXISTING, java.nio.file.LinkOption.NOFOLLOW_LINKS);
 
           int errors = 0;
           PsiErrorElement first = null;

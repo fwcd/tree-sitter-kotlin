@@ -18,6 +18,7 @@
 const fs = require('fs');
 const path = require('path');
 const { runOracle } = require('./oracle');
+const { resetOutput, positive } = require('../safety');
 
 const DEFAULT_CORPUS = path.resolve(__dirname, '..', '..', 'local', 'psi-diff', 'corpora', 'testdata');
 
@@ -27,12 +28,13 @@ const DEFAULT_CORPUS = path.resolve(__dirname, '..', '..', 'local', 'psi-diff', 
  * @returns {{ total: number, psiError: number, skipped: string[], mismatches: Array<{ id: string, reason: string }> }}
  */
 function verifyCorpus(corpus, { sample = 1 } = {}) {
+  positive(sample, 'sample');
   const all = JSON.parse(fs.readFileSync(path.join(corpus, 'corpus.json'), 'utf8'))
     .filter((_, index) => index % sample === 0);
   const skipped = all.filter(entry => entry.expectsException).map(entry => entry.id);
   const entries = all.filter(entry => !entry.expectsException);
-  const out = path.join(corpus, '..', `${path.basename(corpus)}.oracle`);
-  fs.rmSync(out, { recursive: true, force: true });
+  const out = fs.mkdtempSync(path.join(corpus, '..', `${path.basename(corpus)}.oracle-`));
+  resetOutput(out, corpus);
   const index = runOracle(entries.map(entry => entry.source), { root: corpus, out, trim: true });
   const mismatches = [];
   entries.forEach((entry, i) => {
