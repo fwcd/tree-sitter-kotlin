@@ -1,0 +1,22 @@
+KtFile: loop-keyword-throw-selector.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    DOT_QUALIFIED_EXPRESSION
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('a')
+      PsiElement(DOT)('.')
+      THROW
+        PsiElement(throw)('throw')
+        PREFIX_EXPRESSION
+          OPERATION_REFERENCE
+            PsiElement(PLUS)('+')
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('b')
+  PsiWhiteSpace('\n')

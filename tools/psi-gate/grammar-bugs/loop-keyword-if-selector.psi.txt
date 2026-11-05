@@ -1,0 +1,28 @@
+KtFile: loop-keyword-if-selector.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    DOT_QUALIFIED_EXPRESSION
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('a')
+      PsiElement(DOT)('.')
+      IF
+        PsiElement(if)('if')
+        PsiElement(LPAR)('(')
+        CONDITION
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('c')
+        PsiElement(RPAR)(')')
+        THEN
+          BLOCK
+            PsiElement(LBRACE)('{')
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('x')
+            PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

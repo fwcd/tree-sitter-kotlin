@@ -2217,5 +2217,194 @@
       "path": "compiler/tests-spec/testData/codegen/box/linked/expressions/constant-literals/boolean-literals/p-1/pos/2.2.kt",
       "sourceSha256": "4bbc16e779adff16dbf5e1f8a5637d781d4cdce87a718755c5f60741625be7db"
     }
+  },
+  {
+    "id": "g-1ec577db8168e2d03ee9",
+    "file": "g-1ec577db8168e2d03ee9.kt",
+    "expected": "g-1ec577db8168e2d03ee9.expected.json",
+    "sourceSha256": "8e0c797064cdeeb002da8d420cc48b355ea68fc3dcdd4ee2c8462ccb15993ecb",
+    "expectedSha256": "42868e0977af591e0c1d113bbac7a84fbeefa699d607d52eae183f07ee653714",
+    "signature": [
+      "grammar",
+      "character_literal",
+      "ERROR",
+      "character_escape_seq"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "character_literal",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-991614fa98deac69113c",
+    "file": "g-991614fa98deac69113c.kt",
+    "expected": "g-991614fa98deac69113c.expected.json",
+    "sourceSha256": "b9f258289e3e7a89491160d6099574ca940f549aca10fa279f8763b118680a3e",
+    "expectedSha256": "1693a66b304ddc677d8924e754ef451bd47aaaa09dc5b68529ea9274f2817817",
+    "signature": [
+      "grammar",
+      "character_literal",
+      "ERROR",
+      "ERROR"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "character_literal",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-90f1ec06fe4ab98ea016",
+    "file": "g-90f1ec06fe4ab98ea016.kt",
+    "expected": "g-90f1ec06fe4ab98ea016.expected.json",
+    "sourceSha256": "3c2ee1206366293b84c822c6d20be207c28a3fa412e762ba7428fcf0925f39c8",
+    "expectedSha256": "c1f770ce8a7e1930702fb9660a560c24eb5dbb5235f1e430c6fa075dc056b9f4",
+    "signature": [
+      "grammar",
+      "property_declaration",
+      "ERROR",
+      "'"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "property_declaration",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-728566f5dd3bf6fe1b22",
+    "file": "g-728566f5dd3bf6fe1b22.kt",
+    "expected": "g-728566f5dd3bf6fe1b22.expected.json",
+    "sourceSha256": "43268d96f3fd643dd93392bcf27c91ba77c25347af69b0aa1ed3a1b0d07ea172",
+    "expectedSha256": "0276873ce3364875b5fa57cfc4a69cd58ad667d1060e1284eb1d3ea9e9fc0b2b",
+    "signature": [
+      "grammar",
+      "function_value_parameters",
+      "ERROR",
+      "="
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "function_value_parameters",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-93746fc7bd4fec65854c",
+    "file": "g-93746fc7bd4fec65854c.kt",
+    "expected": "g-93746fc7bd4fec65854c.expected.json",
+    "sourceSha256": "061aa0f05d33404d58c71e2e2a0ae21a0767b3d2e2eda16a9f922306456f74ae",
+    "expectedSha256": "fbe5095beb9117e537a9ed12c4c929e11d5343358fa64ed176bfff3639b75e4c",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "'"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-c94ac8acf58d99ee9917",
+    "file": "g-c94ac8acf58d99ee9917.kt",
+    "expected": "g-c94ac8acf58d99ee9917.expected.json",
+    "sourceSha256": "1331eb2245ab8a5dfbffe954b8bbcf839caf2ee04a26e43f8967fe56c23e9918",
+    "expectedSha256": "77f610c7debac4da8b14755f71c95c8d94986e5989e2bc49136042c8ae9ea237",
+    "signature": [
+      "grammar",
+      "conjunction_expression",
+      "ERROR",
+      "=="
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "conjunction_expression",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-0f0668ae7e7d2bfe0205",
+    "file": "g-0f0668ae7e7d2bfe0205.kt",
+    "expected": "g-0f0668ae7e7d2bfe0205.expected.json",
+    "sourceSha256": "031dea6ac30bb8fef78b3777f02eb682bfc1ccbf14e6b3b7a57da4ba5d110ecf",
+    "expectedSha256": "6fed48a9687451f295f3537388606349372ab609ef5ec525b1e41bc7aa0307eb",
+    "signature": [
+      "grammar",
+      "character_literal",
+      "MISSING",
+      "'"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "character_literal",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-2bbc3ca4ea1652c4dfc6",
+    "file": "g-2bbc3ca4ea1652c4dfc6.kt",
+    "expected": "g-2bbc3ca4ea1652c4dfc6.expected.json",
+    "sourceSha256": "58f42b894872fe17e07daf0949e29cb7669d2c0e34f9dd1fcf57e9ca7b78e33d",
+    "expectedSha256": "7f76f88e02c766fb9f50b7838cb6e034f885bbb79eed97eb3e730a24ded9bca0",
+    "signature": [
+      "grammar",
+      "assignment",
+      "ERROR",
+      "="
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "assignment",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
+  },
+  {
+    "id": "g-1c729e7801cf858e486c",
+    "file": "g-1c729e7801cf858e486c.kt",
+    "expected": "g-1c729e7801cf858e486c.expected.json",
+    "sourceSha256": "05eea225a678063d5e68617852c2c994a0f06519933f8300764aea86c6d304fd",
+    "expectedSha256": "fcb241e8bf907b72953155410b86b2df7ef7c8a7c4dfbe0f0c0e6153f1c73b2f",
+    "signature": [
+      "grammar",
+      "disjunction_expression",
+      "ERROR",
+      "=="
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "disjunction_expression",
+    "firstSeenSeed": "normalizer-loop-final-mixed-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {}
   }
 ]
