@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "description": "Confirmed syntax/range defects; normalization must retain their mismatches.",
+  "cases": [
+    {
+      "id": "catalog-lambda-arrow-newline",
+      "file": "catalog-lambda-arrow-newline.kt",
+      "psiFile": "catalog-lambda-arrow-newline.psi.txt",
+      "source": "val f = { x\n -> x }\n",
+      "psiErrors": 0,
+      "nativeError": true,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (lambda_literal (ERROR (statements (simple_identifier))) (statements (simple_identifier)))))",
+      "verdict": "A",
+      "key": "A lambda_literal > ERROR simple_identifier | psi VALUE_PARAMETER",
+      "grammarArea": "lambda parameter/arrow ASI",
+      "origin": "Kotlin compiler/frontend dynamicCalls.kt",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "catalog-generic-nullable-reference",
+      "file": "catalog-generic-nullable-reference.kt",
+      "psiFile": "catalog-generic-nullable-reference.psi.txt",
+      "source": "val r = Array<*>?::contentToString\n",
+      "psiErrors": 0,
+      "nativeError": true,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (type_arguments (type_projection)) (ERROR (quest)) (simple_identifier)))))",
+      "verdict": "A",
+      "key": "A navigation_suffix > ERROR quest | psi CALLABLE_REFERENCE_EXPRESSION",
+      "grammarArea": "generic nullable callable receiver and quest disambiguation",
+      "origin": "kotlin.test Assertions.kt",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "catalog-raw-backslash-dollar",
+      "file": "catalog-raw-backslash-dollar.kt",
+      "psiFile": "catalog-raw-backslash-dollar.psi.txt",
+      "source": "val s = \"\"\"\\$\"\"\".toRegex()\n",
+      "psiErrors": 0,
+      "nativeError": true,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (infix_expression (string_literal) (simple_identifier (MISSING _alpha_identifier)) (call_expression (navigation_expression (string_literal) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments))))))",
+      "verdict": "A",
+      "key": "A infix_expression > ERROR simple_identifier | psi STRING_TEMPLATE",
+      "grammarArea": "raw string delimiter/interpolation scanner",
+      "origin": "stdlib/js regex.kt and BridgeProvider StringUtils.kt",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "catalog-empty-quest-span",
+      "file": "catalog-empty-quest-span.kt",
+      "psiFile": "catalog-empty-quest-span.psi.txt",
+      "source": "val r = String? ::plus\n",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (callable_reference (type_identifier) (quest) (simple_identifier))))",
+      "verdict": "C",
+      "key": "C token span: PSI QUEST is not represented",
+      "grammarArea": "horizontal quest lookahead token start/end",
+      "origin": "PR 329 downstream report",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    }
+  ]
+}

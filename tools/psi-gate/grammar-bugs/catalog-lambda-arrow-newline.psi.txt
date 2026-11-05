@@ -1,0 +1,28 @@
+KtFile: catalog-lambda-arrow-newline.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    PsiWhiteSpace(' ')
+    PsiElement(EQ)('=')
+    PsiWhiteSpace(' ')
+    LAMBDA_EXPRESSION
+      FUNCTION_LITERAL
+        PsiElement(LBRACE)('{')
+        PsiWhiteSpace(' ')
+        VALUE_PARAMETER_LIST
+          VALUE_PARAMETER
+            PsiElement(IDENTIFIER)('x')
+        PsiWhiteSpace('\n ')
+        PsiElement(ARROW)('->')
+        PsiWhiteSpace(' ')
+        BLOCK
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('x')
+        PsiWhiteSpace(' ')
+        PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

@@ -1,0 +1,21 @@
+KtFile: catalog-empty-quest-span.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('r')
+    PsiWhiteSpace(' ')
+    PsiElement(EQ)('=')
+    PsiWhiteSpace(' ')
+    CALLABLE_REFERENCE_EXPRESSION
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('String')
+      PsiElement(QUEST)('?')
+      PsiWhiteSpace(' ')
+      PsiElement(COLONCOLON)('::')
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('plus')
+  PsiWhiteSpace('\n')
