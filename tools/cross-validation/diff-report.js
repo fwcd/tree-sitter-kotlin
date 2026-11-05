@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { conformance, renderConformance } = require('./conformance');
 
 function readShards(outDir) {
   const dir = path.join(outDir, 'shards');
@@ -24,7 +25,8 @@ function readShards(outDir) {
  *
  * @returns {{ totals: object, buckets: Array<{ key: string, verdict: string, counts: object, examples: object }> }}
  */
-function summarize(records, labels, origins = null) {
+function summarize(records, labels, origins = null, context = {}) {
+  const score = conformance(records, labels, context);
   if (origins) records = markMutants(records, labels, origins);
   const totals = Object.fromEntries(labels.map((label) => [label, {}]));
   const buckets = new Map();
@@ -61,7 +63,7 @@ function summarize(records, labels, origins = null) {
       Math.max(...Object.values(b.counts)) - Math.max(...Object.values(a.counts)) ||
       (a.key < b.key ? -1 : 1),
   );
-  return { totals, buckets: sorted };
+  return { totals, buckets: sorted, conformance: score };
 }
 
 /**
@@ -90,6 +92,7 @@ function markMutants(records, labels, origins) {
 
 function renderReport({ corpus, meta, summary, labels, triaged = null }) {
   const out = [`# PSI differential: ${corpus}`, ''];
+  if (summary.conformance) out.push(renderConformance(summary.conformance));
   out.push(
     `Corpus root: \`${meta.root}\`${meta.rootHead ? ` at \`${meta.rootHead}\`` : ''}; ${meta.files} files.`,
   );

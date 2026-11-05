@@ -84,10 +84,23 @@ the oracle deadline (default 120000ms).
 
 ### Result meaning
 
-PASS (per-input regression) means no new/changed discrepancy against the same
-input on base. It does not claim conformance. FAIL reports new differences,
+The headline is mismatching file counts by production/tests/testData/support
+partition: base→head, fixed, newly worse, changed, and excluded files (target 0).
+PASS in regression mode means no new/changed discrepancy against base; --strict
+requires every selected file to match PSI cleanly. FAIL reports new differences,
 failed corpus expectations, or incomplete/invalid execution. Inspect the printed
 paths, case names, report and gate.json; fix the source/expectation and rerun.
+
+A full match is `ok` with no native or original-file PSI errors. `both-error` and
+script-only acceptance remain mismatches, so deliberately negative testData never
+counts as clean conformance. Execution failures are shown separately and earn no
+fixed/worse credit. Changed existing mismatches retain the conservative ratchet
+and require inspection; they are not automatically labeled improvements.
+
+`conformance.json` records partition counts/verdicts/deltas, grammar commits/content
+hashes, tool hash and exact input digest for comparison across runs. Partitions are path/source-set
+rules, including generated/mutant views; review them when choosing a strict
+corpus. No blended percentage is presented.
 
 Comparison preserves named PSI structure, comments, declaration starts and native
 leaf text/ranges. Lexer-hidden delimiters have explicit ownership rules; nullable

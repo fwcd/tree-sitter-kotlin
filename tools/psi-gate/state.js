@@ -217,6 +217,12 @@ function gate(
       : observed?.sha256 === record.sha256
         ? observed.result
         : null;
+    if (conformance && !['oracle-failure', 'harness-error'].includes(result.verdict) &&
+        (result.verdict !== 'ok' || result.hasError === true || record.psiErrors > 0)) {
+      failures.push({ path: record.path, kind: 'difference', grammar: label,
+        message: 'Strict conformance requires a clean original-file PSI match: ' + result.verdict });
+      continue;
+    }
     if (agreement(result)) {
       if (prior && agreement(prior) && result.treeHash !== prior.treeHash) {
         failures.push({

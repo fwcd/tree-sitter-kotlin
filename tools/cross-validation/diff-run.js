@@ -145,7 +145,7 @@ async function worker(options) {
     process.send?.({ shard });
   }
 }
-async function main(argv) {
+async function main(argv, reportContext = null) {
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(HELP);
     return;
@@ -292,11 +292,29 @@ async function main(argv) {
         ? 'conformance'
         : 'per-input regression',
   };
+  if (reportContext) {
+    meta.reportContext = reportContext;
+    fs.writeFileSync(metaFile, JSON.stringify(meta, null, 2) + '\n');
+  }
+  const context = { ...meta.reportContext, corpus: options.corpus };
+  if (options.exclude) {
+    const included = new Set(files);
+    context.excluded = [...new Set([...(context.excluded || []), ...listInputs({ ...options, exclude: null }).filter(file => !included.has(file))])];
+  }
   const summary = summarize(
     records,
     labels,
     options.origins ? JSON.parse(fs.readFileSync(options.origins, 'utf8')) : null,
+    context,
   );
+  fs.writeFileSync(path.join(options.out, 'conformance.json'), JSON.stringify({
+    ...summary.conformance,
+    inputHash: current.context.inputs,
+    toolsHash: current.context.tools,
+    grammars: meta.grammars.map((grammar, i) => ({
+      ...grammar, contentHash: state.digest(current.grammars[i].files),
+    })),
+  }, null, 2) + '\n');
   fs.writeFileSync(path.join(options.out, 'buckets.json'), JSON.stringify(summary, null, 2) + '\n');
   fs.writeFileSync(
     path.join(options.out, 'report.md'),
@@ -319,6 +337,7 @@ async function main(argv) {
     fs.writeFileSync(options.updateExpected + '.tmp', JSON.stringify(snapshot, null, 2) + '\n');
     fs.renameSync(options.updateExpected + '.tmp', options.updateExpected);
   }
+  for (const line of require('./conformance').headlines(summary.conformance)) console.log(line);
   console.log(
     `${options.corpus}: ${triaged.failures.length ? 'FAIL' : 'PASS'} (${triaged.mode}); ${files.length} inputs, ${triaged.failures.length} failures, ${triaged.existing.length} unchanged differences. Report: ${path.join(options.out, 'report.md')}`,
   );

@@ -77,11 +77,12 @@ function snapshotRepository(input, home) {
 function annotateReport(out, repository) {
   const file = path.join(out, 'report.md');
   const text = fs.readFileSync(file, 'utf8');
-  const line = text.indexOf('\n');
+  const marker = text.indexOf('Corpus root:');
+  const line = marker < 0 ? text.length : marker;
   const header = `\n\n## Repository input\n\nCheckout: ${repository.root}\n\nCommit: ${repository.commit}\n\n` +
     `Input content SHA-256: ${repository.inputHash}\n\n` +
     `Kotlin inputs: ${repository.files}; markup-filter exclusions: ${repository.markupExcluded.length}.\n\n`;
-  fs.writeFileSync(file, text.slice(0, line) + header + text.slice(line + 1));
+  fs.writeFileSync(file, text.slice(0, line) + header + text.slice(line));
   const metaFile = path.join(out, 'meta.json');
   const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
   if (meta.identity.context.inputs !== repository.inputHash || meta.files !== repository.files)

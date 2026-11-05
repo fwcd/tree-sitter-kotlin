@@ -299,7 +299,7 @@ function corpusPlan(corpus, options, kotlin, baseRevision) {
     provenance = { corpus };
   if (corpus === 'repo') {
     const snapshot = snapshotRepository(options.repoRoot, options.home);
-    return snapshot;
+    return { ...snapshot, reportContext: { excluded: snapshot.repository.markupExcluded } };
   } else if (corpus === 'snippets') {
     run(process.execPath, [path.join(ROOT, 'tools/cross-validation/mutations.js'), '--out', root]);
     provenance.generator = state.hashFile(path.join(ROOT, 'tools/cross-validation/mutations.js'));
@@ -333,9 +333,12 @@ function corpusPlan(corpus, options, kotlin, baseRevision) {
     )
       throw new Error(`${corpus} checkout differs from its pinned revision`);
     const list = path.join(options.home, corpus + '.list');
-    fs.writeFileSync(list, unmarked(root).join('\n') + '\n');
-    extra.push('--list', list);
-    provenance = null;
+    const selected = unmarked(root);
+    fs.writeFileSync(list, selected.join('\n') + '\n');
+    const tracked = run('git', ['-C', root, 'ls-files', '-z', '--', '*.kt', '*.kts']).split('\0').filter(Boolean);
+    const included = new Set(selected);
+    const reportContext = { excluded: tracked.filter(file => !included.has(file)) };
+    return { root, extra: [...extra, '--list', list], reportContext };
   }
   if (provenance) fs.writeFileSync(path.join(root, 'provenance.json'), JSON.stringify(provenance));
   return { root, extra };
@@ -365,7 +368,7 @@ async function runJob(options) {
     kotlin = checkoutKotlin(options.home);
   let failed = false;
   for (const corpus of options.corpora) {
-    const { root, extra, repository } = corpusPlan(corpus, options, kotlin, baseRevision);
+    const { root, extra, repository, reportContext } = corpusPlan(corpus, options, kotlin, baseRevision);
     const out = path.join(options.home, 'runs', corpus);
     const args = [
       '--corpus',
@@ -401,7 +404,7 @@ async function runJob(options) {
     const latest = path.join(options.home, corpus + '.md');
     let result;
     try {
-      result = await diff.main(args);
+      result = await diff.main(args, reportContext);
     } catch (error) {
       console.error(`${corpus}: execution failed; previous report preserved at ${latest}`);
       throw error;
