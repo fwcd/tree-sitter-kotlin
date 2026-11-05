@@ -9,6 +9,8 @@ const ROOT = path.resolve(import.meta.dirname, '../..');
 const api = require('./diff-run');
 const {compareWithPsi} = require('./pipeline');
 const {compareTrees} = require('./comparator');
+const {Node} = require('./models');
+const {normalizeTs} = require('./normalizer');
 const {runOracle} = require('../psi-oracle/oracle');
 let available = require('../psi-oracle/fetch').isFetched() && fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node'));
 try { require('../safety').javaExecutable(); } catch { available = false; }
@@ -31,6 +33,25 @@ const cases = {
   postfixOnlyTarget: 'fun f(){a!! = c}\n',
   postfixTriviaTarget: 'fun f(){a/* outer /* nested */ end */!!.b=c}\n',
   postfixIncrementTarget: 'fun f(){a++.b=c;a--[0]=c}\n',
+  genericClass: 'val k=Foo<T>::class\n',
+  genericReference: 'val r=Foo<T>::bar\n',
+  qualifiedGenericClass: 'val k=a.b.Foo<T>::class\n',
+  callGenericClass: 'val k=foo().Bar<T>::class\n',
+  plainClass: 'val k=Foo::class\n',
+  nullableContextInside: 'val f:(context(a:Any)()->Unit)??=fn\n',
+  multipleAnnotations: 'fun f(){@A @B foo()}\n',
+  argumentAnnotations: 'fun f(){@A(1) @B(2) foo()}\n',
+  controlAnnotations: 'fun f(){if(c)@A @B foo()}\n',
+  annotatedDeclaration: 'fun f(){@A val x=foo()}\n',
+  repeatedAnnotationGroups: 'fun f(){@A @B foo();@C @D bar()}\n',
+  emptyFor: 'fun f(){for(x in y);}\n',
+  emptyWhile: 'fun f(){while(c);}\n',
+  forCall: 'fun f(){for(x in y)foo()}\n',
+  detachedForThrow: 'fun f(){for(x in y)\nthrow x}\n',
+  genericDelegate: 'class C:I<T> by factory<U>()\n',
+  genericObjectDelegate: 'val x=object:I<T> by factory<U>(){}\n',
+  genericDelegateComments: 'class C:I<T> by factory/* c */<U>()\n',
+  plainDelegate: 'class C:I<T> by factory()\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -71,6 +92,7 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
   });
   it('N14 retains every parsed nullable layer instead of dropping repeated markers', () => {
     equivalent('nullableRepeated'); equivalent('nullableFunction');
+    equivalent('nullableContextInside');
     different('nullableRepeated', 'nullableSingle');
   });
   it('N15 retains anonymous postfix operators in assignment targets and their suffix order', () => {
@@ -85,5 +107,40 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     const facts = api.lexicalFacts(tree.rootNode);
     facts.tokens = facts.tokens.filter(token => token.type !== '?.');
     expect(api.tokenDifference(cases.safeReference, tree.rootNode, api.psiLayout(dump, cases.safeReference), facts)).not.toBeNull();
+  });
+  it('N17 preserves generic expression receivers and the callable-versus-class distinction', () => {
+    for (const name of ['genericClass', 'genericReference', 'qualifiedGenericClass', 'callGenericClass']) equivalent(name);
+    different('genericClass', 'plainClass');
+    different('genericReference', 'genericClass');
+    different('callGenericClass', 'qualifiedGenericClass');
+  });
+  it('N18 groups only a hidden statement annotation prefix with its expression', () => {
+    for (const name of ['multipleAnnotations', 'argumentAnnotations', 'controlAnnotations', 'annotatedDeclaration', 'repeatedAnnotationGroups']) equivalent(name);
+    different('multipleAnnotations', 'annotatedDeclaration');
+    const actual = comparison('annotatedDeclaration');
+    const statement = actual.tsTree.children[0].children.find(child => child.name === 'function_body').children[0];
+    const declaration = statement.children[0];
+    const annotations = declaration.children[0].children;
+    const bare = new Node('property_declaration', declaration.children.slice(1));
+    const detachedStatements = new Node('statements', annotations.concat(bare));
+    Object.defineProperty(detachedStatements, 'sourceInfo', {value: {...statement.sourceInfo,
+      statementSpans: annotations.concat(bare).map(() => statement.sourceInfo.statementSpans[0])}});
+    const detached = new Node('source_file', [new Node('function_declaration', [new Node('function_body', [detachedStatements])])]);
+    expect(compareTrees(normalizeTs(detached), actual.psiNorm).status).toBe('MISMATCH');
+  });
+  it('N19 retains the optional empty loop-body slot without moving a detached statement into it', () => {
+    equivalent('emptyFor'); equivalent('emptyWhile'); equivalent('detachedForThrow');
+    different('emptyFor', 'forCall');
+    const value = comparison('forCall');
+    const loop = value.tsTree.children[0].children.find(child => child.name === 'function_body').children[0].children[0];
+    const body = loop.children.find(child => child.name === 'control_structure_body');
+    const empty = new Node('for_statement', loop.children.filter(child => child !== body));
+    const detached = new Node('source_file', [new Node('function_declaration', [new Node('function_body', [new Node('statements', [empty, ...body.children])])])]);
+    expect(compareTrees(normalizeTs(detached), value.psiNorm).status).toBe('MISMATCH');
+  });
+  it('N20 joins only the parsed generic delegate callee/suffix alias while retaining type arguments', () => {
+    equivalent('genericDelegate'); equivalent('genericObjectDelegate'); equivalent('genericDelegateComments');
+    different('genericDelegate', 'plainDelegate');
+    different('genericDelegate', 'genericObjectDelegate');
   });
 });

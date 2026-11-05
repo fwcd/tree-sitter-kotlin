@@ -93,6 +93,42 @@
       "key": "C @ KtFile > FUN > BLOCK: psi BINARY_EXPRESSION / ts DESTRUCTURING_DECLARATION",
       "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
       "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-raw-quote-tail-span",
+      "source": "val s=\"\"\"x\"\"\"\"\n",
+      "grammarArea": "raw-string closing quote run and content token end",
+      "psiVsNative": "PSI literal content is x followed by a quote; native string_content ends before that quote, leaving a missing REGULAR_STRING_PART span.",
+      "filesAffected": [
+        "analysis/low-level-api-fir/src/org/jetbrains/kotlin/analysis/low/level/api/fir/sessions/structure/LLSessionStructureWriter.kt"
+      ],
+      "file": "loop-raw-quote-tail-span.kt",
+      "psiFile": "loop-raw-quote-tail-span.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))))",
+      "verdict": "C",
+      "key": "C token span: PSI REGULAR_STRING_PART is not represented",
+      "firstSeenSeed": "kotlin-9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-generic-unary-precedence",
+      "source": "val x=-foo<T>()\n",
+      "grammarArea": "generic call dynamic precedence versus prefix unary expression",
+      "psiVsNative": "PSI is PREFIX_EXPRESSION(CALL_EXPRESSION); native is CALL_EXPRESSION(PREFIX_EXPRESSION), changing the operator receiver.",
+      "filesAffected": [
+        "libraries/stdlib/js/runtime/longAsBigInt.kt"
+      ],
+      "file": "loop-generic-unary-precedence.kt",
+      "psiFile": "loop-generic-unary-precedence.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (prefix_expression (simple_identifier)) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments)))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi PREFIX_EXPRESSION / ts CALL_EXPRESSION",
+      "firstSeenSeed": "kotlin-9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
     }
   ]
 }

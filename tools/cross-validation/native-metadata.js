@@ -5,6 +5,7 @@ const NATIVE_METADATA = new Set([
   'string_literal', 'string_content', 'interpolated_identifier',
   'control_structure_body', 'secondary_constructor', 'navigation_suffix',
   'directly_assignable_expression',
+  'source_file', 'statements',
 ]);
 const PSI_METADATA = new Set([
   'LITERAL_STRING_TEMPLATE_ENTRY', 'ESCAPE_STRING_TEMPLATE_ENTRY', 'STRING_INTERPOLATION_PREFIX',
@@ -88,6 +89,8 @@ function attachNative(tree, root) {
       byType.get(node.type).push({
         start: node.startIndex, end: node.endIndex, tokens,
         postfixSequence: node.type === 'directly_assignable_expression' ? postfixSequence(node) : undefined,
+        statementSpans: ['source_file', 'statements', 'control_structure_body'].includes(node.type)
+          ? node.namedChildren.map(child => ({start: child.startIndex, end: child.endIndex})) : undefined,
         text: ['string_literal', 'string_content', 'interpolated_identifier'].includes(node.type) ? node.text : undefined,
         string: literal ? stringDelimiter(literal.text) : null,
         braced: tokens.some(n => n.type === '{') && tokens.some(n => n.type === '}'),

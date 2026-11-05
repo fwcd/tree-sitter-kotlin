@@ -14,6 +14,18 @@ const {
   WRAPPER_COLLAPSE,
 } = require('./mapping');
 
+const STATEMENT_EXPRESSIONS = new Set([
+  'postfix_expression', 'indexing_expression', 'navigation_expression', 'prefix_expression',
+  'as_expression', 'spread_expression', 'multiplicative_expression', 'additive_expression',
+  'range_expression', 'infix_expression', 'elvis_expression', 'check_expression',
+  'comparison_expression', 'equality_expression', 'conjunction_expression', 'disjunction_expression',
+  'simple_identifier', 'parenthesized_expression', 'call_expression', 'callable_reference',
+  'if_expression', 'when_expression', 'try_expression', 'jump_expression',
+  'lambda_literal', 'anonymous_function', 'object_literal', 'this_expression', 'super_expression',
+  'string_literal', 'character_literal', 'boolean_literal', 'integer_literal', 'hex_literal',
+  'bin_literal', 'real_literal', 'null_literal', 'long_literal', 'unsigned_literal',
+]);
+
 // ---------------------------------------------------------------------------
 // Tree-sitter normalizer
 // ---------------------------------------------------------------------------
@@ -29,6 +41,34 @@ function _normalizeTsMulti(node, parentName = null) {
   if (!node) return [];
 
   const tsName = node.name;
+
+  // The restricted delegate grammar aliases a callee and its generic suffix separately.
+  if (tsName === 'explicit_delegation') {
+    const indices = node.children.map((child, i) => ['line_comment', 'multiline_comment'].includes(child.name) ? -1 : i).filter(i => i >= 0);
+    const [leftIndex, rightIndex] = indices.slice(-2);
+    const left = node.children[leftIndex], right = node.children[rightIndex];
+    const receiver = left?.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
+    const suffix = right?.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
+    if (left?.name === 'call_expression' && receiver?.length === 1
+        && right?.name === 'call_expression' && suffix?.length === 2
+        && suffix[0].name === 'type_arguments' && suffix[1].name === 'value_arguments') {
+      const comments = left.children.filter(child => ['line_comment', 'multiline_comment'].includes(child.name));
+      const call = new Node('call_expression', [receiver[0], ...comments,
+        ...node.children.slice(leftIndex + 1, rightIndex), new Node('call_suffix', right.children)]);
+      return _normalizeTsMulti(new Node(tsName, [...node.children.slice(0, leftIndex), call, ...node.children.slice(rightIndex + 1)]), parentName);
+    }
+  }
+
+  // _statement_annotations is hidden; only expression tails share that prefix.
+  if (['source_file', 'statements', 'control_structure_body'].includes(tsName)
+      && node.sourceInfo?.statementSpans && node.children.some(child => child.name === 'annotation')) {
+    const grouped = groupStatementAnnotations(node);
+    if (grouped.children.some((child, i) => child !== node.children[i])) {
+      const replacement = new Node(tsName, grouped.children);
+      Object.defineProperty(replacement, 'sourceInfo', {value: {...node.sourceInfo, statementSpans: grouped.spans}});
+      return _normalizeTsMulti(replacement, parentName);
+    }
+  }
 
   // A declared when subject is the same property syntax as a local declaration.
   if (tsName === 'when_subject' && node.children.some(child =>
@@ -129,6 +169,16 @@ function _normalizeTsMulti(node, parentName = null) {
     const operator = suffix?.sourceInfo?.tokens.find(n => ['.', '?.', '::'].includes(n.type));
     if (operator?.type === '::') {
       const isClass = suffix.sourceInfo.tokens.some(n => n.type === 'class');
+      const argumentsNodes = suffix.children.filter(child => child.name === 'type_arguments');
+      const selector = suffix.children.filter(child => child.name !== 'type_arguments');
+      // PSI calls the parsed expression receiver Foo<T> a type-argument-only call.
+      if (argumentsNodes.length === 1 && selector.every(child =>
+        ['simple_identifier', 'line_comment', 'multiline_comment'].includes(child.name))) {
+        const receiver = new Node('call_expression', node.children.slice(0, -1).concat(argumentsNodes));
+        return [new Node(isClass ? 'CLASS_LITERAL_EXPRESSION' : 'CALLABLE_REFERENCE_EXPRESSION', [
+          ..._normalizeTsMulti(receiver, tsName), ...selector.flatMap(child => _normalizeTsMulti(child, tsName)),
+        ])];
+      }
       return [new Node(isClass ? 'CLASS_LITERAL_EXPRESSION' : 'CALLABLE_REFERENCE_EXPRESSION',
         node.children.flatMap(n => _normalizeTsMulti(n, tsName)))];
     }
@@ -270,6 +320,12 @@ function _normalizeTsMulti(node, parentName = null) {
   }
 
   // --- Special cases ---
+
+  // An absent optional loop body is PSI's empty BODY slot, not a following sibling.
+  if (['for_statement', 'while_statement'].includes(tsName)
+      && !node.children.some(child => child.name === 'control_structure_body')) {
+    children.push(new Node('BODY'));
+  }
 
   // check_expression → IS_EXPRESSION for type tests, BINARY_EXPRESSION for in/!in
   if (tsName === 'check_expression') {
@@ -448,6 +504,29 @@ function normalizeTs(node) {
   if (results.length === 0) return null;
   if (results.length === 1) return results[0];
   return results[0];
+}
+
+function groupStatementAnnotations(node) {
+  const result = [], resultSpans = [], spans = node.sourceInfo.statementSpans;
+  const keep = (child, span) => { result.push(child); resultSpans.push(span); };
+  for (let i = 0; i < node.children.length; i++) {
+    const first = node.children[i];
+    if (first.name !== 'annotation') { keep(first, spans[i]); continue; }
+    let end = i + 1;
+    while (end < node.children.length && ['annotation', 'label', 'line_comment', 'multiline_comment'].includes(node.children[end].name)) end++;
+    const expression = node.children[end];
+    const separated = spans[i] && spans[end] && node.sourceInfo.tokens.some(token =>
+      token.type === ';' && token.start >= spans[i].end && token.end <= spans[end].start);
+    if (!expression || !STATEMENT_EXPRESSIONS.has(expression.name) || separated) {
+      keep(first, spans[i]); continue;
+    }
+    const tail = expression.name === 'prefix_expression' && expression.children.some(child => child.name === 'annotation')
+      ? expression.children : [expression];
+    keep(new Node('prefix_expression', node.children.slice(i, end).concat(tail)),
+      spans[i] && spans[end] ? {start: spans[i].start, end: spans[end].end} : undefined);
+    i = end;
+  }
+  return {children: result, spans: resultSpans};
 }
 
 function _nestFunctionTypeContexts(children, insideFunctionType) {
