@@ -338,7 +338,12 @@ function _normalizeTsMulti(node, parentName = null) {
 
   if (tsName === 'function_type_parameters') {
     const parameters = []; let modifiers = [];
-    for (const child of node.children) {
+    // The hidden dynamic type still occupies one function parameter slot.
+    const inputs = node.sourceInfo?.typeParameterSequence
+      ? node.sourceInfo.typeParameterSequence.flatMap(part => part.named
+        ? [node.children[part.index]] : part.type === 'dynamic' ? [new Node('parameter')] : [])
+      : node.children;
+    for (const child of inputs) {
       const normalized = _normalizeTsMulti(child, tsName);
       if (child.name === 'type_modifiers') modifiers.push(...normalized);
       else if (child.name === 'parameter') {

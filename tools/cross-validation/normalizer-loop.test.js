@@ -89,6 +89,9 @@ const cases = {
   fieldMultiAnnotation: 'class C{@field:[A B] val x=1}\n',
   fieldPlainAnnotation: 'class C{@field:A val x=1}\n',
   plainMultiAnnotation: 'class C{@[A B] val x=1}\n',
+  dynamicFunction: 'val f:(dynamic)->Unit=fn\n',
+  mixedDynamicFunction: 'val f:(dynamic,String,dynamic)->Unit=fn\n',
+  zeroParameterFunction: 'val f:()->Unit=fn\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -238,5 +241,10 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     expect(compareTrees(comparison('fieldListAnnotation').tsNorm, comparison('fieldPlainAnnotation').psiNorm).status).toBe('MATCH');
     different('fieldMultiAnnotation', 'plainMultiAnnotation');
     different('fieldMultiAnnotation', 'fieldListAnnotation');
+  });
+  it('N30 retains parameter slots for an anonymous parsed dynamic type token', () => {
+    equivalent('dynamicFunction'); equivalent('mixedDynamicFunction');
+    different('dynamicFunction', 'zeroParameterFunction');
+    different('dynamicFunction', 'mixedDynamicFunction');
   });
 });
