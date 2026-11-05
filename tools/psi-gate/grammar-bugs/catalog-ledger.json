@@ -129,6 +129,57 @@
       "key": "C @ KtFile > PROPERTY: psi PREFIX_EXPRESSION / ts CALL_EXPRESSION",
       "firstSeenSeed": "kotlin-9180ce6a7a7d3627f88b424717583f28ddca052d",
       "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-newline-qualified-for-body",
+      "source": "fun f(){for(x in y)\nx.f()}\n",
+      "grammarArea": "for control-body ownership across newline before qualified call",
+      "psiVsNative": "PSI FOR owns the qualified call in BODY; native FOR has no control_structure_body and leaves the call as a sibling.",
+      "filesAffected": [
+        "test-utils/common/src/TestBase.common.kt",
+        "libraries/stdlib/src/kotlin/text/Strings.kt"
+      ],
+      "file": "loop-newline-qualified-for-body.kt",
+      "psiFile": "loop-newline-qualified-for-body.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (for_statement (variable_declaration (simple_identifier)) (simple_identifier)) (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (value_arguments)))))))",
+      "verdict": "C",
+      "key": "C @ … > BLOCK > FOR > BODY: psi DOT_QUALIFIED_EXPRESSION / ts (none)",
+      "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-keyword-selector-kind",
+      "source": "val x=a.false\n",
+      "grammarArea": "hard literal/this/null keyword selectors versus identifier tokens",
+      "psiVsNative": "PSI preserves a BOOLEAN_CONSTANT selector; native uses a simple_identifier selector and loses the literal kind. Identifier spelling must not be guessed by normalization.",
+      "filesAffected": [],
+      "file": "loop-keyword-selector-kind.kt",
+      "psiFile": "loop-keyword-selector-kind.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi DOT_QUALIFIED_EXPRESSION / ts (none)",
+      "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-annotated-named-argument",
+      "source": "fun f(){foo(@A x=bar())}\n",
+      "grammarArea": "annotation-prefixed assignment expression versus named value argument",
+      "psiVsNative": "PSI has a BINARY_EXPRESSION with an annotated left operand; native consumes x as the named-argument name and leaves annotation plus call siblings.",
+      "filesAffected": [],
+      "file": "loop-annotated-named-argument.kt",
+      "psiFile": "loop-annotated-named-argument.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (annotation (user_type (type_identifier))) (simple_identifier) (call_expression (simple_identifier) (call_suffix (value_arguments)))))))))))",
+      "verdict": "C",
+      "key": "C @ … > CALL_EXPRESSION > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT: psi BINARY_EXPRESSION / ts ANNOTATION_ENTRY",
+      "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
     }
   ]
 }

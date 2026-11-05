@@ -11,6 +11,8 @@ const {compareWithPsi} = require('./pipeline');
 const {compareTrees} = require('./comparator');
 const {Node} = require('./models');
 const {normalizeTs} = require('./normalizer');
+const {parseTreeSitter} = require('./parser-ts');
+const {attachNative} = require('./native-metadata');
 const {runOracle} = require('../psi-oracle/oracle');
 let available = require('../psi-oracle/fetch').isFetched() && fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node'));
 try { require('../safety').javaExecutable(); } catch { available = false; }
@@ -52,6 +54,21 @@ const cases = {
   genericObjectDelegate: 'val x=object:I<T> by factory<U>(){}\n',
   genericDelegateComments: 'class C:I<T> by factory/* c */<U>()\n',
   plainDelegate: 'class C:I<T> by factory()\n',
+  annotatedAssignment: 'fun f(){@A x=1}\n',
+  annotatedLoop: 'fun f(){@A for(x in y)foo()}\n',
+  plainAssignment: 'fun f(){x=1}\n',
+  argumentClassAnnotation: 'fun f(){foo(@A(T::class) Bar())}\n',
+  plainClassArgument: 'fun f(){foo(Bar())}\n',
+  multiAnnotationList: 'fun f(){@[A B] foo()}\n',
+  multiAnnotationDeclaration: '@[A B] class C\n',
+  singleAnnotationDeclaration: '@A class C\n',
+  annotatedAssignmentArgs: 'fun f(){@A(1) x=1}\n',
+  annotatedAssignmentLine: 'fun f(){@A(1)\nx=1}\n',
+  annotatedAssignmentComment: 'fun f(){@A(1)\n//c\nx=1}\n',
+  annotatedAssignmentBlockComment: 'fun f(){@A(1)/*c*/x=1}\n',
+  annotatedAssignmentMultiple: 'fun f(){@A @B x=1}\n',
+  annotatedAssignmentMixed: 'fun f(){@A\n@B x=1}\n',
+  inlineQualifiedAssignment: 'fun f(){@A(1) x.y=1}\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -142,5 +159,35 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     equivalent('genericDelegate'); equivalent('genericObjectDelegate'); equivalent('genericDelegateComments');
     different('genericDelegate', 'plainDelegate');
     different('genericDelegate', 'genericObjectDelegate');
+  });
+  it('N21 preserves explicit statement annotations and their assignment-target role', () => {
+    for (const name of ['annotatedAssignment', 'annotatedAssignmentArgs', 'annotatedLoop', 'annotatedAssignmentLine', 'annotatedAssignmentComment', 'annotatedAssignmentBlockComment', 'annotatedAssignmentMultiple', 'annotatedAssignmentMixed', 'inlineQualifiedAssignment']) equivalent(name);
+    different('annotatedAssignment', 'plainAssignment');
+    different('annotatedAssignment', 'annotatedLoop');
+    different('annotatedAssignmentArgs', 'annotatedAssignmentLine');
+  });
+  it('N22 retains an argument-owned annotation prefix instead of leaving annotation siblings', () => {
+    equivalent('argumentClassAnnotation');
+    different('argumentClassAnnotation', 'plainClassArgument');
+    const value = comparison('argumentClassAnnotation');
+    const variant = parseTreeSitter(value.tree.rootNode.toString());
+    attachNative(variant, value.tree.rootNode);
+    const nativeArgument = value.tree.rootNode.descendantsOfType('value_argument').find(node =>
+      node.namedChildren.some(child => child.type === 'prefix_expression' && child.namedChildren.some(part => part.type === 'annotation')));
+    function directPrefix(node) {
+      if (node.name === 'value_argument' && node.children[0]?.name === 'prefix_expression') {
+        node.children = node.children[0].children;
+        node.sourceInfo.statementSpans = nativeArgument.namedChildren[0].namedChildren.map(child => ({start: child.startIndex, end: child.endIndex}));
+        return true;
+      }
+      return node.children.some(directPrefix);
+    }
+    expect(directPrefix(variant)).toBe(true);
+    expect(compareTrees(normalizeTs(variant), value.psiNorm).status).toBe('MATCH');
+  });
+  it('N23 retains each entry of a parsed bracket annotation list', () => {
+    equivalent('multiAnnotationList'); equivalent('multiAnnotationDeclaration');
+    different('multiAnnotationDeclaration', 'singleAnnotationDeclaration');
+    different('multiAnnotationList', 'multiAnnotationDeclaration');
   });
 });

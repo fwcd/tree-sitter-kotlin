@@ -163,7 +163,7 @@ const TS_TO_PSI = {
   // An annotated statement. PSI has no composite for it: the ANNOTATION_ENTRY
   // is attached to the expression itself, so the wrapper is dropped and its
   // children promoted, which is the shape PSI records.
-  annotated_expression: null,
+  annotated_expression: 'ANNOTATED_EXPRESSION',
   multi_variable_declaration: 'DESTRUCTURING_DECLARATION',
   variable_declaration: null,
   binding_pattern_kind: null,

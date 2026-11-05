@@ -1,0 +1,17 @@
+KtFile: loop-keyword-selector-kind.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    DOT_QUALIFIED_EXPRESSION
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('a')
+      PsiElement(DOT)('.')
+      BOOLEAN_CONSTANT
+        PsiElement(false)('false')
+  PsiWhiteSpace('\n')

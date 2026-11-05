@@ -42,6 +42,26 @@ function _normalizeTsMulti(node, parentName = null) {
 
   const tsName = node.name;
 
+  // A bracket annotation list aliases multiple unescaped entries inside one native annotation.
+  if (tsName === 'annotation') {
+    const entries = node.children.filter(child => ['user_type', 'constructor_invocation'].includes(child.name));
+    const prefix = node.children.filter(child => !entries.includes(child));
+    if (entries.length > 1 && prefix.every(child => ['use_site_target', 'line_comment', 'multiline_comment'].includes(child.name))) {
+      return entries.flatMap(entry => _normalizeTsMulti(new Node('annotation', prefix.concat(entry)), parentName));
+    }
+  }
+
+  // An inline final annotation makes a PSI LHS prefix; a line boundary retains the statement wrapper.
+  if (tsName === 'annotated_expression') {
+    const parts = node.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
+    const assignment = parts[parts.length - 1];
+    if (assignment?.name === 'assignment' && parts.length > 1 && parts.slice(0, -1).every(child => child.name === 'annotation')
+        && node.sourceInfo?.inlineAssignmentAnnotation) {
+      const lhs = new Node('prefix_expression', parts.slice(0, -1).concat(assignment.children[0]));
+      return _normalizeTsMulti(new Node('assignment', [lhs, ...assignment.children.slice(1)]), parentName);
+    }
+  }
+
   // The restricted delegate grammar aliases a callee and its generic suffix separately.
   if (tsName === 'explicit_delegation') {
     const indices = node.children.map((child, i) => ['line_comment', 'multiline_comment'].includes(child.name) ? -1 : i).filter(i => i >= 0);
@@ -60,7 +80,8 @@ function _normalizeTsMulti(node, parentName = null) {
   }
 
   // _statement_annotations is hidden; only expression tails share that prefix.
-  if (['source_file', 'statements', 'control_structure_body'].includes(tsName)
+  if ((['source_file', 'statements', 'control_structure_body'].includes(tsName)
+      || (tsName === 'value_argument' && !node.sourceInfo?.tokens.some(token => ['=', '*'].includes(token.type))))
       && node.sourceInfo?.statementSpans && node.children.some(child => child.name === 'annotation')) {
     const grouped = groupStatementAnnotations(node);
     if (grouped.children.some((child, i) => child !== node.children[i])) {
