@@ -10,7 +10,10 @@ const { normalizePsi } = require('../cross-validation/normalizer');
 const { sha256, confined } = require('../safety');
 
 function shape(node) {
-  return node ? [node.name, node.children.map(shape)] : null;
+  if (!node) return null;
+  const result = [node.name, node.children.map(shape)];
+  if (node.literal !== undefined) result.push({ literal: node.literal });
+  return result;
 }
 function namedSignature(diff) {
   const direction = diff.kind === 'child_count_mismatch'

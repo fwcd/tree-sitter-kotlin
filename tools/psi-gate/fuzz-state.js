@@ -129,7 +129,7 @@ function writeGrammarBug(directory, representative, { seed, revision, signature,
   const file = id + (representative.extension || '.kt'), expected = id + '.expected.json';
   // Provenance contains repo/pin/relative path or generated seed, never input roots.
   const { root: _root, ...provenance } = origin || {};
-  const expectedText = JSON.stringify({ compiler: '2.4.21', psi: representative.result.expectedPsi, dump: representative.result.psiDump }, null, 2) + '\n';
+  const expectedText = JSON.stringify({ compiler: '2.4.21', psi: representative.result.expectedPsi, dump: representative.result.psiDump }) + '\n';
   const ensure = (relative, text) => {
     const target = confined(directory, relative);
     if (fs.existsSync(target)) {

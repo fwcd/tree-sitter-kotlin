@@ -1,1 +1,514 @@
-[]
+[
+  {
+    "id": "g-3738c29f9375db3b7366",
+    "file": "g-3738c29f9375db3b7366.kt",
+    "expected": "g-3738c29f9375db3b7366.expected.json",
+    "sourceSha256": "46884e286f648ca794f8a1a7a107168e71e37e6657df92ef31b1220845b339f0",
+    "expectedSha256": "e82e83966379297d5854d84d8558da304084a0ec2d7db70b4a16e5e6d37148c1",
+    "signature": [
+      "grammar",
+      "statements",
+      "ERROR",
+      "->"
+    ],
+    "likelyGrammarArea": "statements",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "compiler/frontend/src/org/jetbrains/kotlin/resolve/calls/tasks/dynamicCalls.kt",
+      "sourceSha256": "41459628263113c69a64bc1ed2e70594bce358e0ab28b4c3719e691d8e006c49"
+    }
+  },
+  {
+    "id": "g-96cdece4c6d9c403e17d",
+    "file": "g-96cdece4c6d9c403e17d.kt",
+    "expected": "g-96cdece4c6d9c403e17d.expected.json",
+    "sourceSha256": "c7bf0b36b211d2522eed88fa2d88d74067439ff6623aa7d1fefd9c2222027999",
+    "expectedSha256": "5789af5a1b00ae8aeb76a91472e0c79c5c6708308aa2aa34775cf6bcde312941",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab"
+    }
+  },
+  {
+    "id": "g-29aba5466e514a631edd",
+    "file": "g-29aba5466e514a631edd.kt",
+    "expected": "g-29aba5466e514a631edd.expected.json",
+    "sourceSha256": "fcb2bad4a9b81941844cbd3db959d49865a9c71b84e732f4fcad7984bfa7fb44",
+    "expectedSha256": "cbaffd70b5b5ef54991c841c61a2447a03fa9df623916bb8b3fdb8c46ebca3f5",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/js/src/kotlin/text/regex.kt",
+      "sourceSha256": "0e738f65f74b8f5cb7930dd010e771b6ae7de3cedc5d3ee4b185f319e3eeb432"
+    }
+  },
+  {
+    "id": "g-95c9ce43dc84abf9a9e2",
+    "file": "g-95c9ce43dc84abf9a9e2.kt",
+    "expected": "g-95c9ce43dc84abf9a9e2.expected.json",
+    "sourceSha256": "20b2b22720cae05211a9b2f20a3529d70d1b5dec9fb6eebf4e2f9753d8a30eb6",
+    "expectedSha256": "617aba187800b5b5a4759d41f405a638eecd46327126e8789578ead8c9533760",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "native/swift/sir-providers/src/org/jetbrains/kotlin/sir/providers/impl/BridgeProvider/StringUtils.kt",
+      "sourceSha256": "c72516d46eea13bc1c71ae05f037d5945da329d6949635d36bd6f70e16d5b983"
+    }
+  },
+  {
+    "id": "g-6dd188b4fa2d8fbf66f7",
+    "file": "g-6dd188b4fa2d8fbf66f7.kt",
+    "expected": "g-6dd188b4fa2d8fbf66f7.expected.json",
+    "sourceSha256": "0a818f14e13fdf3d798e7d83b0881978ce71595fd64fb2692bcc5da18121cc0c",
+    "expectedSha256": "abb85409d3b87b22077952e6e2a452d209b07cadf8bbc3a90498a6aed849ad0c",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 13,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-7c6a8588c66fcde2d809",
+    "file": "g-7c6a8588c66fcde2d809.kt",
+    "expected": "g-7c6a8588c66fcde2d809.expected.json",
+    "sourceSha256": "59e0a023d8aee66101005ac4750da3367335546eb12b7dfdc2b30dba86d97131",
+    "expectedSha256": "3645278a48725dae02af0307e29a8959e7731c6b822e400a5e320b4c914fb4b8",
+    "signature": [
+      "grammar",
+      "statements",
+      "ERROR",
+      "->"
+    ],
+    "likelyGrammarArea": "statements",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "compiler/frontend/src/org/jetbrains/kotlin/resolve/calls/tasks/dynamicCalls.kt",
+      "sourceSha256": "41459628263113c69a64bc1ed2e70594bce358e0ab28b4c3719e691d8e006c49",
+      "operator": "drop-body",
+      "seed": "orc-normalizer-1",
+      "index": 27
+    }
+  },
+  {
+    "id": "g-fd18e7ccebe6384119dd",
+    "file": "g-fd18e7ccebe6384119dd.kt",
+    "expected": "g-fd18e7ccebe6384119dd.expected.json",
+    "sourceSha256": "35a0977bebeb72e36c52cd8d0105fc33aadd62b951490e093ab2e49015594f93",
+    "expectedSha256": "b3d359e44e7517a2ff71a06b0312af4908359d7c701cbff52f0985fdbc259443",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab",
+      "operator": "parenthesize",
+      "seed": "orc-normalizer-1",
+      "index": 30
+    }
+  },
+  {
+    "id": "g-8a5f4fa439a7b76f36c6",
+    "file": "g-8a5f4fa439a7b76f36c6.kt",
+    "expected": "g-8a5f4fa439a7b76f36c6.expected.json",
+    "sourceSha256": "23733d0ca3e364b13567d43983b13cb559aa5b404146c42060a5adf0de40e415",
+    "expectedSha256": "c0768a0ab266782b9f3c348ba4b2edc9201b50a047eeea89b0c3cfc5cbe2d35e",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 37,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-f3b708ad4be792634ff2",
+    "file": "g-f3b708ad4be792634ff2.kt",
+    "expected": "g-f3b708ad4be792634ff2.expected.json",
+    "sourceSha256": "b6a8ade83dc9b9b795d8763f955160297c8a48afb07164db71a26edecc1dee48",
+    "expectedSha256": "07e82b11e5540205cc7fecace5e75e0c0c6710a274d047cf35ec602d12a857e5",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 61,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-5ef9df3b4bbd4843a06c",
+    "file": "g-5ef9df3b4bbd4843a06c.kt",
+    "expected": "g-5ef9df3b4bbd4843a06c.expected.json",
+    "sourceSha256": "7593d2d7bd9de0fc9e0beea03ce6d164499a4c40b69b36526fcef59437a4ca78",
+    "expectedSha256": "38ab0bbdfe1d7276d4fabd78ba47f622093cd5cb3ecaae6cbcb82c39c74202ba",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab",
+      "operator": "keyword-selector/this",
+      "seed": "orc-normalizer-1",
+      "index": 69
+    }
+  },
+  {
+    "id": "g-07bcbece2aa81c110735",
+    "file": "g-07bcbece2aa81c110735.kt",
+    "expected": "g-07bcbece2aa81c110735.expected.json",
+    "sourceSha256": "1e3e0966c06ad81dd77cd2c18cda7bfc1228fe7d5bcf1cd4c4687d158bc02c98",
+    "expectedSha256": "3a1797499b2a4972b2e03773e88d97f4b601bfeb50a9e41be1aee266a0f59426",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/js/src/kotlin/text/regex.kt",
+      "sourceSha256": "0e738f65f74b8f5cb7930dd010e771b6ae7de3cedc5d3ee4b185f319e3eeb432",
+      "operator": "keyword-selector/true",
+      "seed": "orc-normalizer-1",
+      "index": 72
+    }
+  },
+  {
+    "id": "g-4949c66f97a879a33b67",
+    "file": "g-4949c66f97a879a33b67.kt",
+    "expected": "g-4949c66f97a879a33b67.expected.json",
+    "sourceSha256": "3a827a17a311e8174159785ca859c5b9f85dbe86e886eb6bb3ae18d1b970d841",
+    "expectedSha256": "52c6b0d302db1db1007a3644e41cea67576b9accb3e47936822ed6dd354b979f",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 85,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-6622bab501367bab954c",
+    "file": "g-6622bab501367bab954c.kt",
+    "expected": "g-6622bab501367bab954c.expected.json",
+    "sourceSha256": "53a74d765bca2f4b732fc063fd03947e1499ac523de64af41e6b9b5e5f08a83f",
+    "expectedSha256": "8f73771b128746cc3b83f4929e2e37ffe9d43cc726ad5b96cbcdcddad9bb1d0b",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 109,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-cc37c08d231e4122bcb9",
+    "file": "g-cc37c08d231e4122bcb9.kt",
+    "expected": "g-cc37c08d231e4122bcb9.expected.json",
+    "sourceSha256": "a24418784af1cddd7dcba679b1faa32ac63b72a7db221fbbfbc014a779f8bc0a",
+    "expectedSha256": "e26769e9b889e2ef26db1f6a1e3a6089a606f727e3a77c2446604978848ed65f",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/js/src/kotlin/text/regex.kt",
+      "sourceSha256": "0e738f65f74b8f5cb7930dd010e771b6ae7de3cedc5d3ee4b185f319e3eeb432",
+      "operator": "keyword-selector/null",
+      "seed": "orc-normalizer-1",
+      "index": 111
+    }
+  },
+  {
+    "id": "g-a5cfadf0af414dd86472",
+    "file": "g-a5cfadf0af414dd86472.kt",
+    "expected": "g-a5cfadf0af414dd86472.expected.json",
+    "sourceSha256": "cd3623025dad4e35ae8282d593fa238c89f71c5462ce307b44aa3b16a37aeb09",
+    "expectedSha256": "63f654dda36af18a5a3d30ed34b9d4fb0ebfd9f01cfd2feff26118082de5ab6d",
+    "signature": [
+      "grammar",
+      "if_expression",
+      "ERROR",
+      "=="
+    ],
+    "likelyGrammarArea": "if_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/src/kotlin/text/Strings.kt",
+      "sourceSha256": "12be6c955d7ab31a705abe296b4733f3883468c8566ca823537a2642932e6b82",
+      "operator": "char-content/2",
+      "seed": "orc-normalizer-1",
+      "index": 132
+    }
+  },
+  {
+    "id": "g-0a97ca496fb6d90b0c7e",
+    "file": "g-0a97ca496fb6d90b0c7e.kt",
+    "expected": "g-0a97ca496fb6d90b0c7e.expected.json",
+    "sourceSha256": "fe4686df52b01a642125868366cb1b870a51422ba82d4e4fa4e8221498ce1634",
+    "expectedSha256": "d90eae32ea6f8bc71139a0f6884e8eb844b5b1b2d98fd83c10ff7aee0cbaf153",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 133,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-0352cbf1b00f1e041b7f",
+    "file": "g-0352cbf1b00f1e041b7f.kt",
+    "expected": "g-0352cbf1b00f1e041b7f.expected.json",
+    "sourceSha256": "3b02dbf264fd815790c836bec4f867cf2ff6decf2ad143e3a537ee731f7855b9",
+    "expectedSha256": "6167a6cba490825539965c1caf05c98784760b50c2997eb13ad1b543378c1e83",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab",
+      "operator": "modifier-run/25x3",
+      "seed": "orc-normalizer-1",
+      "index": 147
+    }
+  },
+  {
+    "id": "g-e5d307884ad4c33475c9",
+    "file": "g-e5d307884ad4c33475c9.kt",
+    "expected": "g-e5d307884ad4c33475c9.expected.json",
+    "sourceSha256": "62aca0adb3f8024ea0481e4046e0f8d882753f378059aae69df78b3eb4a88c95",
+    "expectedSha256": "3ef4ac1c6e18d20a2ee116a1a06cfd3291c1f7bc41bf3c7cbb02a18f68f69b1e",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 157,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-8c8a539f82f3bc75ef2e",
+    "file": "g-8c8a539f82f3bc75ef2e.kt",
+    "expected": "g-8c8a539f82f3bc75ef2e.expected.json",
+    "sourceSha256": "70b57438d6ce9de3467880f14b89b8ba05fc8d42882c606df98fa3dc61ec24b0",
+    "expectedSha256": "57aa860dff5381336cef5f64b53212c4834bcdbe459a0e018024f6275ef341c3",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "orc-normalizer-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "orc-normalizer-1",
+      "index": 181,
+      "feature": "strings",
+      "depth": 4
+    }
+  },
+  {
+    "id": "g-0d9881e2a09ed415cd0e",
+    "file": "g-0d9881e2a09ed415cd0e.kt",
+    "expected": "g-0d9881e2a09ed415cd0e.expected.json",
+    "sourceSha256": "3c0917976a1175beeb347b1d204572c58cc150cfee9e308c08f991d84bff8850",
+    "expectedSha256": "e61a6e568961028fb97a5bdf1981cf73d5492848c9402a9309c735e92048e0d9",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "final-conformance-2026",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "final-conformance-2026",
+      "index": 12,
+      "feature": "references",
+      "depth": 3
+    }
+  },
+  {
+    "id": "g-334dcd27414156fe8ce6",
+    "file": "g-334dcd27414156fe8ce6.kt",
+    "expected": "g-334dcd27414156fe8ce6.expected.json",
+    "sourceSha256": "0b5265f22142c7069f2f0e3ce7460e372cce181bcbace591f188a4f3afd85ee7",
+    "expectedSha256": "d18b301071110ac3ff8575da7a7c9ded060d0123c8167dc0825da1b745d10f7f",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "final-conformance-2026",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "generated",
+      "seed": "final-conformance-2026",
+      "index": 13,
+      "feature": "strings",
+      "depth": 3
+    }
+  }
+]
