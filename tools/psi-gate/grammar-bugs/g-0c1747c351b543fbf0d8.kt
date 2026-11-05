@@ -1,0 +1,2 @@
+fun()@Anno
+class Annotated

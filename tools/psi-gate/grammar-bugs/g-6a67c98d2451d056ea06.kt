@@ -1,0 +1,1 @@
+companion inline fun<reified>typeParameterReceiver()

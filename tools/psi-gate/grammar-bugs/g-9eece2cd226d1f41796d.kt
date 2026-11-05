@@ -1,0 +1,1 @@
+fun naturalOrder<T:Comparable<T>>()

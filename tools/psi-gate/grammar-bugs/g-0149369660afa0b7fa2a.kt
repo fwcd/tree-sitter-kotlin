@@ -1,0 +1,1 @@
+class CompanionContainer{enum companion object}

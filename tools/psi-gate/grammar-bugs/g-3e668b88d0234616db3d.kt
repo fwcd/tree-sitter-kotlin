@@ -1,0 +1,1 @@
+companion const val Foo.Int

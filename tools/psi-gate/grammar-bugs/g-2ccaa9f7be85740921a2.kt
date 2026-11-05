@@ -1,0 +1,1 @@
+companion val size:Int=1

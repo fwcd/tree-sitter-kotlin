@@ -1,0 +1,1 @@
+companion operator fun invoke()

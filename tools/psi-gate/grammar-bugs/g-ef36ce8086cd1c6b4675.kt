@@ -1,0 +1,1 @@
+context(_:A)companion fun getOk()
