@@ -1,6 +1,1 @@
-class Foo{
-    fun test1(arg: Any?) contract [
-        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
-    ] {
-    }
-}
+class Foo{fun test1()contract[callsInPlace()]}

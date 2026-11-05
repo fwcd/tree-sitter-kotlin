@@ -1,3 +1,1 @@
-fun test() {
-    assertEqWithInput([], "") { [it] }
-}
+fun(){{[it]}}

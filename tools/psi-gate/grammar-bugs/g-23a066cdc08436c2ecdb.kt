@@ -1,7 +1,1 @@
-class C {
-    companion {
-        companion {
-        }
-        fun outer() 
-    }
-}
+class C{companion{}}

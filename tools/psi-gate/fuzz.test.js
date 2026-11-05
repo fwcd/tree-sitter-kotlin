@@ -97,7 +97,7 @@ describe.skipIf(!available)('live PSI-valid differential fuzzing', () => {
       const [entry] = state.readLedger(bugs);
       const expected = JSON.parse(fs.readFileSync(path.join(bugs, entry.expected), 'utf8'));
       expect(expected.psi).toEqual(min.result.expectedPsi);
-      expect(expected.dump).toBe(min.result.psiDump);
+      expect(expected).not.toHaveProperty('dump');
       fs.appendFileSync(path.join(bugs, entry.file), 'corrupt');
       expect(() => state.readLedger(bugs)).toThrow(/Corrupt grammar-bug source/);
     } finally { inspector.close(); fs.rmSync(dir, { recursive: true }); }

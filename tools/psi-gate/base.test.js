@@ -164,3 +164,12 @@ describe('upstream merge-base selection', () => {
     } finally { cleanup(f); }
   });
 });
+
+
+it('names a missing explicit base reference', () => {
+  const f = fixture();
+  try {
+    expect(() => resolveBase({ base: 'missing-reference' }, { cwd: f.local, log: () => {} }))
+      .toThrow(/missing-reference/);
+  } finally { cleanup(f); }
+});

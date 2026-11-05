@@ -1,3 +1,1 @@
-fun declaration() {
-    if (true) { (val first) }
-}
+fun(){if(true){(val first)}}

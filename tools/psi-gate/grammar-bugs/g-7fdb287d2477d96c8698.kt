@@ -1,5 +1,2 @@
-class AnotherClass{
-    var Int
-        get() contract [returns()] {
-    }
-}
+class AnotherClass{var Int
+        get()contract[]{}}

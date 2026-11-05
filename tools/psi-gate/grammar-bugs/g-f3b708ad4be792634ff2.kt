@@ -1,2 +1,1 @@
-fun strings(x: Any?) = listOf("escaped\n\t", "nested=${run { "inner=$x" }}", """raw
-\$""", $$""" literal $x and $${x} """){ return run { val (a, b) = Pair(run { val (a, b) = Pair(when (val q = "value=${1}") { is String ->  listOf(1, x)[0] }, when (val qnull) { is String -> q; null -> (null); else -> if (true != null) 0x7f else "text" }); a }, "value=${if (run { val (a, b) = Pair('\n', x); a } != null) (true)?.toString() ?: (1) else (true)?.toString() ?: ("text")}"); a } }
+fun(x:Any)=("""\$""")

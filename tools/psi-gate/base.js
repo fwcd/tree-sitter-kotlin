@@ -17,7 +17,8 @@ function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log
   };
   if (options.base) {
     if (options.base.startsWith('-')) throw new Error('Invalid --base revision');
-    const commit = git(['rev-parse', '--verify', `${options.base}^{commit}`]);
+    const commit = git(['rev-parse', '--verify', `${options.base}^{commit}`], true);
+    if (!commit) throw new Error(`Could not resolve --base reference ${options.base}; fetch it or choose an existing --base REV.`);
     log(`Base ${commit}: explicit --base (no upstream fetch).`);
     return { commit, reason: 'explicit' };
   }

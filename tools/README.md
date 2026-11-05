@@ -221,9 +221,14 @@ No Java or PSI tools are needed for the ordinary grammar tests.
 
 ## Continuous PSI-valid differential fuzzing
 
-Prepare the pinned runtime/main grammar and run deterministic generated inputs:
+Prepare the pinned runtime and the proven upstream merge-base grammar, then run
+deterministic generated inputs (single-branch clones work without origin/main):
 
     npm run psi-fuzz -- --seed example --max-inputs 1000
+
+The default uses the same configurable upstream resolver as psi-gate. `--base REV`
+is an explicit local/offline pin; `--base HEAD` checks the current committed
+grammar. Missing explicit refs are named in the error.
 
 Add a pinned real-code checkout and an exact production-file list, or a research
 seed manifest. Every original and single-site mutant is checked by the live PSI
@@ -243,8 +248,12 @@ Acceptance is syntactic PSI acceptance; it does not assert type checking.
 Continuous runs checkpoint counts and verified representatives as they go.
 Stopping by stability requires 5,000 consecutive PSI-valid inputs with no
 unresolved normalized mismatch and only already-recorded grammar counterexamples.
-Input/time budgets stop bounded experiments; budget exhaustion is not normalizer
-completion. Pending reductions produce exit 2 and a partial result. Oracle,
+An explicit --max-inputs is honored in continuous mode; otherwise its input count
+is unlimited. One sampling deadline includes ledger validation, oracle/native
+inspection and all reductions. Runtime download/grammar preparation precedes that
+budget. No new inspection or reduction starts after expiry. Input/time budgets stop bounded experiments; budget exhaustion is not normalizer
+completion. Time expiry or pending/bounded reductions produce exit 2 and a partial result,
+including expiry before any input is accepted. Oracle,
 harness, corrupt-ledger and changed-comparison failures produce exit 1.
 
 `local/psi-fuzz/report.md` ranks per-file diagnostic families and shows one
@@ -256,13 +265,34 @@ Reductions are bounded, preserving comments/literals as lexical units.
 
 Clean named mismatches are labeled **normalization-or-AST** for the fix loop;
 they are not assumed to be grammar bugs. Confirmed PSI-clean native syntax
-rejections and empty QUEST token spans are saved under
-`tools/psi-gate/grammar-bugs/g-*` with an authoritative PSI dump/shape and a ledger
-entry (source hashes, grammar revision, signature, first seed and provenance).
-Catalog-owned `catalog-*` files are not modified. Existing grammar cases are
-reverified as inputs on later runs; confirmed cases stay as regression evidence
-after the grammar is fixed. Rerun the same seed after any normalizer/mapping change;
-content identities prevent using results from a different comparison version.
+rejections and empty QUEST spans are saved by default in the untracked
+`local/psi-fuzz-bugs` ledger. Inspect the run and rerun with `--promote` to save
+completed, verified reductions of at most 1000 bytes in the tracked corpus.
+`--bugs DIR` selects another local ledger; writing the tracked directory requires
+explicit promotion. `timeBoundReached` records unfinished reductions (null means
+unknown for inherited cases). A completed bounded reduction is not a claim of a
+global minimum. Control-character inputs are JSON strings with a recorded Kotlin
+extension, decoded before parsing; no literal NUL bytes are shipped.
+
+### Tracked grammar counterexamples
+
+`tools/psi-gate/grammar-bugs` contains curated catalog cases and minimized fuzz
+cases, with source/expectation hashes, failure signatures, first seeds and
+provenance. Compact `.expected.json` PSI shapes are authoritative; full dumps are
+regenerated from the pinned Kotlin 2.4.21 oracle. Catalog `.psi.txt` sidecars remain
+readable. Original whole-source inputs/dumps belong in research run artifacts.
+Detailed affected-file measurements are archived at the immutable commit named
+in the catalog ledger; the shipped ledger retains counts and causal descriptions.
+
+The synthetic cases are part of this MIT-licensed grammar project. Derived
+counterexamples use the Apache-2.0 Kotlin, Okio, Exposed, Ktor and kotlinx.coroutines
+sources identified by repository, commit and relative path in the ledgers; the
+Kotlin production-source pin is distinct from the JetBrains fixture-import pin.
+Refer to those upstream licenses and original pinned sources for provenance.
+
+Existing ledger expectations are reverified on later runs against that ledger;
+confirmed cases remain evidence after a grammar fix. Rerun the same seed after a
+normalizer/mapping change; comparison identities prevent stale reuse.
 
 Use `--help` for budgets and alternate owned output/ledger directories. Run output
 and input roots must be separate. No grammar rule is changed by the fuzz harness.

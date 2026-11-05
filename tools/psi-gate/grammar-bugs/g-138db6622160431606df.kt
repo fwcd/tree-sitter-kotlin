@@ -1,9 +1,5 @@
-fun box(): String {
-    fun foo(xInt) {
-    }
-    run {
-        fun foo(x: String) {
+fun(){run{
+        fun foo(){
         }
-        {
-        }.let}
+        {}}
 }

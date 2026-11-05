@@ -1,5 +1,1 @@
-fun foo() {
-  when (a) {
-    foo<T> -> a
-  }
-}
+fun(){when{foo<T>->a}}

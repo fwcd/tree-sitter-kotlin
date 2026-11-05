@@ -1,5 +1,3 @@
-fun box(): String {
-{ }
-fun local1() {}
-    {}
-}
+fun(){{}
+fun local1(){}
+    {}}

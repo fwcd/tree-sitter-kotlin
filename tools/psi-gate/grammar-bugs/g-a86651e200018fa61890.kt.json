@@ -1,0 +1,1 @@
+"class CustomEnumerationColumnType{fun nonNullValueToString(){append('\u0000')}}"
