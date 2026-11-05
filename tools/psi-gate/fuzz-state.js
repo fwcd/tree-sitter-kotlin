@@ -51,6 +51,10 @@ async function minimize(input, id, inspector, { candidates = 32, rounds = 20, se
   }).join('');
   let text = input.text;
   if ((await holds([withoutComments]))[0]) text = withoutComments;
+  if (!text.includes('/*')) {
+    const lines = await reduce(text.split('\n'), batches => holds(batches.map(x => x.join('\n'))), options);
+    text = lines.join('\n');
+  }
   const units = tokenize(text);
   const tokens = [];
   previous = 0;
@@ -61,6 +65,25 @@ async function minimize(input, id, inspector, { candidates = 32, rounds = 20, se
   if (previous < text.length) tokens.push(text.slice(previous));
   const reduced = await reduce(tokens, batches => holds(batches.map(x => x.join(''))), options);
   text = reduced.join('');
+  // Keep quote delimiters intact while shrinking literal payloads. Comments are
+  // never split, including comments embedded in interpolation expressions.
+  for (let pass = 0; pass < 8 && Date.now() < deadline; pass++) {
+    const literals = tokenize(text).filter(token => ['string', 'char'].includes(token.kind))
+      .sort((a, b) => (b.end - b.start) - (a.end - a.start));
+    let changed = false;
+    for (const token of literals) {
+      const quote = token.text.startsWith('"""') ? '"""' : token.text[0];
+      if (!token.text.endsWith(quote)) continue;
+      const payload = token.text.slice(quote.length, -quote.length);
+      if (!payload || payload.includes('/*') || payload.includes('//')) continue;
+      const prefix = text.slice(0, token.start + quote.length), suffix = text.slice(token.end - quote.length);
+      const shrunk = await reduce(Array.from(payload), batches => holds(batches.map(x => prefix + x.join('') + suffix)), options);
+      if (shrunk.join('').length < payload.length) {
+        text = prefix + shrunk.join('') + suffix; changed = true; break;
+      }
+    }
+    if (!changed) break;
+  }
   let [result] = await inspector.inspect([{ text, extension: input.extension }]);
   if (!result.accepted || !result.classes.some(c => c.id === id)) {
     text = input.text;

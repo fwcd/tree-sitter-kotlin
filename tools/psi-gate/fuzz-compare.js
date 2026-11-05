@@ -67,7 +67,7 @@ class Inspector {
         try {
           comparison = tree.rootNode.hasError
             ? { psiNorm: normalizePsi(rawPsi), tsNorm: null, result: { differences: [] } }
-            : compareWithPsi(tree.rootNode.toString(), dump, { text, tree, cst });
+            : compareWithPsi(tree.rootNode.toString(), dump, { nativeRoot: tree.rootNode, source: text });
         } catch (error) {
           normalizerError = String(error.message);
           comparison = { psiNorm: null, tsNorm: null, result: { differences: [] } };
