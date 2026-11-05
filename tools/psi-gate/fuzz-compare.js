@@ -76,7 +76,7 @@ class Inspector {
           comparison = { psiNorm: null, tsNorm: null, result: { differences: [] } };
         }
         const classes = tree.rootNode.hasError ? [grammarSignature(tree.rootNode)]
-          : lostQuest.length ? [['grammar', 'token-span', 'quest']] 
+          : lostQuest.length ? [['grammar', 'token-span', 'quest']]
           : normalizerError ? [['normalizer-exception', normalizerError]]
           : comparison.result.differences.map(namedSignature);
         const unique = new Map(classes.map(signature => [signatureId(signature), signature]));
