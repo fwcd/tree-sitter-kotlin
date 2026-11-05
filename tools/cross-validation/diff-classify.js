@@ -25,6 +25,9 @@ function trimPath(diffPath, keep = 3) {
  */
 function firstDivergence(ts, psi, at = ts.name) {
   if (ts.name !== psi.name) return { path: at, psi: psi.name, ts: ts.name };
+  if (JSON.stringify(ts.literal) !== JSON.stringify(psi.literal)) {
+    return { path: at, psi: 'literal content/source span', ts: 'different literal content/source span' };
+  }
   const shared = Math.min(ts.children.length, psi.children.length);
   for (let i = 0; i < shared; i++) {
     const tsChild = ts.children[i],
@@ -129,7 +132,7 @@ function normalizedShape(root) {
   const shape = [], pending = [root];
   while (pending.length) {
     const node = pending.pop();
-    shape.push([node.name, node.children.length]);
+    shape.push([node.name, node.children.length, ...(node.literal ? [node.literal] : [])]);
     for (let i = node.children.length - 1; i >= 0; i--) pending.push(node.children[i]);
   }
   return shape;
@@ -143,7 +146,7 @@ function compareInput({ text, tree, psi, dump }) {
   if (psi.failure) return { ...classify({ text, tree, psi, dump }), treeHash: null };
   const cst = lexicalFacts(tree.rootNode);
   const layout = psiLayout(dump, text);
-  const comparison = compareWithPsi(tree.rootNode.toString(), dump);
+  const comparison = compareWithPsi(tree.rootNode.toString(), dump, { nativeRoot: tree.rootNode, source: text });
   const differences = layoutDifferences(text, tree.rootNode, layout, cst);
   const classification = classify({ text, tree, psi, dump, cst, layout, comparison, differences });
   return {

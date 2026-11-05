@@ -1,6 +1,7 @@
 'use strict';
 
 const COMMENT_TYPES = new Set(['line_comment', 'multiline_comment', 'shebang_line']);
+const { hiddenSpans } = require('./native-metadata');
 const lineAt = (text, offset) => text.slice(0, offset).split('\n').length;
 
 /** Capture only leaf lexemes and the spans needed to account for hidden delimiters. */
@@ -35,6 +36,8 @@ function lexicalFacts(root) {
       ]);
     if (ownerTypes.has(node.type))
       owners.push({ type: node.type, start: node.startIndex, end: node.endIndex });
+    const hidden = hiddenSpans(node);
+    if (hidden.length) owners.push({ type: 'hidden_tokens', hidden });
     if (
       node.childCount === 0 &&
       node !== root &&
@@ -52,6 +55,7 @@ function lexicalFacts(root) {
 
 /** Index token owners once: hidden lexer delimiters are not visible CST leaves. */
 function hiddenTokenOwners(nodes) {
+  const owned = new Set(nodes.flatMap(n => n.hidden || []).map(n => `${n.type}:${n.start}:${n.end}`));
   const starts = { quotes: new Set(), constructors: new Set() };
   const ends = new Set();
   const characters = new Set();
@@ -78,6 +82,7 @@ function hiddenTokenOwners(nodes) {
   let index = 0,
     extent = -1;
   return (token) => {
+    if (owned.has(`${token.type}:${token.start}:${token.end}`)) return true;
     if (token.type === 'SEMICOLON') return true; // _semi is intentionally hidden.
     if (token.type === 'OPEN_QUOTE') return starts.quotes.has(token.start);
     if (token.type === 'CLOSING_QUOTE') return ends.has(token.end);

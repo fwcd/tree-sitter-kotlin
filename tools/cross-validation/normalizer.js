@@ -6,6 +6,7 @@
 'use strict';
 
 const { Node } = require('./models');
+const { textNode, mergeRuns } = require('./literal-runs');
 const {
   TS_TO_PSI,
   SKIP_TS_NODES,
@@ -28,6 +29,84 @@ function _normalizeTsMulti(node, parentName = null) {
   if (!node) return [];
 
   const tsName = node.name;
+
+  // A string-content token is opaque; PSI splits the same text into literal and escape runs.
+  if (tsName === 'string_literal' && node.sourceInfo?.string) {
+    const children = [];
+    const info = node.sourceInfo;
+    if (info.string.prefix) children.push(new Node('STRING_INTERPOLATION_PREFIX', [], {
+      value: info.string.prefix, start: info.start, end: info.start + info.string.prefix,
+    }));
+    let run;
+    const flush = () => {
+      if (run) children.push(textNode(run, info.string.raw));
+      run = undefined;
+    };
+    for (const child of node.children) {
+      const content = child.name === 'string_content' && child.sourceInfo;
+      if (content) {
+        if (run && run.end === content.start) {
+          run = { start: run.start, end: content.end, text: run.text + content.text };
+        } else { flush(); run = { ...content }; }
+      } else { flush(); children.push(..._normalizeTsMulti(child, tsName)); }
+    }
+    flush();
+    return [new Node('STRING_TEMPLATE', mergeRuns(children))];
+  }
+  // $this is a this-expression, while ordinary interpolated names remain references.
+  if (tsName === 'interpolated_identifier' && node.sourceInfo?.text === 'this') {
+    return [new Node('SHORT_STRING_TEMPLATE_ENTRY', [new Node('THIS_EXPRESSION')])];
+  }
+
+  // Mandatory brace bodies are hidden _block rules, but their scope is explicit in PSI.
+  if (tsName === 'try_expression') {
+    let end = node.children.findIndex(n => ['catch_block', 'finally_block'].includes(n.name));
+    if (end < 0) end = node.children.length;
+    return [new Node('TRY', [
+      new Node('BLOCK', node.children.slice(0, end).flatMap(n => _normalizeTsMulti(n, tsName))),
+      ...node.children.slice(end).flatMap(n => _normalizeTsMulti(n, tsName)),
+    ])];
+  }
+  if (tsName === 'catch_block') {
+    let body = node.children.findIndex(n => n.name === 'statements');
+    if (body < 0) body = node.children.length;
+    const parameter = new Node('parameter', node.children.slice(0, body));
+    return [new Node('CATCH', [
+      new Node('VALUE_PARAMETER_LIST', _normalizeTsMulti(parameter, 'function_value_parameters')),
+      new Node('BLOCK', node.children.slice(body).flatMap(n => _normalizeTsMulti(n, tsName))),
+    ])];
+  }
+  if (tsName === 'finally_block') {
+    return [new Node('FINALLY', [new Node('BLOCK', node.children.flatMap(n => _normalizeTsMulti(n, tsName)))])];
+  }
+  // A secondary constructor's body is optional. Its implicit delegation has no source token.
+  if (tsName === 'secondary_constructor') {
+    const header = node.children.filter(n => ['modifiers', 'function_value_parameters', 'constructor_delegation_call'].includes(n.name));
+    const body = node.children.filter(n => !header.includes(n));
+    const children = header.flatMap(n => _normalizeTsMulti(n, tsName));
+    if (!header.some(n => n.name === 'constructor_delegation_call')) children.push(new Node('CONSTRUCTOR_DELEGATION_CALL'));
+    if (body.length || node.sourceInfo?.braced) children.push(new Node('BLOCK', body.flatMap(n => _normalizeTsMulti(n, tsName))));
+    return [new Node('SECONDARY_CONSTRUCTOR', children)];
+  }
+  // Assignment targets emit postfix pieces instead of the expression wrapper used on the RHS.
+  if (tsName === 'directly_assignable_expression' && node.children.slice(1).some(n => ['indexing_suffix', 'navigation_suffix'].includes(n.name))) {
+    let value = node.children[0];
+    for (const suffix of node.children.slice(1)) {
+      if (!['indexing_suffix', 'navigation_suffix'].includes(suffix.name)) { value = null; break; }
+      value = new Node(suffix.name === 'indexing_suffix' ? 'indexing_expression' : 'navigation_expression', [value, suffix]);
+    }
+    if (value) return _normalizeTsMulti(value, parentName);
+  }
+  // The parsed suffix operator, rather than its node label, identifies a callable reference.
+  if (tsName === 'navigation_expression') {
+    const suffix = node.children[node.children.length - 1];
+    const operator = suffix?.sourceInfo?.tokens.find(n => ['.', '?.', '::'].includes(n.type));
+    if (operator?.type === '::') {
+      const isClass = suffix.sourceInfo.tokens.some(n => n.type === 'class');
+      return [new Node(isClass ? 'CLASS_LITERAL_EXPRESSION' : 'CALLABLE_REFERENCE_EXPRESSION',
+        node.children.flatMap(n => _normalizeTsMulti(n, tsName)))];
+    }
+  }
 
   // Only a direct identifier under this/super denotes the @label. Identifiers
   // in user types retain the normal transparent treatment.
@@ -103,6 +182,13 @@ function _normalizeTsMulti(node, parentName = null) {
       kids.push(..._normalizeTsMulti(child, tsName));
     }
     return kids;
+  }
+
+  // Kotlin PSI models signed/unsigned numeric tokens as one atomic constant.
+  if (tsName === 'unsigned_literal') {
+    const children = node.children.flatMap(n => _normalizeTsMulti(n, tsName));
+    if (children.length === 1 && children[0].name === 'INTEGER_CONSTANT') return children;
+    return [new Node('INTEGER_CONSTANT', children)];
   }
 
   // lambda_parameters → preserve parameter count by generating VALUE_PARAMETER for each entry.
@@ -188,7 +274,8 @@ function _normalizeTsMulti(node, parentName = null) {
       node.children.some(c => c.name === 'line_comment' || c.name === 'multiline_comment');
     const isLoop = ['for_statement', 'while_statement', 'do_while_statement'].includes(parentName);
     let body;
-    if (!hasStatements && hasNonCommentChildren) body = children;
+    if (node.sourceInfo?.braced) body = [new Node('BLOCK', children)];
+    else if (!hasStatements && hasNonCommentChildren) body = children;
     else if (hasStatements || hasOnlyComments || (isLoop && node.children.length === 0)) body = [new Node('BLOCK', children)];
     else body = children.length ? [new Node('BLOCK', children)] : [];
     return isLoop ? [new Node('BODY', body)] : body;
@@ -270,7 +357,7 @@ function _normalizeTsMulti(node, parentName = null) {
   }
 
   // CLASS_INITIALIZER → wrap children in BLOCK
-  if (psiName === 'CLASS_INITIALIZER' && children.length > 0) {
+  if (psiName === 'CLASS_INITIALIZER') {
     children = [new Node('BLOCK', children)];
   }
 
@@ -357,6 +444,16 @@ function _normalizePsiMulti(node) {
   if (!node) return [];
 
   const name = node.name;
+  // PSI's literal/escape segmentation is canonicalized from its own exact source spans.
+  if (node.sourceInfo && name === 'LITERAL_STRING_TEMPLATE_ENTRY') {
+    return [textNode(node.sourceInfo, true)];
+  }
+  if (node.sourceInfo && name === 'ESCAPE_STRING_TEMPLATE_ENTRY') {
+    return [textNode(node.sourceInfo)];
+  }
+  if (node.sourceInfo && name === 'STRING_INTERPOLATION_PREFIX') {
+    return [new Node(name, [], { value: node.sourceInfo.text.length, start: node.sourceInfo.start, end: node.sourceInfo.end })];
+  }
   // Tree-sitter represents KDoc as a comment, without PSI's documentation AST.
   // Remove that AST before testing whether an import/package list is empty.
   if (name.startsWith('KDOC_')) return [];
@@ -410,8 +507,8 @@ function _normalizePsiMulti(node) {
 
   // Pure DOT_QUALIFIED_EXPRESSION chains → collapse to nothing
   if (name === 'DOT_QUALIFIED_EXPRESSION') {
-    const nonDqe = children.filter(c => c.name !== 'DOT_QUALIFIED_EXPRESSION');
-    if (nonDqe.length === 0) {
+    const referenceOnly = n => n.name === 'DOT_QUALIFIED_EXPRESSION' && n.children.every(referenceOnly);
+    if (children.every(referenceOnly)) {
       return [];
     }
   }
@@ -438,6 +535,7 @@ function _normalizePsiMulti(node) {
   if (name === 'CALL_EXPRESSION') {
     children = _flattenCallExpression(children);
   }
+  if (name === 'STRING_TEMPLATE') children = mergeRuns(children);
 
   // Empty DOT_QUALIFIED_EXPRESSION → drop
   if (name === 'DOT_QUALIFIED_EXPRESSION' && children.length === 0) {
