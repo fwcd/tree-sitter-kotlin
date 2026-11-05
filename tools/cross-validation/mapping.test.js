@@ -29,14 +29,11 @@ describe('mapping coverage', () => {
     expect(SKIP_PSI_NODES.has('CONTEXT_PARAMETER_LIST')).toBe(false);
     expect(ALL_PSI_COMPOSITE_NODES.has('BODY')).toBe(true);
   });
-  it('annotated_expression is a transparent wrapper', () => {
-    // `@Suppress("x") y = f()`. PSI has no composite for an annotated
-    // statement that survives normalisation: the ANNOTATION_ENTRY is attached
-    // to the expression itself, so the grammar's wrapper is dropped and its
-    // children promoted. A missing entry here is not benign — it raises
-    // UnknownNodeTypeError for every file containing one.
+  it('annotated_expression has an explicit ownership mapping', () => {
+    // The normalizer resolves assignment-prefix roles from the parsed line
+    // boundary; loops and line-prefixed statements retain this wrapper.
     expect(TS_TO_PSI).toHaveProperty('annotated_expression');
-    expect(TS_TO_PSI.annotated_expression).toBe(null);
+    expect(TS_TO_PSI.annotated_expression).toBe('ANNOTATED_EXPRESSION');
     expect(ALL_TS_NAMED_NODES.has('annotated_expression')).toBe(true);
   });
 

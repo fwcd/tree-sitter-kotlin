@@ -69,6 +69,13 @@ const cases = {
   annotatedAssignmentMultiple: 'fun f(){@A @B x=1}\n',
   annotatedAssignmentMixed: 'fun f(){@A\n@B x=1}\n',
   inlineQualifiedAssignment: 'fun f(){@A(1) x.y=1}\n',
+  unknownEscape: 'val s="\\f"\n',
+  unknownEscapeMixed: 'val s="a\\f\\n"\n',
+  validEscape: 'val s="\\n"\n',
+  constructorHeaderComment: 'class C(x:Int){@A //c\nconstructor():this(1)}\n',
+  constructorEmptyBody: 'class C(x:Int){@A //c\nconstructor():this(1){}}\n',
+  invalidUnicodeEscape: 'val s="a\\u12"\n',
+  invalidUnicodeEscapeChars: 'val s="a\\u12ZZb"\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -189,5 +196,14 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     equivalent('multiAnnotationList'); equivalent('multiAnnotationDeclaration');
     different('multiAnnotationDeclaration', 'singleAnnotationDeclaration');
     different('multiAnnotationList', 'multiAnnotationDeclaration');
+  });
+  it('N24 retains invalid escape fragments and surrounding valid text', () => {
+    equivalent('unknownEscape'); equivalent('unknownEscapeMixed');
+    equivalent('invalidUnicodeEscape'); equivalent('invalidUnicodeEscapeChars');
+    different('unknownEscape', 'validEscape');
+  });
+  it('N25 does not mistake a constructor header comment for a body', () => {
+    equivalent('constructorHeaderComment'); equivalent('constructorEmptyBody');
+    different('constructorHeaderComment', 'constructorEmptyBody');
   });
 });

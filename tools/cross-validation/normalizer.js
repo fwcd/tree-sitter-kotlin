@@ -6,7 +6,7 @@
 'use strict';
 
 const { Node } = require('./models');
-const { textNode, mergeRuns } = require('./literal-runs');
+const { textNode, textNodes, mergeRuns } = require('./literal-runs');
 const {
   TS_TO_PSI,
   SKIP_TS_NODES,
@@ -106,7 +106,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }));
     let run;
     const flush = () => {
-      if (run) children.push(textNode(run, info.string.raw));
+      if (run) children.push(...textNodes(run, info.string.raw));
       run = undefined;
     };
     for (const child of node.children) {
@@ -152,7 +152,8 @@ function _normalizeTsMulti(node, parentName = null) {
     const body = node.children.filter(n => !header.includes(n));
     const children = header.flatMap(n => _normalizeTsMulti(n, tsName));
     if (!header.some(n => n.name === 'constructor_delegation_call')) children.push(new Node('CONSTRUCTOR_DELEGATION_CALL'));
-    if (body.length || node.sourceInfo?.braced) children.push(new Node('BLOCK', body.flatMap(n => _normalizeTsMulti(n, tsName))));
+    if (body.some(child => !['line_comment', 'multiline_comment'].includes(child.name)) || node.sourceInfo?.braced)
+      children.push(new Node('BLOCK', body.flatMap(n => _normalizeTsMulti(n, tsName))));
     return [new Node('SECONDARY_CONSTRUCTOR', children)];
   }
   // Assignment targets emit postfix pieces instead of the expression wrapper used on the RHS.

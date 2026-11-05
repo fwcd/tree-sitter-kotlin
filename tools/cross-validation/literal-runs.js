@@ -23,6 +23,25 @@ function textNode(info, raw = false) {
   return new Node('LITERAL_STRING_TEMPLATE_ENTRY', [], { value, start: info.start, end: info.end });
 }
 
+/** Keep invalid escape fragments separate from the surrounding valid opaque run. */
+function textNodes(info, raw = false) {
+  if (raw) return [textNode(info, true)];
+  const result = []; let start = 0;
+  const part = (from, end) => textNode({text: info.text.slice(from, end), start: info.start + from, end: info.start + end});
+  for (let i = 0; i < info.text.length; i++) {
+    if (info.text[i] !== '\\') continue;
+    const escape = info.text[i + 1];
+    if (escape === 'u' && /^[0-9a-fA-F]{4}$/.test(info.text.slice(i + 2, i + 6))) { i += 5; continue; }
+    if (Object.hasOwn(ESCAPES, escape)) { i++; continue; }
+    if (escape === undefined) return [textNode(info)];
+    if (i > start) result.push(part(start, i));
+    result.push(part(i, i + 2));
+    i++; start = i + 1;
+  }
+  if (start < info.text.length) result.push(part(start, info.text.length));
+  return result.length ? result : [textNode(info)];
+}
+
 /** Merge only contiguous literal runs; interpolation remains a distinct node. */
 function mergeRuns(children) {
   const result = [];
@@ -39,4 +58,4 @@ function mergeRuns(children) {
   return result;
 }
 
-module.exports = { decode, textNode, mergeRuns };
+module.exports = { decode, textNode, textNodes, mergeRuns };
