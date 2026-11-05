@@ -1,0 +1,13 @@
+KtFile: loop-companion-property-modifier.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    MODIFIER_LIST
+      PsiElement(companion)('companion')
+    PsiWhiteSpace(' ')
+    PsiElement(var)('var')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+  PsiWhiteSpace('\n')

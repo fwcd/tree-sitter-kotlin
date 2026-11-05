@@ -1,0 +1,32 @@
+KtFile: loop-set-lambda-call-kind.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      CALL_EXPRESSION
+        REFERENCE_EXPRESSION
+          PsiElement(IDENTIFIER)('set')
+        VALUE_ARGUMENT_LIST
+          PsiElement(LPAR)('(')
+          VALUE_ARGUMENT
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('x')
+          PsiElement(RPAR)(')')
+        LAMBDA_ARGUMENT
+          LAMBDA_EXPRESSION
+            FUNCTION_LITERAL
+              PsiElement(LBRACE)('{')
+              BLOCK
+                <empty list>
+              PsiElement(RBRACE)('}')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')
