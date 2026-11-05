@@ -37,6 +37,23 @@ Check a local base revision without fetching upstream:
 
     npm run psi-gate -- quick --base origin/main
 
+Check any local Git checkout's tracked Kotlin sources with automatic grammar builds:
+
+    npm run psi-gate -- repo /path/to/Exposed
+
+The command uses the same upstream merge-base and accepts --base/--upstream,
+--strict, --home and worker/time budgets. Input repositories must have a commit,
+no tracked changes and no untracked Kotlin files. Clone a Git URL first, check out
+the desired commit, then supply its folder. No input-repository file is modified.
+
+The existing IDE-markup filter selects .kt/.kts inputs. Exact source bytes are
+snapshotted into the owned cache; the report and meta.json record the checked
+repository commit, input content SHA-256 and filter counts. Ordinary repository
+cases.json files are not treated as grammar assertions. Detailed run reports
+support psi-diff:minimize even after the original checkout moves or changes.
+Successful summaries use local/psi-gate/repo.md; failed runs preserve the last
+success and use repo.failed.md. Source and --home must be separate directories.
+
 Run all four reproducible corpora, including base-relative corpus expectations:
 
     npm run psi-gate -- full

@@ -18,10 +18,12 @@ const state = require('./state');
 const diff = require('../cross-validation/diff-run');
 const { assertHome, withHome } = require('./home');
 const { resolveBase } = require('./base');
+const { unmarked, inspectRepository, snapshotRepository, annotateReport } = require('./repository');
 const ROOT = path.resolve(__dirname, '../..');
 const KOTLIN = '9180ce6a7a7d3627f88b424717583f28ddca052d';
-const HELP = `Usage: npm run psi-gate -- quick|full|update-expected [options]
+const HELP = `Usage: npm run psi-gate -- quick|full|update-expected [options] or repo FOLDER [options]
   quick                  Generated snippets against the upstream merge-base
+  repo FOLDER            Check tracked Kotlin inputs in a clean local Git checkout
   full                   Also check corpus assertions, Kotlin and single-site mutations
   update-expected        Record base observations, not count allowances
   --base REV             Explicit local base (default: merge-base with upstream)
@@ -42,15 +44,18 @@ IDEA inputs require IDEA_ROOT and an exact 40-character IDEA_REV.
 function argumentsOf(argv) {
   const args = [...argv],
     command = args.shift() || 'quick';
-  if (!['quick', 'full', 'update-expected'].includes(command))
+  if (!['quick', 'full', 'update-expected', 'repo'].includes(command))
     throw new Error(`Unknown job ${command}; use --help`);
+  const folder = command === 'repo' ? args.shift() : null;
+  if (command === 'repo' && (!folder || folder.startsWith('--'))) throw new Error('repo requires a local checkout folder');
   const options = {
     command,
+    repoRoot: folder ? path.resolve(folder) : null,
     jobs: 2,
     timeoutMs: 120000,
     parseTimeoutMs: 10000,
     home: path.join(ROOT, 'local/psi-gate'),
-    corpora: command === 'full' ? ['snippets', 'corpus', 'mutations', 'kotlin'] : ['snippets'],
+    corpora: command === 'repo' ? ['repo'] : command === 'full' ? ['snippets', 'corpus', 'mutations', 'kotlin'] : ['snippets'],
   };
   while (args.length) {
     const flag = args.shift();
@@ -74,9 +79,11 @@ function argumentsOf(argv) {
   if (
     !options.corpora.length ||
     new Set(options.corpora).size !== options.corpora.length ||
-    options.corpora.some((c) => !['snippets', 'corpus', 'mutations', 'kotlin', 'idea'].includes(c))
+    options.corpora.some((c) => !['snippets', 'corpus', 'mutations', 'kotlin', 'idea', ...(command === 'repo' ? ['repo'] : [])].includes(c))
   )
     throw new Error('Choose distinct supported corpora (see --help)');
+  if (command === 'repo' && (options.corpora.length !== 1 || options.corpora[0] !== 'repo'))
+    throw new Error('repo checks its folder; --corpora cannot replace it');
   if (options.command === 'update-expected' && !options.expected)
     throw new Error('update-expected requires --expected FILE');
   if (options.expected && options.command !== 'update-expected')
@@ -85,6 +92,9 @@ function argumentsOf(argv) {
     );
   if (options.expected && options.corpora.length !== 1)
     throw new Error('Use one --corpora NAME with an expected snapshot');
+  if (options.repoRoot && (inside(canonical(options.home), canonical(options.repoRoot)) ||
+      inside(canonical(options.repoRoot), canonical(options.home))))
+    throw new Error('--home and the input repository must be separate');
   if (inside(canonical(options.home), canonical(ROOT)))
     throw new Error('--home must not contain the source checkout');
   return options;
@@ -282,24 +292,15 @@ function checkoutKotlin(home) {
     throw new Error('Kotlin input cache is not clean at its pinned revision; choose a new --home');
   return root;
 }
-function unmarked(root) {
-  const files = run('git', ['-C', root, 'ls-files', '-z', '--', '*.kt', '*.kts'])
-    .split('\0')
-    .filter(Boolean);
-  const markup =
-    /<(?:\/?(?:caret\w*|before|after|change|selection|error|warning|weak_warning|info|lineMarker|EOLError|EOLWarning|spot|symbolName|fold|inlineHint|hint|ref|cursor|block|html|inject|rainbow|TYPO|text_attr|caretMarker|expr)\b|rename\b)|<!\w*(?:[:(][^>]*)?!>|<!>/;
-  return files
-    .filter((file) => {
-      const data = fs.readFileSync(confined(root, file), 'utf8');
-      return !markup.test(data) && !/^\/\/ FILE: \S+\.(?!kts?\s*$)\w+\s*$/m.test(data);
-    })
-    .sort();
-}
+
 function corpusPlan(corpus, options, kotlin, baseRevision) {
   let root = path.join(options.home, 'corpora', corpus),
     extra = [],
     provenance = { corpus };
-  if (corpus === 'snippets') {
+  if (corpus === 'repo') {
+    const snapshot = snapshotRepository(options.repoRoot, options.home);
+    return snapshot;
+  } else if (corpus === 'snippets') {
     run(process.execPath, [path.join(ROOT, 'tools/cross-validation/mutations.js'), '--out', root]);
     provenance.generator = state.hashFile(path.join(ROOT, 'tools/cross-validation/mutations.js'));
   } else if (corpus === 'corpus') {
@@ -364,7 +365,7 @@ async function runJob(options) {
     kotlin = checkoutKotlin(options.home);
   let failed = false;
   for (const corpus of options.corpora) {
-    const { root, extra } = corpusPlan(corpus, options, kotlin, baseRevision);
+    const { root, extra, repository } = corpusPlan(corpus, options, kotlin, baseRevision);
     const out = path.join(options.home, 'runs', corpus);
     const args = [
       '--corpus',
@@ -405,6 +406,7 @@ async function runJob(options) {
       console.error(`${corpus}: execution failed; previous report preserved at ${latest}`);
       throw error;
     }
+    if (repository) annotateReport(path.join(out, content), repository);
     publishReport(options.home, corpus, result, path.join(out, content, 'report.md'));
     if (result.exitCode) failed = true;
   }
@@ -435,6 +437,7 @@ async function main(argv) {
     return { exitCode: 0 };
   }
   const options = argumentsOf(argv);
+  if (options.command === 'repo') inspectRepository(options.repoRoot);
   assertHome(options.home);
   prerequisites(options);
   return withHome(options.home, () => runJob(options));
