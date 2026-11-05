@@ -116,6 +116,33 @@ const cases = {
   genericQualifiedMemberCall: 'val r=Foo<T>.bar()\n',
   genericQualifiedChain: 'val r=a.Foo<T>.Bar<U>::baz\n',
   plainQualifiedReference: 'val r=Foo.Bar::baz\n',
+  typeContextReturn: 'fun f():context(A)()->Unit=fn\n',
+  anonymousTypeContextReturn: 'val f=fun():context(A)()->Unit{}\n',
+  nestedTypeContextParameter: 'val f:(context(A)B.(Int)->Unit)->Unit=fn\n',
+  mixedDynamicContextParameter: 'val f:(dynamic,context(A)B.(Int)->Unit,dynamic)->Unit=fn\n',
+  plainFunctionReturn: 'fun f():()->Unit=fn\n',
+  declarationContextReturn: 'context(a:A) fun f():()->Unit=fn\n',
+  parenthesizedSelectorCall: 'val x=a.(fn)()\n',
+  parenthesizedSafeSelectorCall: 'val x=a?.(fn)(1)\n',
+  lambdaSelectorCall: 'val x=a.{}()\n',
+  parenthesizedLambdaSelectorCall: 'val x=a.({1})(2)\n',
+  genericParenthesizedSelectorCall: 'val x=Foo<T>.(fn)()\n',
+  callReceiverSelectorCall: 'val x=a.foo().(fn)(1)\n',
+  parenthesizedSelectorValue: 'val x=a.(fn)\n',
+  hiddenAnnotatedBinary: 'fun f(){g(x,@A a+b)}\n',
+  hiddenAnnotatedBinaryArgs: 'fun f(){g(x,@A(T::class)\na+b)}\n',
+  hiddenAnnotatedInfix: 'fun f(){g(x,@A(T::class)\na to b)}\n',
+  hiddenAnnotatedCast: 'fun f(){g(x,@A(T::class)\na as T)}\n',
+  hiddenAnnotatedNestedBinary: 'fun f(){g(x,@A(T::class)\na*b+c)}\n',
+  parenthesizedAnnotatedBinary: 'fun f(){g(x,@A(T::class) (a+b))}\n',
+  plainBinaryArgument: 'fun f(){g(x,a+b)}\n',
+  explicitArgumentPrefix: 'fun f(){g(@A a+b)}\n',
+  secondAnnotatedFunction: 'fun f(){g(x,@A fun(){})}\n',
+  secondAnnotatedExtensionFunction: 'fun f(){g(x,@A fun T.(){})}\n',
+  statementAnnotatedAnonymousFunction: '@A\nfun(){}\n',
+  secondAnnotatedFunctionComment: 'fun f(){g(x,@A/*c*/fun(){})}\n',
+  precedingAnnotatedCall: 'fun f(){@A foo();fun(){}}\n',
+  secondPlainFunction: 'fun f(){g(x,fun(){})}\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -298,5 +325,31 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     different('genericQualifiedReference', 'plainQualifiedReference');
     different('genericQualifiedReference', 'genericQualifiedClass');
     different('genericQualifiedMember', 'genericQualifiedMemberCall');
+  });
+  it('N36 nests parsed type contexts in return and unnamed parameter function types', () => {
+    for (const name of ['typeContextReturn', 'anonymousTypeContextReturn', 'nestedTypeContextParameter', 'mixedDynamicContextParameter']) equivalent(name);
+    equivalent('declarationContextReturn');
+    different('typeContextReturn', 'plainFunctionReturn');
+    different('typeContextReturn', 'declarationContextReturn');
+    different('nestedTypeContextParameter', 'mixedDynamicContextParameter');
+  });
+  it('N37 preserves parenthesized and lambda member selectors as call targets', () => {
+    for (const name of ['parenthesizedSelectorCall', 'parenthesizedSafeSelectorCall', 'lambdaSelectorCall', 'parenthesizedLambdaSelectorCall', 'genericParenthesizedSelectorCall', 'callReceiverSelectorCall']) equivalent(name);
+    different('parenthesizedSelectorCall', 'parenthesizedSelectorValue');
+    different('parenthesizedSelectorCall', 'singleQualifiedCall');
+    different('lambdaSelectorCall', 'parenthesizedLambdaSelectorCall');
+  });
+  it('N38 interprets a separate argument annotation as a prefix of its first operand', () => {
+    for (const name of ['hiddenAnnotatedBinary', 'hiddenAnnotatedBinaryArgs', 'hiddenAnnotatedInfix', 'hiddenAnnotatedCast', 'hiddenAnnotatedNestedBinary']) equivalent(name);
+    equivalent('parenthesizedAnnotatedBinary');
+    different('hiddenAnnotatedBinary', 'plainBinaryArgument');
+    different('hiddenAnnotatedBinaryArgs', 'parenthesizedAnnotatedBinary');
+    different('hiddenAnnotatedNestedBinary', 'hiddenAnnotatedBinaryArgs');
+    expect(comparison('explicitArgumentPrefix').result.differences.length).toBeGreaterThan(0);
+  });
+  it('N39 starts anonymous declarations at their parsed hidden annotation prefix', () => {
+    for (const name of ['secondAnnotatedFunction', 'secondAnnotatedExtensionFunction', 'statementAnnotatedAnonymousFunction', 'secondAnnotatedFunctionComment', 'precedingAnnotatedCall']) equivalent(name);
+    different('secondAnnotatedFunction', 'secondPlainFunction');
+    different('statementAnnotatedAnonymousFunction', 'precedingAnnotatedCall');
   });
 });

@@ -25,6 +25,11 @@ const STATEMENT_EXPRESSIONS = new Set([
   'string_literal', 'character_literal', 'boolean_literal', 'integer_literal', 'hex_literal',
   'bin_literal', 'real_literal', 'null_literal', 'long_literal', 'unsigned_literal',
 ]);
+const ARGUMENT_PREFIX_OPERANDS = new Set([
+  'multiplicative_expression', 'additive_expression', 'range_expression', 'infix_expression',
+  'elvis_expression', 'check_expression', 'as_expression', 'comparison_expression',
+  'equality_expression', 'conjunction_expression', 'disjunction_expression',
+]);
 
 // ---------------------------------------------------------------------------
 // Tree-sitter normalizer
@@ -55,6 +60,25 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
+  // A return type's hidden modifier tuple owns the following function type.
+  if (['function_declaration', 'anonymous_function'].includes(tsName)) {
+    const grouped = []; let changed = false;
+    for (let i = 0; i < node.children.length; i++) {
+      const modifiers = node.children[i];
+      const contexts = modifiers.name === 'type_modifiers'
+        ? modifiers.children.filter(child => child.name === 'context_receiver') : [];
+      let end = i + 1;
+      while (end < node.children.length && ['line_comment', 'multiline_comment'].includes(node.children[end].name)) end++;
+      const type = node.children[end];
+      if (!contexts.length || type?.name !== 'function_type') { grouped.push(modifiers); continue; }
+      const rest = modifiers.children.filter(child => !contexts.includes(child));
+      if (rest.length) grouped.push(new Node('type_modifiers', rest));
+      grouped.push(...node.children.slice(i + 1, end), new Node('function_type', contexts.concat(type.children)));
+      i = end; changed = true;
+    }
+    if (changed) return _normalizeTsMulti(new Node(tsName, grouped), parentName);
+  }
+
   // A lambda-only suffix appends arguments to the preceding call.
   if (tsName === 'call_expression') {
     const parts = node.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
@@ -66,6 +90,32 @@ function _normalizeTsMulti(node, parentName = null) {
       const comments = node.children.filter(child => ['line_comment', 'multiline_comment'].includes(child.name));
       return _normalizeTsMulti(new Node(tsName, callee.children.map(child => child === previousSuffix
         ? new Node('call_suffix', previousSuffix.children.concat(comments, suffix.children)) : child)), parentName);
+    }
+  }
+
+  // A parenthesized or lambda selector is the call target, even when its receiver vanishes.
+  if (tsName === 'call_expression') {
+    const parts = node.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
+    const [callee, callSuffix] = parts;
+    const suffix = callee?.children[callee.children.length - 1];
+    const selectors = suffix?.children.filter(child => !['type_arguments', 'line_comment', 'multiline_comment'].includes(child.name));
+    const operator = suffix?.sourceInfo?.tokens.find(token => ['.', '?.'].includes(token.type));
+    const argumentsNodes = suffix?.children.filter(child => child.name === 'type_arguments') || [];
+    const genericReceiver = !argumentsNodes.length || (argumentsNodes.length === 1 && argumentsNodes[0].sourceInfo?.end <= operator?.start);
+    if (parts.length === 2 && callee.name === 'navigation_expression' && callSuffix.name === 'call_suffix'
+        && suffix?.name === 'navigation_suffix' && operator && genericReceiver && selectors.length === 1
+        && ['parenthesized_expression', 'lambda_literal'].includes(selectors[0].name)) {
+      let receivers = callee.children.slice(0, -1);
+      if (argumentsNodes.length) {
+        receivers = [new Node('call_expression', receivers.concat(argumentsNodes))];
+      }
+      return [new Node('DOT_QUALIFIED_EXPRESSION', [
+        ...receivers.flatMap(child => _normalizeTsMulti(child, tsName)),
+        new Node('CALL_EXPRESSION', [
+          ...suffix.children.filter(child => child.name !== 'type_arguments').flatMap(child => _normalizeTsMulti(child, tsName)),
+          ...node.children.filter(child => child !== callee).flatMap(child => _normalizeTsMulti(child, tsName)),
+        ]),
+      ])];
     }
   }
 
@@ -385,6 +435,11 @@ function _normalizeTsMulti(node, parentName = null) {
       else if (child.name === 'parameter') {
         parameters.push(new Node('VALUE_PARAMETER', modifiers.concat(normalized[0].children))); modifiers = [];
       } else if (normalized.length) {
+        if (child.name === 'function_type' && normalized.length === 1 && normalized[0].name === 'FUNCTION_TYPE') {
+          const contexts = modifiers.filter(entry => entry.name === 'CONTEXT_PARAMETER_LIST');
+          modifiers = modifiers.filter(entry => entry.name !== 'CONTEXT_PARAMETER_LIST');
+          if (contexts.length) normalized[0] = new Node('FUNCTION_TYPE', contexts.concat(normalized[0].children));
+        }
         parameters.push(new Node('VALUE_PARAMETER', modifiers.concat(normalized))); modifiers = [];
       }
     }
@@ -623,11 +678,25 @@ function groupStatementAnnotations(node) {
     }
     const tail = expression.name === 'prefix_expression' && expression.children.some(child => child.name === 'annotation')
       ? expression.children : [expression];
-    keep(new Node('prefix_expression', node.children.slice(i, end).concat(tail)),
+    const prefix = node.children.slice(i, end);
+    const argumentPrefix = node.name === 'value_argument' && ARGUMENT_PREFIX_OPERANDS.has(expression.name)
+      && prefix.every(child => ['annotation', 'line_comment', 'multiline_comment'].includes(child.name));
+    keep(argumentPrefix ? prefixArgumentOperand(expression, prefix)
+      : new Node('prefix_expression', prefix.concat(tail)),
       spans[i] && spans[end] ? {start: spans[i].start, end: spans[end].end} : undefined);
     i = end;
   }
   return {children: result, spans: resultSpans};
+}
+
+// The separate value-argument annotation aliases a unary prefix before the first operand.
+// Parentheses stop the left-operand walk and preserve explicitly grouped expressions.
+function prefixArgumentOperand(expression, prefix) {
+  if (!ARGUMENT_PREFIX_OPERANDS.has(expression.name)) return new Node('prefix_expression', prefix.concat(expression));
+  const index = expression.children.findIndex(child => !['line_comment', 'multiline_comment'].includes(child.name));
+  if (index < 0) return new Node('prefix_expression', prefix.concat(expression));
+  return new Node(expression.name, expression.children.map((child, i) => i === index
+    ? prefixArgumentOperand(child, prefix) : child));
 }
 
 function _nestFunctionTypeContexts(children, insideFunctionType) {

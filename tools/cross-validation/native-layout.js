@@ -93,9 +93,22 @@ function annotatedStart(node, start) {
     parent && parent.type === 'prefix_expression' && parent.lastNamedChild?.id === node.id;
     node = parent, parent = parent.parent
   ) {
-    if (!parent.namedChildren.slice(0, -1).every((child) => child.type === 'annotation')) break;
-    start = parent.startIndex;
+    const prefix = parent.namedChildren.slice(0, -1);
+    if (!prefix.every((child) => child.type === 'annotation' || COMMENT_TYPES.has(child.type))) break;
+    const first = prefix.find(child => child.type === 'annotation');
+    if (!first) break;
+    start = first.startIndex;
   }
+  // Hidden statement/argument annotation tuples have the same FUN modifier prefix.
+  const parent = node.parent;
+  if (!parent || !['source_file', 'statements', 'control_structure_body', 'value_argument'].includes(parent.type)) return start;
+  if (parent.type === 'value_argument' && parent.children.some(child => ['=', '*'].includes(child.type))) return start;
+  const siblings = parent.namedChildren, index = siblings.findIndex(child => child.id === node.id);
+  let begin = index;
+  while (begin > 0 && (siblings[begin - 1].type === 'annotation' || COMMENT_TYPES.has(siblings[begin - 1].type))) begin--;
+  const first = siblings.slice(begin, index).find(child => child.type === 'annotation');
+  if (first && !parent.children.some(child => child.type === ';' && child.startIndex >= first.endIndex && child.endIndex <= node.startIndex))
+    start = first.startIndex;
   return start;
 }
 
