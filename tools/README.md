@@ -11,9 +11,27 @@ Requires Node 22+, JDK 17+, git, curl, tar, Python 3.8+ and a C++17 compiler
 cache ownership are checked before downloading/building. Linux is verified;
 macOS/Windows native builds have not been tested here.
 
-One command from a bare checkout compares snippets against current upstream main:
+One command from a bare checkout compares snippets against the common ancestor
+of HEAD and the upstream branch:
 
     npm run psi-gate -- quick
+
+The default uses Git's merge-base, so upstream-only commits after the branch
+point are excluded from the contributor's change. The tool prints the selected
+commit and reason. It prefers a configured upstream/origin remote whose URL
+points to the canonical repository. If none exists, the documented fallback is
+https://github.com/fwcd/tree-sitter-kotlin.git, branch main. A configured remote's
+HEAD supplies its default branch when available.
+
+Override the upstream remote/URL and branch through flags or environment:
+
+    npm run psi-gate -- quick --upstream upstream --upstream-branch main
+    PSI_GATE_UPSTREAM=https://github.com/OWNER/REPO.git PSI_GATE_UPSTREAM_BRANCH=main npm run psi-gate -- quick
+
+Fetches write FETCH_HEAD and needed objects, with no tags or tracking-ref updates.
+Shallow checkouts deepen in bounded steps until the common ancestor is proven;
+remaining incomplete/unrelated history fails with an explicit-base remedy.
+Offline or network/configuration failure also suggests --base REV.
 
 Check a local base revision without fetching upstream:
 

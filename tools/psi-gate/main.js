@@ -17,13 +17,16 @@ const {
 const state = require('./state');
 const diff = require('../cross-validation/diff-run');
 const { assertHome, withHome } = require('./home');
+const { resolveBase } = require('./base');
 const ROOT = path.resolve(__dirname, '../..');
 const KOTLIN = '9180ce6a7a7d3627f88b424717583f28ddca052d';
 const HELP = `Usage: npm run psi-gate -- quick|full|update-expected [options]
-  quick                  Generated snippets against current upstream main
+  quick                  Generated snippets against the upstream merge-base
   full                   Also check corpus assertions, Kotlin and single-site mutations
   update-expected        Record base observations, not count allowances
-  --base REV             Local base revision (default: fetch current fwcd main)
+  --base REV             Explicit local base (default: merge-base with upstream)
+  --upstream REMOTE|URL  Override upstream, or PSI_GATE_UPSTREAM
+  --upstream-branch NAME Override branch, or PSI_GATE_UPSTREAM_BRANCH
   --corpora LIST          Comma-separated snippets,corpus,mutations,kotlin,idea
   --expected FILE        Snapshot to compare, or destination for update-expected
   --home DIR             Owned cache/report directory (default local/psi-gate)
@@ -58,6 +61,8 @@ function argumentsOf(argv) {
     const value = args.shift();
     if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`);
     if (flag === '--base') options.base = value;
+    else if (flag === '--upstream') options.upstream = value;
+    else if (flag === '--upstream-branch') options.upstreamBranch = value;
     else if (flag === '--corpora') options.corpora = value.split(',');
     else if (flag === '--expected') options.expected = path.resolve(value);
     else if (flag === '--home') options.home = path.resolve(value);
@@ -171,23 +176,10 @@ function runtime() {
   if (version !== '0.25.1')
     throw new Error('PSI runtime is corrupt; remove tools/psi-gate/node_modules and rerun');
 }
-function revision(base) {
-  if (!base) {
-    console.log('Fetching current upstream main...');
-    run(
-      'git',
-      [
-        'fetch',
-        '--depth=1',
-        'https://github.com/fwcd/tree-sitter-kotlin.git',
-        'main:refs/remotes/psi-upstream/main',
-      ],
-      { cwd: ROOT },
-    );
-    base = 'refs/remotes/psi-upstream/main';
-  }
-  return run('git', ['rev-parse', '--verify', `${base}^{commit}`], { cwd: ROOT }).trim();
+function revision(base, options = {}) {
+  return resolveBase({ ...options, base }, { cwd: ROOT }).commit;
 }
+
 function grammar(root, home, revision) {
   const residue = path.join(home, 'grammars/tools');
   if (fs.existsSync(residue)) {
@@ -364,7 +356,7 @@ function publishReport(home, corpus, result, report) {
 async function runJob(options) {
   runtime();
   await require('../psi-oracle/fetch').fetchAll();
-  const baseRevision = revision(options.base);
+  const baseRevision = revision(options.base, options);
   const head = grammar(ROOT, options.home),
     base = grammar(ROOT, options.home, baseRevision);
   let kotlin;
@@ -449,13 +441,13 @@ async function main(argv) {
 }
 
 /** Prepare the pinned runtime and an immutable grammar for other PSI tools. */
-async function prepareGrammar({ home, base }) {
+async function prepareGrammar({ home, base, upstream, upstreamBranch }) {
   assertHome(home);
   return withHome(home, async () => {
     prerequisites({ corpora: [] });
     runtime();
     await require('../psi-oracle/fetch').fetchAll();
-    const ref = revision(base);
+    const ref = revision(base, { upstream, upstreamBranch });
     return { grammar: grammar(ROOT, home, ref), runtime: __dirname, revision: ref };
   });
 }
