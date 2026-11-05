@@ -25,8 +25,9 @@ describe.skipIf(!available)('confirmed grammar defects remain visible through no
     expect(reference.psiErrors).toBe(0);
     const dump = fs.readFileSync(path.join(output, reference.dump), 'utf8');
     expect(dump).toBe(fs.readFileSync(path.join(ROOT, 'tools/psi-gate/grammar-bugs', c.psiFile), 'utf8'));
-    const tree = api.parseText(parser, c.source);
+    const source = fs.readFileSync(path.join(ROOT, 'tools/psi-gate/grammar-bugs', c.file), 'utf8');
+    const tree = api.parseText(parser, source);
     expect(tree.rootNode.hasError).toBe(c.nativeError);
-    expect(api.compareInput({ text: c.source, tree, psi: reference, dump }).verdict).toBe(c.verdict);
+    expect(api.compareInput({ text: source, tree, psi: reference, dump }).verdict).toBe(c.verdict);
   });
 });
