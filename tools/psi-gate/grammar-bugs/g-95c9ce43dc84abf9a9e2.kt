@@ -1,0 +1,2 @@
+val kotlinQuotedIdentifierRegex=
+    """^[^\r\n`]+\$"""
