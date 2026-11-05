@@ -448,5 +448,17 @@ async function main(argv) {
   return withHome(options.home, () => runJob(options));
 }
 
-module.exports = { main, argumentsOf, prerequisites, unmarked, baseCorpus, publishReport };
+/** Prepare the pinned runtime and an immutable grammar for other PSI tools. */
+async function prepareGrammar({ home, base }) {
+  assertHome(home);
+  return withHome(home, async () => {
+    prerequisites({ corpora: [] });
+    runtime();
+    await require('../psi-oracle/fetch').fetchAll();
+    const ref = revision(base);
+    return { grammar: grammar(ROOT, home, ref), runtime: __dirname, revision: ref };
+  });
+}
+
+module.exports = { prepareGrammar, main, argumentsOf, prerequisites, unmarked, baseCorpus, publishReport };
 runIfMain(module, main);

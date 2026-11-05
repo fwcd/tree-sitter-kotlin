@@ -24,7 +24,8 @@
     "psi-diff": "node tools/cross-validation/diff-run.js",
     "psi-diff:minimize": "node tools/cross-validation/minimize.js",
     "psi-diff:mutations": "node tools/cross-validation/mutations.js",
-    "psi-gate": "node tools/psi-gate/main.js"
+    "psi-gate": "node tools/psi-gate/main.js",
+    "psi-fuzz": "node tools/psi-gate/fuzz.js"
   },
   "repository": {
     "type": "git",

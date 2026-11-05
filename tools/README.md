@@ -170,3 +170,51 @@ suite. Without this setup, oracle/native integration tests skip and print the
 missing prerequisite. The test count therefore depends on whether those inputs
 are present; a skipped failure-mode suite is not verification of the fixes.
 No Java or PSI tools are needed for the ordinary grammar tests.
+
+## Continuous PSI-valid differential fuzzing
+
+Prepare the pinned runtime/main grammar and run deterministic generated inputs:
+
+    npm run psi-fuzz -- --seed example --max-inputs 1000
+
+Add a pinned real-code checkout and an exact production-file list, or a research
+seed manifest. Every original and single-site mutant is checked by the live PSI
+oracle; inputs with PSI errors are discarded before comparison.
+
+    npm run psi-fuzz -- --corpus /path/to/okio --list /path/to/production.list --seed example --max-inputs 2000
+    npm run psi-fuzz -- --sources /path/to/fuzzer-seeds.json --fixtures /path/to/kotlin/compiler/psi/psi-impl/testData/psi --seed example --max-inputs 2000
+
+The generator combines classes, constructors, delegation, enum/sealed/value
+classes, generics/function types, context/suspend functions, annotations,
+accessors, references, strings/interpolation, operators, labels, loops,
+destructuring and contracts with recursive expressions and unusual trivia.
+Acceptance is syntactic PSI acceptance; it does not assert type checking.
+
+    npm run psi-fuzz -- --continuous --seed example --depth 6 --jobs 2 --stable-window 5000 --max-seconds 3600
+
+Continuous runs checkpoint counts and verified representatives as they go.
+Stopping by stability requires 5,000 consecutive PSI-valid inputs with no
+unresolved normalized mismatch and only already-recorded grammar counterexamples.
+Input/time budgets stop bounded experiments; budget exhaustion is not normalizer
+completion. Pending reductions produce exit 2 and a partial result. Oracle,
+harness, corrupt-ledger and changed-comparison failures produce exit 1.
+
+`local/psi-fuzz/report.md` ranks per-file diagnostic families and shows one
+PSI-valid, reverified reduced example per family. `buckets.json` also records the
+complete expected/actual normalized shapes and native CST; `progress.json` is the
+partial checkpoint. Child-count families use direction rather than incidental
+absolute counts, and comparison paths identify the structural position.
+Reductions are bounded, preserving comments/literals as lexical units.
+
+Clean named mismatches are labeled **normalization-or-AST** for the fix loop;
+they are not assumed to be grammar bugs. Confirmed PSI-clean native syntax
+rejections and empty QUEST token spans are saved under
+`tools/psi-gate/grammar-bugs/g-*` with an authoritative PSI dump/shape and a ledger
+entry (source hashes, grammar revision, signature, first seed and provenance).
+Catalog-owned `catalog-*` files are not modified. Existing grammar cases are
+reverified as inputs on later runs; confirmed cases stay as regression evidence
+after the grammar is fixed. Rerun the same seed after any normalizer/mapping change;
+content identities prevent using results from a different comparison version.
+
+Use `--help` for budgets and alternate owned output/ledger directories. Run output
+and input roots must be separate. No grammar rule is changed by the fuzz harness.
