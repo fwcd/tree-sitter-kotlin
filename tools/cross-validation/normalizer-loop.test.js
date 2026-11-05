@@ -92,6 +92,30 @@ const cases = {
   dynamicFunction: 'val f:(dynamic)->Unit=fn\n',
   mixedDynamicFunction: 'val f:(dynamic,String,dynamic)->Unit=fn\n',
   zeroParameterFunction: 'val f:()->Unit=fn\n',
+  anonymousReceiver: 'val f=fun String.(){}\n',
+  anonymousQualifiedReceiver: 'val f=fun A.B.(){}\n',
+  anonymousGenericReceiver: 'val f=fun List<T>.(){}\n',
+  anonymousReceiverReturn: 'val f=fun List<T>.<U>(x:U):String{}\n',
+  anonymousPlain: 'val f=fun(){}\n',
+  anonymousParameter: 'val f=fun(x:String){}\n',
+  tripleQualifiedCall: 'val x=a.b()()()\n',
+  tripleSafeCall: 'val x=a?.b()()()\n',
+  quadrupleQualifiedCall: 'val x=a.b()()()()\n',
+  qualifiedArgumentCalls: 'val x=a.b(1)(2)(3)\n',
+  qualifiedLambdaCalls: 'val x=a.b{}{1}{2}\n',
+  qualifiedParenthesizedLambdaCalls: 'val x=a.b(){1}{2}\n',
+  plainLambdaCalls: 'val x=f(){1}{2}\n',
+  resultLambdaCall: 'val x=a.b()(){1}\n',
+  labeledExpressionBody: 'fun f()=label@foo()\n',
+  multipleLabeledExpressionBody: 'fun f()=outer@inner@foo()\n',
+  labeledBlockBody: 'fun f(){label@foo()}\n',
+  plainExpressionBody: 'fun f()=foo()\n',
+  genericQualifiedReference: 'val r=Foo<T>.Bar<U>::baz\n',
+  genericQualifiedClass: 'val r=Foo<T>.Bar<U>::class\n',
+  genericQualifiedMember: 'val r=Foo<T>.bar\n',
+  genericQualifiedMemberCall: 'val r=Foo<T>.bar()\n',
+  genericQualifiedChain: 'val r=a.Foo<T>.Bar<U>::baz\n',
+  plainQualifiedReference: 'val r=Foo.Bar::baz\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -246,5 +270,33 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     equivalent('dynamicFunction'); equivalent('mixedDynamicFunction');
     different('dynamicFunction', 'zeroParameterFunction');
     different('dynamicFunction', 'mixedDynamicFunction');
+  });
+  it('N31 wraps parsed anonymous extension receiver type pieces', () => {
+    for (const name of ['anonymousReceiver', 'anonymousQualifiedReceiver', 'anonymousGenericReceiver', 'anonymousReceiverReturn']) equivalent(name);
+    different('anonymousReceiver', 'anonymousPlain');
+    different('anonymousReceiver', 'anonymousParameter');
+    different('anonymousGenericReceiver', 'anonymousReceiver');
+  });
+  it('N32 preserves repeated qualified result invocations at arbitrary depth', () => {
+    for (const name of ['tripleQualifiedCall', 'tripleSafeCall', 'quadrupleQualifiedCall', 'qualifiedArgumentCalls']) equivalent(name);
+    different('tripleQualifiedCall', 'doubleQualifiedCall');
+    different('tripleQualifiedCall', 'quadrupleQualifiedCall');
+    different('tripleQualifiedCall', 'receiverThenCall');
+  });
+  it('N33 groups lambda-only suffixes as arguments of the preceding call', () => {
+    for (const name of ['qualifiedLambdaCalls', 'qualifiedParenthesizedLambdaCalls', 'plainLambdaCalls', 'resultLambdaCall']) equivalent(name);
+    different('qualifiedLambdaCalls', 'tripleQualifiedCall');
+    different('qualifiedParenthesizedLambdaCalls', 'resultLambdaCall');
+  });
+  it('N34 retains all pieces of a parsed equals expression body without a brace block', () => {
+    equivalent('labeledExpressionBody'); equivalent('multipleLabeledExpressionBody');
+    different('labeledExpressionBody', 'labeledBlockBody');
+    different('labeledExpressionBody', 'plainExpressionBody');
+  });
+  it('N35 wraps generic qualifiers only before their parsed member dot', () => {
+    for (const name of ['genericQualifiedReference', 'genericQualifiedClass', 'genericQualifiedMember', 'genericQualifiedMemberCall', 'genericQualifiedChain']) equivalent(name);
+    different('genericQualifiedReference', 'plainQualifiedReference');
+    different('genericQualifiedReference', 'genericQualifiedClass');
+    different('genericQualifiedMember', 'genericQualifiedMemberCall');
   });
 });

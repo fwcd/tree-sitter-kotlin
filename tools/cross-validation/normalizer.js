@@ -42,6 +42,33 @@ function _normalizeTsMulti(node, parentName = null) {
 
   const tsName = node.name;
 
+  // The anonymous receiver's hidden simple-user-type rule emits its pieces directly.
+  if (tsName === 'anonymous_function' && node.sourceInfo?.tokens.some(token => token.type === '.')) {
+    const end = node.children.findIndex(child => ['type_parameters', 'function_value_parameters'].includes(child.name));
+    const start = node.children.findIndex(child => child.name === 'type_identifier');
+    const receiver = node.children.slice(start, end);
+    if (start >= 0 && start < end && receiver.every(child =>
+      ['type_identifier', 'type_arguments', 'line_comment', 'multiline_comment'].includes(child.name))) {
+      return _normalizeTsMulti(new Node(tsName, [
+        ...node.children.slice(0, start), new Node('user_type', receiver), ...node.children.slice(end),
+      ]), parentName);
+    }
+  }
+
+  // A lambda-only suffix appends arguments to the preceding call.
+  if (tsName === 'call_expression') {
+    const parts = node.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
+    const [callee, suffix] = parts;
+    const suffixParts = suffix?.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
+    const previousSuffix = callee?.children.findLast(child => child.name === 'call_suffix');
+    if (parts.length === 2 && callee.name === 'call_expression' && suffix.name === 'call_suffix'
+        && suffixParts.length && suffixParts.every(child => child.name === 'annotated_lambda') && previousSuffix) {
+      const comments = node.children.filter(child => ['line_comment', 'multiline_comment'].includes(child.name));
+      return _normalizeTsMulti(new Node(tsName, callee.children.map(child => child === previousSuffix
+        ? new Node('call_suffix', previousSuffix.children.concat(comments, suffix.children)) : child)), parentName);
+    }
+  }
+
   // Initializer modifiers belong to the declaration, outside its hidden brace body.
   if (tsName === 'anonymous_initializer') {
     const headers = node.children.filter(child => child.name === 'modifiers');
@@ -216,10 +243,19 @@ function _normalizeTsMulti(node, parentName = null) {
   if (tsName === 'navigation_expression') {
     const suffix = node.children[node.children.length - 1];
     const operator = suffix?.sourceInfo?.tokens.find(n => ['.', '?.', '::'].includes(n.type));
+    const argumentsNodes = suffix?.children.filter(child => child.name === 'type_arguments') || [];
+    const selector = suffix?.children.filter(child => child.name !== 'type_arguments') || [];
+    // A parsed generic qualifier before the dot is PSI's type-argument-only receiver call.
+    if (['.', '?.'].includes(operator?.type) && argumentsNodes.length === 1
+        && argumentsNodes[0].sourceInfo?.end <= operator.start && selector.every(child =>
+          ['simple_identifier', 'line_comment', 'multiline_comment'].includes(child.name))) {
+      const receiver = new Node('call_expression', node.children.slice(0, -1).concat(argumentsNodes));
+      const tail = new Node('navigation_suffix', selector);
+      Object.defineProperty(tail, 'sourceInfo', {value:suffix.sourceInfo});
+      return _normalizeTsMulti(new Node(tsName, [receiver, tail]), parentName);
+    }
     if (operator?.type === '::') {
       const isClass = suffix.sourceInfo.tokens.some(n => n.type === 'class');
-      const argumentsNodes = suffix.children.filter(child => child.name === 'type_arguments');
-      const selector = suffix.children.filter(child => child.name !== 'type_arguments');
       // PSI calls the parsed expression receiver Foo<T> a type-argument-only call.
       if (argumentsNodes.length === 1 && selector.every(child =>
         ['simple_identifier', 'line_comment', 'multiline_comment'].includes(child.name))) {
@@ -444,13 +480,15 @@ function _normalizeTsMulti(node, parentName = null) {
   // CALL_EXPRESSION → flatten nested chains, then reorder DOT_QUALIFIED
   if (psiName === 'CALL_EXPRESSION') {
     const callee = node.children.find(child => !['line_comment', 'multiline_comment'].includes(child.name));
-    // Applying a qualified call's result is an outer call, not another member suffix.
-    if (callee?.name === 'call_expression' && children[0]?.name === 'DOT_QUALIFIED_EXPRESSION'
+    const flattened = _flattenCallExpression(children);
+    // Parenthesized arguments invoke a qualified call's result at every chain depth.
+    if (callee?.name === 'call_expression' && flattened[0]?.name === 'DOT_QUALIFIED_EXPRESSION'
+        && node.children.some(child => child.name === 'call_suffix' && child.children.some(part => part.name === 'value_arguments'))
         && callee.children.some(child => child.name === 'call_suffix' && child.children.some(part =>
           ['value_arguments', 'annotated_lambda'].includes(part.name)))) {
-      return [new Node('CALL_EXPRESSION', children)];
+      return [new Node('CALL_EXPRESSION', flattened)];
     }
-    children = _flattenCallExpression(children);
+    children = flattened;
     const reordered = _reorderDotQualifiedCall(children);
     if (reordered.length === 1 && reordered[0].name === 'DOT_QUALIFIED_EXPRESSION') {
       return reordered; // Already restructured, don't wrap in CALL_EXPRESSION
@@ -468,6 +506,8 @@ function _normalizeTsMulti(node, parentName = null) {
 
   // function_body — expression body detection
   if (tsName === 'function_body') {
+    // The parsed equals token makes every normalized expression piece body content.
+    if (node.sourceInfo?.tokens.some(token => token.type === '=')) return children;
     const hasStatements = node.children.some(c => c.name === 'statements');
     const hasNonCommentChildren = node.children.some(c =>
       c.name !== 'statements' && c.name !== 'line_comment' && c.name !== 'multiline_comment'

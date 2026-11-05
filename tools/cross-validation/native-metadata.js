@@ -5,7 +5,8 @@ const NATIVE_METADATA = new Set([
   'string_literal', 'string_content', 'interpolated_identifier',
   'control_structure_body', 'secondary_constructor', 'navigation_suffix',
   'directly_assignable_expression',
-  'source_file', 'statements', 'value_argument', 'annotated_expression', 'function_type_parameters',
+  'source_file', 'statements', 'value_argument', 'annotated_expression', 'function_type_parameters', 'anonymous_function',
+  'function_body', 'type_arguments',
 ]);
 const PSI_METADATA = new Set([
   'LITERAL_STRING_TEMPLATE_ENTRY', 'ESCAPE_STRING_TEMPLATE_ENTRY', 'STRING_INTERPOLATION_PREFIX',
