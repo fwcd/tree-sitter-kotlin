@@ -1,0 +1,21 @@
+KtFile: loop-escaped-dollar-interpolation.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('s')
+    PsiElement(EQ)('=')
+    STRING_TEMPLATE
+      PsiElement(OPEN_QUOTE)('"')
+      ESCAPE_STRING_TEMPLATE_ENTRY
+        PsiElement(ESCAPE_SEQUENCE)('\$')
+      LONG_STRING_TEMPLATE_ENTRY
+        PsiElement(LONG_TEMPLATE_ENTRY_START)('${')
+        REFERENCE_EXPRESSION
+          PsiElement(IDENTIFIER)('x')
+        PsiElement(LONG_TEMPLATE_ENTRY_END)('}')
+      PsiElement(CLOSING_QUOTE)('"')
+  PsiWhiteSpace('\n')

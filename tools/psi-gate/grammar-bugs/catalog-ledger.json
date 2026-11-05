@@ -57,6 +57,42 @@
       "grammarArea": "horizontal quest lookahead token start/end",
       "origin": "PR 329 downstream report",
       "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-escaped-dollar-interpolation",
+      "source": "val s=\"\\$${x}\"\n",
+      "grammarArea": "quoted-string scanner resumes interpolation after escaped dollar",
+      "psiVsNative": "PSI has an escaped dollar and a LONG_STRING_TEMPLATE_ENTRY; native has only literal string_content containing ${x}.",
+      "filesAffected": [
+        "okio-testing-support/src/commonMain/kotlin/okio/AbstractFileSystemTest.kt"
+      ],
+      "file": "loop-escaped-dollar-interpolation.kt",
+      "psiFile": "loop-escaped-dollar-interpolation.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))))",
+      "verdict": "C",
+      "key": "C @ … > PROPERTY > STRING_TEMPLATE > LITERAL_STRING_TEMPLATE_ENTRY: psi literal content/source span / ts different literal content/source span",
+      "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-data-index-assignment",
+      "source": "fun f(){data[i]=a[x]\ni}\n",
+      "grammarArea": "soft data modifier versus indexed assignment and positional destructuring conflict",
+      "psiVsNative": "PSI has BINARY_EXPRESSION with ARRAY_ACCESS_EXPRESSION receiver data; native treats data as class_modifier and makes DESTRUCTURING_DECLARATION.",
+      "filesAffected": [
+        "okio/src/commonMain/kotlin/okio/internal/Buffer.kt"
+      ],
+      "file": "loop-data-index-assignment.kt",
+      "psiFile": "loop-data-index-assignment.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (destructuring_declaration (modifiers (class_modifier)) (multi_variable_declaration (variable_declaration (simple_identifier))) (indexing_expression (simple_identifier) (indexing_suffix (simple_identifier)))) (simple_identifier)))))",
+      "verdict": "C",
+      "key": "C @ KtFile > FUN > BLOCK: psi BINARY_EXPRESSION / ts DESTRUCTURING_DECLARATION",
+      "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
     }
   ]
 }

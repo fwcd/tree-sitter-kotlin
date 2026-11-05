@@ -4,6 +4,7 @@ const { psiLayout } = require('./psi-layout');
 const NATIVE_METADATA = new Set([
   'string_literal', 'string_content', 'interpolated_identifier',
   'control_structure_body', 'secondary_constructor', 'navigation_suffix',
+  'directly_assignable_expression',
 ]);
 const PSI_METADATA = new Set([
   'LITERAL_STRING_TEMPLATE_ENTRY', 'ESCAPE_STRING_TEMPLATE_ENTRY', 'STRING_INTERPOLATION_PREFIX',
@@ -86,6 +87,7 @@ function attachNative(tree, root) {
       const literal = node.type === 'string_literal' ? node : node.parent?.type === 'string_literal' ? node.parent : null;
       byType.get(node.type).push({
         start: node.startIndex, end: node.endIndex, tokens,
+        postfixSequence: node.type === 'directly_assignable_expression' ? postfixSequence(node) : undefined,
         text: ['string_literal', 'string_content', 'interpolated_identifier'].includes(node.type) ? node.text : undefined,
         string: literal ? stringDelimiter(literal.text) : null,
         braced: tokens.some(n => n.type === '{') && tokens.some(n => n.type === '}'),
@@ -94,6 +96,12 @@ function attachNative(tree, root) {
     if (cursor.gotoFirstChild()) continue;
     while (!cursor.gotoNextSibling()) if (!cursor.gotoParent()) return assign(tree, byType);
   }
+}
+
+function postfixSequence(node) {
+  let index = 0;
+  return node.children.map(child => ({ type: child.type, named: child.isNamed,
+    index: child.isNamed ? index++ : null }));
 }
 
 function assign(tree, byType) {

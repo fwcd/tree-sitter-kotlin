@@ -30,6 +30,12 @@ function _normalizeTsMulti(node, parentName = null) {
 
   const tsName = node.name;
 
+  // A declared when subject is the same property syntax as a local declaration.
+  if (tsName === 'when_subject' && node.children.some(child =>
+    ['variable_declaration', 'multi_variable_declaration'].includes(child.name))) {
+    return _normalizeTsMulti(new Node('property_declaration', node.children), parentName);
+  }
+
   // A string-content token is opaque; PSI splits the same text into literal and escape runs.
   if (tsName === 'string_literal' && node.sourceInfo?.string) {
     const children = [];
@@ -89,6 +95,26 @@ function _normalizeTsMulti(node, parentName = null) {
     return [new Node('SECONDARY_CONSTRUCTOR', children)];
   }
   // Assignment targets emit postfix pieces instead of the expression wrapper used on the RHS.
+  // The hidden lvalue rule still emits its postfix operators in their parsed order.
+  if (tsName === 'directly_assignable_expression' && node.sourceInfo?.postfixSequence
+      .some(part => !part.named && ['!!', '++', '--'].includes(part.type))) {
+    let value, complete = true;
+    for (const part of node.sourceInfo.postfixSequence) {
+      if (!part.named) {
+        if (!value || !['!!', '++', '--'].includes(part.type)) { complete = false; break; }
+        value = new Node('postfix_expression', [value]);
+      } else {
+        const child = node.children[part.index];
+        if (!child) { complete = false; break; }
+        if (['line_comment', 'multiline_comment'].includes(child.name)) continue;
+        if (!value) value = child;
+        else if (['indexing_suffix', 'navigation_suffix'].includes(child.name)) {
+          value = new Node(child.name === 'indexing_suffix' ? 'indexing_expression' : 'navigation_expression', [value, child]);
+        } else { complete = false; break; }
+      }
+    }
+    if (complete && value) return _normalizeTsMulti(value, parentName);
+  }
   if (tsName === 'directly_assignable_expression' && node.children.slice(1).some(n => ['indexing_suffix', 'navigation_suffix'].includes(n.name))) {
     let value = node.children[0];
     for (const suffix of node.children.slice(1)) {
@@ -396,6 +422,16 @@ function _normalizeTsMulti(node, parentName = null) {
     children = _mergeFileAnnotationLists(children);
   }
 
+  // Native nullable_type owns repeated quest children; PSI nests one wrapper per quest.
+  if (tsName === 'nullable_type') {
+    const count = node.children.filter(child => child.name === 'quest').length;
+    if (count > 1) {
+      let value = new Node('NULLABLE_TYPE', children);
+      for (let i = 1; i < count; i++) value = new Node('NULLABLE_TYPE', [value]);
+      return [value];
+    }
+  }
+
   return [new Node(psiName, children)];
 }
 
@@ -443,7 +479,8 @@ function _nestFunctionTypeContexts(children, insideFunctionType) {
 function _normalizePsiMulti(node) {
   if (!node) return [];
 
-  const name = node.name;
+  // Both PSI access labels use the native navigation wrapper; the operator stays lexical.
+  const name = node.name === 'SAFE_ACCESS_EXPRESSION' ? 'DOT_QUALIFIED_EXPRESSION' : node.name;
   // PSI's literal/escape segmentation is canonicalized from its own exact source spans.
   if (node.sourceInfo && name === 'LITERAL_STRING_TEMPLATE_ENTRY') {
     return [textNode(node.sourceInfo, true)];
@@ -582,11 +619,6 @@ function _normalizePsiMulti(node) {
   // USER_TYPE → flatten nested chains (PSI nests, TS flattens)
   if (name === 'USER_TYPE') {
     children = _flattenUserType(children);
-  }
-
-  // SAFE_ACCESS_EXPRESSION → DOT_QUALIFIED_EXPRESSION
-  if (name === 'SAFE_ACCESS_EXPRESSION') {
-    return [new Node('DOT_QUALIFIED_EXPRESSION', children)];
   }
 
   return [new Node(name, children)];
