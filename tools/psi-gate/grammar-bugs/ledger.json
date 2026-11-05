@@ -510,5 +510,440 @@
       "feature": "strings",
       "depth": 3
     }
+  },
+  {
+    "id": "g-66d336c30ef982a3ff82",
+    "file": "g-66d336c30ef982a3ff82.kt",
+    "expected": "g-66d336c30ef982a3ff82.expected.json",
+    "sourceSha256": "4c3d70c9014c8cc3649b259837262a7b6dcd5baf183ab35069338323bd06da0c",
+    "expectedSha256": "4ec5071df305ae07141115dc725af67577b060c9a98e00f7c56bb4bc2a6198f8",
+    "signature": [
+      "grammar",
+      "statements",
+      "ERROR",
+      "->"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "statements",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "compiler/frontend/src/org/jetbrains/kotlin/resolve/calls/tasks/dynamicCalls.kt",
+      "sourceSha256": "41459628263113c69a64bc1ed2e70594bce358e0ab28b4c3719e691d8e006c49"
+    }
+  },
+  {
+    "id": "g-99567ba6235b1c903c62",
+    "file": "g-99567ba6235b1c903c62.kt",
+    "expected": "g-99567ba6235b1c903c62.expected.json",
+    "sourceSha256": "7e3de12c9d91fc4717ae901c7ffe211d3330909aba96687f9f11828e4dd02f7f",
+    "expectedSha256": "3fd460d931b3cb1d6ad143d0081cc2450aaa37f43cccd978e0057de5b4048253",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab"
+    }
+  },
+  {
+    "id": "g-bf3624ea613fb1d12823",
+    "file": "g-bf3624ea613fb1d12823.kt",
+    "expected": "g-bf3624ea613fb1d12823.expected.json",
+    "sourceSha256": "9cd89e076fafdc1abe4e9cb2cc1f829d9b15e5b114753a56d34154e4bce66aaf",
+    "expectedSha256": "295d39ff1c13d558b720a367b125b9928e0b1810dd4ef222edc7ec81eba6d4fc",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/js/src/kotlin/text/regex.kt",
+      "sourceSha256": "0e738f65f74b8f5cb7930dd010e771b6ae7de3cedc5d3ee4b185f319e3eeb432"
+    }
+  },
+  {
+    "id": "g-930c4088bad3b03508b0",
+    "file": "g-930c4088bad3b03508b0.kt",
+    "expected": "g-930c4088bad3b03508b0.expected.json",
+    "sourceSha256": "a34fddc38620997290656c8f9c8a8b83cb1af976ea21ad63aff9fda81625467f",
+    "expectedSha256": "44c023db7c7ec4bc36887d562d198cf105ad9c76fc7c3ef31823753a241f6fba",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "native/swift/sir-providers/src/org/jetbrains/kotlin/sir/providers/impl/BridgeProvider/StringUtils.kt",
+      "sourceSha256": "c72516d46eea13bc1c71ae05f037d5945da329d6949635d36bd6f70e16d5b983"
+    }
+  },
+  {
+    "id": "g-a86651e200018fa61890",
+    "file": "g-a86651e200018fa61890.kt",
+    "expected": "g-a86651e200018fa61890.expected.json",
+    "sourceSha256": "1fe3c7e264c9f66ca4bfe577f9885fe1d482c2809a6f37413084b09586fc2af8",
+    "expectedSha256": "b5d291614632f2a5205757dda37d8da22e991ae48079fbb44a3b94751e6f7a33",
+    "signature": [
+      "grammar",
+      "value_arguments",
+      "ERROR",
+      "'"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "value_arguments",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/Exposed",
+      "commit": "0957638c87e7a6ffae3835b0e11414ab2c8c65ac",
+      "path": "exposed-core/src/main/kotlin/org/jetbrains/exposed/v1/core/ColumnType.kt",
+      "sourceSha256": "fe1c0c69aa49172ffaa2ff0463f6b1fb14c18295398b0923dc88038786e1a542",
+      "operator": "char-content/2",
+      "seed": "normalizer-loop-sources-1",
+      "index": 3
+    }
+  },
+  {
+    "id": "g-9b7a4652b5bf790cb349",
+    "file": "g-9b7a4652b5bf790cb349.kt",
+    "expected": "g-9b7a4652b5bf790cb349.expected.json",
+    "sourceSha256": "fc7016dc70805c7450742351ca857cd2d274a89f8a3e4f94b6aff0f012c41fa7",
+    "expectedSha256": "e96089be3ebab2d91033e62c4e587bcadd3de0a04d3c2b8557ab1bdad8d7fd79",
+    "signature": [
+      "grammar",
+      "value_arguments",
+      "ERROR",
+      "'"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "value_arguments",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "plugins/kapt/kapt-compiler/src/org/jetbrains/kotlin/kapt/stubs/KaptStubConverter.kt",
+      "sourceSha256": "885c1f4c804f037d78c7abb1d167669277593f06a61a9e9dc23069bd0c15d88c",
+      "operator": "char-content/2",
+      "seed": "normalizer-loop-sources-1",
+      "index": 57
+    }
+  },
+  {
+    "id": "g-1d7ddc0ffa5a344dda3f",
+    "file": "g-1d7ddc0ffa5a344dda3f.kt",
+    "expected": "g-1d7ddc0ffa5a344dda3f.expected.json",
+    "sourceSha256": "3525e25f6ae91c348536ce707d0457e6d72b368dc6870f700a2c311d51303d09",
+    "expectedSha256": "6cf2f491e4308d858ead28fd06c3e71adeba9f3a413b6348ed0b3453a6db52d8",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab",
+      "operator": "comment-between-tokens",
+      "seed": "normalizer-loop-sources-1",
+      "index": 69
+    }
+  },
+  {
+    "id": "g-f795c8d6f3ae9027461f",
+    "file": "g-f795c8d6f3ae9027461f.kt",
+    "expected": "g-f795c8d6f3ae9027461f.expected.json",
+    "sourceSha256": "63d2f6ef58f08a950cce126e69c4030b4708d67ceafd17d0f00e45ab79adb908",
+    "expectedSha256": "ccb1b02d6a3c2a2a7186748027667b48b90096a05d8571b2946532f33de1e6c2",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/js/src/kotlin/text/regex.kt",
+      "sourceSha256": "0e738f65f74b8f5cb7930dd010e771b6ae7de3cedc5d3ee4b185f319e3eeb432",
+      "operator": "unicode-cjk",
+      "seed": "normalizer-loop-sources-1",
+      "index": 72
+    }
+  },
+  {
+    "id": "g-da51df21cfb78cfd821e",
+    "file": "g-da51df21cfb78cfd821e.kt",
+    "expected": "g-da51df21cfb78cfd821e.expected.json",
+    "sourceSha256": "4083c85302c1c77d7527236376b34e97680f3ae63c71b03f561783d8f607d506",
+    "expectedSha256": "ddd5568cce09142fc597034844f7a2601dee716f97e25b27f5a7f586a67f8aa1",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab",
+      "operator": "modifier-run/300x1",
+      "seed": "normalizer-loop-sources-1",
+      "index": 108
+    }
+  },
+  {
+    "id": "g-03ccfa3f987d184c1b0d",
+    "file": "g-03ccfa3f987d184c1b0d.kt",
+    "expected": "g-03ccfa3f987d184c1b0d.expected.json",
+    "sourceSha256": "c1403a0896409c6642bf4d1e5929f707cc7b218f684ce20b5d396b23a70f8b40",
+    "expectedSha256": "33547b4e16dd947af3bdaed72e51e532e015bc4b24a26e5d4bcaed4b3c27af2d",
+    "signature": [
+      "grammar",
+      "function_value_parameters",
+      "ERROR",
+      "'"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "function_value_parameters",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/src/kotlin/text/Strings.kt",
+      "sourceSha256": "12be6c955d7ab31a705abe296b4733f3883468c8566ca823537a2642932e6b82",
+      "operator": "char-content/6",
+      "seed": "normalizer-loop-sources-1",
+      "index": 132
+    }
+  },
+  {
+    "id": "g-f941a3cecf5de7492832",
+    "file": "g-f941a3cecf5de7492832.kt",
+    "expected": "g-f941a3cecf5de7492832.expected.json",
+    "sourceSha256": "cdbbb49c0c21914de556ef33e9354ec211548a98342798dd71c31ad485af4a19",
+    "expectedSha256": "2ce73a7f805dd939faf5b79d78554381a769d8df5b9e688de0b54b73a3af2189",
+    "signature": [
+      "grammar",
+      "statements",
+      "ERROR",
+      "->"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "statements",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "compiler/frontend/src/org/jetbrains/kotlin/resolve/calls/tasks/dynamicCalls.kt",
+      "sourceSha256": "41459628263113c69a64bc1ed2e70594bce358e0ab28b4c3719e691d8e006c49",
+      "operator": "modifier-run/300x5",
+      "seed": "normalizer-loop-sources-1",
+      "index": 183
+    }
+  },
+  {
+    "id": "g-8e24f84b33f98b0019ac",
+    "file": "g-8e24f84b33f98b0019ac.kt",
+    "expected": "g-8e24f84b33f98b0019ac.expected.json",
+    "sourceSha256": "8918da2de7b80f66f1fbb71bc9b6631ca3bc7d26f653fd4ad2205cbbdb58d6ee",
+    "expectedSha256": "f645562e99abfce6d0da33334b5d2c84ac814ca397b83361eaaac9ca6a172dba",
+    "signature": [
+      "grammar",
+      "navigation_suffix",
+      "ERROR",
+      "quest"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "navigation_suffix",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/kotlin.test/common/src/main/kotlin/kotlin/test/Assertions.kt",
+      "sourceSha256": "1c244e82fee76b35235b9cf6b7267f5f0d68256849547be459f43216c7b7f7ab",
+      "operator": "keyword-selector/false",
+      "seed": "normalizer-loop-sources-1",
+      "index": 342
+    }
+  },
+  {
+    "id": "g-d7f18ef01065793faaad",
+    "file": "g-d7f18ef01065793faaad.kt",
+    "expected": "g-d7f18ef01065793faaad.expected.json",
+    "sourceSha256": "27257fa88cc4b2de6f8c4fdd45cdf4840319b5390c0ab3ba9c9a0bec5e968f5e",
+    "expectedSha256": "6bf0fa7814f110a0ca015049d1f3ff08e01f3fa62a41f5ef79c7079f1ea9044a",
+    "signature": [
+      "grammar",
+      "value_arguments",
+      "ERROR",
+      "'"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "value_arguments",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/Exposed",
+      "commit": "0957638c87e7a6ffae3835b0e11414ab2c8c65ac",
+      "path": "exposed-core/src/main/kotlin/org/jetbrains/exposed/v1/core/ColumnType.kt",
+      "sourceSha256": "fe1c0c69aa49172ffaa2ff0463f6b1fb14c18295398b0923dc88038786e1a542",
+      "operator": "char-content/0",
+      "seed": "normalizer-loop-sources-1",
+      "index": 354
+    }
+  },
+  {
+    "id": "g-ca50544a0d11b3c245f9",
+    "file": "g-ca50544a0d11b3c245f9.kt",
+    "expected": "g-ca50544a0d11b3c245f9.expected.json",
+    "sourceSha256": "6bb9f0b1e01aa8ac8801d5cf90f80ddd4718df0012113701504b663bbd1eeb83",
+    "expectedSha256": "dcbd398d83a96fe906e8cfe79a23cd2d37554d27412fb907fc28965a4a8ef4b3",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "corpus",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/js/src/kotlin/text/regex.kt",
+      "sourceSha256": "0e738f65f74b8f5cb7930dd010e771b6ae7de3cedc5d3ee4b185f319e3eeb432"
+    }
+  },
+  {
+    "id": "g-7d6e387149b9f768dd26",
+    "file": "g-7d6e387149b9f768dd26.kt",
+    "expected": "g-7d6e387149b9f768dd26.expected.json",
+    "sourceSha256": "6afc0410e62e58b7089c0396a7402e62e41924a4b3cf2a62df2ca2eb3db3219a",
+    "expectedSha256": "3d5c52351ed7e5caf8d2bd768e004ebb1e785df7778910c8e0cb91a211472fa2",
+    "signature": [
+      "grammar",
+      "infix_expression",
+      "ERROR",
+      "simple_identifier"
+    ],
+    "observed": {
+      "defect": "native-syntax-rejection",
+      "spans": null
+    },
+    "likelyGrammarArea": "infix_expression",
+    "firstSeenSeed": "normalizer-loop-sources-1",
+    "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311",
+    "provenance": {
+      "kind": "mutation",
+      "repo": "JetBrains/kotlin",
+      "commit": "9180ce6a7a7d3627f88b424717583f28ddca052d",
+      "path": "libraries/stdlib/js/src/kotlin/text/regex.kt",
+      "sourceSha256": "0e738f65f74b8f5cb7930dd010e771b6ae7de3cedc5d3ee4b185f319e3eeb432",
+      "operator": "trivia-after/break",
+      "seed": "normalizer-loop-sources-1",
+      "index": 228
+    }
   }
 ]
