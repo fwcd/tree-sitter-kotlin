@@ -1,0 +1,26 @@
+KtFile: loop-script-semicolon-accessor.kts
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  SCRIPT
+    BLOCK
+      PROPERTY
+        PsiElement(var)('var')
+        PsiWhiteSpace(' ')
+        PsiElement(IDENTIFIER)('a')
+        PsiElement(SEMICOLON)(';')
+      PsiWhiteSpace('\n')
+      SCRIPT_INITIALIZER
+        BINARY_EXPRESSION
+          CALL_EXPRESSION
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('get')
+            VALUE_ARGUMENT_LIST
+              PsiElement(LPAR)('(')
+              PsiElement(RPAR)(')')
+          OPERATION_REFERENCE
+            PsiElement(EQ)('=')
+          INTEGER_CONSTANT
+            PsiElement(INTEGER_LITERAL)('42')
+      PsiWhiteSpace('\n')

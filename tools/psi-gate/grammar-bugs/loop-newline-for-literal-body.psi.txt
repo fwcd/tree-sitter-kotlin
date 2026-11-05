@@ -1,0 +1,35 @@
+KtFile: loop-newline-for-literal-body.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      FOR
+        PsiElement(for)('for')
+        PsiElement(LPAR)('(')
+        VALUE_PARAMETER
+          PsiElement(IDENTIFIER)('x')
+        PsiWhiteSpace(' ')
+        PsiElement(in)('in')
+        PsiWhiteSpace(' ')
+        LOOP_RANGE
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('y')
+        PsiElement(RPAR)(')')
+        PsiWhiteSpace('\n')
+        BODY
+          STRING_TEMPLATE
+            PsiElement(OPEN_QUOTE)('"')
+            LITERAL_STRING_TEMPLATE_ENTRY
+              PsiElement(REGULAR_STRING_PART)('x')
+            PsiElement(CLOSING_QUOTE)('"')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

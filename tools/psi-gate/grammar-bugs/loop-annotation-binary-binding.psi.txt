@@ -1,0 +1,27 @@
+KtFile: loop-annotation-binary-binding.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    BINARY_EXPRESSION
+      ANNOTATED_EXPRESSION
+        ANNOTATION_ENTRY
+          PsiElement(AT)('@')
+          CONSTRUCTOR_CALLEE
+            TYPE_REFERENCE
+              USER_TYPE
+                REFERENCE_EXPRESSION
+                  PsiElement(IDENTIFIER)('A')
+        PsiWhiteSpace(' ')
+        REFERENCE_EXPRESSION
+          PsiElement(IDENTIFIER)('a')
+      OPERATION_REFERENCE
+        PsiElement(PLUS)('+')
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('b')
+  PsiWhiteSpace('\n')

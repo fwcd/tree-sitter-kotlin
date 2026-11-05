@@ -1,0 +1,36 @@
+KtFile: loop-control-call-postfix.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      IF
+        PsiElement(if)('if')
+        PsiElement(LPAR)('(')
+        CONDITION
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('c')
+        PsiElement(RPAR)(')')
+        THEN
+          POSTFIX_EXPRESSION
+            CALL_EXPRESSION
+              REFERENCE_EXPRESSION
+                PsiElement(IDENTIFIER)('get')
+              VALUE_ARGUMENT_LIST
+                PsiElement(LPAR)('(')
+                VALUE_ARGUMENT
+                  BOOLEAN_CONSTANT
+                    PsiElement(true)('true')
+                PsiElement(RPAR)(')')
+            OPERATION_REFERENCE
+              PsiElement(EXCLEXCL)('!!')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

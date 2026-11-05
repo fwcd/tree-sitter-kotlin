@@ -1,0 +1,1 @@
+companion fun f(){}

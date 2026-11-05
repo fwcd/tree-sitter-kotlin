@@ -1,0 +1,31 @@
+KtFile: loop-label-cast-binding.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    BINARY_WITH_TYPE
+      LABELED_EXPRESSION
+        LABEL_QUALIFIER
+          LABEL
+            PsiElement(IDENTIFIER)('l')
+            PsiElement(AT)('@')
+        LAMBDA_EXPRESSION
+          FUNCTION_LITERAL
+            PsiElement(LBRACE)('{')
+            BLOCK
+              <empty list>
+            PsiElement(RBRACE)('}')
+      PsiWhiteSpace(' ')
+      OPERATION_REFERENCE
+        PsiElement(as)('as')
+      PsiWhiteSpace(' ')
+      TYPE_REFERENCE
+        USER_TYPE
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('T')
+  PsiWhiteSpace('\n')

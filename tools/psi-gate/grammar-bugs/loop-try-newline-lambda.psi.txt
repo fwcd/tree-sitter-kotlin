@@ -1,0 +1,39 @@
+KtFile: loop-try-newline-lambda.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      PROPERTY
+        PsiElement(val)('val')
+        PsiWhiteSpace(' ')
+        PsiElement(IDENTIFIER)('x')
+        PsiElement(EQ)('=')
+        TRY
+          PsiElement(try)('try')
+          BLOCK
+            PsiElement(LBRACE)('{')
+            PsiElement(RBRACE)('}')
+          FINALLY
+            PsiElement(finally)('finally')
+            BLOCK
+              PsiElement(LBRACE)('{')
+              PsiElement(RBRACE)('}')
+      PsiWhiteSpace('\n')
+      LAMBDA_EXPRESSION
+        FUNCTION_LITERAL
+          PsiElement(LBRACE)('{')
+          BLOCK
+            INTEGER_CONSTANT
+              PsiElement(INTEGER_LITERAL)('1')
+          PsiElement(RBRACE)('}')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

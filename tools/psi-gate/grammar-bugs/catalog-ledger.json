@@ -216,6 +216,529 @@
       "key": "C @ KtFile > PROPERTY: psi BINARY_EXPRESSION / ts CALL_EXPRESSION",
       "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
       "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-annotation-binary-binding",
+      "source": "val x=@A a+b\n",
+      "grammarArea": "expression annotation versus binary operator precedence",
+      "psiVsNative": "PSI annotates the left operand; native prefix_expression annotates the entire additive expression.",
+      "filesAffected": [
+        "compiler/util-klib-metadata/src/org/jetbrains/kotlin/library/metadata/impl/KlibModuleDescriptorFactoryImpl.kt"
+      ],
+      "file": "loop-annotation-binary-binding.kt",
+      "psiFile": "loop-annotation-binary-binding.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (additive_expression (simple_identifier) (simple_identifier)))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi BINARY_EXPRESSION / ts ANNOTATED_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-annotation-cast-binding",
+      "source": "val x=@A foo() as T\n",
+      "grammarArea": "expression annotation versus cast operator precedence",
+      "psiVsNative": "PSI casts an annotated call; native annotates the entire cast.",
+      "filesAffected": [
+        "libraries/stdlib/wasm/src/kotlin/collections/ArraysWasm.kt"
+      ],
+      "file": "loop-annotation-cast-binding.kt",
+      "psiFile": "loop-annotation-cast-binding.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (prefix_expression (annotation (user_type (type_identifier))) (as_expression (call_expression (simple_identifier) (call_suffix (value_arguments))) (user_type (type_identifier))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi BINARY_WITH_TYPE / ts ANNOTATED_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-label-binary-binding",
+      "source": "fun f(){l@a+b}\n",
+      "grammarArea": "expression label versus binary operator precedence",
+      "psiVsNative": "PSI labels the left operand; native labels the entire additive expression.",
+      "filesAffected": [
+        "compiler/psi/psi-impl/testData/psi/newLabels/basic.kt"
+      ],
+      "file": "loop-label-binary-binding.kt",
+      "psiFile": "loop-label-binary-binding.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (prefix_expression (label) (additive_expression (simple_identifier) (simple_identifier)))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > FUN > BLOCK: psi BINARY_EXPRESSION / ts LABEL",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-label-cast-binding",
+      "source": "val x=l@{} as T\n",
+      "grammarArea": "expression label versus cast operator precedence",
+      "psiVsNative": "PSI casts a labeled lambda; native labels the entire cast.",
+      "filesAffected": [
+        "compiler/testData/codegen/box/inference/pcla/oneParameter/oneTypeVariable/oneTypeInfoOrigin/targetTypes/NullaryFunctionWithReturnValue.kt"
+      ],
+      "file": "loop-label-cast-binding.kt",
+      "psiFile": "loop-label-cast-binding.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (prefix_expression (label) (as_expression (lambda_literal) (user_type (type_identifier))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi BINARY_WITH_TYPE / ts LABEL",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-try-newline-lambda",
+      "source": "fun f(){val x=try{}finally{}\n{1}}\n",
+      "grammarArea": "newline separates a try expression from a following lambda statement",
+      "psiVsNative": "PSI has a try initializer and a sibling lambda; native makes the lambda a call suffix of try.",
+      "filesAffected": [
+        "analysis/light-classes-base/src/org/jetbrains/kotlin/asJava/classes/implUtils.kt"
+      ],
+      "file": "loop-try-newline-lambda.kt",
+      "psiFile": "loop-try-newline-lambda.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (try_expression (finally_block)) (call_suffix (annotated_lambda (lambda_literal (statements (integer_literal)))))))))))",
+      "verdict": "C",
+      "key": "C @ … > FUN > BLOCK > PROPERTY: psi TRY / ts CALL_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-if-newline-lambda",
+      "source": "fun f(){if(c){}\n{1}}\n",
+      "grammarArea": "newline separates an if expression from a following lambda statement",
+      "psiVsNative": "PSI has sibling IF and LAMBDA_EXPRESSION statements; native calls the IF with the lambda.",
+      "filesAffected": [
+        "compiler/fir/raw-fir/psi2fir/testData/rawBuilder/expressions/cascadeIf.kt"
+      ],
+      "file": "loop-if-newline-lambda.kt",
+      "psiFile": "loop-if-newline-lambda.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (if_expression condition: (simple_identifier) consequence: (control_structure_body)) (call_suffix (annotated_lambda (lambda_literal (statements (integer_literal))))))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > FUN > BLOCK: psi IF / ts CALL_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-literal-newline-lambda",
+      "source": "fun f(){1\n{}}\n",
+      "grammarArea": "newline separates a literal expression from a following lambda statement",
+      "psiVsNative": "PSI keeps the integer and lambda as siblings; native calls the integer with a lambda suffix.",
+      "filesAffected": [
+        "compiler/testData/codegen/box/unit/sillyThings.kt"
+      ],
+      "file": "loop-literal-newline-lambda.kt",
+      "psiFile": "loop-literal-newline-lambda.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (integer_literal) (call_suffix (annotated_lambda (lambda_literal))))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > FUN > BLOCK: psi INTEGER_CONSTANT / ts CALL_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-lambda-newline-lambda",
+      "source": "fun f(){val x={}\n{}}\n",
+      "grammarArea": "newline separates lambda initializer and lambda statement",
+      "psiVsNative": "PSI has a lambda initializer and sibling lambda; native calls the initializer with the second lambda.",
+      "filesAffected": [
+        "compiler/testData/diagnostics/tests/collectionLiterals/stdlibTypes/kt85842.kt"
+      ],
+      "file": "loop-lambda-newline-lambda.kt",
+      "psiFile": "loop-lambda-newline-lambda.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (lambda_literal) (call_suffix (annotated_lambda (lambda_literal)))))))))",
+      "verdict": "C",
+      "key": "C @ … > FUN > BLOCK > PROPERTY: psi FUNCTION_LITERAL / ts CALL_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-semicolon-else-unary",
+      "source": "fun f(){if(c)x;else-y}\n",
+      "grammarArea": "semicolon before else and unary expression branch ownership",
+      "psiVsNative": "PSI has an IF with unary minus ELSE; native terminates IF and parses else-y as a sibling additive expression.",
+      "filesAffected": [
+        "libraries/stdlib/wasm/src/kotlin/math/fdlibm/s_asinh.kt"
+      ],
+      "file": "loop-semicolon-else-unary.kt",
+      "psiFile": "loop-semicolon-else-unary.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (if_expression condition: (simple_identifier) consequence: (control_structure_body (simple_identifier))) (additive_expression (simple_identifier) (simple_identifier))))))",
+      "verdict": "C",
+      "key": "C @ … > FUN > BLOCK > IF: psi PREFIX_EXPRESSION / ts (none)",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-qualified-is-grouping",
+      "source": "val x=this is A.B\n",
+      "grammarArea": "qualified user type versus navigation after a type check",
+      "psiVsNative": "PSI tests against qualified type A.B; native parses navigation of the check this is A.",
+      "filesAffected": [
+        "jps/jps-common/src/org/jetbrains/kotlin/platform/impl/CommonIdePlatformKind.kt"
+      ],
+      "file": "loop-qualified-is-grouping.kt",
+      "psiFile": "loop-qualified-is-grouping.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (navigation_expression (check_expression (this_expression) (user_type (type_identifier))) (navigation_suffix (simple_identifier)))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi IS_EXPRESSION / ts DOT_QUALIFIED_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-escaped-dollar-token-loss",
+      "source": "val x=\"\\$\"\n",
+      "grammarArea": "quoted string escaped dollar token extent",
+      "psiVsNative": "PSI preserves the escaped dollar entry; native string_literal has no content token for it.",
+      "filesAffected": [
+        "compiler/ir/backend.js/src/org/jetbrains/kotlin/ir/backend/js/transformers/irToJs/ReservedJsNames.kt"
+      ],
+      "file": "loop-escaped-dollar-token-loss.kt",
+      "psiFile": "loop-escaped-dollar-token-loss.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal)))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY > STRING_TEMPLATE: psi LITERAL_STRING_TEMPLATE_ENTRY / ts (none)",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-escaped-dollar-identifier",
+      "source": "val x=\"\\$\\$d\"\n",
+      "grammarArea": "quoted string escaped dollar versus short interpolation scanner",
+      "psiVsNative": "PSI has two escaped dollars and literal d; native starts a short interpolation at the second escaped dollar.",
+      "filesAffected": [
+        "core/compiler.common/src/org/jetbrains/kotlin/name/NameUtils.kt"
+      ],
+      "file": "loop-escaped-dollar-identifier.kt",
+      "psiFile": "loop-escaped-dollar-identifier.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content) (interpolation_identifier_start) (interpolated_identifier))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY > STRING_TEMPLATE: psi LITERAL_STRING_TEMPLATE_ENTRY / ts INVALID_ESCAPE_SEQUENCE",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-raw-backslash-interpolation",
+      "source": "val x=\"\"\"\\${x}\"\"\"\n",
+      "grammarArea": "raw string backslash does not escape interpolation",
+      "psiVsNative": "PSI has literal backslash and long interpolation; native consumes all of them as string_content.",
+      "filesAffected": [
+        "compiler/testData/codegen/box/strings/multilineStringsWithTemplates.kt"
+      ],
+      "file": "loop-raw-backslash-interpolation.kt",
+      "psiFile": "loop-raw-backslash-interpolation.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content))))",
+      "verdict": "C",
+      "key": "C @ … > PROPERTY > STRING_TEMPLATE > LITERAL_STRING_TEMPLATE_ENTRY: psi literal content/source span / ts different literal content/source span",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-short-backtick-interpolation",
+      "source": "val x=\"$`x`\"\n",
+      "grammarArea": "short string interpolation with escaped identifier",
+      "psiVsNative": "PSI recognizes a short interpolation containing an escaped identifier; native emits literal string_content.",
+      "filesAffected": [
+        "plugins/scripting/scripting-tests/testData/codegen/testScripts/reflect.test.kts"
+      ],
+      "file": "loop-short-backtick-interpolation.kt",
+      "psiFile": "loop-short-backtick-interpolation.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content) (string_content))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY > STRING_TEMPLATE: psi SHORT_STRING_TEMPLATE_ENTRY / ts LITERAL_STRING_TEMPLATE_ENTRY",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-multidollar-backtick-interpolation",
+      "source": "val x=$$\"\"\"$$`x`\"\"\"\n",
+      "grammarArea": "multi-dollar short interpolation with escaped identifier",
+      "psiVsNative": "PSI recognizes the escaped identifier after the active multi-dollar prefix; native emits literal content.",
+      "filesAffected": [
+        "compiler/testData/codegen/box/js/MultiDollarInterpolation.kt"
+      ],
+      "file": "loop-multidollar-backtick-interpolation.kt",
+      "psiFile": "loop-multidollar-backtick-interpolation.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (string_literal (string_content) (string_content))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY > STRING_TEMPLATE: psi SHORT_STRING_TEMPLATE_ENTRY / ts LITERAL_STRING_TEMPLATE_ENTRY",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-modifier-fun-binding",
+      "source": "companion fun f(){}\n",
+      "grammarArea": "modifier and function declaration versus infix expression ambiguity",
+      "psiVsNative": "PSI has a FUN with companion modifier; native parses an infix expression and lambda call.",
+      "filesAffected": [
+        "compiler/tests-integration/testData/integration/smoke/companionExtensionMain/hello.kt"
+      ],
+      "file": "loop-modifier-fun-binding.kt",
+      "psiFile": "loop-modifier-fun-binding.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (infix_expression (simple_identifier) (simple_identifier) (call_expression (simple_identifier) (call_suffix (value_arguments) (annotated_lambda (lambda_literal))))))",
+      "verdict": "C",
+      "key": "C declaration start only in psi: FUN @ ts simple_identifier / psi MODIFIER_LIST",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-context-labeled-receiver",
+      "source": "context(b@B)\nclass C\n",
+      "grammarArea": "labeled context receiver declaration prefix",
+      "psiVsNative": "PSI places labeled B in the CLASS context list; native parses a context call followed by CLASS.",
+      "filesAffected": [
+        "compiler/fir/raw-fir/psi2fir/testData/rawBuilder/declarations/contextReceivers.kt"
+      ],
+      "file": "loop-context-labeled-receiver.kt",
+      "psiFile": "loop-context-labeled-receiver.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (prefix_expression (label) (simple_identifier)))))) (class_declaration (type_identifier)))",
+      "verdict": "C",
+      "key": "C declaration start only in psi: CLASS @ ts simple_identifier / psi CONTEXT_PARAMETER_LIST",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-context-anonymous-function",
+      "source": "context(String)\nfun()\n",
+      "grammarArea": "context prefix of anonymous function declaration",
+      "psiVsNative": "PSI places the context list on FUN; native leaves a sibling call to context.",
+      "filesAffected": [
+        "analysis/analysis-api/testData/symbols/symbolByPsi/contextReceivers/contextReceiversOnFunction.kt"
+      ],
+      "file": "loop-context-anonymous-function.kt",
+      "psiFile": "loop-context-anonymous-function.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (simple_identifier))))) (anonymous_function (function_value_parameters)))",
+      "verdict": "C",
+      "key": "C declaration start only in psi: FUN @ ts simple_identifier / psi CONTEXT_PARAMETER_LIST",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-modifier-newline-function",
+      "source": "inline\nfun(){}\n",
+      "grammarArea": "newline modifier ownership for anonymous function declarations",
+      "psiVsNative": "PSI starts FUN at inline; native leaves inline as a sibling identifier and starts FUN at fun.",
+      "filesAffected": [
+        "jps/jps-plugin/testData/incremental/pureKotlin/inlinePrivateFunctionAdded/inline.kt"
+      ],
+      "file": "loop-modifier-newline-function.kt",
+      "psiFile": "loop-modifier-newline-function.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (simple_identifier) (anonymous_function (function_value_parameters) (function_body)))",
+      "verdict": "C",
+      "key": "C declaration start only in psi: FUN @ ts simple_identifier / psi MODIFIER_LIST",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-modified-accessor-binding",
+      "source": "var a\ninline set(value){}\nvar b\n",
+      "grammarArea": "modifier and property accessor versus infix expression ambiguity",
+      "psiVsNative": "PSI nests a modified setter under the first property; native leaves an infix expression between properties.",
+      "filesAffected": [
+        "compiler/testData/klib/syntheticAccessors/topLevelPrivate/crossFilePrivateLeak/leakingPrivateExtensionVarThroughPrivateInlineVarChain.kt"
+      ],
+      "file": "loop-modified-accessor-binding.kt",
+      "psiFile": "loop-modified-accessor-binding.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier))) (infix_expression (simple_identifier) (simple_identifier) (call_expression (parenthesized_expression (simple_identifier)) (call_suffix (annotated_lambda (lambda_literal))))) (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier))))",
+      "verdict": "C",
+      "key": "C declaration start only in psi: PROPERTY_ACCESSOR @ ts simple_identifier / psi MODIFIER_LIST",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-set-reference-kind",
+      "source": "fun f(){set}\n",
+      "grammarArea": "contextual accessor keyword versus ordinary reference expression",
+      "psiVsNative": "PSI keeps set as a reference; native creates a setter declaration.",
+      "filesAffected": [
+        "compiler/testData/codegen/box/controlStructures/kt910.kt"
+      ],
+      "file": "loop-set-reference-kind.kt",
+      "psiFile": "loop-set-reference-kind.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (setter)))))",
+      "verdict": "C",
+      "key": "C declaration start only in ts: PROPERTY_ACCESSOR @ ts function_declaration / psi REFERENCE_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-newline-for-literal-body",
+      "source": "fun f(){for(x in y)\n\"x\"}\n",
+      "grammarArea": "for control-body ownership across newline before literal",
+      "psiVsNative": "PSI FOR owns the string literal in BODY; native leaves FOR without a body and the string as a sibling.",
+      "filesAffected": [
+        "compiler/testData/codegen/box/strings/kt894.kt"
+      ],
+      "file": "loop-newline-for-literal-body.kt",
+      "psiFile": "loop-newline-for-literal-body.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (for_statement (variable_declaration (simple_identifier)) (simple_identifier)) (string_literal (string_content))))))",
+      "verdict": "C",
+      "key": "C @ … > BLOCK > FOR > BODY: psi STRING_TEMPLATE / ts (none)",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-script-semicolon-accessor",
+      "source": "var a;\nget()=42\n",
+      "extension": ".kts",
+      "grammarArea": "script semicolon ends property before get call assignment",
+      "psiVsNative": "PSI has PROPERTY then call-assignment initializer; native associates get as the property's accessor.",
+      "filesAffected": [
+        "compiler/psi/psi-impl/testData/psi/script/topLevelPropertiesWithGetSet.kts"
+      ],
+      "file": "loop-script-semicolon-accessor.kts",
+      "psiFile": "loop-script-semicolon-accessor.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier))) (getter (function_body (integer_literal))))",
+      "verdict": "C",
+      "key": "C declaration start only in ts: PROPERTY_ACCESSOR @ ts getter / psi REFERENCE_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-function-type-annotation-binding",
+      "source": "val x:Comparable<@A@B Unit.()->Unit>\n",
+      "grammarArea": "multiple type annotations before extension function type receiver",
+      "psiVsNative": "PSI puts both annotations on the whole function type; native attaches the second annotation to its receiver type.",
+      "filesAffected": [
+        "compiler/psi/psi-impl/testData/psi/annotation/functionalTypes/withoutParentheses/withReveiver.kt"
+      ],
+      "file": "loop-function-type-annotation-binding.kt",
+      "psiFile": "loop-function-type-annotation-binding.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier) (user_type (type_identifier) (type_arguments (type_projection (type_modifiers (annotation (user_type (type_identifier)))) (function_type receiver: (receiver_type (type_modifiers (annotation (user_type (type_identifier)))) (user_type (type_identifier))) (function_type_parameters) (user_type (type_identifier)))))))))",
+      "verdict": "C",
+      "key": "C @ … > USER_TYPE > TYPE_ARGUMENT_LIST > TYPE_PROJECTION: psi ANNOTATION_ENTRY / ts FUNCTION_TYPE",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-control-call-postfix",
+      "source": "fun f(){if(c)get(true)!!}\n",
+      "grammarArea": "getter-like branch call versus call suffix on IF",
+      "psiVsNative": "PSI IF owns a postfix call in THEN; native applies a call suffix and postfix operator to IF itself.",
+      "filesAffected": [
+        "compiler/tests-spec/testData/codegen/box/linked/expressions/conditional-expression/p-1/pos/2.6.kt"
+      ],
+      "file": "loop-control-call-postfix.kt",
+      "psiFile": "loop-control-call-postfix.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (postfix_expression (call_expression (if_expression condition: (simple_identifier) consequence: (control_structure_body (getter))) (call_suffix (value_arguments (value_argument (boolean_literal))))))))))",
+      "verdict": "C",
+      "key": "C declaration start only in ts: PROPERTY_ACCESSOR @ ts getter / psi REFERENCE_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-nested-do-label",
+      "source": "fun f(){l1@l2@do while(c)}\n",
+      "grammarArea": "nested labels on do while without brace body",
+      "psiVsNative": "PSI has labeled DO_WHILE; native parses an infix expression under the labels.",
+      "filesAffected": [
+        "compiler/testData/ir/irText/expressions/kt24804.kt"
+      ],
+      "file": "loop-nested-do-label.kt",
+      "psiFile": "loop-nested-do-label.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (prefix_expression (label) (prefix_expression (label) (infix_expression (simple_identifier) (simple_identifier) (parenthesized_expression (simple_identifier)))))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > FUN > BLOCK: psi DO_WHILE / ts BINARY_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-generic-class-reference-ambiguity",
+      "source": "fun f(){Array<String>::class}\n",
+      "grammarArea": "generic class reference in statement versus comparison expression",
+      "psiVsNative": "PSI has a class literal with generic receiver; native parses nested comparison expressions.",
+      "filesAffected": [
+        "compiler/fir/raw-fir/psi2fir/testData/rawBuilder/expressions/qualifierWithTypeArguments.kt"
+      ],
+      "file": "loop-generic-class-reference-ambiguity.kt",
+      "psiFile": "loop-generic-class-reference-ambiguity.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (comparison_expression (comparison_expression (simple_identifier) (simple_identifier)) (callable_reference))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > FUN > BLOCK: psi CLASS_LITERAL_EXPRESSION / ts BINARY_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-keyword-backtick-label",
+      "source": "fun f(){`!`@while(true){}}\n",
+      "grammarArea": "escaped identifier label versus annotation on lambda call",
+      "psiVsNative": "PSI has a labeled WHILE; native calls an identifier with an annotated lambda suffix.",
+      "filesAffected": [
+        "js/js.translator/testData/box/labels/peculiarNames.kt"
+      ],
+      "file": "loop-keyword-backtick-label.kt",
+      "psiFile": "loop-keyword-backtick-label.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (annotated_lambda (annotation (constructor_invocation (user_type (type_identifier)) (value_arguments (value_argument (boolean_literal))))) (lambda_literal))))))))",
+      "verdict": "C",
+      "key": "C @ KtFile > FUN > BLOCK: psi LABEL / ts CALL_EXPRESSION",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-object-argument-supertypes",
+      "source": "fun f(){g(object:A(),B{})}\n",
+      "grammarArea": "comma in object argument supertype list versus outer value arguments",
+      "psiVsNative": "PSI object declaration owns both supertypes; native assigns the second supertype to the outer argument list.",
+      "filesAffected": [
+        "libraries/stdlib/jvm/test/collections/IteratorsJVMTest.kt"
+      ],
+      "file": "loop-object-argument-supertypes.kt",
+      "psiFile": "loop-object-argument-supertypes.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (function_declaration (simple_identifier) (function_value_parameters) (function_body (statements (call_expression (simple_identifier) (call_suffix (value_arguments (value_argument (object_literal (delegation_specifier (constructor_invocation (user_type (type_identifier)) (value_arguments))))) (value_argument (call_expression (simple_identifier) (call_suffix (annotated_lambda (lambda_literal))))))))))))",
+      "verdict": "C",
+      "key": "C @ … > VALUE_ARGUMENT > OBJECT_LITERAL > OBJECT_DECLARATION: psi USER_TYPE / ts (none)",
+      "firstSeenSeed": "strict-corpus-normalizer-resume1",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
     }
   ]
 }

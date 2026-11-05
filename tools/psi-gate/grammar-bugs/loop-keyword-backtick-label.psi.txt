@@ -1,0 +1,32 @@
+KtFile: loop-keyword-backtick-label.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      LABELED_EXPRESSION
+        LABEL_QUALIFIER
+          LABEL
+            PsiElement(IDENTIFIER)('`!`')
+            PsiElement(AT)('@')
+        WHILE
+          PsiElement(while)('while')
+          PsiElement(LPAR)('(')
+          CONDITION
+            BOOLEAN_CONSTANT
+              PsiElement(true)('true')
+          PsiElement(RPAR)(')')
+          BODY
+            BLOCK
+              PsiElement(LBRACE)('{')
+              PsiElement(RBRACE)('}')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')
