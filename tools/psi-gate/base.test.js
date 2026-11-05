@@ -129,6 +129,17 @@ describe('upstream merge-base selection', () => {
       expect(refs(f.local)).toBe(before);
     } finally { cleanup(f); }
   });
+  it('uses complete local ancestry after advertising the current upstream tip', () => {
+    const f = fixture();
+    try {
+      git(f.local, 'fetch', '--no-tags', '--refmap=', f.upstream, 'main');
+      fs.writeFileSync(path.join(f.local, '.git/FETCH_HEAD'), 'sentinel');
+      const before = refs(f.local);
+      expect(resolveBase({ upstream: f.upstream }, { cwd: f.local, env: {}, log: () => {} }).commit).toBe(f.common);
+      expect(refs(f.local)).toBe(before);
+      expect(fs.readFileSync(path.join(f.local, '.git/FETCH_HEAD'), 'utf8')).toBe('sentinel');
+    } finally { cleanup(f); }
+  });
   it('keeps existing tags even when the checkout enables automatic pruning', () => {
     const f = fixture();
     try {

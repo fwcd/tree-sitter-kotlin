@@ -62,20 +62,31 @@ function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log
   const historyRemote = trackingRemote && remotes.includes(trackingRemote) ? trackingRemote
     : remotes.includes('origin') ? 'origin' : remote;
   const historyUrl = historyRemote ? urlOf(historyRemote) : url;
+  const knownBase = upstream => {
+    if (git(['cat-file', '-e', `${upstream}^{commit}`], true) === null) return null;
+    const commit = git(['merge-base', head, upstream], true);
+    if (!commit || boundaries().some(boundary =>
+      (ancestor(boundary, head) || ancestor(boundary, upstream)) && !ancestor(boundary, commit))) return null;
+    log(`Base ${commit}: merge-base of HEAD and ${label} (upstream tip ${upstream}).`);
+    return { commit, upstream, remote: remote || null, branch, reason: 'merge-base' };
+  };
+  const advertised = git(['ls-remote', '--exit-code', url, `refs/heads/${branch}`], true);
+  if (!advertised)
+    throw new Error(`Could not fetch upstream history for ${label}. Check connectivity/configuration, or use --base REV for an offline check.`);
+  const tip = advertised.split(/\s+/)[0];
+  const existing = knownBase(tip);
+  if (existing) return existing;
   const depths = git(['rev-parse', '--is-shallow-repository']) === 'true' ? [64, 256, 1024, 4096] : [null];
   for (const depth of depths) {
     if (depth && initial.length) fetch(historyUrl, initial, depth);
+    // The fork history often already contains upstream's advertised tip. Avoid
+    // downloading its trees/blobs again when the complete ancestor is now local.
+    const fromHistory = knownBase(tip);
+    if (fromHistory) return fromHistory;
     fetch(url, [`refs/heads/${branch}`], depth);
     const upstream = git(['rev-parse', '--verify', 'FETCH_HEAD^{commit}']);
-    const commit = git(['merge-base', head, upstream], true);
-    if (!commit) continue;
-    // A shallow frontier outside the candidate's ancestry could hide a better
-    // common ancestor. Deepen until every relevant frontier is at/before it.
-    const incomplete = boundaries().some(boundary =>
-      (ancestor(boundary, head) || ancestor(boundary, upstream)) && !ancestor(boundary, commit));
-    if (incomplete) continue;
-    log(`Base ${commit}: merge-base of HEAD and ${label} (upstream tip ${upstream}).`);
-    return { commit, upstream, remote: remote || null, branch, reason: 'merge-base' };
+    const resolved = knownBase(upstream);
+    if (resolved) return resolved;
   }
   throw new Error('Cannot establish a complete common ancestor with upstream. Fetch more history or use --base REV explicitly.');
 }
