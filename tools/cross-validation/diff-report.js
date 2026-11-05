@@ -134,7 +134,9 @@ function renderReport({ corpus, meta, summary, labels, triaged = null }) {
     for (const bucket of buckets) {
       const example = labels.map((label) => bucket.examples[label][0]).find(Boolean);
       out.push(
-        `| \`${bucket.key.replace(/\|/g, '\\|').replace(/`/g, 'ˋ')}\` | ${labels.map((label) => bucket.counts[label]).join(' | ')} | ${example ? `\`${example.path}${example.line ? `:${example.line}` : ''}\`` : ''} |`,
+        `| \`${bucket.key.replace(/\|/g, '\\|').replace(/`/g, 'ˋ')}\` | ` +
+          `${labels.map((label) => bucket.counts[label]).join(' | ')} | ` +
+          `${example ? `\`${example.path}${example.line ? `:${example.line}` : ''}\`` : ''} |`,
       );
     }
   };
@@ -143,7 +145,8 @@ function renderReport({ corpus, meta, summary, labels, triaged = null }) {
       '',
       `## Gate: ${triaged.failures.length ? 'FAIL' : 'PASS'} (${triaged.mode})`,
       '',
-      `${triaged.existing.length} unchanged differences and ${triaged.existingClaims?.length || 0} known corpus discrepancies retained from the reference.`,
+      `${triaged.existing.length} unchanged differences and ` +
+        `${triaged.existingClaims?.length || 0} known corpus discrepancies retained from the reference.`,
       '',
     );
     if (triaged.existingClaims?.length) {
@@ -155,7 +158,8 @@ function renderReport({ corpus, meta, summary, labels, triaged = null }) {
       out.push(`- **${failure.kind}** ${failure.path}: ${failure.message}`);
     out.push(
       '',
-      'Inspect a failing input, fix the grammar or corpus assertion, and rerun. Use --fresh after changing inputs in an explicit output directory.',
+      'Inspect a failing input, fix the grammar or corpus assertion, and rerun. ' +
+        'Use --fresh after changing inputs in an explicit output directory.',
     );
   }
   if (labels.includes('base') && labels.length > 1) {

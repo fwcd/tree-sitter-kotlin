@@ -22,7 +22,13 @@ const MANIFEST_PATH = path.join(__dirname, 'fixtures.manifest.json');
 const VERSION_FILE = path.join(__dirname, '.fixtures-version');
 const SCHEMA_VERSION = 3;
 const { METADATA_FILE, goldenHasPsiError, verifyGoldenFormat } = require('../psi-fixture-sources');
-const { CONTEXT_EXCLUSIONS_DIR, contextExclusion, exclusionPaths, verifyContextExclusion, requiredContextIds } = require('../psi-fixture-context');
+const {
+  CONTEXT_EXCLUSIONS_DIR,
+  contextExclusion,
+  exclusionPaths,
+  verifyContextExclusion,
+  requiredContextIds,
+} = require('../psi-fixture-context');
 
 /**
  * @typedef {object} Manifest
@@ -180,7 +186,10 @@ function verifyFixtures(manifest, dir = FIXTURES_DIR) {
   if (manifest.schemaVersion >= 3) {
     actual.positiveInventoryPairs = names.length + exclusions.length;
     actual.contextExcluded = exclusions.length;
-    if (exclusions.length) warnings.push(`${names.length} grammar comparisons from ${actual.positiveInventoryPairs} retained PSI pairs; ${exclusions.length} audited fixture policy exclusions (${exclusions.map(record => record.id).join(', ')})`);
+    if (exclusions.length) warnings.push(
+      `${names.length} grammar comparisons from ${actual.positiveInventoryPairs} retained PSI pairs; ` +
+        `${exclusions.length} audited fixture policy exclusions (${exclusions.map(record => record.id).join(', ')})`,
+    );
   }
 
   if (names.length === 0) {
@@ -242,7 +251,8 @@ function verifyFixtures(manifest, dir = FIXTURES_DIR) {
   }
   if (manifest.sources) {
     const recorded = Object.keys(manifest.sources).sort();
-    if (JSON.stringify(recorded) !== JSON.stringify([...manifest.fixtures].sort())) errors.push('Source provenance does not cover the exact fixture set');
+    if (JSON.stringify(recorded) !== JSON.stringify([...manifest.fixtures].sort()))
+      errors.push('Source provenance does not cover the exact fixture set');
     const metadataPath = path.join(dir, METADATA_FILE);
     if (!fs.existsSync(metadataPath)) errors.push('Fixture import provenance is missing');
     else {
@@ -251,7 +261,8 @@ function verifyFixtures(manifest, dir = FIXTURES_DIR) {
           || JSON.stringify(metadata.sourceRoots) !== JSON.stringify(manifest.sourceRoots)
           || JSON.stringify(metadata.sources) !== JSON.stringify(manifest.sources)
           || JSON.stringify(metadata.contextExclusions || []) !== JSON.stringify(exclusions)
-          || JSON.stringify(metadata.rejected) !== JSON.stringify(manifest.rejected)) errors.push('Fixture import provenance differs from the manifest');
+          || JSON.stringify(metadata.rejected) !== JSON.stringify(manifest.rejected))
+        errors.push('Fixture import provenance differs from the manifest');
     }
   }
 
@@ -267,7 +278,10 @@ function verifyFixtures(manifest, dir = FIXTURES_DIR) {
       const { ktFile, psiFile } = verifyContextExclusion(record, dir);
       verifyGoldenFormat(fs.readFileSync(psiFile, 'utf8'), path.basename(ktFile));
       if (goldenHasPsiError(fs.readFileSync(psiFile, 'utf8'))) errors.push(`PSI-invalid context exclusion: ${record.id}`);
-      expectedArtifacts.push(path.relative(contextDir, ktFile).split(path.sep).join('/'), path.relative(contextDir, psiFile).split(path.sep).join('/'));
+      expectedArtifacts.push(
+        path.relative(contextDir, ktFile).split(path.sep).join('/'),
+        path.relative(contextDir, psiFile).split(path.sep).join('/'),
+      );
     } catch (error) { errors.push(error.message); }
   }
   const actualArtifacts = [];

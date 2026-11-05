@@ -299,7 +299,10 @@ async function main(argv, reportContext = null) {
   const context = { ...meta.reportContext, corpus: options.corpus };
   if (options.exclude) {
     const included = new Set(files);
-    context.excluded = [...new Set([...(context.excluded || []), ...listInputs({ ...options, exclude: null }).filter(file => !included.has(file))])];
+    context.excluded = [...new Set([
+      ...(context.excluded || []),
+      ...listInputs({ ...options, exclude: null }).filter(file => !included.has(file)),
+    ])];
   }
   const summary = summarize(
     records,
@@ -339,7 +342,9 @@ async function main(argv, reportContext = null) {
   }
   for (const line of require('./conformance').headlines(summary.conformance)) console.log(line);
   console.log(
-    `${options.corpus}: ${triaged.failures.length ? 'FAIL' : 'PASS'} (${triaged.mode}); ${files.length} inputs, ${triaged.failures.length} failures, ${triaged.existing.length} unchanged differences. Report: ${path.join(options.out, 'report.md')}`,
+    `${options.corpus}: ${triaged.failures.length ? 'FAIL' : 'PASS'} (${triaged.mode}); ` +
+      `${files.length} inputs, ${triaged.failures.length} failures, ${triaged.existing.length} unchanged differences. ` +
+      `Report: ${path.join(options.out, 'report.md')}`,
   );
   for (const failure of triaged.failures.slice(0, 10))
     console.error(`${failure.kind}: ${failure.path}: ${failure.message}`);
