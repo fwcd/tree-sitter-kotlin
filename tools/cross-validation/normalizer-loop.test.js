@@ -76,6 +76,19 @@ const cases = {
   constructorEmptyBody: 'class C(x:Int){@A //c\nconstructor():this(1){}}\n',
   invalidUnicodeEscape: 'val s="a\\u12"\n',
   invalidUnicodeEscapeChars: 'val s="a\\u12ZZb"\n',
+  annotatedInit: 'class C{@A init{foo()}}\n',
+  plainInit: 'class C{init{foo()}}\n',
+  annotatedDelegate: 'class C:@A I by x\n',
+  plainDelegate: 'class C:I by x\n',
+  classAnnotation: '@A class C:I by x\n',
+  doubleQualifiedCall: 'val x=a.b()()\n',
+  doubleSafeQualifiedCall: 'val x=a?.b()()\n',
+  receiverThenCall: 'val x=a().b()\n',
+  singleQualifiedCall: 'val x=a.b()\n',
+  fieldListAnnotation: 'class C{@field:[A] val x=1}\n',
+  fieldMultiAnnotation: 'class C{@field:[A B] val x=1}\n',
+  fieldPlainAnnotation: 'class C{@field:A val x=1}\n',
+  plainMultiAnnotation: 'class C{@[A B] val x=1}\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -205,5 +218,25 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
   it('N25 does not mistake a constructor header comment for a body', () => {
     equivalent('constructorHeaderComment'); equivalent('constructorEmptyBody');
     different('constructorHeaderComment', 'constructorEmptyBody');
+  });
+  it('N26 retains initializer header annotations outside the body', () => {
+    equivalent('annotatedInit');
+    different('annotatedInit', 'plainInit');
+  });
+  it('N27 gives a parsed delegated entry its hidden annotation prefix', () => {
+    equivalent('annotatedDelegate'); equivalent('classAnnotation');
+    different('annotatedDelegate', 'plainDelegate');
+    different('annotatedDelegate', 'classAnnotation');
+  });
+  it('N28 preserves applying an already evaluated qualified call result', () => {
+    equivalent('doubleQualifiedCall'); equivalent('doubleSafeQualifiedCall');
+    different('doubleQualifiedCall', 'receiverThenCall');
+    different('doubleQualifiedCall', 'singleQualifiedCall');
+  });
+  it('N29 retains a bracket annotation group target on every entry', () => {
+    equivalent('fieldListAnnotation'); equivalent('fieldMultiAnnotation');
+    expect(compareTrees(comparison('fieldListAnnotation').tsNorm, comparison('fieldPlainAnnotation').psiNorm).status).toBe('MATCH');
+    different('fieldMultiAnnotation', 'plainMultiAnnotation');
+    different('fieldMultiAnnotation', 'fieldListAnnotation');
   });
 });

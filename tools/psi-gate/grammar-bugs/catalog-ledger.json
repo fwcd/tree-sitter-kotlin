@@ -180,6 +180,42 @@
       "key": "C @ … > CALL_EXPRESSION > VALUE_ARGUMENT_LIST > VALUE_ARGUMENT: psi BINARY_EXPRESSION / ts ANNOTATION_ENTRY",
       "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
       "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-generic-binary-precedence",
+      "source": "val x=a.f<T>()+b.g<U>()\n",
+      "grammarArea": "generic call suffix versus binary operator precedence",
+      "psiVsNative": "PSI BINARY_EXPRESSION contains two calls; native attaches the right generic call suffix to the whole additive expression.",
+      "filesAffected": [
+        "compiler/fir/diagnostic-renderers/src/org/jetbrains/kotlin/fir/analysis/diagnostics/FirAdaptiveTypeRenderingKey.kt"
+      ],
+      "file": "loop-generic-binary-precedence.kt",
+      "psiFile": "loop-generic-binary-precedence.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (additive_expression (call_expression (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier))) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments))) (navigation_expression (simple_identifier) (navigation_suffix (simple_identifier)))) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments)))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi BINARY_EXPRESSION / ts CALL_EXPRESSION",
+      "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
+    },
+    {
+      "id": "loop-generic-elvis-precedence",
+      "source": "val x=a?:foo<T>()\n",
+      "grammarArea": "generic call suffix versus elvis expression precedence",
+      "psiVsNative": "PSI elvis BINARY_EXPRESSION has a call RHS; native CALL_EXPRESSION applies its suffix to the entire elvis expression.",
+      "filesAffected": [
+        "compiler/frontend/src/org/jetbrains/kotlin/resolve/FiniteBoundRestrictionChecker.kt"
+      ],
+      "file": "loop-generic-elvis-precedence.kt",
+      "psiFile": "loop-generic-elvis-precedence.psi.txt",
+      "psiErrors": 0,
+      "nativeError": false,
+      "nativeTree": "(source_file (property_declaration (binding_pattern_kind) (variable_declaration (simple_identifier)) (call_expression (elvis_expression (simple_identifier) (simple_identifier)) (call_suffix (type_arguments (type_projection (user_type (type_identifier)))) (value_arguments)))))",
+      "verdict": "C",
+      "key": "C @ KtFile > PROPERTY: psi BINARY_EXPRESSION / ts CALL_EXPRESSION",
+      "firstSeenSeed": "okio-1926f022425ccd85ee558c558f0a5b7b24826a57",
+      "grammarRevision": "d6af96d2e23ef0a8ff5ab512864378cf08fba311"
     }
   ]
 }

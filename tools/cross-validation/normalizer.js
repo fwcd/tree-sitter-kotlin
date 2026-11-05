@@ -42,6 +42,33 @@ function _normalizeTsMulti(node, parentName = null) {
 
   const tsName = node.name;
 
+  // Initializer modifiers belong to the declaration, outside its hidden brace body.
+  if (tsName === 'anonymous_initializer') {
+    const headers = node.children.filter(child => child.name === 'modifiers');
+    const body = node.children.filter(child => child.name !== 'modifiers');
+    return [new Node('CLASS_INITIALIZER', [
+      ...headers.flatMap(child => _normalizeTsMulti(child, tsName)),
+      new Node('BLOCK', body.flatMap(child => _normalizeTsMulti(child, tsName))),
+    ])];
+  }
+
+  // _annotated_delegation_specifier is hidden; its prefix owns only this delegated entry.
+  if (['class_declaration', 'object_declaration', 'object_literal', 'companion_object'].includes(tsName)) {
+    const children = []; let changed = false;
+    for (let i = 0; i < node.children.length; i++) {
+      const first = node.children[i];
+      if (first.name !== 'annotation') { children.push(first); continue; }
+      let end = i + 1;
+      while (end < node.children.length && ['annotation', 'line_comment', 'multiline_comment'].includes(node.children[end].name)) end++;
+      const specifier = node.children[end];
+      const entry = specifier?.name === 'delegation_specifier' && specifier.children.length === 1 && specifier.children[0];
+      if (entry?.name !== 'explicit_delegation') { children.push(first); continue; }
+      children.push(new Node('delegation_specifier', [new Node('explicit_delegation', node.children.slice(i, end).concat(entry.children))]));
+      i = end; changed = true;
+    }
+    if (changed) return _normalizeTsMulti(new Node(tsName, children), parentName);
+  }
+
   // A bracket annotation list aliases multiple unescaped entries inside one native annotation.
   if (tsName === 'annotation') {
     const entries = node.children.filter(child => ['user_type', 'constructor_invocation'].includes(child.name));
@@ -411,6 +438,13 @@ function _normalizeTsMulti(node, parentName = null) {
 
   // CALL_EXPRESSION → flatten nested chains, then reorder DOT_QUALIFIED
   if (psiName === 'CALL_EXPRESSION') {
+    const callee = node.children.find(child => !['line_comment', 'multiline_comment'].includes(child.name));
+    // Applying a qualified call's result is an outer call, not another member suffix.
+    if (callee?.name === 'call_expression' && children[0]?.name === 'DOT_QUALIFIED_EXPRESSION'
+        && callee.children.some(child => child.name === 'call_suffix' && child.children.some(part =>
+          ['value_arguments', 'annotated_lambda'].includes(part.name)))) {
+      return [new Node('CALL_EXPRESSION', children)];
+    }
     children = _flattenCallExpression(children);
     const reordered = _reorderDotQualifiedCall(children);
     if (reordered.length === 1 && reordered[0].name === 'DOT_QUALIFIED_EXPRESSION') {
@@ -582,6 +616,14 @@ function _normalizePsiMulti(node) {
 
   // Both PSI access labels use the native navigation wrapper; the operator stays lexical.
   const name = node.name === 'SAFE_ACCESS_EXPRESSION' ? 'DOT_QUALIFIED_EXPRESSION' : node.name;
+  // A PSI bracket group's target applies to each entry, as in native annotation aliases.
+  if (name === 'ANNOTATION') {
+    const target = node.children.find(child => child.name === 'ANNOTATION_TARGET');
+    const entries = node.children.filter(child => child.name === 'ANNOTATION_ENTRY');
+    if (target && entries.length && node.children.every(child => child === target || entries.includes(child))) {
+      return entries.flatMap(entry => _normalizePsiMulti(new Node('ANNOTATION_ENTRY', [target, ...entry.children])));
+    }
+  }
   // PSI's literal/escape segmentation is canonicalized from its own exact source spans.
   if (node.sourceInfo && name === 'LITERAL_STRING_TEMPLATE_ENTRY') {
     return [textNode(node.sourceInfo, true)];
@@ -688,7 +730,7 @@ function _normalizePsiMulti(node) {
   // CLASS_INITIALIZER → wrap children in BLOCK (PSI side only if not already a BLOCK)
   if (name === 'CLASS_INITIALIZER') {
     // PSI already has BLOCK inside CLASS_INITIALIZER — don't double-wrap
-    const hasBlock = children.length === 1 && children[0].name === 'BLOCK';
+    const hasBlock = children.some(child => child.name === 'BLOCK');
     if (!hasBlock) {
       children = [new Node('BLOCK', children)];
     }
