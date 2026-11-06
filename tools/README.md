@@ -343,6 +343,11 @@ Both `psi-gate` and `psi-fuzz` accept `--git-timeout-ms N` (1..3600000), or
 `PSI_GATE_GIT_TIMEOUT_MS`; the flag takes precedence and the default is 180000ms
 per Git call. This budget is separate from the oracle and fuzz sampling budgets.
 
+When a shallow fork has the upstream tip object, base resolution first tries a
+date-bounded fork fetch just before that tip's commit date. It accepts the result
+only after the same ancestor/frontier proof; backdated histories or unsupported
+server date queries fall back to the depth progression.
+
 When ancestry is missing, base resolution starts with small history windows
 (depth 1,8,32,128,512,2048,4096). It reuses complete local ancestry and does not
 shorten a complete upstream chain. A timed-out fetch step is reported and the

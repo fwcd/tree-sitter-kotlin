@@ -44,7 +44,7 @@ function slowGit(f, mode) {
   fs.mkdirSync(directory);
   fs.writeFileSync(file, `#!${process.execPath}
 const fs = require('fs'), {spawnSync} = require('child_process');
-const args = process.argv.slice(2), depth = args.find(a => a.startsWith('--depth='));
+const args = process.argv.slice(2), depth = args.find(a => a.startsWith('--depth=') || a.startsWith('--shallow-since='));
 if (args[0] === 'fetch') fs.appendFileSync(${JSON.stringify(record)}, JSON.stringify({depth, repository:args[args.indexOf('--')+1]}) + '\\n');
 if (args[0] === 'fetch' && (${JSON.stringify(mode)} === 'all' || (${JSON.stringify(mode)} === 'first' && depth === '--depth=1'))) {
   setTimeout(() => process.exit(0), 5000);
@@ -253,6 +253,26 @@ it('deepens the fork first when the one-commit upstream tip is its branch point'
     expect(refs(shallow)).toBe(before);
     const requests = fs.readFileSync(shim.record, 'utf8').trim().split('\n').map(line => JSON.parse(line));
     expect(requests.filter(r => r.repository === f.upstream).map(r => r.depth)).toEqual(['--depth=1']);
-    expect(requests.some(r => r.repository !== f.upstream && r.depth === '--depth=128')).toBe(true);
+    expect(requests.some(r => r.repository !== f.upstream && r.depth?.startsWith('--shallow-since='))).toBe(true);
+  } finally { cleanup(f); }
+}, GIT_TIMEOUT_MS);
+
+it('falls back to depth windows when commit dates hide a required ancestor', () => {
+  const f = fixture();
+  try {
+    execFileSync('git', ['commit', '--allow-empty', '-qm', 'old-dated ancestor'], {
+      cwd: f.local, env: { ...process.env, GIT_COMMITTER_DATE: '2000-01-01T00:00:00Z' },
+    });
+    git(f.local, 'commit', '--allow-empty', '-qm', 'new head');
+    const fork = path.join(f.dir, 'fork.git'), shallow = path.join(f.dir, 'shallow');
+    git(f.dir, 'clone', '-q', '--bare', f.local, fork);
+    git(f.dir, 'clone', '-q', '--depth=1', 'file://' + fork, shallow);
+    const shim = slowGit(f, 'none'), before = refs(shallow);
+    const result = resolveBase({ upstream: f.upstream }, { cwd: shallow, env: shim.env, log: () => {} });
+    expect(result.commit).toBe(f.common);
+    expect(refs(shallow)).toBe(before);
+    const steps = fs.readFileSync(shim.record, 'utf8');
+    expect(steps).toContain('--shallow-since=');
+    expect(steps).toContain('--depth=8');
   } finally { cleanup(f); }
 }, GIT_TIMEOUT_MS);

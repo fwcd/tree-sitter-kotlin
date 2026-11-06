@@ -59,11 +59,12 @@ function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log
   const label = `${remote || (requested ? 'configured upstream' : 'canonical fallback')}/${branch}`;
   const fetch = (repository, refs, depth, role) => {
     const args = ['fetch', '--no-tags', '--no-prune', '--no-prune-tags', '--no-auto-gc', '--no-recurse-submodules', '--refmap='];
-    if (depth) args.push(`--depth=${depth}`);
+    const window = typeof depth === 'number' ? `depth ${depth}` : `since ${depth}`;
+    args.push(typeof depth === 'number' ? `--depth=${depth}` : `--shallow-since=${depth}`);
     // Empty refmap and URL transport prevent configured remote fetch mappings
     // from updating refs/remotes/*; FETCH_HEAD is the only fetched reference.
     args.push('--', repository, ...refs);
-    if (git(args, true, `fetch ${label} ${role}, depth ${depth}`) === null)
+    if (git(args, true, `fetch ${label} ${role}, ${window}`) === null)
       throw new Error(`Could not fetch upstream history for ${label}. Check connectivity/configuration, or use --base REV for an offline check.`);
   };
   const boundaries = () => {
@@ -94,7 +95,7 @@ function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log
   // Begin cheaply even when only the upstream side is shallow/missing. Each
   // larger window is bounded, and a slow window does not end the progression.
   const depths = [1, 8, 32, 128, 512, 2048, 4096];
-  let lastTimeout, windowTimedOut;
+  let lastTimeout, windowTimedOut, triedSince = false;
   const attempt = (repository, refs, depth, role) => {
     try { fetch(repository, refs, depth, role); return true; }
     catch (error) {
@@ -106,6 +107,20 @@ function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log
   };
   for (const depth of depths) {
     windowTimedOut = false;
+    if (!triedSince && initial.length && git(['cat-file', '-e', `${tip}^{commit}`], true) !== null) {
+      triedSince = true;
+      const timestamp = Number(git(['show', '-s', '--format=%ct', tip]));
+      if (Number.isSafeInteger(timestamp) && timestamp > 0) {
+        const since = new Date((timestamp - 1) * 1000).toISOString();
+        try { fetch(historyUrl, initial, since, 'fork ancestry'); }
+        catch (error) {
+          if (error instanceof GitTimeout) log(error.message + ' Continuing depth windows.');
+          else log('Date-bounded fork history unavailable; continuing depth windows.');
+        }
+        const fromDate = knownBase(tip);
+        if (fromDate) return fromDate;
+      }
+    }
     const historyFetched = initial.length && attempt(historyUrl, initial, depth, 'fork ancestry');
     // The fork history often already contains upstream's advertised tip. Avoid
     // downloading its trees/blobs again when the complete ancestor is now local.
