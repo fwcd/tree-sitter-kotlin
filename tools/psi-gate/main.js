@@ -4,17 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const { runIfMain } = require('../cli');
 const { loadConfig } = require('./config');
-const { HELP, argumentsOf } = require('./options');
+const { commandHelp, argumentsOf } = require('./options');
 const { prerequisites, createParser } = require('./runtime');
 const { assertHome, withHome } = require('./home');
 const { inspectRepository, selectFiles, fetchRepositories } = require('./repository');
 const { checkFiles } = require('./check');
 const { fetchAll } = require('../psi-oracle/fetch');
 const ROOT = path.resolve(__dirname, '../..');
-function quick(options) { return require('./quick').run({ ...options, root: ROOT }); }
+function quick(options) { return require('./quick').run({ ...options, root: ROOT, timeoutMs: options.parseTimeoutMs }); }
 async function checkRepository(repo, options) {
   const selected = repo.files ? repo : { ...repo, ...selectFiles(repo.root, repo) };
   const out = path.join(options.home, 'runs', repo.name || 'repo');
+  console.log(`${repo.name || 'repo'}: comparing ${selected.files.length} selected Kotlin files (${selected.excluded.length} excluded)...`);
   const result = await checkFiles({ ...options, root: repo.root, files: selected.files, out });
   inspectRepository(repo.root, repo.rev);
   console.log(`${repo.name || 'repo'}: ${result.mismatches.length} files mismatching (target 0, ${selected.excluded.length} excluded)`);
@@ -32,7 +33,8 @@ async function checkRepository(repo, options) {
 }
 async function full(options) {
   const quickPromise = Promise.resolve().then(() => quick(options));
-  const repoPromise = Promise.all([fetchRepositories(options.config.repos, options.home), fetchAll({ config: options.config })])
+  const repoPromise = Promise.all([
+    fetchRepositories(options.config.repos, options.home, {log: console.log}), fetchAll({config: options.config})])
     .then(async ([repos]) => {
       const results = [];
       for (const repo of repos) results.push(await checkRepository(repo, options));
@@ -43,7 +45,7 @@ async function full(options) {
   return { exitCode: results.some(result => result.status === 'rejected' || result.value.exitCode) ? 1 : 0 };
 }
 async function main(argv) {
-  if (argv.includes('--help') || argv.includes('-h')) { console.log(HELP); return { exitCode: 0 }; }
+  if (argv.includes('--help') || argv.includes('-h')) { console.log(commandHelp(argv[0])); return { exitCode: 0 }; }
   const options = argumentsOf(argv); options.config = loadConfig(options.configFile);
   assertHome(options.home);
   prerequisites({ java: options.command !== 'quick' });

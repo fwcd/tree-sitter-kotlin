@@ -17,6 +17,56 @@ const HELP = `Usage: npm run psi-gate -- quick|full|repo DIR|regenerate-expectat
 Requires Node, Git, the repo's normal npm install, and JRE 17 for live PSI.
 The current bindings/node parser is the sole grammar; verdicts are absolute.
 `;
+const COMMON_HELP = `  --config FILE         TOML pins/repositories (default psigate.toml)
+  --home DIR            Owned cache/results (default local/psi-gate)
+`;
+const ORACLE_HELP = `  --timeout-ms N        Live PSI request timeout (default 120000)
+`;
+const PARSE_HELP = `  --parse-timeout-ms N  Native per-file timeout (default 10000; maximum 60000)
+`;
+const COMMAND_HELP = {
+  quick: `Usage: npm run psi-gate -- quick [options]
+Check current indexed must-match snippets against stored PSI expectations.
+Needs Node/Git and the current binding; no Java or network.
+` + COMMON_HELP + PARSE_HELP,
+  full: `Usage: npm run psi-gate -- full [options]
+Run Quick and compare clean pinned configured repositories with live PSI.
+` + COMMON_HELP + ORACLE_HELP + PARSE_HELP + '  --jobs N              1..4 oracle workers (default 2)\n',
+  repo: `Usage: npm run psi-gate -- repo DIR [options]
+Check indexed Kotlin files in a clean Git checkout; untracked files are ignored.
+` + COMMON_HELP + ORACLE_HELP + PARSE_HELP + '  --jobs N              1..4 oracle workers (default 2)\n',
+  'regenerate-expectations': `Usage: npm run psi-gate -- regenerate-expectations [options]
+Regenerate indexed corpus PSI truth using pinned live PSI. Review the diff before staging.
+` + COMMON_HELP + ORACLE_HELP,
+  coverage: `Usage: npm run psi-gate -- coverage [options]
+Measure live-verified corpus type/context coverage.
+` + COMMON_HELP + ORACLE_HELP + '  --out DIR             Report directory (default a new temporary directory)\n',
+  minimize: `Usage: npm run psi-gate -- minimize FILE [options]
+Reduce one PSI-valid mismatch and save a reverified temporary source/sidecar/index.
+` + COMMON_HELP + ORACLE_HELP + PARSE_HELP + `  --class ID            Select a mismatch family (default first present family)
+  --max-seconds N       Total reduction budget (default 30; maximum 3600)
+`,
+  add: `Usage: npm run psi-gate -- add FILE [options]
+Reverify a matching Kotlin snippet with live PSI, then stage its source and stored PSI expectation.
+` + COMMON_HELP + ORACLE_HELP + PARSE_HELP,
+  fuzz: `Usage: npm run psi-gate -- fuzz [options]
+  --seed TEXT --max-inputs N --max-seconds N  Deterministic, budgeted search
+  --out DIR             Untracked suspect folder; default a new OS temp folder
+  --sources FILE        Research seed manifest; --corpus DIR --list FILE, --fixtures DIR
+  --known-ledger DIR    Read-only known ledger (default committed grammar-bugs)
+  --depth N --jobs N --batch-size N  Depth1..8, workers1..2, batches1..64
+  --min-rounds N --min-candidates N --min-seconds N  Reduction budgets
+  --continuous --stable-window N  Optional search stopping window; never a gate
+Stdout lists minimized, PSI-valid suspect paths; index.json records sidecars and budgets.
+No classification, corpus writes, promotion, base or past-commit comparison.
+Use a separate follow-up, then explicit add of a fixed must-match specimen.
+` + COMMON_HELP + ORACLE_HELP + PARSE_HELP
+};
+function commandHelp(command) {
+  if (!command || command.startsWith('-')) return HELP;
+  if (!COMMAND_HELP[command]) throw Error(`Unknown PSI gate command: ${command}`);
+  return COMMAND_HELP[command];
+}
 function argumentsOf(argv) {
   const removed = argv.find(flag =>
     ['--base', '--upstream', '--upstream-branch', '--expected', '--strict', '--corpora', '--promote'].includes(flag));
@@ -43,11 +93,11 @@ function argumentsOf(argv) {
     else if (flag === '--out' && command === 'coverage') options.out = path.resolve(value);
     else if (flag === '--max-seconds' && command === 'minimize') options.maxSeconds = positive(value, flag, 3600);
     else if (flag === '--class' && command === 'minimize') options.classId = value;
-    else if (flag === '--jobs') options.jobs = positive(value, flag, 4);
+    else if (flag === '--jobs') options.jobs = positive(value, flag, command === 'fuzz' ? 2 : 4);
     else if (flag === '--timeout-ms') options.timeoutMs = positive(value, flag);
     else if (flag === '--parse-timeout-ms') options.parseTimeoutMs = positive(value, flag, 60000);
     else throw new Error(`Unknown PSI gate option: ${flag}`);
   }
   return options;
 }
-module.exports = { HELP, argumentsOf };
+module.exports = { HELP, commandHelp, argumentsOf };

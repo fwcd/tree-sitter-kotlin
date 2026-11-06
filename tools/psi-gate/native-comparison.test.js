@@ -47,9 +47,11 @@ function correctQuest(root) {
   expect(source.slice(at)).toContain(needle);
   fs.writeFileSync(file, source.slice(0, at) + source.slice(at).replace(needle, needle.replace('skip(lexer)', 'advance(lexer)')));
 }
-let available = false;
-try { available = require('../psi-oracle/fetch').isFetched() && !buildSetup.missing.length &&
-  Boolean(require('../safety').javaExecutable()); } catch {}
+const missing = [...buildSetup.missing];
+try { require('../safety').javaExecutable(); } catch (error) { missing.push(error.message); }
+if (!require('../psi-oracle/fetch').isFetched()) missing.push('npm run psi-oracle:fetch (verified PSI jars)');
+const available = missing.length === 0;
+if (!available) process.stderr.write('Native comparison tests skipped; missing: ' + missing.join('; ') + '\n');
 function reference(dir, text) {
   const source = input(dir, 'input', text), out = path.join(dir, 'psi');
   const [psi] = require('../psi-oracle/oracle').runOracle(['a.kt'], {root: source, out});

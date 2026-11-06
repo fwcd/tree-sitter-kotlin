@@ -18,11 +18,24 @@ Node binding with `npm install` after changing generated parser/scanner sources.
 The ordinary install script records the source/runtime and addon SHA-256 in
 `build/node-binding-source.json`; source edits force a rebuild. Missing or stale
 receipts fail the gate with the setup command. After editing `grammar.js`, run
-`npm run generate` then `npm install`; generation refreshes the committed `bindings/node/generation.json` identity,
+`npm run generate` then `npm install`; generation refreshes the committed
+`bindings/node/generation.json` identity,
 which pairs grammar.js and the exact pinned generator with all three generated
 outputs. Install and gate preparation verify that identity even on first install.
 Commit the identity alongside generated-source updates.
-A loadable old addon alone is insufficient to pass the gate. Curl and tar are
+A loadable old addon alone is insufficient to pass the gate.
+For fast grammar iteration, edit grammar.js, run `npm run generate`, then
+`npm install` and `npm run psi-gate -- quick`. Hand edits to generated parser.c,
+grammar.json or node-types.json fail the generation identity check; scanner.c
+is handwritten and needs install plus Quick. Generation prints progress every 10 seconds.
+Successful native builds are quiet; failures show diagnostics. Set
+`PSI_GATE_VERBOSE=1` for complete generator/build output.
+
+npm 11 may print allow-scripts notices about dependency lifecycle scripts even
+after the native binding is ready. These are npm notices, not a failed gate.
+Run Quick to verify setup; if the generator dependency is unavailable, follow
+npm's printed dependency-script instructions.
+ Curl and tar are
 not required. The included `tools/psi-oracle/helpers/psi-oracle-1.jar` is compiled
 from the repository's `PsiOracle.java` with Java 17; normal checks invoke its class,
 never the Java source launcher. Its version/SHA-256 and Kotlin jar coordinates/
@@ -101,7 +114,8 @@ record `compilationChecked: false` and explain this distinction for the follow-u
 
 A separate per-file follow-up decides whether a suspect is a grammar bug,
 requires normalization work, should be discarded, or is fixed and worth keeping.
-Failing cases stay in the bug ledger. Corpus admission requires a separate explicit add operation. To admit a selected, fixed example:
+Failing cases stay in the bug ledger. Corpus admission requires a separate explicit
+add operation. To admit a selected, fixed example:
 
     npm run psi-gate -- add /tmp/psi-suspects-.../suspect-....kt
 

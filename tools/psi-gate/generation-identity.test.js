@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const build = require('../../bindings/node/build');
 const git = (root, ...args) => execFileSync('git', ['-C', root, ...args], {encoding: 'utf8', stdio: 'pipe'});
-it('rejects committed grammar-only changes on first install and in both gate commands', () => {
+it('rejects committed grammar-only changes on first install and in both gate commands', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-generation-')), root = path.join(dir, 'repo');
   try {
     git(dir, 'clone', '--quiet', '--shared', ROOT, root);
@@ -29,7 +29,7 @@ it('rejects committed grammar-only changes on first install and in both gate com
       expect(result.stdout + result.stderr).toMatch(/Generated parser does not match.*npm run generate/);
     }
     fs.writeFileSync(file, before + '\n// correctly generated source change\n');
-    build.generate(root); build.install(root);
+    await build.generate(root); await build.install(root);
     expect(build.fresh(root)).toBe(true);
     const result = spawnSync('npm', ['run', 'psi-gate', '--', 'quick'], {cwd: root, encoding: 'utf8', timeout: 30000,
       env: {...process.env, PSI_JAVA: '/unavailable-java'}});

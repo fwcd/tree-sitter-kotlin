@@ -16,18 +16,7 @@ const {fetchAll} = require('../psi-oracle/fetch');
 const {oracleIdentity} = require('./expectations');
 const ROOT = path.resolve(__dirname, '../..');
 const TRACKED = path.join(__dirname, 'grammar-bugs');
-const HELP = `Usage: npm run psi-gate -- fuzz [options]
-  --seed TEXT --max-inputs N --max-seconds N  Deterministic, budgeted search
-  --out DIR             Untracked suspect folder; default a new OS temp folder
-  --sources FILE        Research seed manifest; --corpus DIR --list FILE, --fixtures DIR
-  --known-ledger DIR    Read-only known ledger (default committed grammar-bugs)
-  --depth N --jobs N --batch-size N  Depth1..8, workers1..2, batches1..64
-  --min-rounds N --min-candidates N --min-seconds N  Reduction budgets
-  --continuous --stable-window N  Optional search stopping window; never a gate
-Stdout lists minimized, PSI-valid suspect paths; index.json records sidecars and budgets.
-No classification, corpus writes, promotion, base or past-commit comparison.
-Use a separate follow-up, then explicit add of a fixed must-match specimen.
-`;
+const HELP = require('./options').commandHelp('fuzz');
 function argumentsOf(argv, inherited = {}) {
   const options = {seed: 'psi-search', maxInputs: 400, maxSeconds: 900, stableWindow: 5000,
     jobs: 1, depth: 4, batchSize: 16, minRounds: 20, minCandidates: 32, minSeconds: 20, ...inherited};

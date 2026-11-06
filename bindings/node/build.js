@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const {execFileSync} = require('child_process');
+const {execFileSync, execFile} = require('child_process');
 const ROOT = path.resolve(__dirname, '../..');
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const read = file => digest(fs.readFileSync(file));
@@ -63,34 +63,57 @@ function assertGenerated(root = ROOT) {
     throw Error('Generated parser does not match grammar.js or the pinned generator; run npm run generate, then npm install');
   return identity;
 }
+function runTool(executable, args, root, label, env = process.env) {
+  const started = Date.now(), verbose = process.env.PSI_GATE_VERBOSE === '1';
+  console.error(`${label}...`);
+  return new Promise((resolve, reject) => {
+    const progress = setInterval(() => console.error(`${label}... ${Math.floor((Date.now() - started) / 1000)}s elapsed`), 10000);
+    const child = execFile(process.execPath, [executable, ...args], {cwd: root, env, timeout: 180000,
+      maxBuffer: 16 * 1024 * 1024}, (error, stdout, stderr) => {
+      clearInterval(progress);
+      if (error) {
+        if (!verbose) process.stderr.write(stdout + stderr);
+        reject(new Error(`${label} failed: ${error.message}`)); return;
+      }
+      if (!verbose && /\bwarn(?:ing)?\b|deprecated/i.test(stdout + stderr))
+        process.stderr.write((stdout + stderr).split('\n').filter(line => !line.startsWith('gyp info ')).join('\n'));
+      resolve(((Date.now() - started) / 1000).toFixed(1));
+    });
+    if (verbose) { child.stdout.pipe(process.stdout); child.stderr.pipe(process.stderr); }
+  });
+}
 function generate(root = ROOT) {
   const expected = generatorVersion(root);
   const executable = require.resolve('tree-sitter-cli/cli.js', {paths: [root]});
   const version = execFileSync(process.execPath, [executable, '--version'], {cwd: root, encoding: 'utf8'});
   if (!version.startsWith('tree-sitter ' + expected + ' ')) throw Error('Wrong tree-sitter generator; run npm install');
   const grammarHash = read(path.join(root, 'grammar.js'));
-  execFileSync(process.execPath, [executable, 'generate'], {cwd: root, stdio: 'inherit', timeout: 180000});
-  if (read(path.join(root, 'grammar.js')) !== grammarHash) throw Error('grammar.js changed during generation; rerun npm run generate');
-  const identity = {schemaVersion: 1, generatorVersion: expected, grammarHash,
-    files: Object.fromEntries(GENERATED_FILES.map(file => [file, read(path.join(root, file))]))};
-  const file = path.join(root, GENERATION), temporary = file + '.' + process.pid + '.tmp';
-  fs.writeFileSync(temporary, JSON.stringify(identity, null, 2) + '\n'); fs.renameSync(temporary, file);
+  return runTool(executable, ['generate'], root, `Generating Kotlin parser with tree-sitter ${expected}`).then(seconds => {
+    if (read(path.join(root, 'grammar.js')) !== grammarHash) throw Error('grammar.js changed during generation; rerun npm run generate');
+    const identity = {schemaVersion: 1, generatorVersion: expected, grammarHash,
+      files: Object.fromEntries(GENERATED_FILES.map(file => [file, read(path.join(root, file))]))};
+    const file = path.join(root, GENERATION), temporary = file + '.' + process.pid + '.tmp';
+    fs.writeFileSync(temporary, JSON.stringify(identity, null, 2) + '\n'); fs.renameSync(temporary, file);
+    console.error(`Generated parser sources and identity (${seconds}s). Run npm install to refresh the binding.`);
+  });
 }
 function install(root = ROOT) {
   assertGenerated(root);
-  if (fresh(root) && !process.env.npm_config_build_from_source) return;
-  const source = sourceIdentity(root);
-  console.error('Building current Node binding...');
-  const executable = require.resolve('node-gyp-build/bin.js', {paths: [root]});
-  execFileSync(process.execPath, [executable], {cwd: root, stdio: 'inherit',
-    env: {...process.env, npm_config_build_from_source: 'true'}, timeout: 180000});
-  if (sourceIdentity(root).hash !== source.hash) throw Error('Binding inputs changed during build; rerun npm install');
-  const file = binary(root);
-  fs.writeFileSync(path.join(root, RECEIPT), JSON.stringify({source,
-    binary: {path: path.relative(root, file), hash: read(file)}}, null, 2) + '\n');
+  if (fresh(root) && !process.env.npm_config_build_from_source) {
+    console.error('Native Node binding is current.'); return;
+  }
+  const source = sourceIdentity(root), executable = require.resolve('node-gyp-build/bin.js', {paths: [root]});
+  return runTool(executable, [], root, 'Building current Node binding',
+    {...process.env, npm_config_build_from_source: 'true', npm_config_loglevel: 'warn'}).then(seconds => {
+    if (sourceIdentity(root).hash !== source.hash) throw Error('Binding inputs changed during build; rerun npm install');
+    const file = binary(root);
+    fs.writeFileSync(path.join(root, RECEIPT), JSON.stringify({source,
+      binary: {path: path.relative(root, file), hash: read(file)}}, null, 2) + '\n');
+    console.error(`Native Node binding ready (${seconds}s). Check setup with npm run psi-gate -- quick.`);
+  });
 }
-module.exports = {sourceIdentity, assertFresh, fresh, install, generate, assertGenerated};
+module.exports = {sourceIdentity, assertFresh, fresh, install, generate, assertGenerated, runTool};
 if (require.main === module) {
-  try { if (process.argv.includes('--generate')) generate(); else install(); }
-  catch (error) { console.error(error.message); process.exitCode = 1; }
+  Promise.resolve().then(() => process.argv.includes('--generate') ? generate() : install())
+    .catch(error => {console.error(error.message); process.exitCode = 1;});
 }

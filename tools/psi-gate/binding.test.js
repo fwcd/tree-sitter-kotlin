@@ -7,12 +7,12 @@ const require = createRequire(import.meta.url);
 const build = require('../../bindings/node/build');
 const ROOT = path.resolve(import.meta.dirname, '../..');
 let dir, root;
-beforeAll(() => {
+beforeAll(async () => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-binding-')); root = path.join(dir, 'grammar'); fs.mkdirSync(root);
   for (const name of ['src', 'bindings']) fs.cpSync(path.join(ROOT, name), path.join(root, name), {recursive: true});
   for (const name of ['grammar.js', 'binding.gyp', 'package.json']) fs.copyFileSync(path.join(ROOT, name), path.join(root, name));
   fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(root, 'node_modules'), 'dir');
-  build.install(root);
+  await build.install(root);
 }, 180000);
 afterAll(() => { if (dir) fs.rmSync(dir, {recursive: true}); });
 it('requires a receipt matching actual source and loaded addon bytes', () => {
@@ -24,11 +24,11 @@ it('requires a receipt matching actual source and loaded addon bytes', () => {
   fs.appendFileSync(addon, 'changed'); expect(() => build.assertFresh(root)).toThrow(/stale or changed/);
   fs.writeFileSync(addon, binary); expect(build.fresh(root)).toBe(true);
 });
-it('ordinary install rebuilds changed scanner sources instead of reusing a loadable addon', () => {
+it('ordinary install rebuilds changed scanner sources instead of reusing a loadable addon', async () => {
   require('./runtime').createParser(root);
   const file = path.join(root, 'src/scanner.c'); fs.appendFileSync(file, '\n// freshness control\n');
   expect(() => build.assertFresh(root)).toThrow(/npm install/);
-  build.install(root); expect(build.fresh(root)).toBe(true);
+  await build.install(root); expect(build.fresh(root)).toBe(true);
   expect(() => require('./runtime').createParser(root)).toThrow(/start a new npm run psi-gate/);
 }, 180000);
 it('requires generation before certifying a grammar.js edit as built', () => {

@@ -34,16 +34,20 @@ function runGit(args, cwd, timeout = 180000) {
   return new Promise((resolve, reject) => execFile('git', args, { cwd, timeout, maxBuffer: 32 * 1024 * 1024 },
     (error, stdout, stderr) => error ? reject(new Error(`Repository Git operation failed: ${stderr || error.message}`)) : resolve(stdout)));
 }
-async function fetchRepository(repo, home, { timeoutMs = 180000 } = {}) {
+async function fetchRepository(repo, home, { timeoutMs = 180000, log = () => {} } = {}) {
   const cache = path.join(home, 'repos', `${repo.name}-${sha256(repo.url + '\0' + repo.rev).slice(0, 16)}`);
-  if (!fs.existsSync(path.join(cache, '.git'))) {
+  const cached = fs.existsSync(path.join(cache, '.git'));
+  log(`${repo.name}: ${cached ? 'checking cached checkout' : 'fetching ' + repo.url} at ${repo.rev}`);
+  if (!cached) {
     if (fs.existsSync(cache) && fs.readdirSync(cache).length) throw new Error(`Repository cache is unowned: ${cache}`);
     fs.mkdirSync(cache, { recursive: true });
     await runGit(['init', '-q'], cache, timeoutMs);
     await runGit(['fetch', '--depth=1', '--no-tags', '--refmap=', '--', repo.url, repo.rev], cache, timeoutMs);
     await runGit(['checkout', '-q', '--detach', 'FETCH_HEAD'], cache, timeoutMs);
   }
-  return { ...repo, ...inspectRepository(cache, repo.rev), ...selectFiles(cache, repo) };
+  const result = { ...repo, ...inspectRepository(cache, repo.rev), ...selectFiles(cache, repo) };
+  log(`${repo.name}: pinned checkout ready at ${result.commit}; ${result.files.length} selected, ${result.excluded.length} excluded`);
+  return result;
 }
 async function fetchRepositories(repos, home, options) {
   return Promise.all(repos.map(repo => fetchRepository(repo, home, options)));
