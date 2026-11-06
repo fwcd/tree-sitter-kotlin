@@ -19,6 +19,7 @@ it('refuses cached/downloaded hash mismatches before executing Java', async () =
   fs.copyFileSync(path.resolve(import.meta.dirname, '../../psigate.toml'), path.join(dir, 'psigate.toml'));
   fs.cpSync(path.join(import.meta.dirname, 'helpers'), path.join(oracleDir, 'helpers'), { recursive: true });
   fs.symlinkSync(path.resolve(import.meta.dirname, '../../node_modules'), path.join(dir, 'node_modules'), 'dir');
+  fs.copyFileSync(path.join(import.meta.dirname, '../resource.js'), path.join(dir, 'tools/resource.js'));
   const previousCache = process.env.PSI_ORACLE_CACHE;
   process.env.PSI_ORACLE_CACHE = path.join(dir, 'cache');
   const { jarPaths, isFetched, fetchAll } = require(path.join(oracleDir, 'fetch'));

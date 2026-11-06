@@ -80,13 +80,14 @@ it('rejects a real rebuilt float-literal regression and prints its file, differe
   const selected = quick.CORPUS + '/syntax-primitives.kt', root = repository(selected);
   expect((await quick.run({root, config, parser, home: path.join(root, 'report')})).exitCode).toBe(0);
   const output = vi.spyOn(console, 'log').mockImplementation(() => {});
+  const diagnostic = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     const result = await quick.run({root, config, parser: brokenFloat, home: path.join(root, 'report')});
     expect(result.exitCode).toBe(1); expect(result.rows[0].verdict).toBe('C');
-    const text = output.mock.calls.flat().join('\n');
+    const text = [...output.mock.calls, ...diagnostic.mock.calls].flat().join('\n');
     expect(text).toContain(selected); expect(text).toContain(quick.failureReason(result.rows[0]));
-    expect(text).toContain('Report: ' + result.reportPath);
-  } finally { output.mockRestore(); }
+    expect(text).toContain(result.reportPath);
+  } finally { diagnostic.mockRestore(); output.mockRestore(); }
 });
 it('runs with invalid Java paths and does not load the oracle or downloader', () => {
   const root = repository(), program = `

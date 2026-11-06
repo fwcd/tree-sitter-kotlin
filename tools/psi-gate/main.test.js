@@ -5,7 +5,7 @@ const { argumentsOf, prerequisites } = require('./main');
 const { normalizeTs } = require('../cross-validation/normalizer');
 const { Node } = require('../cross-validation/models');
 it('rejects removed relative options and invalid v2 inputs before work', () => {
-  expect(() => argumentsOf(['quick', '--jobs', '0'])).toThrow(/integer/);
+  expect(() => argumentsOf(['full', '--jobs', '0'])).toThrow(/integer/);
   for (const option of ['--corpora', '--base', '--expected', '--promote'])
     expect(() => argumentsOf(['quick', option, 'x'])).toThrow(/removed/);
   expect(() => argumentsOf(['fuzz', '--seed', 'x', '--promote'])).toThrow(/removed/);

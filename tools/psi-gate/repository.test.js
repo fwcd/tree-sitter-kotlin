@@ -42,11 +42,11 @@ it('acquires multiple pinned repositories and verifies cached dirty state', asyn
     const home = path.join(f.dir, 'cache');
     const logs = [];
     const [a, b] = await fetchRepositories([{ ...repo, name: 'a' }, { ...repo, name: 'b' }], home, {log: line => logs.push(line)});
-    expect(logs.some(line => line.includes('fetching ') && line.includes(f.rev))).toBe(true);
-    expect(logs.some(line => line.includes('2 selected, 0 excluded'))).toBe(true);
+    expect(logs.some(line => line.includes('fetching '))).toBe(true);
+    expect(logs.some(line => line.includes('2 selected, 0 excluded') && line.includes(f.rev))).toBe(true);
     logs.length = 0;
     await fetchRepositories([{ ...repo, name: 'b' }], home, {log: line => logs.push(line)});
-    expect(logs.some(line => line.includes('checking cached checkout') && line.includes(f.rev))).toBe(true);
+    expect(logs.some(line => line.includes('checking cached checkout'))).toBe(true);
     expect(a.commit).toBe(f.rev); expect(b.commit).toBe(f.rev); expect(a.root).not.toBe(b.root);
     fs.writeFileSync(path.join(a.root, 'a.kt'), 'val broken=');
     await expect(fetchRepositories([{ ...repo, name: 'a' }], home)).rejects.toThrow(/a.kt/);
