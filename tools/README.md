@@ -76,3 +76,89 @@ pinned jars. Ordinary grammar tests use `npm test`. Git-clean external inputs,
 index-only selection, pin/config corruption, incomplete oracle results and native
 errors are failures. There is no relative headline or `update-expected` command.
 Stored expectations are PSI truth, never snapshots of the current tree-sitter output.
+
+## Fixture import and oracle verification
+
+The importer pins cross-validation/.fixtures-version. It preserves .kt/.kts paths
+from compiler/psi/psi-impl/testData/psi and linked spec inputs. At the current pin:
+789 paired candidates, 342 PSI-invalid goldens, 447 retained positive pairs;
+436 eligible comparisons and 11 hash-scoped context exclusions. Unsupported
+fragment/multi-file/experimental contexts are not silently treated as whole files.
+The detailed manifests are authoritative when refreshing this pin.
+
+    npm install
+    npm run vendor-fixtures
+    npm exec -- node-gyp rebuild
+    npm run vendor-jetbrains
+    npm test
+    npm run cross-validate
+
+Rebuild after every generated-parser change before regenerating corpus trees.
+Review promoted :error cases and parser/scanner fingerprints. Cross-validation
+is the existing static fixture report; its match percentage is not the new gate.
+
+Verify the live oracle against all positive and negative upstream goldens:
+
+    npm run psi-oracle:fetch
+    npm run psi-oracle:verify
+
+The oracle reproduces 788 comparable goldens exactly; one upstream spec EXCEPTION
+golden is intentionally excluded. The verification and mutation inputs are pinned
+to Kotlin 2.4.21. Full runs should be accompanied by this oracle check when changing
+its implementation or fixture/compiler pin.
+
+
+### Tracked grammar counterexamples
+
+`tools/psi-gate/grammar-bugs` contains curated catalog cases and minimized fuzz
+cases, with source/expectation hashes, failure signatures, first seeds and
+provenance. Compact `.expected.json` PSI shapes are authoritative; full dumps are
+regenerated from the pinned Kotlin 2.4.21 oracle. Catalog `.psi.txt` sidecars remain
+readable. Original whole-source inputs/dumps belong in research run artifacts.
+Detailed affected-file measurements are archived at the immutable commit named
+in the catalog ledger; the shipped ledger retains counts and causal descriptions.
+The archive remains in the `VladimirMakaev/tree-sitter-kotlin` fork's
+`psi-gate-improved` history after an upstream squash-merge, which does not retain
+the original commits. Fetch the recorded revision from that fork and read the
+recorded path with `git show REVISION:PATH`; verify its recorded SHA-256. The
+[current archive](https://github.com/VladimirMakaev/tree-sitter-kotlin/blob/cff4a71d8282d40da840888853e6a30e93d1b1c2/tools/psi-gate/grammar-bugs/catalog-ledger.json)
+is available independently of the upstream squash commit. Retain the fork history
+for as long as those detailed measurements are needed.
+
+The synthetic cases are part of this MIT-licensed grammar project. Derived
+counterexamples use the Apache-2.0 Kotlin, Okio, Exposed, Ktor and kotlinx.coroutines
+sources identified by repository, commit and relative path in the ledgers; the
+Kotlin production-source pin is distinct from the JetBrains fixture-import pin.
+Refer to those upstream licenses and original pinned sources for provenance.
+The historical mixed-run entries now retain their recovered mutation seed, index,
+operator and original source pin; reductions keep those original provenance fields.
+
+
+### Grammar-driven generation and coverage
+
+Generation reads `src/grammar.json` and `src/node-types.json`. Grammar combinators
+supply operator, argument and expression productions; Kotlin context rules supply
+declaration boundaries, valid annotation/type positions and lexical spellings.
+The initial cycle covers every declaration/production family, using eight
+expression positions where applicable. Later selection favors missing/rare named types and parent-child pairs.
+Generation and mutation have separate counters, so every-third source mutation
+cannot skip declaration families.
+
+Each run writes `coverage.json` alongside clusters: intended and observed type/context
+sets, per-file frequencies, generated/mutated/corpus partitions, native parent
+contexts and a native-clean alternative. Rejected PSI inputs contribute no coverage.
+The full catalogue and explicitly non-emitted entries remain visible; applicability
+never changes because a run failed to hit a type. The pinned file PSI exposes
+`kotlin.FILE` instead of its parser wrapper. Lexer recovery/reserved spellings and
+one KDoc highlighting token are documented in `fuzz-psi-types.json` with reasons.
+These are catalogue distinctions, not exclusions of valid corpus files.
+
+The generator includes ordinary headers, grouped/file annotations, explicit backing
+fields, named destructuring, guarded when entries, callable references, floating
+literals, scripts and KDoc, plus syntax accepted by the pinned parser such as
+contract-v2 and companion blocks. The live PSI-valid filter is authoritative;
+syntax acceptance still does not imply successful type checking. Existing normalizer
+cluster formats and local defect ledgers are unchanged. Intrinsic roots/directives
+and some leaf types have only one legal direct parent; observed context sets show
+that limitation rather than inventing additional contexts. Full type coverage alone
+does not prove all combinations or grammar-wide normalizer correctness.
