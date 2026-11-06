@@ -8,6 +8,7 @@ const {runTool} = require('../../bindings/node/build');
 it('keeps successful tool output quiet but shows complete failure diagnostics', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-output-')), file = path.join(root, 'tool.js');
   const output = [], spy = vi.spyOn(process.stderr, 'write').mockImplementation(chunk => {output.push(String(chunk)); return true;});
+  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(message => output.push(String(message)));
   try {
     fs.writeFileSync(file, 'console.log("gyp info noisy success");\n');
     await runTool(file, [], root, 'Building fixture');
@@ -19,5 +20,5 @@ it('keeps successful tool output quiet but shows complete failure diagnostics', 
     fs.writeFileSync(file, 'console.error("fatal: actionable compiler failure");process.exit(7);\n');
     await expect(runTool(file, [], root, 'Building fixture')).rejects.toThrow(/failed/);
     expect(output.join('')).toContain('fatal: actionable compiler failure');
-  } finally {spy.mockRestore(); fs.rmSync(root, {recursive: true});}
+  } finally {consoleSpy.mockRestore(); spy.mockRestore(); fs.rmSync(root, {recursive: true});}
 });
