@@ -112,11 +112,22 @@ describe.skipIf(!available)('actual native rejection and continuous controls', (
       const bugs = path.join(dir, 'bugs');
       state.saveGrammarBug(bugs, { text: input.text, extension: '.kt', exhausted: false, result: original },
         { seed: 'ledger', signature: original.classes[0].signature, revision: 'test' });
-      const result = await run({ ...argumentsOf([]), grammar: ROOT, runtime: ROOT, maxInputs: 1,
-        maxSeconds: 1, minSeconds: 20, batchSize: 1, bugs, out: path.join(dir, 'run') });
-      expect(result).toMatchObject({ partial: true, exitCode: 2, stopReason: 'time-budget' });
-      expect(result.seconds).toBeLessThan(1.5);
-      expect(state.readLedger(bugs)).toHaveLength(1);
+      // JVM startup speed is not a deadline control. Expire the clock exactly
+      // as ledger inspection returns, independent of source/precompiled launch.
+      let now = Date.now();
+      vi.spyOn(Date, 'now').mockImplementation(() => now);
+      const inspect = vi.spyOn(InspectorPool.prototype, 'inspect').mockImplementation(async (inputs, { deadline }) => {
+        now = deadline;
+        return inputs.map(() => original);
+      });
+      try {
+        const result = await run({ ...argumentsOf([]), grammar: ROOT, runtime: ROOT, maxInputs: 1,
+          maxSeconds: 1, minSeconds: 20, batchSize: 1, bugs, out: path.join(dir, 'run') });
+        expect(result).toMatchObject({ partial: true, exitCode: 2, stopReason: 'time-budget' });
+        expect(result.seconds).toBeLessThan(1.5);
+        expect(inspect).toHaveBeenCalledTimes(1);
+        expect(state.readLedger(bugs)).toHaveLength(1);
+      } finally { vi.restoreAllMocks(); }
     } finally { inspector.close(); fs.rmSync(dir, { recursive: true }); }
   }, 30000);
 
