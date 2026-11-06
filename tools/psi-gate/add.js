@@ -11,6 +11,14 @@ const expected = require('./expectations');
 const {inventory, CORPUS} = require('./quick');
 const {createParser} = require('./runtime');
 const ROOT = path.resolve(__dirname, '../..');
+function printAdmission(file, expectation, duplicate) {
+  console.log(`${duplicate ? 'Already in corpus' : 'Added'}: ${file}`);
+  console.log(`PSI expectation: ${expectation}`);
+  if (!duplicate) console.log('Both files are staged.');
+  console.log('After reviewing or editing them, stage both with:');
+  const quote = value => "'" + value.replace(/'/g, "'\"'\"'") + "'";
+  console.log(`  git add -- ${quote(file)} ${quote(expectation)}`);
+}
 
 async function run({file, root = ROOT, config = loadConfig(), timeoutMs = 120000, parseTimeoutMs = 10000}) {
   if (!file || !['.kt', '.kts'].includes(path.extname(file))) throw Error('add requires a Kotlin snippet file');
@@ -45,7 +53,9 @@ async function run({file, root = ROOT, config = loadConfig(), timeoutMs = 120000
       const stored = expected.read({root, relative: candidate, config, indexed: existing.indexed, bytes: content});
       if (expected.compare({text: expected.textOf(content), parser, expected: stored, timeoutMs: parseTimeoutMs}).verdict !== 'ok')
         throw Error('Existing corpus duplicate is not a valid must-match assertion');
-      console.log(candidate); return {exitCode: 0, duplicate: true, file: candidate};
+      const expectation = expected.filename(candidate);
+      printAdmission(candidate, expectation, true);
+      return {exitCode: 0, duplicate: true, file: candidate, expectation};
     }
     const destination = path.join(root, relative), sidecar = expected.filename(relative);
     fs.mkdirSync(path.dirname(destination), {recursive: true});
@@ -58,7 +68,7 @@ async function run({file, root = ROOT, config = loadConfig(), timeoutMs = 120000
       created.push(path.join(root, sidecar));
       execFileSync('git', ['-C', root, 'add', '--', relative, sidecar], {stdio: ['ignore', 'pipe', 'pipe']});
     } catch (error) {for (const own of created) fs.unlinkSync(own); throw error;}
-    console.log(relative);
+    printAdmission(relative, sidecar, false);
     return {exitCode: 0, duplicate: false, file: relative, expectation: sidecar, staged: true};
   } finally {fs.rmSync(stage, {recursive: true});}
 }

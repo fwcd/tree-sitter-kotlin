@@ -25,10 +25,11 @@ async function run({file, config, timeoutMs, parseTimeoutMs, maxSeconds = 30, cl
     const selected = classId ? original.classes.find(c => c.id === classId) : original.classes[0];
     if (!selected) throw Error(`Mismatch class is no longer present: ${classId}`);
     const min = await state.minimize(input, selected.id, inspector, {seconds: maxSeconds, deadline});
-    const context = sha256(JSON.stringify([state.identity({grammar: ROOT, runtime: ROOT}), oracleIdentity(config)]));
-    const entry = findings.record({out, seed: 'per-file', context, oracle: oracleIdentity(config),
+    const oracle = oracleIdentity(config);
+    const context = sha256(JSON.stringify([state.identity({grammar: ROOT, runtime: ROOT}), oracle]));
+    const entry = findings.record({out, seed: 'per-file', context,
       bucket: {input, originalBytes: Buffer.byteLength(input.text)}, min, knownMatch: false});
-    fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify({schemaVersion: 1, entries: [entry]}, null, 2) + '\n');
+    fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify({schemaVersion: 1, oracle, entries: [entry]}, null, 2) + '\n');
     console.log(`minimize: ${Buffer.byteLength(input.text)} -> ${Buffer.byteLength(min.text)} bytes${min.exhausted ? ' (partial)' : ''}`);
     console.log(entry.file); console.log(entry.sidecar);
     return {exitCode: min.exhausted ? 2 : 0, ...entry};

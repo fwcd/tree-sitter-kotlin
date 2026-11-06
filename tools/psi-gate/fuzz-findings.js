@@ -29,14 +29,16 @@ function knownInputs(root, directory) {
       extension: path.extname(relative)}});
   return entries;
 }
-function record({out, seed, context, oracle, bucket, min, knownMatch}) {
+function record({out, seed, context, bucket, min, knownMatch}) {
   const result = min.result, source = Buffer.from(min.text), id = observation(result).slice(0, 24);
   const extension = min.extension || '.kt', file = 'suspect-' + id + extension;
   const sidecar = file + '.json', target = path.join(out, file);
   const evidence = {schemaVersion: 1, id, sourceSha256: sha256(source), seed,
     provenance: bucket.input.origin, originalBytes: bucket.originalBytes, extension,
-    context, oracle, reduction: {complete: !min.exhausted, bytes: source.length}, reverified: true,
-    psiErrors: 0, nativeErrors: result.nativeRejected, psiNormalized: result.expectedNormalized,
+    context, oracleRef: 'index.json#/oracle', reduction: {complete: !min.exhausted, bytes: source.length}, reverified: true,
+    psiErrors: 0, compilationChecked: false,
+    note: 'PSI-valid syntax does not imply compilable Kotlin. Minimization may leave unresolved names, type errors or unusual valid constructs; compilation and type checking were not run.',
+    nativeErrors: result.nativeRejected, psiNormalized: result.expectedNormalized,
     nativeNormalized: result.actualNormalized, nativeTree: result.nativeTree,
     diff: result.differences, layoutDiff: result.layoutDifferences || [], signatures: result.classes,
     spanEvidence: result.spanEvidence, knownMatch};

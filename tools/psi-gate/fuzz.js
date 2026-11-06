@@ -163,7 +163,7 @@ async function search(options, inputs) {
     if (match) {suppressed.push({id: bucket.id, known: match}); continue;}
     if (files.has(key.slice(0, 24))) continue;
     const possible = [...new Set(bucket.min.result.classes.flatMap(c => [...(signatures.get(c.id) || [])]))];
-    const item = findings.record({out: options.out, seed: options.seed, context, oracle, bucket, min: bucket.min,
+    const item = findings.record({out: options.out, seed: options.seed, context, bucket, min: bucket.min,
       knownMatch: {exact: [], possible}}); files.set(item.id, item);
   }
   partial ||= pending.length > 0;

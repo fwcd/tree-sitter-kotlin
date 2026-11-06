@@ -86,11 +86,18 @@ These corpus/search operations are maintained by their dedicated modules.
 Search defaults to a new OS temporary folder; `--out DIR` selects an owned,
 untracked output. Stdout lists suspect Kotlin paths. `index.json` records ordered
 paths/sidecars, seed, budgets, completeness and pending/suppressed known cases.
-Each sidecar contains source SHA, provenance, pinned oracle/comparison identity,
+The full pinned oracle identity is stored once in `index.json`; each sidecar's
+`oracleRef: "index.json#/oracle"` refers to it. Keep the index with the sidecars.
+Each sidecar contains source SHA, provenance, comparison identity,
 normalized PSI/native trees and full differences. Only completed, PSI-valid,
 live-reverified reductions are emitted. Exact known observations are deduped;
 shared signatures merely annotate possible known matches. A failing must-match
 corpus case is never treated as a known-bug waiver.
+
+PSI syntax validity does not imply compilable or well-typed Kotlin. Minimized
+sources can have unresolved names, type errors or unusual valid constructs such
+as `fun()=if(flag)else 2`. Compilation and type checking are not run; sidecars
+record `compilationChecked: false` and explain this distinction for the follow-up.
 
 A separate per-file follow-up decides whether a suspect is a grammar bug,
 requires normalization work, should be discarded, or is fixed and worth keeping.
@@ -101,7 +108,10 @@ Failing cases stay in the bug ledger. Corpus admission requires a separate expli
 `add` re-verifies current grammar/live pinned PSI, requires a full named-tree and
 source-fact match, checks sidecar/source integrity, dedupes and stages the chosen
 source plus stored PSI expectation. It never commits or imports a still-failing
-case into quick. Quick remains entirely must-match.
+case into quick. It prints both paths and confirms the new pair is staged. After
+reviewing or editing the pair, use the printed `git add` command to stage both
+source and expectation together. An existing duplicate prints both existing paths
+and the same reminder. Quick remains entirely must-match.
 
 ## Validation
 

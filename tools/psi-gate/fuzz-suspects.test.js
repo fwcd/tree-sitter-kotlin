@@ -1,4 +1,4 @@
-import {it, expect, beforeAll, afterAll} from 'vitest';
+import {it, expect, beforeAll, afterAll, vi} from 'vitest';
 import {createRequire} from 'node:module';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -35,10 +35,17 @@ it('emits reverified suspect paths/sidecars/index for a real broken grammar with
   expect(result.exitCode).toBe(0); expect(result.files.length).toBeGreaterThan(0);
   const index = JSON.parse(fs.readFileSync(result.indexPath));
   expect(index.files).toEqual(result.files);
+  expect(index.oracle).toEqual(require('./expectations').oracleIdentity(config));
   for (const finding of result.files) {
     expect(path.isAbsolute(finding.file)).toBe(true); expect(fs.existsSync(finding.file)).toBe(true);
     const sidecar = JSON.parse(fs.readFileSync(finding.sidecar));
-    expect(sidecar).toMatchObject({reverified: true, psiErrors: 0, reduction: {complete: true}});
+    expect(sidecar).toMatchObject({reverified: true, psiErrors: 0, reduction: {complete: true},
+      oracleRef: 'index.json#/oracle', compilationChecked: false});
+    expect(sidecar).not.toHaveProperty('oracle');
+    const [file, pointer] = sidecar.oracleRef.split('#');
+    expect(JSON.parse(fs.readFileSync(path.resolve(path.dirname(finding.sidecar), file)))[pointer.slice(1)])
+      .toEqual(index.oracle);
+    expect(sidecar.note).toContain('compilation and type checking were not run');
     expect(sidecar).not.toHaveProperty('kind'); expect(sidecar).not.toHaveProperty('verdict');
   }
   expect(execFileSync('git', ['-C', ROOT, 'diff', 'HEAD', '--', 'tools/psi-gate/corpus', 'tools/psi-gate/grammar-bugs']))
@@ -63,13 +70,23 @@ function repository() {
 it('adds one selected matching case, stages source/reference and leaves quick green; rejects failures', async () => {
   const root = repository(), source = path.join(directory, 'selected.kt');
   fs.writeFileSync(source, 'fun selectedForCorpus()=12345\n');
-  const result = await add.run({file: source, root, config});
+  let result;
+  const output = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    result = await add.run({file: source, root, config});
+    const text = output.mock.calls.flat().join('\n');
+    expect(text).toContain('Added: ' + result.file);
+    expect(text).toContain('PSI expectation: ' + result.expectation);
+    expect(text).toContain('Both files are staged.');
+    expect(text).toContain(`git add -- '${result.file}' '${result.expectation}'`);
+  } finally { output.mockRestore(); }
   expect(result).toMatchObject({exitCode: 0, duplicate: false, staged: true});
   const indexed = execFileSync('git', ['-C', root, 'ls-files', '--', result.file, result.expectation], {encoding: 'utf8'});
   expect(indexed.trim().split('\n')).toHaveLength(2);
   const checked = await quick.run({root, config, home: path.join(directory, 'quick')});
   expect(checked.exitCode).toBe(0);
-  expect((await add.run({file: source, root, config})).duplicate).toBe(true);
+  expect(await add.run({file: source, root, config})).toMatchObject({duplicate: true,
+    file: result.file, expectation: result.expectation});
   const before = execFileSync('git', ['-C', root, 'ls-files', '-s']);
   fs.writeFileSync(source, 'val ref=String? ::plus\n');
   await expect(add.run({file: source, root, config})).rejects.toThrow(/still differs/);
