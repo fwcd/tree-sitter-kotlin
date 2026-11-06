@@ -22,6 +22,11 @@ const cases = {
   referenceBodies: 'fun f(){if(c)a else b}\n',
   emptyThen: 'fun f(){if(c);else bar()}\n',
   emptyElse: 'fun f(){if(c)foo()else;}\n',
+  emptyThenReference: 'fun f(){if(c);else a}\n',
+  emptyElseReference: 'fun f(){if(c)a else;}\n',
+  bothEmpty: 'fun f(){if(c);else;}\n',
+  emptyThenComment: 'fun f(){if(c);/*boundary*/else a}\n',
+  emptyElseComment: 'fun f(){if(c)a else/*boundary*/;}\n',
   emptyIf: 'fun f(){if(c);}\n',
   bracedIf: 'fun f(){if(c){}else{}}\n',
   forRange: 'fun f(){for(x in c)foo()}\n',
@@ -43,7 +48,7 @@ it('keeps N1–N41 justifications and the standing hidden-rule premise in the so
 });
 
 describe.skipIf(!available)('native condition, branch and range roles remain explicit', () => {
-  let directory, refs, parsers;
+  let directory, refs, parsers, roots;
   const results = new Map();
   beforeAll(() => {
     directory = fs.mkdtempSync(path.join(os.tmpdir(), 'control-roles-'));
@@ -57,7 +62,7 @@ describe.skipIf(!available)('native condition, branch and range roles remain exp
       ['condition-then', [['field_condition', 'condition', 'consequence'], ['field_consequence', 'consequence', 'condition']]],
       ['hidden-body', null],
     ];
-    const roots = [{label: 'pristine', root: ROOT}];
+    roots = [{label: 'pristine', root: ROOT}];
     for (const [label, fields] of variants) {
       const root = path.join(directory, label); fs.mkdirSync(root);
       for (const name of ['src', 'bindings']) fs.cpSync(path.join(ROOT, name), path.join(root, name), {recursive: true});
@@ -104,6 +109,36 @@ describe.skipIf(!available)('native condition, branch and range roles remain exp
     expect(comparison('sameCalls', 'then-else').verdict).toBe('C');
     expect(compareTrees(comparison('thenCall').tsNorm, comparison('elseCall').psiNorm).status).toBe('MISMATCH');
   });
+  it('detects swapped fields with one semicolon-empty branch and one reference-only body', () => {
+    for (const name of ['emptyThenReference', 'emptyElseReference', 'emptyThenComment', 'emptyElseComment']) {
+      expect(comparison(name, 'then-else').verdict, name).toBe('C');
+      expect(compareTrees(comparison(name, 'then-else').tsNorm, comparison(name).psiNorm).status, name).toBe('MISMATCH');
+    }
+  });
+  it('fails ordinary and strict CLI gates for both empty/reference role-swap repros', () => {
+    const list = path.join(directory, 'empty-slots.txt');
+    fs.writeFileSync(list, 'emptyThenReference.kt\nemptyElseReference.kt\n');
+    const swapped = roots.find(root => root.label === 'then-else').root;
+    for (const strict of [false, true]) {
+      const out = path.join(directory, strict ? 'strict-run' : 'ordinary-run');
+      const args = [path.join(ROOT, 'tools/cross-validation/diff-run.js'), '--corpus', 'if-empty-slots',
+        '--root', path.join(directory, 'sources'), '--list', list, '--grammar', 'base=' + ROOT,
+        '--grammar', 'head=' + swapped, '--runtime', ROOT, '--out', out, '--jobs', '1'];
+      if (strict) args.push('--strict');
+      let status;
+      try { execFileSync(process.execPath, args, {cwd: ROOT, timeout: 120000, stdio: 'pipe'}); status = 0; }
+      catch (error) { status = error.status; }
+      expect(status, strict ? 'strict' : 'ordinary').toBe(1);
+      const records = fs.readFileSync(path.join(out, 'shards/00000.jsonl'), 'utf8').trim().split('\n').map(JSON.parse);
+      expect(records.length).toBe(2);
+      for (const record of records) {
+        expect(record.psiErrors, record.path).toBe(0);
+        expect(record.results.base.verdict, record.path).toBe('ok');
+        expect(record.results.head.verdict, record.path).toBe('C');
+        expect(record.results.head.treeHash, record.path).not.toBe(record.results.base.treeHash);
+      }
+    }
+  }, 120000);
   it('detects a condition routed into the then role', () => {
     expect(comparison('sameCalls', 'condition-then').verdict).toBe('C');
     expect(compareTrees(comparison('sameCalls').tsNorm, comparison('conditionCall').psiNorm).status).toBe('MISMATCH');

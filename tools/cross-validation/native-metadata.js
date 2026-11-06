@@ -105,11 +105,28 @@ function attachNative(tree, root) {
         string: literal ? stringDelimiter(literal.text) : null,
         braced: tokens.some(n => n.type === '{') && tokens.some(n => n.type === '}'),
         controlHeader: controlHeader(node),
+        ifSlots: ifSlots(node),
       });
     }
     if (cursor.gotoFirstChild()) continue;
     while (!cursor.gotoNextSibling()) if (!cursor.gotoParent()) return assign(tree, byType);
   }
+}
+
+// N42: empty IF branches require source-position evidence, never a missing field.
+function ifSlots(node) {
+  if (node.type !== 'if_expression') return undefined;
+  const close = node.children.find(child => child.type === ')');
+  if (!close) return undefined;
+  const otherwise = node.children.find(child => child.type === 'else');
+  const side = child => child.startIndex >= close.endIndex && child.endIndex <= (otherwise?.startIndex ?? node.endIndex)
+    ? 'consequence' : otherwise && child.startIndex >= otherwise.endIndex ? 'alternative' : null;
+  const substantive = node.children.filter(child => !['line_comment', 'multiline_comment', ';'].includes(child.type));
+  const thenEmpty = !substantive.some(child => side(child) === 'consequence') &&
+    Boolean(otherwise || node.children.some(child => child.type === ';' && side(child) === 'consequence'));
+  const elseEmpty = Boolean(otherwise) && !substantive.some(child => side(child) === 'alternative') &&
+    node.children.some(child => child.type === ';' && side(child) === 'alternative');
+  return {thenEmpty, elseEmpty, sides: node.namedChildren.map(side)};
 }
 
 // N42: loop headers have no named fields; only their parsed delimiters own the slot.

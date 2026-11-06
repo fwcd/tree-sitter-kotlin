@@ -55,10 +55,12 @@ function _normalizeTsMulti(node, parentName = null) {
   // a hidden/dropped control_structure_body must not be reconstructed from a field.
   if (tsName === 'if_expression') {
     const children = [];
-    const hasThen = node.children.some(child => child.field === 'consequence');
+    const slots = node.sourceInfo?.ifSlots;
     let emptyThen = false;
-    for (const child of node.children) {
-      if (child.field === 'alternative' && !hasThen && !emptyThen) {
+    for (const [index, child] of node.children.entries()) {
+      // The source's empty THEN precedes its ELSE body, regardless of native labels.
+      // Keep conflicting labels; manufacturing the other role would hide a swap.
+      if (slots?.thenEmpty && slots.sides[index] === 'alternative' && !emptyThen) {
         children.push(new Node('THEN')); emptyThen = true;
       }
       const contents = _normalizeTsMulti(child, tsName);
@@ -67,9 +69,8 @@ function _normalizeTsMulti(node, parentName = null) {
         children.push(new Node(child.field === 'consequence' ? 'THEN' : 'ELSE', contents));
       else children.push(...contents);
     }
-    if (!hasThen && !emptyThen) children.push(new Node('THEN'));
-    if (node.sourceInfo?.tokens.some(token => token.type === 'else')
-        && !node.children.some(child => child.field === 'alternative')) children.push(new Node('ELSE'));
+    if (slots?.thenEmpty && !emptyThen) children.push(new Node('THEN'));
+    if (slots?.elseEmpty) children.push(new Node('ELSE'));
     return [new Node('IF', children)];
   }
 
