@@ -42,7 +42,7 @@ async function download(url) {
         throw new Error('Too many oracle download redirects');
       } catch (error) {
         if (attempt === 2) throw new Error(
-          `HTTPS request failed: ${error.cause?.message || error.message}. ` +
+          `HTTPS request failed: ${String(error.cause?.message || error.message).replace(/[.\s]+$/, '')}. ` +
           'Check HTTPS_PROXY/npm proxy settings or use a verified PSI_ORACLE_CACHE.');
         await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
       }

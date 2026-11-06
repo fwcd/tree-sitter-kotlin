@@ -134,7 +134,7 @@ function ownedDirectory(directory) {
   if (fs.existsSync(directory) && (fs.lstatSync(directory).isSymbolicLink() ||
       (fs.readdirSync(directory).length && !catalogOwned && (!fs.existsSync(marker) ||
         fs.readFileSync(marker, 'utf8') !== 'psi-fuzz-bugs-v1\n'))))
-    throw new Error('Grammar-bug directory is not owned; choose a new --bugs directory');
+    throw new Error('Grammar-bug directory is not owned; choose a new temporary evidence directory');
   fs.mkdirSync(directory, { recursive: true });
   if (!fs.existsSync(marker)) fs.writeFileSync(marker, 'psi-fuzz-bugs-v1\n', { flag: 'wx' });
 }
@@ -163,7 +163,7 @@ function readGrammarInput(directory, entry) {
 function writeGrammarBug(directory, representative, { seed, revision, signature, origin, promote = false, deadline = Infinity }) {
   remaining(deadline);
   if (canonical(directory) === canonical(path.join(__dirname, 'grammar-bugs'))) {
-    if (!promote) throw new Error('Writing the tracked grammar corpus requires --promote; use a local --bugs directory');
+    if (!promote) throw new Error('Tracked grammar-ledger writes require explicit authorization; use a temporary suspect directory');
     if (representative.exhausted !== false || Buffer.byteLength(representative.text) > 1000)
       throw new Error('Promotion requires a completed reduction of at most 1000 bytes; increase the reduction budget');
   }

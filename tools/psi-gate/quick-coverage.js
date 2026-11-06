@@ -17,7 +17,8 @@ const grammarBlocked = {
 };
 
 async function measure({root = ROOT, config = require('./config').loadConfig(),
-  out = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-quick-coverage-')), timeoutMs = 120000} = {}) {
+  out = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-quick-coverage-')), timeoutMs = 120000,
+  oracle = require('../psi-oracle/oracle').runOracleAsync} = {}) {
   const {files, indexed} = quick.inventory(root);
   if (!files.length) throw Error('No indexed quick snippets to measure');
   fs.mkdirSync(out, {recursive: true});
@@ -26,7 +27,7 @@ async function measure({root = ROOT, config = require('./config').loadConfig(),
   for (const {relative, bytes} of sources) {
     const target = path.join(inputs, relative); fs.mkdirSync(path.dirname(target), {recursive: true}); fs.writeFileSync(target, bytes);
   }
-  const refs = await require('../psi-oracle/oracle').runOracleAsync(files, {root: inputs, out: oracleOut, config, timeoutMs});
+  const refs = await oracle(files, {root: inputs, out: oracleOut, config, timeoutMs});
   if (refs.length !== files.length) throw Error('Incomplete quick coverage oracle output');
   const coverage = new Coverage(), parser = quick.nativeParser(root), rows = [];
   for (const [index, {relative, bytes}] of sources.entries()) {

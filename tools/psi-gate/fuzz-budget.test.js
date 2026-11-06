@@ -41,7 +41,7 @@ it('requires explicit, completed and compact promotion before touching tracked c
   const metadata = { signature: ['grammar', 'test'] };
   const representative = { text: 'x'.repeat(1001), exhausted: false,
     result: { accepted: true, grammarError: true } };
-  expect(() => state.saveGrammarBug(tracked, representative, metadata)).toThrow(/--promote/);
+  expect(() => state.saveGrammarBug(tracked, representative, metadata)).toThrow(/explicit authorization/);
   expect(() => state.saveGrammarBug(tracked, representative, { ...metadata, promote: true })).toThrow(/1000 bytes/);
   expect(() => state.saveGrammarBug(tracked, { ...representative, text: 'x', exhausted: true },
     { ...metadata, promote: true })).toThrow(/completed reduction/);

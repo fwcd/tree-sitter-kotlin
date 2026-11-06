@@ -18,7 +18,10 @@ Node binding with `npm install` after changing generated parser/scanner sources.
 The ordinary install script records the source/runtime and addon SHA-256 in
 `build/node-binding-source.json`; source edits force a rebuild. Missing or stale
 receipts fail the gate with the setup command. After editing `grammar.js`, run
-`npm run generate` then `npm install`; generation records the grammar source used.
+`npm run generate` then `npm install`; generation refreshes the committed `bindings/node/generation.json` identity,
+which pairs grammar.js and the exact pinned generator with all three generated
+outputs. Install and gate preparation verify that identity even on first install.
+Commit the identity alongside generated-source updates.
 A loadable old addon alone is insufficient to pass the gate. Curl and tar are
 not required. The included `tools/psi-oracle/helpers/psi-oracle-1.jar` is compiled
 from the repository's `PsiOracle.java` with Java 17; normal checks invoke its class,
@@ -65,11 +68,14 @@ It does not require a configured URL/revision. Source repositories are not reset
 or rewritten. `--home DIR` selects an owned cache/result directory (default
 `local/psi-gate`); `--jobs`, `--timeout-ms` and `--parse-timeout-ms` bound execution.
 
+`coverage --out DIR` measures the curated corpus against live PSI and records
+native/PSI type and context sets. Omit --out for a temporary report directory.
+
 `regenerate-expectations` regenerates the existing corpus's pinned PSI truth.
 `minimize FILE` shrinks one PSI-valid mismatch using the current binding/live PSI,
 writes a reverified source/sidecar/index to a temporary directory, and prints its
 paths. `--class ID` selects a mismatch family and `--max-seconds N` bounds
-reduction (default30); partial reduction exits2. `add FILE` re-verifies one chosen
+reduction (default 30); partial reduction exits 2. `add FILE` re-verifies one chosen
 finding before explicit corpus admission.
 `fuzz` is a deterministic, budgeted search producing suspect files/sidecars in an
 untracked directory; it does not decide grammar/normalizer fixes or promote cases.
@@ -88,8 +94,7 @@ corpus case is never treated as a known-bug waiver.
 
 A separate per-file follow-up decides whether a suspect is a grammar bug,
 requires normalization work, should be discarded, or is fixed and worth keeping.
-Failing cases stay in the bug ledger. There is no `--promote` or automatic corpus
-production. To admit a selected, fixed example:
+Failing cases stay in the bug ledger. Corpus admission requires a separate explicit add operation. To admit a selected, fixed example:
 
     npm run psi-gate -- add /tmp/psi-suspects-.../suspect-....kt
 
@@ -100,7 +105,7 @@ case into quick. Quick remains entirely must-match.
 
 ## Validation
 
-    npm run cross-validate:test
+    npm run test:tools
 
 Native/oracle integration controls require the normal built binding and fetched
 pinned jars. Ordinary grammar tests use `npm test`. Git-clean external inputs,

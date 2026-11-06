@@ -20,7 +20,7 @@ function variantBuild(root, configuredGyp = process.env.npm_config_node_gyp) {
     try {
       nodeGyp = require.resolve('node-gyp/bin/node-gyp.js', { paths });
     } catch {
-      missing.push('npm run cross-validate:test (npm supplies node-gyp)');
+      missing.push('npm run test:tools (npm supplies node-gyp)');
     }
   }
   return { dependencies, nodeGyp, missing };

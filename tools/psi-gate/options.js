@@ -2,10 +2,13 @@
 const path = require('path');
 const { positive } = require('../safety');
 const ROOT = path.resolve(__dirname, '../..');
-const HELP = `Usage: npm run psi-gate -- quick|full|repo DIR|regenerate-expectations|add FILE|minimize FILE|fuzz [options]
+const HELP = `Usage: npm run psi-gate -- quick|full|repo DIR|regenerate-expectations|add FILE|minimize FILE|coverage|fuzz [options]
   quick                 Current indexed must-match corpus; no Java/network
   full                  Quick plus clean, pinned configured repositories
   repo DIR              Clean external Git checkout; indexed inputs only
+  minimize FILE         Reverified per-file reduction; --class ID, --max-seconds N (30)
+  coverage              Live PSI type/context measurement; --out DIR (temporary default)
+  fuzz                  Search; --seed TEXT, --max-inputs N (400), --max-seconds N (900), --out DIR
   --config FILE         TOML pins and repository scope (default psigate.toml)
   --home DIR            Owned cache/results (default local/psi-gate)
   --jobs N              1..4 oracle workers (default 2)
@@ -19,7 +22,7 @@ function argumentsOf(argv) {
     ['--base', '--upstream', '--upstream-branch', '--expected', '--strict', '--corpora', '--promote'].includes(flag));
   if (removed) throw new Error(`${removed} was removed: PSI gate v2 checks the current grammar with absolute verdicts`);
   const args = [...argv], command = args.shift() || 'quick';
-  if (!['quick', 'full', 'repo', 'regenerate-expectations', 'add', 'minimize', 'fuzz'].includes(command))
+  if (!['quick', 'full', 'repo', 'regenerate-expectations', 'add', 'minimize', 'coverage', 'fuzz'].includes(command))
     throw new Error(`Unknown PSI gate command: ${command}`);
   const options = { command, home: path.join(ROOT, 'local/psi-gate'), configFile: path.join(ROOT, 'psigate.toml'),
     jobs: 2, timeoutMs: 120000, parseTimeoutMs: 10000, forward: [] };
@@ -37,6 +40,7 @@ function argumentsOf(argv) {
     if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`);
     if (flag === '--config') options.configFile = path.resolve(value);
     else if (flag === '--home') options.home = path.resolve(value);
+    else if (flag === '--out' && command === 'coverage') options.out = path.resolve(value);
     else if (flag === '--max-seconds' && command === 'minimize') options.maxSeconds = positive(value, flag, 3600);
     else if (flag === '--class' && command === 'minimize') options.classId = value;
     else if (flag === '--jobs') options.jobs = positive(value, flag, 4);

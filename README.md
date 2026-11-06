@@ -84,7 +84,7 @@ here is not a claim that every source compiles.
 npm run vendor-fixtures
 npm run vendor-jetbrains
 npm test
-npm run cross-validate:test
+npm run test:tools
 npm run psi-gate -- quick
 
 # Reuse a local clone containing the exact JetBrains pin.

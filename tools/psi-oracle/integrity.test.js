@@ -1,4 +1,4 @@
-import { it, expect } from 'vitest';
+import { it, expect, vi } from 'vitest';
 import { createRequire } from 'module';
 import fs from 'fs';
 import os from 'os';
@@ -34,6 +34,10 @@ it('refuses cached/downloaded hash mismatches before executing Java', async () =
     ).rejects.toThrow(/SHA-256/);
     await expect(fetchAll({log: () => {}, downloadJar: () => { throw Error('injected connection failure'); }}))
       .rejects.toThrow(/Kotlin jar download failed for org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.21 \(https:\/\/repo.maven.apache.org/);
+    vi.stubGlobal('fetch', async () => { throw new Error('Request was cancelled.'); });
+    try {
+      await expect(fetchAll({log: () => {}})).rejects.toThrow(/Request was cancelled\. Check HTTPS_PROXY/);
+    } finally { vi.unstubAllGlobals(); }
     expect(fs.readFileSync(jarPaths()[0], 'utf8')).toBe('invalid cached jar');
   } finally {
     if (previousCache === undefined) delete process.env.PSI_ORACLE_CACHE;

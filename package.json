@@ -7,7 +7,7 @@
   "scripts": {
     "test": "tree-sitter test",
     "install": "node bindings/node/build.js",
-    "generate": "tree-sitter generate && node bindings/node/build.js --generated",
+    "generate": "node bindings/node/build.js --generate",
     "parse": "tree-sitter parse",
     "build-wasm": "tree-sitter build --wasm",
     "playground": "tree-sitter playground",
@@ -16,11 +16,11 @@
     "prebuildify": "prebuildify --napi --strip",
     "vendor-fixtures": "node tools/vendor-fixtures.js",
     "vendor-jetbrains": "node tools/vendor-jetbrains-tests.js",
-    "cross-validate:test": "npx vitest run",
     "psi-oracle:fetch": "node tools/psi-oracle/fetch.js",
-    "psi-oracle:verify": "node tools/vendor-fixtures.js --oracle-corpus local/psi-diff/corpora/testdata && node tools/psi-oracle/verify.js",
+    "psi-oracle:verify": "node tools/vendor-fixtures.js --oracle-corpus local/psi-gate/corpora/testdata && node tools/psi-oracle/verify.js",
     "psi-gate": "node tools/psi-gate/main.js",
-    "psi-fuzz": "node tools/psi-gate/fuzz.js"
+    "psi-fuzz": "node tools/psi-gate/fuzz.js",
+    "test:tools": "npx vitest run"
   },
   "repository": {
     "type": "git",
@@ -63,7 +63,7 @@
     "minimatch": "10.1.1",
     "prebuildify": "^6.0.0",
     "smol-toml": "1.9.1",
-    "tree-sitter-cli": "^0.24.4",
+    "tree-sitter-cli": "0.24.7",
     "undici": "6.21.3",
     "vitest": "^4.1.0"
   },

@@ -20,7 +20,7 @@ const path = require('path');
 const { runOracle } = require('./oracle');
 const { resetOutput, positive } = require('../safety');
 
-const DEFAULT_CORPUS = path.resolve(__dirname, '..', '..', 'local', 'psi-diff', 'corpora', 'testdata');
+const DEFAULT_CORPUS = path.resolve(__dirname, '..', '..', 'local', 'psi-gate', 'corpora', 'testdata');
 
 /**
  * @param {string} corpus - Directory written by `exportOracleCorpus`.

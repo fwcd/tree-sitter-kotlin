@@ -59,6 +59,10 @@ async function main(argv) {
       return checkRepository(repo, options);
     }
     if (options.command === 'regenerate-expectations') return require('./quick').regenerate({ ...options, root: ROOT });
+    if (options.command === 'coverage') {
+      await fetchAll({config: options.config});
+      return {exitCode: 0, ...await require('./quick-coverage').measure(options)};
+    }
     if (options.command === 'minimize') return require('./minimize').run(options);
     if (options.command === 'add') return require('./add').run(options);
     return require('./fuzz').run(require('./fuzz').argumentsOf(options.forward, {
