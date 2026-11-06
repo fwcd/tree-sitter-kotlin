@@ -31,10 +31,9 @@ is handwritten and needs install plus Quick. Generation prints progress every 10
 Successful native builds are quiet; failures show diagnostics. Set
 `PSI_GATE_VERBOSE=1` for complete generator/build output.
 
-npm 11 may print allow-scripts notices about dependency lifecycle scripts even
-after the native binding is ready. These are npm notices, not a failed gate.
-Run Quick to verify setup; if the generator dependency is unavailable, follow
-npm's printed dependency-script instructions.
+The project approves the exact installed tree-sitter runtime/CLI lifecycle
+scripts in package.json. Plain npm install verifies the dependency audit and
+builds the current binding; Quick verifies setup.
  Curl and tar are
 not required. The included `tools/psi-oracle/helpers/psi-oracle-1.jar` is compiled
 from the repository's `PsiOracle.java` with Java 17; normal checks invoke its class,
@@ -153,7 +152,8 @@ The detailed manifests are authoritative when refreshing this pin.
     npm test
 
 Rebuild after every generated-parser change before regenerating corpus trees.
-Review promoted :error cases and parser/scanner fingerprints. Fixture imports remain available for ordinary grammar tests and oracle checks.
+Review promoted :error cases and parser/scanner fingerprints. Fixture imports remain
+available for ordinary grammar tests and oracle checks.
 
 Verify the live oracle against all positive and negative upstream goldens:
 
@@ -198,7 +198,8 @@ Generation reads `src/grammar.json` and `src/node-types.json`. Grammar combinato
 supply operator, argument and expression productions; Kotlin context rules supply
 declaration boundaries, valid annotation/type positions and lexical spellings.
 The initial cycle covers every declaration/production family, using eight
-expression positions where applicable. Later selection favors missing/rare named types and parent-child pairs.
+expression positions where applicable. Later selection favors missing/rare named types
+and parent-child pairs.
 Generation and mutation have separate counters, so every-third source mutation
 cannot skip declaration families.
 
@@ -220,3 +221,27 @@ cluster formats and local defect ledgers are unchanged. Intrinsic roots/directiv
 and some leaf types have only one legal direct parent; observed context sets show
 that limitation rather than inventing additional contexts. Full type coverage alone
 does not prove all combinations or grammar-wide normalizer correctness.
+
+## Environment and budgets
+
+Progress, diagnostics and incomplete-resource remedies use stderr. Stdout contains
+conformance verdicts and saved artifact paths. Full reports verdicts in configured
+order and total duration on stderr. Exit 0 means complete, exit 1 is a mismatch or
+setup/execution failure, and exit 2 means a resource budget stopped an incomplete
+check/search/reduction. No unverified specimen is emitted on an initial timeout.
+
+`--timeout-ms` limits live PSI requests; `--parse-timeout-ms` separately limits
+each native parse (default 10000 ms, maximum 60000 ms). Coverage honors both.
+`minimize --max-seconds` and `fuzz --max-seconds` bound reductions/search; after
+exhaustion retry with a larger displayed budget.
+
+- `PSI_DEBUG=1`: show stack traces for unexpected errors.
+- `PSI_GATE_VERBOSE=1`: inherit full generator/build diagnostics on stderr.
+- `PSI_ORACLE_CACHE`: shared SHA-verified Maven jar cache.
+- `PSI_JAVA`: Java 17+ executable.
+- `PSI_GATE_GIT_TIMEOUT_MS`: per Git operation timeout (default 180000 ms).
+- `HTTPS_PROXY`/`https_proxy` and npm proxy settings: HTTPS transport proxy.
+- `CC`, `CXX`, `CFLAGS`, `CXXFLAGS`, `CPPFLAGS`, `LDFLAGS`: ordinary build settings.
+
+Pinned dependencies are updated with npm install --save-dev --save-exact and
+verified with npm audit plus the native/oracle suite before publication.

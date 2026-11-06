@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const {resourceError} = require('../resource');
 const { confined } = require('../safety');
 const { listFilesRecursive } = require('../vendor-fixtures');
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -26,7 +27,7 @@ function parseText(parser, text) {
   const limit = parser.getTimeoutMicros();
   if (!tree || (limit && Number(process.hrtime.bigint() - started) / 1000 >= limit)) {
     parser.reset();
-    throw new Error('Native parser timed out; increase --parse-timeout-ms for large inputs');
+    throw resourceError('Native parser timed out', 'PSI_NATIVE_TIMEOUT');
   }
   return tree;
 }

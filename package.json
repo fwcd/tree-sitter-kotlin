@@ -60,11 +60,11 @@
     }
   },
   "devDependencies": {
-    "minimatch": "10.1.1",
+    "minimatch": "11.0.4",
     "prebuildify": "^6.0.0",
     "smol-toml": "1.9.1",
     "tree-sitter-cli": "0.24.7",
-    "undici": "6.21.3",
+    "undici": "6.29.1",
     "vitest": "^4.1.0"
   },
   "tree-sitter": [
@@ -72,5 +72,9 @@
       "scope": "source.kotlin",
       "injection-regex": "^kotlin$"
     }
-  ]
+  ],
+  "allowScripts": {
+    "tree-sitter": true,
+    "tree-sitter-cli": true
+  }
 }

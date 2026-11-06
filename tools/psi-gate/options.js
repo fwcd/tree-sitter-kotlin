@@ -1,103 +1,90 @@
 'use strict';
 const path = require('path');
-const { positive } = require('../safety');
+const {positive} = require('../safety');
 const ROOT = path.resolve(__dirname, '../..');
-const HELP = `Usage: npm run psi-gate -- quick|full|repo DIR|regenerate-expectations|add FILE|minimize FILE|coverage|fuzz [options]
-  quick                 Current indexed must-match corpus; no Java/network
-  full                  Quick plus clean, pinned configured repositories
-  repo DIR              Clean external Git checkout; indexed inputs only
-  minimize FILE         Reverified per-file reduction; --class ID, --max-seconds N (30)
-  coverage              Live PSI type/context measurement; --out DIR (temporary default)
-  fuzz                  Search; --seed TEXT, --max-inputs N (400), --max-seconds N (900), --out DIR
-  --config FILE         TOML pins and repository scope (default psigate.toml)
-  --home DIR            Owned cache/results (default local/psi-gate)
-  --jobs N              1..4 oracle workers (default 2)
-  --timeout-ms N        Oracle request timeout (default 120000)
-  --parse-timeout-ms N  Native parse timeout (default 10000)
-Requires Node, Git, the repo's normal npm install, and JRE 17 for live PSI.
-The current bindings/node parser is the sole grammar; verdicts are absolute.
-`;
-const COMMON_HELP = `  --config FILE         TOML pins/repositories (default psigate.toml)
-  --home DIR            Owned cache/results (default local/psi-gate)
-`;
-const ORACLE_HELP = `  --timeout-ms N        Live PSI request timeout (default 120000)
-`;
-const PARSE_HELP = `  --parse-timeout-ms N  Native per-file timeout (default 10000; maximum 60000)
-`;
-const COMMAND_HELP = {
-  quick: `Usage: npm run psi-gate -- quick [options]
-Check current indexed must-match snippets against stored PSI expectations.
-Needs Node/Git and the current binding; no Java or network.
-` + COMMON_HELP + PARSE_HELP,
-  full: `Usage: npm run psi-gate -- full [options]
-Run Quick and compare clean pinned configured repositories with live PSI.
-` + COMMON_HELP + ORACLE_HELP + PARSE_HELP + '  --jobs N              1..4 oracle workers (default 2)\n',
-  repo: `Usage: npm run psi-gate -- repo DIR [options]
-Check indexed Kotlin files in a clean Git checkout; untracked files are ignored.
-` + COMMON_HELP + ORACLE_HELP + PARSE_HELP + '  --jobs N              1..4 oracle workers (default 2)\n',
-  'regenerate-expectations': `Usage: npm run psi-gate -- regenerate-expectations [options]
-Regenerate indexed corpus PSI truth using pinned live PSI. Review the diff before staging.
-` + COMMON_HELP + ORACLE_HELP,
-  coverage: `Usage: npm run psi-gate -- coverage [options]
-Measure live-verified corpus type/context coverage.
-` + COMMON_HELP + ORACLE_HELP + '  --out DIR             Report directory (default a new temporary directory)\n',
-  minimize: `Usage: npm run psi-gate -- minimize FILE [options]
-Reduce one PSI-valid mismatch and save a reverified temporary source/sidecar/index.
-` + COMMON_HELP + ORACLE_HELP + PARSE_HELP + `  --class ID            Select a mismatch family (default first present family)
-  --max-seconds N       Total reduction budget (default 30; maximum 3600)
-`,
-  add: `Usage: npm run psi-gate -- add FILE [options]
-Reverify a matching Kotlin snippet with live PSI, then stage its source and stored PSI expectation.
-` + COMMON_HELP + ORACLE_HELP + PARSE_HELP,
-  fuzz: `Usage: npm run psi-gate -- fuzz [options]
-  --seed TEXT --max-inputs N --max-seconds N  Deterministic, budgeted search
-  --out DIR             Untracked suspect folder; default a new OS temp folder
-  --sources FILE        Research seed manifest; --corpus DIR --list FILE, --fixtures DIR
-  --known-ledger DIR    Read-only known ledger (default committed grammar-bugs)
-  --depth N --jobs N --batch-size N  Depth1..8, workers1..2, batches1..64
-  --min-rounds N --min-candidates N --min-seconds N  Reduction budgets
-  --continuous --stable-window N  Optional search stopping window; never a gate
-Stdout lists minimized, PSI-valid suspect paths; index.json records sidecars and budgets.
-No classification, corpus writes, promotion, base or past-commit comparison.
-Use a separate follow-up, then explicit add of a fixed must-match specimen.
-` + COMMON_HELP + ORACLE_HELP + PARSE_HELP
+const OPTIONS = {
+  config: ['--config FILE', 'TOML pins/repositories', 'configFile', path.join(ROOT, 'psigate.toml')],
+  home: ['--home DIR', 'Owned cache/results', 'home', path.join(ROOT, 'local/psi-gate')],
+  oracle: ['--timeout-ms N', 'Live PSI request timeout', 'oracleTimeoutMs', 120000, 3600000],
+  native: ['--parse-timeout-ms N', 'Native per-file timeout', 'parseTimeoutMs', 10000, 60000],
+  jobs: ['--jobs N', 'Oracle workers', 'jobs', 2, 4],
+  out: ['--out DIR', 'Report/suspect directory (default new temporary directory)', 'out'],
+  family: ['--class ID', 'Mismatch family (default first present)', 'classId'],
+  reduction: ['--max-seconds N', 'Total reduction budget', 'maxSeconds', 30, 3600],
+  seed: ['--seed TEXT', 'Deterministic search seed', 'seed', 'psi-search'],
+  inputs: ['--max-inputs N', 'Search input limit', 'maxInputs', 400, 10000000],
+  search: ['--max-seconds N', 'Whole search budget', 'maxSeconds', 900, 86400],
+  sources: ['--sources FILE', 'Pinned source seed manifest', 'sources'],
+  corpus: ['--corpus DIR', 'Real source seeds', 'corpus'],
+  list: ['--list FILE', 'Exact --corpus relative input list', 'list'],
+  fixtures: ['--fixtures DIR', 'Kotlin fixture/source seeds', 'fixtures'],
+  known: ['--known-ledger DIR', 'Read-only known ledger (default committed grammar-bugs)', 'knownLedger'],
+  depth: ['--depth N', 'Recursive generation depth', 'depth', 4, 8],
+  workers: ['--jobs N', 'Search workers', 'jobs', 2, 2],
+  batch: ['--batch-size N', 'Inputs per oracle batch', 'batchSize', 16, 64],
+  rounds: ['--min-rounds N', 'Reduction rounds', 'minRounds', 20, 100],
+  candidates: ['--min-candidates N', 'Candidates per reduction round', 'minCandidates', 32, 128],
+  seconds: ['--min-seconds N', 'Budget per representative', 'minSeconds', 20, 3600],
+  continuous: ['--continuous', 'Search until stability/time/explicit input limit', 'continuous'],
+  stable: ['--stable-window N', 'Consecutive valid inputs without novelty', 'stableWindow', 5000, 10000000],
 };
+const COMMANDS = {
+  quick: ['quick', 'Check indexed must-match snippets; no Java/network', ['config','home','native']],
+  full: ['full', 'Quick plus live PSI on clean pinned repositories', ['config','home','oracle','native','jobs']],
+  repo: ['repo DIR', 'Check clean Git/indexed Kotlin files; untracked ignored', ['config','home','oracle','native','jobs']],
+  'regenerate-expectations': ['regenerate-expectations', 'Regenerate pinned PSI truth; review and stage the diff', ['config','home','oracle']],
+  coverage: ['coverage', 'Measure live-verified native/PSI type and context coverage', ['config','home','oracle','native','out']],
+  minimize: ['minimize FILE', 'Reduce one PSI-valid mismatch; keep the verified artifact bundle', ['config','home','oracle','native','family','reduction']],
+  add: ['add FILE', 'Reverify a matching case and stage its source/PSI expectation', ['config','home','oracle','native']],
+  fuzz: ['fuzz', 'Deterministic search; findings are not a conformance verdict',
+    ['config','home','oracle','native','seed','inputs','search','out','sources','corpus','list','fixtures',
+      'known','depth','workers','batch','rounds','candidates','seconds','continuous','stable']],
+};
+const ENVIRONMENT = [
+  ['PSI_ORACLE_CACHE', 'Shared SHA-verified Kotlin jar cache'],
+  ['PSI_GATE_GIT_TIMEOUT_MS', 'Per Git operation budget in ms (default 180000)'],
+  ['PSI_JAVA', 'Java 17+ executable for live PSI'],
+  ['PSI_DEBUG=1', 'Show error stack traces'],
+  ['PSI_GATE_VERBOSE=1', 'Show complete generator/native build logs'],
+  ['HTTPS_PROXY / https_proxy', 'HTTPS proxy (npm proxy settings also supported)'],
+  ['CC / CXX / CFLAGS / CXXFLAGS / CPPFLAGS / LDFLAGS', 'Ordinary native build toolchain settings'],
+];
 function commandHelp(command) {
-  if (!command || command.startsWith('-')) return HELP;
-  if (!COMMAND_HELP[command]) throw Error(`Unknown PSI gate command: ${command}`);
-  return COMMAND_HELP[command];
+  const environment = '\nEnvironment:\n' + ENVIRONMENT.map(([name, text]) => `  ${name}  ${text}`).join('\n');
+  if (!command || command.startsWith('-')) return 'Usage: npm run psi-gate -- COMMAND [options]\n' +
+    Object.values(COMMANDS).map(([usage, summary]) => `  ${usage.padEnd(27)} ${summary}`).join('\n') +
+    '\nUse COMMAND --help for its options.' + environment + '\n';
+  const spec = COMMANDS[command]; if (!spec) throw Error(`Unknown PSI gate command: ${command}`);
+  return `Usage: npm run psi-gate -- ${spec[0]} [options]\n${spec[1]}\n\nOptions:\n` + spec[2].map(id => {
+    const [flag, text, , fallback, maximum] = OPTIONS[id];
+    const value = typeof fallback === 'number' ? ` (default ${fallback}${maximum ? '; range 1..' + maximum : ''})` : '';
+    return `  ${flag.padEnd(23)} ${text}${value}`;
+  }).join('\n') + '\n\nExit codes: 0 complete; 1 mismatch/setup failure; 2 resource budget exhausted (incomplete).\n' + environment + '\n';
 }
+const HELP = commandHelp();
 function argumentsOf(argv) {
-  const removed = argv.find(flag =>
-    ['--base', '--upstream', '--upstream-branch', '--expected', '--strict', '--corpora', '--promote'].includes(flag));
-  if (removed) throw new Error(`${removed} was removed: PSI gate v2 checks the current grammar with absolute verdicts`);
-  const args = [...argv], command = args.shift() || 'quick';
-  if (!['quick', 'full', 'repo', 'regenerate-expectations', 'add', 'minimize', 'coverage', 'fuzz'].includes(command))
-    throw new Error(`Unknown PSI gate command: ${command}`);
-  const options = { command, home: path.join(ROOT, 'local/psi-gate'), configFile: path.join(ROOT, 'psigate.toml'),
-    jobs: 2, timeoutMs: 120000, parseTimeoutMs: 10000, forward: [] };
-  if (command === 'repo' || command === 'add' || command === 'minimize') {
+  const removed = argv.find(flag => ['--base','--upstream','--upstream-branch','--expected','--strict','--corpora','--promote'].includes(flag));
+  if (removed) throw Error(`${removed} was removed: PSI gate checks the current grammar with absolute verdicts`);
+  const args = [...argv], command = args.shift() || 'quick', spec = COMMANDS[command];
+  if (!spec) throw Error(`Unknown PSI gate command: ${command}`);
+  const options = {command, configFile: OPTIONS.config[3], home: OPTIONS.home[3], oracleTimeoutMs: 120000,
+    parseTimeoutMs: 10000, jobs: 2, forward: []};
+  if (spec[0].includes(' ')) {
     const value = args.shift();
-    if (!value || value.startsWith('--')) throw new Error(`${command} requires a ${command === 'repo' ? 'Git folder' : 'snippet file'}`);
+    if (!value || value.startsWith('--')) throw Error(`${command} requires a ${command === 'repo' ? 'Git folder' : 'snippet file'}`);
     options[command === 'repo' ? 'repoRoot' : 'file'] = path.resolve(value);
   }
+  if (command === 'fuzz') options.forward = [...args];
   while (args.length) {
     const flag = args.shift();
-    if (command === 'fuzz' && !['--config', '--home', '--jobs', '--timeout-ms', '--parse-timeout-ms'].includes(flag)) {
-      options.forward.push(flag, ...args); break;
-    }
-    const value = args.shift();
-    if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`);
-    if (flag === '--config') options.configFile = path.resolve(value);
-    else if (flag === '--home') options.home = path.resolve(value);
-    else if (flag === '--out' && command === 'coverage') options.out = path.resolve(value);
-    else if (flag === '--max-seconds' && command === 'minimize') options.maxSeconds = positive(value, flag, 3600);
-    else if (flag === '--class' && command === 'minimize') options.classId = value;
-    else if (flag === '--jobs') options.jobs = positive(value, flag, command === 'fuzz' ? 2 : 4);
-    else if (flag === '--timeout-ms') options.timeoutMs = positive(value, flag);
-    else if (flag === '--parse-timeout-ms') options.parseTimeoutMs = positive(value, flag, 60000);
-    else throw new Error(`Unknown PSI gate option: ${flag}`);
+    const id = spec[2].find(id => OPTIONS[id][0].split(' ')[0] === flag);
+    if (!id) throw Error(`Unknown ${command} option: ${flag}`);
+    if (!OPTIONS[id][0].includes(' ')) {options[OPTIONS[id][2]] = true; continue;}
+    const value = args.shift(); if (!value || value.startsWith('--')) throw Error(`${flag} requires a value`);
+    const [, , key, , maximum] = OPTIONS[id];
+    options[key] = maximum ? positive(value, flag, maximum) :
+      ['configFile','home','out','sources','corpus','list','fixtures','knownLedger'].includes(key) ? path.resolve(value) : value;
   }
   return options;
 }
-module.exports = { HELP, commandHelp, argumentsOf };
+module.exports = {HELP, commandHelp, argumentsOf, COMMANDS, OPTIONS};

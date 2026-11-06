@@ -4,9 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync, execFile } = require('child_process');
 const { minimatch } = require('minimatch');
-const { canonical, sha256 } = require('../safety');
+const { canonical, sha256, positive } = require('../safety');
+const gitTimeout = () => positive(process.env.PSI_GATE_GIT_TIMEOUT_MS || 180000, 'PSI_GATE_GIT_TIMEOUT_MS', 3600000);
 function git(root, args) {
-  return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8', timeout: 180000,
+  return execFileSync('git', ['-C', root, ...args], { encoding: 'utf8', timeout: gitTimeout(),
     maxBuffer: 128 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
 }
 function inspectRepository(input, revision = null) {
@@ -30,20 +31,20 @@ function selectFiles(root, { includes = ['**/*.kt', '**/*.kts'], excludes = [] }
   const omitted = new Set(excluded);
   return { files: candidates.filter(file => !omitted.has(file)), excluded, candidates };
 }
-function runGit(args, cwd, timeout = 180000) {
+function runGit(args, cwd, timeout = gitTimeout()) {
   return new Promise((resolve, reject) => execFile('git', args, { cwd, timeout, maxBuffer: 32 * 1024 * 1024 },
     (error, stdout, stderr) => error ? reject(new Error(`Repository Git operation failed: ${stderr || error.message}`)) : resolve(stdout)));
 }
-async function fetchRepository(repo, home, { timeoutMs = 180000, log = () => {} } = {}) {
+async function fetchRepository(repo, home, { gitTimeoutMs = gitTimeout(), log = () => {} } = {}) {
   const cache = path.join(home, 'repos', `${repo.name}-${sha256(repo.url + '\0' + repo.rev).slice(0, 16)}`);
   const cached = fs.existsSync(path.join(cache, '.git'));
-  log(`${repo.name}: ${cached ? 'checking cached checkout' : 'fetching ' + repo.url} at ${repo.rev}`);
+  log(`${repo.name}: ${cached ? 'checking cached checkout' : 'fetching ' + repo.url}`);
   if (!cached) {
     if (fs.existsSync(cache) && fs.readdirSync(cache).length) throw new Error(`Repository cache is unowned: ${cache}`);
     fs.mkdirSync(cache, { recursive: true });
-    await runGit(['init', '-q'], cache, timeoutMs);
-    await runGit(['fetch', '--depth=1', '--no-tags', '--refmap=', '--', repo.url, repo.rev], cache, timeoutMs);
-    await runGit(['checkout', '-q', '--detach', 'FETCH_HEAD'], cache, timeoutMs);
+    await runGit(['init', '-q'], cache, gitTimeoutMs);
+    await runGit(['fetch', '--depth=1', '--no-tags', '--refmap=', '--', repo.url, repo.rev], cache, gitTimeoutMs);
+    await runGit(['checkout', '-q', '--detach', 'FETCH_HEAD'], cache, gitTimeoutMs);
   }
   const result = { ...repo, ...inspectRepository(cache, repo.rev), ...selectFiles(cache, repo) };
   log(`${repo.name}: pinned checkout ready at ${result.commit}; ${result.files.length} selected, ${result.excluded.length} excluded`);

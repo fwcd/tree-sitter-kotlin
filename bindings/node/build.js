@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const {execFileSync, execFile} = require('child_process');
+const {execFileSync, spawn} = require('child_process');
 const ROOT = path.resolve(__dirname, '../..');
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const read = file => digest(fs.readFileSync(file));
@@ -67,19 +67,39 @@ function runTool(executable, args, root, label, env = process.env) {
   const started = Date.now(), verbose = process.env.PSI_GATE_VERBOSE === '1';
   console.error(`${label}...`);
   return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [executable, ...args], {cwd: root, env,
+      detached: process.platform !== 'win32', stdio: verbose ? ['ignore', 2, 2] : ['ignore', 'pipe', 'pipe']});
+    const chunks = []; let size = 0, stopped, force;
+    const stop = signal => {
+      stopped = signal;
+      try { if (process.platform === 'win32') child.kill(signal); else process.kill(-child.pid, signal); } catch {}
+      force = setTimeout(() => { try { if (process.platform === 'win32') child.kill('SIGKILL');
+        else process.kill(-child.pid, 'SIGKILL'); } catch {} }, 5000);
+    };
+    const interrupt = () => stop('SIGINT'), terminate = () => stop('SIGTERM');
+    process.once('SIGINT', interrupt); process.once('SIGTERM', terminate);
     const progress = setInterval(() => console.error(`${label}... ${Math.floor((Date.now() - started) / 1000)}s elapsed`), 10000);
-    const child = execFile(process.execPath, [executable, ...args], {cwd: root, env, timeout: 180000,
-      maxBuffer: 16 * 1024 * 1024}, (error, stdout, stderr) => {
-      clearInterval(progress);
-      if (error) {
-        if (!verbose) process.stderr.write(stdout + stderr);
-        reject(new Error(`${label} failed: ${error.message}`)); return;
+    const timeout = setTimeout(() => stop('SIGTERM'), 180000);
+    if (!verbose) for (const stream of [child.stdout, child.stderr]) stream.on('data', chunk => {
+      chunks.push(chunk); size += chunk.length;
+      if (size > 16 * 1024 * 1024 && !stopped) stop('SIGTERM');
+    });
+    let launchError;
+    child.on('error', error => { launchError = error; });
+    child.on('close', (code, signal) => {
+      clearInterval(progress); clearTimeout(timeout); clearTimeout(force);
+      process.removeListener('SIGINT', interrupt); process.removeListener('SIGTERM', terminate);
+      const output = Buffer.concat(chunks).toString('utf8');
+      if (launchError || code !== 0 || stopped) {
+        if (!verbose) process.stderr.write(output);
+        const error = new Error(`${label} failed (${launchError?.message || signal || stopped || 'exit ' + code})`);
+        if (stopped === 'SIGINT') error.exitCode = 130;
+        reject(error); return;
       }
-      if (!verbose && /\bwarn(?:ing)?\b|deprecated/i.test(stdout + stderr))
-        process.stderr.write((stdout + stderr).split('\n').filter(line => !line.startsWith('gyp info ')).join('\n'));
+      if (!verbose) for (const line of output.split(/\r?\n/))
+        if (/\bwarn(?:ing)?\b|deprecated/i.test(line)) process.stderr.write(line + '\n');
       resolve(((Date.now() - started) / 1000).toFixed(1));
     });
-    if (verbose) { child.stdout.pipe(process.stdout); child.stderr.pipe(process.stderr); }
   });
 }
 function generate(root = ROOT) {
@@ -88,7 +108,7 @@ function generate(root = ROOT) {
   const version = execFileSync(process.execPath, [executable, '--version'], {cwd: root, encoding: 'utf8'});
   if (!version.startsWith('tree-sitter ' + expected + ' ')) throw Error('Wrong tree-sitter generator; run npm install');
   const grammarHash = read(path.join(root, 'grammar.js'));
-  return runTool(executable, ['generate'], root, `Generating Kotlin parser with tree-sitter ${expected}`).then(seconds => {
+  return runTool(executable, ['generate'], root, `Generating Kotlin parser with tree-sitter ${expected} (usually ~50s)`).then(seconds => {
     if (read(path.join(root, 'grammar.js')) !== grammarHash) throw Error('grammar.js changed during generation; rerun npm run generate');
     const identity = {schemaVersion: 1, generatorVersion: expected, grammarHash,
       files: Object.fromEntries(GENERATED_FILES.map(file => [file, read(path.join(root, file))]))};
@@ -104,7 +124,7 @@ function install(root = ROOT) {
   }
   const source = sourceIdentity(root), executable = require.resolve('node-gyp-build/bin.js', {paths: [root]});
   return runTool(executable, [], root, 'Building current Node binding',
-    {...process.env, npm_config_build_from_source: 'true', npm_config_loglevel: 'warn'}).then(seconds => {
+    {...process.env, npm_config_build_from_source: 'true', npm_config_loglevel: process.env.PSI_GATE_VERBOSE === '1' ? 'info' : 'warn'}).then(seconds => {
     if (sourceIdentity(root).hash !== source.hash) throw Error('Binding inputs changed during build; rerun npm install');
     const file = binary(root);
     fs.writeFileSync(path.join(root, RECEIPT), JSON.stringify({source,
@@ -115,5 +135,5 @@ function install(root = ROOT) {
 module.exports = {sourceIdentity, assertFresh, fresh, install, generate, assertGenerated, runTool};
 if (require.main === module) {
   Promise.resolve().then(() => process.argv.includes('--generate') ? generate() : install())
-    .catch(error => {console.error(error.message); process.exitCode = 1;});
+    .catch(error => {console.error(error.message); process.exitCode = error.exitCode || 1;});
 }

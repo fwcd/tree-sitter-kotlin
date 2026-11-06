@@ -1,4 +1,5 @@
 'use strict';
+const {isResourceError, resourceMessage} = require('./resource');
 
 /**
  * Runs `main` with the command-line arguments when `entry` is the module node started. A thrown
@@ -10,9 +11,10 @@ function runIfMain(entry, main) {
   if (require.main !== entry) return;
   const fail = (error) => {
     console.error(
+      isResourceError(error) ? resourceMessage(process.argv[2] || 'PSI check', error) :
       process.env.PSI_DEBUG === '1' ? error.stack || error.message : error.message || String(error),
     );
-    process.exitCode = 1;
+    process.exitCode = isResourceError(error) ? 2 : error.exitCode || 1;
   };
   try {
     Promise.resolve(main(process.argv.slice(2)))

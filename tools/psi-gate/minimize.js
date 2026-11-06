@@ -9,14 +9,15 @@ const state = require('./fuzz-state');
 const findings = require('./fuzz-findings');
 const {oracleIdentity} = require('./expectations');
 const {sha256} = require('../safety');
+const {isResourceError, resourceMessage} = require('../resource');
 const ROOT = path.resolve(__dirname, '../..');
-async function run({file, config, timeoutMs, parseTimeoutMs, maxSeconds = 30, classId}) {
+async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 30, classId}) {
   const extension = path.extname(file);
   if (!['.kt', '.kts'].includes(extension)) throw Error('minimize requires a Kotlin .kt/.kts file');
   const input = {text: fs.readFileSync(file, 'utf8'), extension, origin: {file: path.resolve(file)}};
   createParser(); await fetchAll({config});
   const out = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-minimized-'));
-  const inspector = new InspectorPool({grammar: ROOT, runtime: ROOT, config: {config}, out, timeoutMs, parseTimeoutMs});
+  const inspector = new InspectorPool({grammar: ROOT, runtime: ROOT, config: {config}, out, timeoutMs: oracleTimeoutMs, parseTimeoutMs});
   try {
     const deadline = Date.now() + maxSeconds * 1000;
     const [original] = await inspector.inspect([input], {deadline});
@@ -33,6 +34,10 @@ async function run({file, config, timeoutMs, parseTimeoutMs, maxSeconds = 30, cl
     console.log(`minimize: ${Buffer.byteLength(input.text)} -> ${Buffer.byteLength(min.text)} bytes${min.exhausted ? ' (partial)' : ''}`);
     console.log(entry.file); console.log(entry.sidecar);
     return {exitCode: min.exhausted ? 2 : 0, ...entry};
+  } catch (error) {
+    if (!isResourceError(error)) throw error;
+    console.error(resourceMessage('minimize', {...error, message: 'no verified representative saved before exhaustion'}));
+    return {exitCode: 2, partial: true, saved: false};
   } finally { inspector.close(); }
 }
 module.exports = {run};

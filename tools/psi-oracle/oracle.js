@@ -16,6 +16,7 @@ const { execFile, execFileSync, spawn } = require('child_process');
 const { jarPaths, isFetched, verifyHelper } = require('./fetch');
 const { loadConfig } = require('../psi-gate/config');
 const { confined, javaExecutable, positive } = require('../safety');
+const {resourceError} = require('../resource');
 const JVM = ['-Xss64m', '-Xmx1g'];
 
 const SOURCE = path.join(__dirname, 'PsiOracle.java');
@@ -75,7 +76,8 @@ function runOracleAsync(files, options) {
   return new Promise((resolve, reject) => {
     execFile(java, javaArgs(listFile, options), { timeout: positive(options.timeoutMs || 120000, 'timeout-ms'), killSignal: 'SIGKILL', maxBuffer: 64 * 1024 * 1024 }, (error, _stdout, stderr) => {
       fs.rmSync(path.dirname(listFile), { recursive: true, force: true });
-      if (error) reject(new Error(`PsiOracle failed: ${stderr || error.message}`));
+      if (error) reject(error.killed ? resourceError('PSI oracle request timed out', 'PSI_ORACLE_TIMEOUT') :
+        new Error(`PsiOracle failed: ${stderr || error.message}`));
       else { try { resolve(readIndex(options.out)); } catch (failure) { reject(failure); } }
     });
   });
@@ -123,7 +125,7 @@ class OracleServer {
   async runOnce(files, options) {
     if (this.failure) throw this.failure;
     const listFile = prepare(files, options, false);
-    const timer = setTimeout(() => { this.fail(new Error('PSI oracle timed out')); this.child.kill('SIGKILL'); }, positive(options.timeoutMs || 120000, 'timeout-ms'));
+    const timer = setTimeout(() => { this.fail(resourceError('PSI oracle request timed out', 'PSI_ORACLE_TIMEOUT')); this.child.kill('SIGKILL'); }, positive(options.timeoutMs || 120000, 'timeout-ms'));
     try {
       await new Promise((resolve, reject) => {
         this.pending.push({ resolve, reject });

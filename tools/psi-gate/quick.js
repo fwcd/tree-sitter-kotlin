@@ -27,7 +27,7 @@ function failureReason(row) {
   const fact = row.layoutDifferences?.[0];
   return fact ? `${fact.key}${fact.line ? ` (line ${fact.line})` : ''}` : row.verdict;
 }
-async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'), timeoutMs = 10000, parser}) {
+async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'), parseTimeoutMs = 10000, parser, emit = true}) {
   const {indexed, files} = inventory(root);
   if (!files.length) throw Error('No indexed quick corpus snippets; add the curated corpus to Git');
   parser = parser || nativeParser(root);
@@ -37,24 +37,33 @@ async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'
       const bytes = fs.readFileSync(confined(root, relative));
       const reference = expected.read({root, relative, config, indexed, bytes});
       rows.push({path: relative, sourceSha256: sha256(bytes),
-        ...expected.compare({text: expected.textOf(bytes), parser, expected: reference, timeoutMs})});
-    } catch (error) { rows.push({path: relative, verdict: 'expectation-error', error: error.message}); }
+        ...expected.compare({text: expected.textOf(bytes), parser, expected: reference, timeoutMs: parseTimeoutMs})});
+    } catch (error) { rows.push({path: relative, verdict: error.message === 'Native quick parse timed out' ?
+      'resource-exhausted' : 'expectation-error', error: error.message}); }
   }
-  const mismatching = rows.filter(row => row.verdict !== 'ok').length;
-  const result = {exitCode: mismatching ? 1 : 0, rows,
-    counts: {selected: files.length, matched: files.length - mismatching, mismatching}};
+  const incomplete = rows.filter(row => row.verdict === 'resource-exhausted').length;
+  const mismatching = rows.filter(row => !['ok','resource-exhausted'].includes(row.verdict)).length;
+  const result = {exitCode: incomplete ? 2 : mismatching ? 1 : 0, rows,
+    counts: {selected: files.length, matched: files.length - mismatching - incomplete, mismatching, incomplete}};
   fs.mkdirSync(home, {recursive: true});
   result.reportPath = path.join(home, 'quick.json');
   fs.writeFileSync(result.reportPath, JSON.stringify(result, null, 2) + '\n');
-  console.log(`quick: ${mismatching} files mismatching (${files.length} must-match snippets)`);
-  if (mismatching) {
-    for (const row of rows.filter(row => row.verdict !== 'ok'))
-      console.log(`  ${row.path}: ${failureReason(row).replace(/[\r\n]+/g, ' ').slice(0, 600)}`);
-    console.log(`Report: ${result.reportPath}`);
-  }
+  if (emit) printResult(result);
   return result;
 }
-async function regenerate({root = REPO, config, home = path.join(root, 'local/psi-gate'), timeoutMs = 120000,
+function printResult(result) {
+  const {rows, counts: {mismatching, selected}, reportPath} = result;
+  if (result.exitCode === 2) {
+    console.log(`quick: INCOMPLETE (${result.counts.incomplete} native timeouts)`);
+    console.error('quick: increase --parse-timeout-ms and rerun; no complete verdict');
+  } else console.log(`quick: ${mismatching} files mismatching (${selected} must-match snippets)`);
+  if (mismatching || result.exitCode === 2) {
+    for (const row of rows.filter(row => row.verdict !== 'ok'))
+      console.error(`  ${row.path}: ${failureReason(row).replace(/[\r\n]+/g, ' ').slice(0, 600)}`);
+    console.log(reportPath);
+  }
+}
+async function regenerate({root = REPO, config, home = path.join(root, 'local/psi-gate'), oracleTimeoutMs = 120000,
   oracle = require('../psi-oracle/oracle').runOracleAsync}) {
   const {files} = inventory(root);
   if (!files.length) throw Error('No indexed snippets to regenerate');
@@ -65,7 +74,7 @@ async function regenerate({root = REPO, config, home = path.join(root, 'local/ps
     for (const {relative, bytes} of original) {
       const file = path.join(inputs, relative); fs.mkdirSync(path.dirname(file), {recursive: true}); fs.writeFileSync(file, bytes);
     }
-    const refs = await oracle(files, {root: inputs, out, timeoutMs, config: config.psi});
+    const refs = await oracle(files, {root: inputs, out, timeoutMs: oracleTimeoutMs, config: config.psi});
     if (refs.length !== files.length) throw Error('Incomplete PSI expectation regeneration');
     const prepared = original.map(({relative, bytes}, i) => {
       if (refs[i].path !== relative) throw Error('Misaligned PSI expectation regeneration');
@@ -86,9 +95,10 @@ async function regenerate({root = REPO, config, home = path.join(root, 'local/ps
         fs.writeFileSync(temporary, file.output, {flag: 'wx'}); fs.renameSync(temporary, destination); changed++;
       }
     }
-    console.log(`regenerate-expectations: ${files.length} PSI references, ${changed} changed (review before staging)`);
+    console.log(`regenerate-expectations: PASS (${files.length} PSI references, ${changed} changed)`);
+    console.error('Review regenerated PSI expectations before staging source and expectation together.');
     return {exitCode: 0, regenerated: files.length, changed};
   } finally { fs.rmSync(stage, {recursive: true}); }
 }
 
-module.exports = {run, regenerate, inventory, nativeParser, failureReason, CORPUS};
+module.exports = {run, regenerate, inventory, nativeParser, failureReason, CORPUS, printResult};

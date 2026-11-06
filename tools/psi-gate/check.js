@@ -8,7 +8,7 @@ const { parseText } = require('../cross-validation/diff-execute');
 const { compareInput } = require('../cross-validation/diff-classify');
 const { runOracleAsync } = require('../psi-oracle/oracle');
 
-async function checkFiles({ root, files, config, out, timeoutMs = 120000, parseTimeoutMs = 10000, jobs = 2 }) {
+async function checkFiles({ root, files, config, out, oracleTimeoutMs = 120000, parseTimeoutMs = 10000, jobs = 2 }) {
   jobs = positive(jobs, 'jobs', 4);
   if (!files.length) throw new Error('No indexed Kotlin inputs selected');
   if (new Set(files).size !== files.length) throw new Error('Duplicate selected input paths');
@@ -20,7 +20,7 @@ async function checkFiles({ root, files, config, out, timeoutMs = 120000, parseT
       const start = shard * 1000, batch = files.slice(start, start + 1000);
       batch.forEach(file => confined(root, file));
       const dumpRoot = path.join(out, 'psi-' + shard);
-      const refs = await runOracleAsync(batch, { root, out: dumpRoot, config, timeoutMs });
+      const refs = await runOracleAsync(batch, { root, out: dumpRoot, config, timeoutMs: oracleTimeoutMs });
       if (refs.length !== batch.length) throw new Error('Incomplete PSI oracle results');
       refs.forEach((psi, i) => {
         if (psi.path !== batch[i] || psi.failure) throw new Error(`PSI oracle failure: ${psi.path}: ${psi.failure || 'misaligned output'}`);

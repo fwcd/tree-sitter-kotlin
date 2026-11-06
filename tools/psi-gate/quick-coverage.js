@@ -7,6 +7,8 @@ const path = require('path');
 const quick = require('./quick');
 const expected = require('./expectations');
 const {observe, Coverage} = require('./fuzz-coverage');
+const {resourceError} = require('../resource');
+const {parseText} = require('../cross-validation/diff-execute');
 const {confined, sha256} = require('../safety');
 const ROOT = path.resolve(__dirname, '../..');
 const grammarBlocked = {
@@ -17,7 +19,7 @@ const grammarBlocked = {
 };
 
 async function measure({root = ROOT, config = require('./config').loadConfig(),
-  out = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-quick-coverage-')), timeoutMs = 120000,
+  out = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-quick-coverage-')), oracleTimeoutMs = 120000, parseTimeoutMs = 10000,
   oracle = require('../psi-oracle/oracle').runOracleAsync} = {}) {
   const {files, indexed} = quick.inventory(root);
   if (!files.length) throw Error('No indexed quick snippets to measure');
@@ -27,7 +29,7 @@ async function measure({root = ROOT, config = require('./config').loadConfig(),
   for (const {relative, bytes} of sources) {
     const target = path.join(inputs, relative); fs.mkdirSync(path.dirname(target), {recursive: true}); fs.writeFileSync(target, bytes);
   }
-  const refs = await oracle(files, {root: inputs, out: oracleOut, config, timeoutMs});
+  const refs = await oracle(files, {root: inputs, out: oracleOut, config, timeoutMs: oracleTimeoutMs});
   if (refs.length !== files.length) throw Error('Incomplete quick coverage oracle output');
   const coverage = new Coverage(), parser = quick.nativeParser(root), rows = [];
   for (const [index, {relative, bytes}] of sources.entries()) {
@@ -38,9 +40,14 @@ async function measure({root = ROOT, config = require('./config').loadConfig(),
     const stored = expected.read({root, relative, bytes, config, indexed});
     const live = expected.make({relative, bytes, dump, psi: ref, config, origin: stored.origin});
     if (JSON.stringify(live) !== JSON.stringify(stored)) throw Error('Stored PSI expectation differs from live PSI: ' + relative);
-    const comparison = expected.compare({text, parser, expected: live, timeoutMs});
+    let comparison;
+    try { comparison = expected.compare({text, parser, expected: live, timeoutMs: parseTimeoutMs}); }
+    catch (error) { if (error.message === 'Native quick parse timed out')
+      throw resourceError('Native coverage parse timed out', 'PSI_NATIVE_TIMEOUT');
+      throw error; }
     if (comparison.verdict !== 'ok') throw Error('Quick coverage requires must-match input: ' + relative + ': ' + quick.failureReason(comparison));
-    const tree = parser.parse(text);
+    parser.setTimeoutMicros(parseTimeoutMs * 1000);
+    const tree = parseText(parser, text);
     try {
       const observed = observe(tree.rootNode, dump);
       coverage.add({accepted: true, nativeRejected: false, coverage: observed}, {kind: 'corpus'});
@@ -55,9 +62,9 @@ async function measure({root = ROOT, config = require('./config').loadConfig(),
     })));
   fs.writeFileSync(path.join(out, 'coverage.json'), JSON.stringify(result, null, 2) + '\n');
   const s = result.views.all.summary;
-  console.log(`quick coverage (${files.length} must-match snippets): native ${s.nativeTypes}/${s.nativeTotal}, PSI composites ${s.psiComposites}/${s.psiCompositeTotal}, lexer ${s.psiTokens}/${s.psiTokenTotal}`);
-  for (const gap of result.notYetCoverable) console.log(`  ${gap.type}: ${gap.reason}`);
-  console.log(`Report: ${path.join(out, 'coverage.json')}`);
+  console.error(`quick coverage (${files.length} must-match snippets): native ${s.nativeTypes}/${s.nativeTotal}, PSI composites ${s.psiComposites}/${s.psiCompositeTotal}, lexer ${s.psiTokens}/${s.psiTokenTotal}`);
+  for (const gap of result.notYetCoverable) console.error(`  ${gap.type}: ${gap.reason}`);
+  console.log(path.join(out, 'coverage.json'));
   return result;
 }
 
