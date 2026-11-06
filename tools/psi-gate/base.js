@@ -3,12 +3,26 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { positive } = require('../safety');
 const FALLBACK_UPSTREAM = 'https://github.com/fwcd/tree-sitter-kotlin.git';
+
+class GitTimeout extends Error {
+  constructor(step, elapsed, timeout) {
+    super(`TIMEOUT ${step} after ${(elapsed / 1000).toFixed(3)}s (Git budget ${timeout}ms). ` +
+      'Use --base REV for a local/offline pin, --upstream REMOTE|URL for another source, ' +
+      'or --git-timeout-ms N / PSI_GATE_GIT_TIMEOUT_MS to raise the timeout.');
+    this.code = 'PSI_GATE_GIT_TIMEOUT';
+  }
+}
 
 /** Select a local override or a proven merge-base, without updating tracking refs. */
 function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log = console.log } = {}) {
-  const git = (args, optional = false) => {
-    const result = spawnSync('git', args, { cwd, encoding: 'utf8', timeout: 180000 });
+  const timeout = positive(options.gitTimeoutMs ?? env.PSI_GATE_GIT_TIMEOUT_MS ?? 180000, '--git-timeout-ms', 3600000);
+  const git = (args, optional = false, step = `git ${args[0]}`) => {
+    const started = process.hrtime.bigint();
+    const result = spawnSync('git', args, { cwd, env: { ...process.env, ...env }, encoding: 'utf8', timeout });
+    if (result.error?.code === 'ETIMEDOUT')
+      throw new GitTimeout(step, Number(process.hrtime.bigint() - started) / 1e6, timeout);
     if (result.error || result.status !== 0) {
       if (optional) return null;
       throw new Error('Could not read Git history; check this checkout or provide --base REV.');
@@ -43,13 +57,13 @@ function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log
   if (git(['check-ref-format', `refs/heads/${branch}`], true) === null)
     throw new Error('Invalid upstream branch; use --upstream-branch NAME or --base REV.');
   const label = `${remote || (requested ? 'configured upstream' : 'canonical fallback')}/${branch}`;
-  const fetch = (repository, refs, depth) => {
+  const fetch = (repository, refs, depth, role) => {
     const args = ['fetch', '--no-tags', '--no-prune', '--no-prune-tags', '--no-auto-gc', '--no-recurse-submodules', '--refmap='];
     if (depth) args.push(`--depth=${depth}`);
     // Empty refmap and URL transport prevent configured remote fetch mappings
     // from updating refs/remotes/*; FETCH_HEAD is the only fetched reference.
     args.push('--', repository, ...refs);
-    if (git(args, true) === null)
+    if (git(args, true, `fetch ${label} ${role}, depth ${depth}`) === null)
       throw new Error(`Could not fetch upstream history for ${label}. Check connectivity/configuration, or use --base REV for an offline check.`);
   };
   const boundaries = () => {
@@ -71,23 +85,50 @@ function resolveBase(options = {}, { cwd = process.cwd(), env = process.env, log
     log(`Base ${commit}: merge-base of HEAD and ${label} (upstream tip ${upstream}).`);
     return { commit, upstream, remote: remote || null, branch, reason: 'merge-base' };
   };
-  const advertised = git(['ls-remote', '--exit-code', url, `refs/heads/${branch}`], true);
+  const advertised = git(['ls-remote', '--exit-code', url, `refs/heads/${branch}`], true, `advertise ${label}`);
   if (!advertised)
     throw new Error(`Could not fetch upstream history for ${label}. Check connectivity/configuration, or use --base REV for an offline check.`);
   const tip = advertised.split(/\s+/)[0];
   const existing = knownBase(tip);
   if (existing) return existing;
-  const depths = git(['rev-parse', '--is-shallow-repository']) === 'true' ? [64, 256, 1024, 4096] : [null];
+  // Begin cheaply even when only the upstream side is shallow/missing. Each
+  // larger window is bounded, and a slow window does not end the progression.
+  const depths = [1, 8, 32, 128, 512, 2048, 4096];
+  let lastTimeout, windowTimedOut;
+  const attempt = (repository, refs, depth, role) => {
+    try { fetch(repository, refs, depth, role); return true; }
+    catch (error) {
+      if (!(error instanceof GitTimeout)) throw error;
+      lastTimeout = error; windowTimedOut = true;
+      log(`${error.message} Continuing the bounded history progression.`);
+      return false;
+    }
+  };
   for (const depth of depths) {
-    if (depth && initial.length) fetch(historyUrl, initial, depth);
+    windowTimedOut = false;
+    const historyFetched = initial.length && attempt(historyUrl, initial, depth, 'fork ancestry');
     // The fork history often already contains upstream's advertised tip. Avoid
     // downloading its trees/blobs again when the complete ancestor is now local.
     const fromHistory = knownBase(tip);
     if (fromHistory) return fromHistory;
-    fetch(url, [`refs/heads/${branch}`], depth);
+    const tipKnown = git(['cat-file', '-e', `${tip}^{commit}`], true) !== null;
+    if (historyFetched && depth > 1 && depth < depths.at(-1) && tipKnown &&
+        boundaries().some(boundary => ancestor(boundary, head))) {
+      log(`Extending fork ancestry at depth ${depth} before requesting a larger upstream window for ${label}.`);
+      continue;
+    }
+    // A complete upstream chain needs no additional fetch, even if the local
+    // fork still has a shallow frontier. Do not shorten its known ancestry.
+    if (tipKnown &&
+        !boundaries().some(boundary => ancestor(boundary, tip))) continue;
+    if (!attempt(url, [`refs/heads/${branch}`], depth, 'upstream history')) continue;
     const upstream = git(['rev-parse', '--verify', 'FETCH_HEAD^{commit}']);
     const resolved = knownBase(upstream);
     if (resolved) return resolved;
+  }
+  if (windowTimedOut) {
+    lastTimeout.message += ' No complete common ancestor after the bounded history progression.';
+    throw lastTimeout;
   }
   throw new Error('Cannot establish a complete common ancestor with upstream. Fetch more history or use --base REV explicitly.');
 }

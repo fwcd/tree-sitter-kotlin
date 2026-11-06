@@ -335,3 +335,26 @@ cluster formats and local defect ledgers are unchanged. Intrinsic roots/directiv
 and some leaf types have only one legal direct parent; observed context sets show
 that limitation rather than inventing additional contexts. Full type coverage alone
 does not prove all combinations or grammar-wide normalizer correctness.
+
+
+### Upstream history timeouts
+
+Both `psi-gate` and `psi-fuzz` accept `--git-timeout-ms N` (1..3600000), or
+`PSI_GATE_GIT_TIMEOUT_MS`; the flag takes precedence and the default is 180000ms
+per Git call. This budget is separate from the oracle and fuzz sampling budgets.
+
+When ancestry is missing, base resolution starts with small history windows
+(depth 1,8,32,128,512,2048,4096). It reuses complete local ancestry and does not
+shorten a complete upstream chain. A timed-out fetch step is reported and the
+bounded progression continues; a successful later step still must prove the
+merge-base and shallow-frontier conditions. FETCH_HEAD-only fetches leave
+tracking refs and tags unchanged. Exhausted timeouts identify the upstream,
+history role, depth and elapsed time, rather than describing a timeout as a
+connectivity error.
+
+For a slow server, raise the per-call budget or select another upstream; an
+explicit local revision avoids the fetch:
+
+    npm run psi-gate -- quick --git-timeout-ms 600000
+    PSI_GATE_GIT_TIMEOUT_MS=600000 npm run psi-fuzz -- --seed example --max-inputs 1000
+    npm run psi-gate -- quick --base EXISTING_LOCAL_REV

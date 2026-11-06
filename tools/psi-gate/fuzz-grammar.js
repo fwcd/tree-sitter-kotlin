@@ -9,7 +9,8 @@ function references(node, out = new Set()) {
   for (const child of node.members || []) references(child, out);
   return out;
 }
-const graph = Object.fromEntries(Object.entries(grammar.rules).map(([name, node]) => [name, [...references(node)]]));
+const graph = Object.assign(Object.create(null),
+  Object.fromEntries(Object.entries(grammar.rules).map(([name, node]) => [name, [...references(node)]])));
 function descendants(name, depth = 3, seen = new Set()) {
   if (!depth || seen.has(name)) return seen;
   seen.add(name);

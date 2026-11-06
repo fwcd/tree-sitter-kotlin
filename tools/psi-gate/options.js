@@ -12,6 +12,7 @@ const HELP = `Usage: npm run psi-gate -- quick|full|update-expected [options] or
   --base REV             Explicit local base (default: merge-base with upstream)
   --upstream REMOTE|URL  Override upstream, or PSI_GATE_UPSTREAM
   --upstream-branch NAME Override branch, or PSI_GATE_UPSTREAM_BRANCH
+  --git-timeout-ms N     Per-Git-call timeout, or PSI_GATE_GIT_TIMEOUT_MS (default 180000)
   --corpora LIST          Comma-separated snippets,corpus,mutations,kotlin,idea
   --expected FILE        Snapshot to compare, or destination for update-expected
   --home DIR             Owned cache/report directory (default local/psi-gate)
@@ -51,6 +52,7 @@ function argumentsOf(argv) {
     if (flag === '--base') options.base = value;
     else if (flag === '--upstream') options.upstream = value;
     else if (flag === '--upstream-branch') options.upstreamBranch = value;
+    else if (flag === '--git-timeout-ms') options.gitTimeoutMs = positive(value, flag, 3600000);
     else if (flag === '--corpora') options.corpora = value.split(',');
     else if (flag === '--expected') options.expected = path.resolve(value);
     else if (flag === '--home') options.home = path.resolve(value);

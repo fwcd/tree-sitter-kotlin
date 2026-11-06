@@ -69,7 +69,7 @@ class Coverage {
   snapshot() {
     const views = {};
     for (const [name, v] of Object.entries(this.views)) {
-      const parentCounts = {};
+      const parentCounts = Object.create(null);
       for (const pair of v.nativePairs.keys()) {
         const [parent, child] = pair.split(' > ');
         (parentCounts[child] ||= new Set()).add(parent);

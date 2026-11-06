@@ -91,13 +91,13 @@ function sourceFiles(root) {
   return files.sort();
 }
 /** Prepare the pinned runtime and an immutable grammar for other PSI tools. */
-async function prepareGrammar({ home, base, upstream, upstreamBranch }) {
+async function prepareGrammar({ home, base, upstream, upstreamBranch, gitTimeoutMs }) {
   assertHome(home);
   return withHome(home, async () => {
     prerequisites({ corpora: [] });
     runtime();
     await require('../psi-oracle/fetch').fetchAll();
-    const ref = revision(base, { upstream, upstreamBranch });
+    const ref = revision(base, { upstream, upstreamBranch, gitTimeoutMs });
     return { grammar: grammar(ROOT, home, ref), runtime: __dirname, revision: ref };
   });
 }

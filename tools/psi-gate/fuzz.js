@@ -23,6 +23,7 @@ const HELP = `Usage: npm run psi-fuzz -- [options]
   --base REF               Explicit local revision; default upstream merge-base
   --upstream REMOTE|URL     Override upstream, or PSI_GATE_UPSTREAM
   --upstream-branch NAME    Override branch, or PSI_GATE_UPSTREAM_BRANCH
+  --git-timeout-ms N        Per-Git-call timeout, or PSI_GATE_GIT_TIMEOUT_MS (default 180000)
   --grammar DIR --runtime DIR  Already-built grammar/runtime instead of preparation
   --out DIR                Owned run output; default local/psi-fuzz
   --bugs DIR               Local defect ledger; default local/psi-fuzz-bugs
@@ -46,6 +47,7 @@ function argumentsOf(argv) {
     bugs: path.join(ROOT, 'local/psi-fuzz-bugs'), maxInputs: 400, maxSeconds: 900,
     stableWindow: 5000, jobs: 1, depth: 4, batchSize: 16, minRounds: 20, minCandidates: 32, minSeconds: 20 };
   const numbers = { '--max-inputs': ['maxInputs', 10000000], '--max-seconds': ['maxSeconds', 86400],
+    '--git-timeout-ms': ['gitTimeoutMs', 3600000],
     '--stable-window': ['stableWindow', 10000000], '--depth': ['depth', 8],
     '--jobs': ['jobs', 2], '--batch-size': ['batchSize', 64], '--min-rounds': ['minRounds', 100],
     '--min-candidates': ['minCandidates', 128], '--min-seconds': ['minSeconds', 3600] };
@@ -134,7 +136,8 @@ async function runPrepared(options, inputs) {
   const prepared = options.grammar
     ? { grammar: options.grammar, runtime: options.runtime, revision: 'external-built-grammar' }
     : await prepareGrammar({ home: path.join(ROOT, 'local/psi-fuzz-cache'),
-      base: options.base, upstream: options.upstream, upstreamBranch: options.upstreamBranch });
+      base: options.base, upstream: options.upstream, upstreamBranch: options.upstreamBranch,
+      gitTimeoutMs: options.gitTimeoutMs });
   const started = Date.now(), deadline = started + options.maxSeconds * 1000;
   const context = state.identity(prepared), ledgerValidation = [], buckets = new Map(), coverage = new Coverage();
   const metrics = { attempted: 0, accepted: 0, rejected: 0, matches: 0, grammarInputs: 0 };

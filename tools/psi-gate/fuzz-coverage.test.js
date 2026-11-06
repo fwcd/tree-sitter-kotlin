@@ -6,7 +6,7 @@ import path from 'path';
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const { Coverage } = require('./fuzz-coverage');
-const { renderer, grammar, graph } = require('./fuzz-grammar');
+const { renderer, grammar, graph, descendants } = require('./fuzz-grammar');
 const { FEATURES, generated } = require('./fuzz-generate');
 const { argumentsOf, run } = require('./fuzz');
 
@@ -32,6 +32,17 @@ it('records sets and file frequencies without crediting PSI-invalid inputs', () 
   expect(snapshot.notEmitted.FILE).toMatch(/wrapper/);
   expect(snapshot.views.all.summary.psiTokenTotal).toBe(150);
   expect(snapshot.intended.psiTypes).toContain('constructor');
+});
+
+it('handles prototype-named future grammar rules and context children as ordinary keys', () => {
+  expect(Object.getPrototypeOf(graph)).toBeNull();
+  expect([...descendants('constructor')]).toEqual(['constructor']);
+  const c = new Coverage();
+  c.views.all.nativePairs.set('source_file > constructor', 1);
+  c.views.all.nativePairs.set('constructor > __proto__', 1);
+  const parents = c.snapshot().views.all.nativeParentContexts;
+  expect(parents.constructor).toEqual(['source_file']);
+  expect(parents.__proto__).toEqual(['constructor']);
 });
 
 it('keeps deterministic initial coverage cycles and biases later choices toward missing productions', () => {

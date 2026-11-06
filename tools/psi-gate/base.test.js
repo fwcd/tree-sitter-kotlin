@@ -37,6 +37,26 @@ function fixture() {
 }
 const cleanup = f => fs.rmSync(f.dir, { recursive: true });
 
+function slowGit(f, mode) {
+  const real = execFileSync('which', ['git'], { encoding: 'utf8' }).trim();
+  const directory = path.join(f.dir, 'git-shim'), file = path.join(directory, 'git');
+  const record = path.join(f.dir, 'fetch-steps.jsonl');
+  fs.mkdirSync(directory);
+  fs.writeFileSync(file, `#!${process.execPath}
+const fs = require('fs'), {spawnSync} = require('child_process');
+const args = process.argv.slice(2), depth = args.find(a => a.startsWith('--depth='));
+if (args[0] === 'fetch') fs.appendFileSync(${JSON.stringify(record)}, JSON.stringify({depth, repository:args[args.indexOf('--')+1]}) + '\\n');
+if (args[0] === 'fetch' && (${JSON.stringify(mode)} === 'all' || (${JSON.stringify(mode)} === 'first' && depth === '--depth=1'))) {
+  setTimeout(() => process.exit(0), 5000);
+} else {
+  const result = spawnSync(${JSON.stringify(real)}, args, {stdio: 'inherit'});
+  process.exit(result.status ?? 1);
+}
+`);
+  fs.chmodSync(file, 0o755);
+  return { env: { PATH: directory + path.delimiter + process.env.PATH }, record };
+}
+
 describe('upstream merge-base selection', () => {
   it('excludes upstream-only changes and leaves all refs/tags unchanged', () => {
     const f = fixture();
@@ -171,5 +191,68 @@ it('names a missing explicit base reference', () => {
   try {
     expect(() => resolveBase({ base: 'missing-reference' }, { cwd: f.local, log: () => {} }))
       .toThrow(/missing-reference/);
+  } finally { cleanup(f); }
+}, GIT_TIMEOUT_MS);
+
+it('advances from a timed-out small fetch window and honors the flag over the environment', () => {
+  const f = fixture(), shim = slowGit(f, 'first');
+  try {
+    const before = refs(f.local), messages = [];
+    const result = resolveBase({ upstream: f.upstream, gitTimeoutMs: 1000 }, {
+      cwd: f.local, env: { ...shim.env, PSI_GATE_GIT_TIMEOUT_MS: '50000' }, log: text => messages.push(text),
+    });
+    expect(result.commit).toBe(f.common);
+    expect(refs(f.local)).toBe(before);
+    const steps = fs.readFileSync(shim.record, 'utf8');
+    expect(steps).toContain('--depth=1');
+    expect(steps).toContain('--depth=8');
+    expect(messages.join('\n')).toMatch(/TIMEOUT fetch .*upstream history, depth 1 after .*1000ms/);
+    expect(messages.join('\n')).toContain('Continuing');
+  } finally { cleanup(f); }
+}, GIT_TIMEOUT_MS);
+
+it('names exhausted fetch timeouts, elapsed time, final step and all override options', () => {
+  const f = fixture(), shim = slowGit(f, 'all');
+  try {
+    const messages = [], before = refs(f.local);
+    let failure;
+    try {
+      resolveBase({ upstream: f.upstream }, { cwd: f.local,
+        env: { ...shim.env, PSI_GATE_GIT_TIMEOUT_MS: '1000' }, log: text => messages.push(text) });
+    } catch (error) { failure = error; }
+    expect(failure?.code).toBe('PSI_GATE_GIT_TIMEOUT');
+    expect(failure.message).toMatch(/TIMEOUT fetch .*depth 4096 after [\d.]+s/);
+    expect(failure.message).toContain('--base REV');
+    expect(failure.message).toContain('--upstream REMOTE|URL');
+    expect(failure.message).toContain('--git-timeout-ms N / PSI_GATE_GIT_TIMEOUT_MS');
+    expect(failure.message).not.toContain('connectivity');
+    expect(refs(f.local)).toBe(before);
+    expect(fs.readFileSync(shim.record, 'utf8').trim().split('\n')).toHaveLength(7);
+  } finally { cleanup(f); }
+}, GIT_TIMEOUT_MS);
+
+it('validates the configurable timeout and exposes it through both launchers', () => {
+  expect(argumentsOf(['quick', '--git-timeout-ms', '600000']).gitTimeoutMs).toBe(600000);
+  expect(require('./fuzz').argumentsOf(['--git-timeout-ms', '600000']).gitTimeoutMs).toBe(600000);
+  expect(() => resolveBase({}, { env: { PSI_GATE_GIT_TIMEOUT_MS: '0' } })).toThrow(/integer/);
+  expect(() => resolveBase({ gitTimeoutMs: 3600001 })).toThrow(/integer/);
+});
+
+it('deepens the fork first when the one-commit upstream tip is its branch point', () => {
+  const f = fixture();
+  try {
+    git(f.local, 'fetch', '--no-tags', f.upstream, 'main');
+    git(f.local, 'checkout', '-qb', 'long-fork', 'FETCH_HEAD');
+    for (let i = 0; i < 60; i++) git(f.local, 'commit', '--allow-empty', '-qm', 'fork-' + i);
+    const fork = path.join(f.dir, 'fork.git'), shallow = path.join(f.dir, 'shallow');
+    git(f.dir, 'clone', '-q', '--bare', f.local, fork);
+    git(f.dir, 'clone', '-q', '--branch', 'long-fork', '--depth=1', 'file://' + fork, shallow);
+    const shim = slowGit(f, 'none'), before = refs(shallow);
+    const result = resolveBase({ upstream: f.upstream }, { cwd: shallow, env: shim.env, log: () => {} });
+    expect(result.commit).toBe(f.tip);
+    expect(refs(shallow)).toBe(before);
+    const requests = fs.readFileSync(shim.record, 'utf8').trim().split('\n').map(line => JSON.parse(line));
+    expect(requests.filter(r => r.repository === f.upstream).map(r => r.depth)).toEqual(['--depth=1']);
+    expect(requests.some(r => r.repository !== f.upstream && r.depth === '--depth=128')).toBe(true);
   } finally { cleanup(f); }
 }, GIT_TIMEOUT_MS);
