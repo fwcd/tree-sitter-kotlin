@@ -143,6 +143,28 @@ const cases = {
   secondAnnotatedFunctionComment: 'fun f(){g(x,@A/*c*/fun(){})}\n',
   precedingAnnotatedCall: 'fun f(){@A foo();fun(){}}\n',
   secondPlainFunction: 'fun f(){g(x,fun(){})}\n',
+  annotatedTryBinary: 'fun f(){try{@A(1) (a)+b}catch(e:T){}}\n',
+  annotatedTryInfix: 'fun f(){try{@A(1) (a) to b}catch(e:T){}}\n',
+  annotatedTryNestedBinary: 'fun f(){try{@A(1) @B(2) a*b+c}catch(e:T){}}\n',
+  annotatedThenBinary: 'fun f(){if(c)@A(1) (a)+b else x}\n',
+  annotatedElseBinary: 'fun f(){if(c)x else @A(1) (a)?:b}\n',
+  annotatedBodyComment: 'fun f(){if(c)@A(1)/*c*/(a)+b else x}\n',
+  annotatedTryParenthesized: 'fun f(){try{@A(1) (a+b)}catch(e:T){}}\n',
+  plainTryBinary: 'fun f(){try{(a)+b}catch(e:T){}}\n',
+  consecutiveExpressionAnnotations: 'val x=(@A(1) @B(2) a)\n',
+  consecutiveLabeledAnnotations: 'val x=(@A(1) @B(2) l@1)\n',
+  consecutiveCommentAnnotations: 'val x=(@A(1)/*c*/@B(2) l@1)\n',
+  groupedExpressionAnnotations: 'val x=(@A(1) (@B(2) a))\n',
+  separatedLabelAnnotations: 'val x=(@A(1) l@ @B(2) 1)\n',
+  singleExpressionAnnotation: 'val x=(@A(1) a)\n',
+  explicitStatementPrefix: 'fun f(){try{@A(1) a+b}catch(e:T){}}\n',
+  explicitBranchPrefix: 'fun f(){if(c)@A(1) a+b else x}\n',
+  newlineStatementAnnotation: 'fun f(){@A(1)\n(a)+b}\n',
+  newlineMultipleAnnotations: 'fun f(){@A(1) @B(2)\n(a)+b}\n',
+  newlineBetweenAnnotations: 'fun f(){@A(1)\n@B(2) (a)+b}\n',
+  newlineInsideComment: 'fun f(){@A(1)/*c\n*/(a)+b}\n',
+  newlineBranchAnnotation: 'fun f(){if(c)@A(1)\n(a)+b else x}\n',
+  inlineStatementAnnotation: 'fun f(){@A(1) (a)+b}\n',
 };
 
 describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
@@ -346,10 +368,30 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     different('hiddenAnnotatedBinaryArgs', 'parenthesizedAnnotatedBinary');
     different('hiddenAnnotatedNestedBinary', 'hiddenAnnotatedBinaryArgs');
     expect(comparison('explicitArgumentPrefix').result.differences.length).toBeGreaterThan(0);
+    expect(comparison('explicitStatementPrefix').result.differences.length).toBeGreaterThan(0);
+    expect(comparison('explicitBranchPrefix').result.differences.length).toBeGreaterThan(0);
   });
   it('N39 starts anonymous declarations at their parsed hidden annotation prefix', () => {
     for (const name of ['secondAnnotatedFunction', 'secondAnnotatedExtensionFunction', 'statementAnnotatedAnonymousFunction', 'secondAnnotatedFunctionComment', 'precedingAnnotatedCall']) equivalent(name);
     different('secondAnnotatedFunction', 'secondPlainFunction');
     different('statementAnnotatedAnonymousFunction', 'precedingAnnotatedCall');
+  });
+  it('N40 gives a hidden statement or branch annotation to its first binary operand', () => {
+    for (const name of ['annotatedTryBinary', 'annotatedTryInfix', 'annotatedTryNestedBinary',
+      'annotatedThenBinary', 'annotatedElseBinary', 'annotatedBodyComment', 'annotatedTryParenthesized']) equivalent(name);
+    different('annotatedTryBinary', 'plainTryBinary');
+    different('annotatedTryNestedBinary', 'annotatedTryBinary');
+    expect(comparison('explicitArgumentPrefix').result.differences.length).toBeGreaterThan(0);
+    for (const name of ['newlineStatementAnnotation', 'newlineMultipleAnnotations', 'newlineBetweenAnnotations',
+      'newlineInsideComment', 'newlineBranchAnnotation', 'inlineStatementAnnotation']) equivalent(name);
+    different('inlineStatementAnnotation', 'newlineStatementAnnotation');
+    different('annotatedThenBinary', 'newlineBranchAnnotation');
+  });
+  it('N41 groups consecutive expression annotations without crossing parentheses or labels', () => {
+    for (const name of ['consecutiveExpressionAnnotations', 'consecutiveLabeledAnnotations',
+      'consecutiveCommentAnnotations', 'groupedExpressionAnnotations', 'separatedLabelAnnotations']) equivalent(name);
+    different('consecutiveExpressionAnnotations', 'singleExpressionAnnotation');
+    different('consecutiveExpressionAnnotations', 'groupedExpressionAnnotations');
+    different('consecutiveLabeledAnnotations', 'separatedLabelAnnotations');
   });
 });

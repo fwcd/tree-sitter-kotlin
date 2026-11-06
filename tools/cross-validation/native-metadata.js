@@ -92,7 +92,10 @@ function attachNative(tree, root) {
         postfixSequence: node.type === 'directly_assignable_expression' ? postfixSequence(node) : undefined,
         typeParameterSequence: node.type === 'function_type_parameters' ? postfixSequence(node) : undefined,
         statementSpans: ['source_file', 'statements', 'control_structure_body', 'value_argument'].includes(node.type)
-          ? node.namedChildren.map(child => ({start: child.startIndex, end: child.endIndex})) : undefined,
+          ? node.namedChildren.map((child, i, children) => ({start: child.startIndex, end: child.endIndex,
+            newlineBefore: i > 0 && /[\r\n]/.test(node.text.slice(
+              children[i - 1].endIndex - node.startIndex, child.startIndex - node.startIndex)),
+          })) : undefined,
         inlineAssignmentAnnotation: node.type === 'annotated_expression'
           ? inlineAssignmentAnnotation(node) : undefined,
         text: ['string_literal', 'string_content', 'interpolated_identifier'].includes(node.type) ? node.text : undefined,

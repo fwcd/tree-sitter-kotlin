@@ -329,6 +329,15 @@ function _normalizeTsMulti(node, parentName = null) {
   // must remain distinguishable from an annotated expression.
   if ((tsName === 'prefix_expression' || tsName === 'annotated_lambda')
       && node.children.some(child => child.name === 'annotation')) {
+    // Consecutive annotation prefixes form one PSI annotation list. An intervening
+    // label, operator or parenthesized expression keeps its own scope.
+    const tail = node.children.at(-1);
+    if (tsName === 'prefix_expression' && tail?.name === 'prefix_expression'
+        && tail.children.some(child => child.name === 'annotation')
+        && node.children.slice(0, -1).every(child =>
+          ['annotation', 'line_comment', 'multiline_comment'].includes(child.name))) {
+      return _normalizeTsMulti(new Node(tsName, node.children.slice(0, -1).concat(tail.children)), parentName);
+    }
     const children = node.children.flatMap(child => _normalizeTsMulti(child, tsName));
     // An annotation directly on an anonymous function belongs to FUN's
     // modifiers in PSI, rather than an ANNOTATED_EXPRESSION around the FUN.
@@ -679,17 +688,22 @@ function groupStatementAnnotations(node) {
     const tail = expression.name === 'prefix_expression' && expression.children.some(child => child.name === 'annotation')
       ? expression.children : [expression];
     const prefix = node.children.slice(i, end);
-    const argumentPrefix = node.name === 'value_argument' && ARGUMENT_PREFIX_OPERANDS.has(expression.name)
+    let lastAnnotation = end - 1;
+    while (lastAnnotation > i && node.children[lastAnnotation].name !== 'annotation') lastAnnotation--;
+    // A newline after the final statement annotation gives it the whole statement.
+    // Newlines inside parsed annotation arguments/comments do not break the prefix.
+    const inline = spans.slice(lastAnnotation + 1, end + 1).every(span => span?.newlineBefore === false);
+    const operandPrefix = (node.name === 'value_argument' || inline) && ARGUMENT_PREFIX_OPERANDS.has(expression.name)
       && prefix.every(child => ['annotation', 'line_comment', 'multiline_comment'].includes(child.name));
-    keep(argumentPrefix ? prefixArgumentOperand(expression, prefix)
+    keep(operandPrefix ? prefixArgumentOperand(expression, prefix)
       : new Node('prefix_expression', prefix.concat(tail)),
-      spans[i] && spans[end] ? {start: spans[i].start, end: spans[end].end} : undefined);
+      spans[i] && spans[end] ? {...spans[i], end: spans[end].end} : undefined);
     i = end;
   }
   return {children: result, spans: resultSpans};
 }
 
-// The separate value-argument annotation aliases a unary prefix before the first operand.
+// A separate annotation in a hidden statement/body/argument tuple prefixes its first operand.
 // Parentheses stop the left-operand walk and preserve explicitly grouped expressions.
 function prefixArgumentOperand(expression, prefix) {
   if (!ARGUMENT_PREFIX_OPERANDS.has(expression.name)) return new Node('prefix_expression', prefix.concat(expression));
