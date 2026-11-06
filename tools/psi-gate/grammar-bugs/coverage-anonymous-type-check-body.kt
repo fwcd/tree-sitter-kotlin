@@ -1,0 +1,1 @@
+val x=fun()=1is T*2

@@ -1,0 +1,1 @@
+class C{companion{val x}}

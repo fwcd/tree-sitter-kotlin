@@ -1,0 +1,22 @@
+KtFile: coverage-companion-block.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  CLASS
+    PsiElement(class)('class')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('C')
+    CLASS_BODY
+      PsiElement(LBRACE)('{')
+      COMPANION_BLOCK
+        MODIFIER_LIST
+          PsiElement(companion)('companion')
+        CLASS_BODY
+          PsiElement(LBRACE)('{')
+          PROPERTY
+            PsiElement(val)('val')
+            PsiWhiteSpace(' ')
+            PsiElement(IDENTIFIER)('x')
+          PsiElement(RBRACE)('}')
+      PsiElement(RBRACE)('}')
