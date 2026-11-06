@@ -1,4 +1,4 @@
-import {it, expect, beforeAll, afterAll} from 'vitest';
+import {it, expect, beforeAll, afterAll, vi} from 'vitest';
 import {createRequire} from 'node:module';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -12,30 +12,35 @@ const ROOT = path.resolve(import.meta.dirname, '../..');
 const relative = 'tools/psi-gate/corpus/catalog-constructor.kt';
 const fixture = JSON.parse(fs.readFileSync(path.join(ROOT, expectations.filename(relative)), 'utf8'));
 const config = {psi: fixture.oracle};
-let directory, parser, broken;
+let directory, parser, broken, brokenFloat;
 const git = (root, ...args) => execFileSync('git', ['-C', root, ...args], {stdio: ['ignore', 'pipe', 'pipe']});
-function repository() {
+function repository(selected = relative) {
   const root = fs.mkdtempSync(path.join(directory, 'repo-')); git(root, 'init', '--quiet');
-  fs.mkdirSync(path.dirname(path.join(root, relative)), {recursive: true});
-  for (const file of [relative, expectations.filename(relative)]) fs.copyFileSync(path.join(ROOT, file), path.join(root, file));
-  git(root, 'add', relative, expectations.filename(relative)); return root;
+  fs.mkdirSync(path.dirname(path.join(root, selected)), {recursive: true});
+  for (const file of [selected, expectations.filename(selected)]) fs.copyFileSync(path.join(ROOT, file), path.join(root, file));
+  git(root, 'add', selected, expectations.filename(selected)); return root;
 }
 beforeAll(() => {
   directory = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-quick-')); parser = quick.nativeParser(ROOT);
   const setup = require('./test-prerequisites').variantBuild(ROOT);
   if (setup.missing.length) throw Error('Quick regression build prerequisites: ' + setup.missing.join(', '));
-  const root = path.join(directory, 'hidden-class'); fs.mkdirSync(root);
-  for (const name of ['src', 'bindings']) fs.cpSync(path.join(ROOT, name), path.join(root, name), {recursive: true});
-  for (const name of ['package.json', 'binding.gyp']) fs.copyFileSync(path.join(ROOT, name), path.join(root, name));
-  fs.mkdirSync(path.join(root, 'node_modules'));
-  for (const name of ['node-addon-api', 'node-gyp-build'])
-    fs.cpSync(setup.dependencies[name], path.join(root, 'node_modules', name), {recursive: true});
-  const file = path.join(root, 'src/parser.c'), text = fs.readFileSync(file, 'utf8');
-  const needle = '[sym_class_declaration] = {\n    .visible = true,';
-  if (!text.includes(needle)) throw Error('Missing native class visibility marker');
-  fs.writeFileSync(file, text.replace(needle, '[sym_class_declaration] = {\n    .visible = false,'));
-  execFileSync(process.execPath, [setup.nodeGyp, 'rebuild'], {cwd: root, timeout: 120000, stdio: 'pipe'});
-  broken = require('../cross-validation/diff-execute').loadParsers([{label: 'broken', root}], ROOT)[0].parser;
+  const variants = [];
+  for (const type of ['class_declaration', 'real_literal']) {
+    const root = path.join(directory, 'hidden-' + type); fs.mkdirSync(root);
+    for (const name of ['src', 'bindings']) fs.cpSync(path.join(ROOT, name), path.join(root, name), {recursive: true});
+    for (const name of ['package.json', 'binding.gyp']) fs.copyFileSync(path.join(ROOT, name), path.join(root, name));
+    fs.mkdirSync(path.join(root, 'node_modules'));
+    for (const name of ['node-addon-api', 'node-gyp-build'])
+      fs.cpSync(setup.dependencies[name], path.join(root, 'node_modules', name), {recursive: true});
+    const file = path.join(root, 'src/parser.c'), text = fs.readFileSync(file, 'utf8');
+    const needle = `[sym_${type}] = {\n    .visible = true,`;
+    if (!text.includes(needle)) throw Error('Missing native visibility marker: ' + type);
+    fs.writeFileSync(file, text.replace(needle, `[sym_${type}] = {\n    .visible = false,`));
+    execFileSync(process.execPath, [setup.nodeGyp, 'rebuild'], {cwd: root, timeout: 120000, stdio: 'pipe'});
+    const Parser = require('tree-sitter'), variant = new Parser();
+    variant.setLanguage(require(path.join(root, 'bindings/node'))); variants.push(variant);
+  }
+  [broken, brokenFloat] = variants;
 }, 180000);
 afterAll(() => { if (directory) fs.rmSync(directory, {recursive: true}); });
 
@@ -70,6 +75,18 @@ it('rejects a real rebuilt grammar that drops the snippet class node', async () 
   expect((await quick.run({root, config, parser, home: path.join(root, 'report')})).exitCode).toBe(0);
   const result = await quick.run({root, config, parser: broken, home: path.join(root, 'report')});
   expect(result.exitCode).toBe(1); expect(result.rows[0].verdict).toBe('C');
+});
+it('rejects a real rebuilt float-literal regression and prints its file, difference and report', async () => {
+  const selected = quick.CORPUS + '/syntax-primitives.kt', root = repository(selected);
+  expect((await quick.run({root, config, parser, home: path.join(root, 'report')})).exitCode).toBe(0);
+  const output = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    const result = await quick.run({root, config, parser: brokenFloat, home: path.join(root, 'report')});
+    expect(result.exitCode).toBe(1); expect(result.rows[0].verdict).toBe('C');
+    const text = output.mock.calls.flat().join('\n');
+    expect(text).toContain(selected); expect(text).toContain(quick.failureReason(result.rows[0]));
+    expect(text).toContain('Report: ' + result.reportPath);
+  } finally { output.mockRestore(); }
 });
 it('runs with invalid Java paths and does not load the oracle or downloader', () => {
   const root = repository(), program = `

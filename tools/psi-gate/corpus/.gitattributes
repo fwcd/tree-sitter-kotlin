@@ -1,0 +1,4 @@
+*.kt text eol=lf
+*.kts text eol=lf
+*.psi.json text eol=lf
+syntax-unicode-crlf.kt -text whitespace=cr-at-eol

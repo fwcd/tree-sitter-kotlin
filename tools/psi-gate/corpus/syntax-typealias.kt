@@ -1,0 +1,1 @@
+typealias Names=List<String>

@@ -18,6 +18,15 @@ function inventory(root) {
 function nativeParser(root) {
   return require('./runtime').createParser(root);
 }
+function failureReason(row) {
+  if (typeof row.error === 'string') return row.error;
+  if (row.nativeErrors) return row.error
+    ? `Native ${row.error.type} at offsets ${row.error.start}–${row.error.end}` : 'Native parse error';
+  const difference = row.differences?.[0];
+  if (difference) return `${difference.kind.replace(/_/g, ' ')} at ${difference.path}: PSI ${difference.expected}; native ${difference.actual}`;
+  const fact = row.layoutDifferences?.[0];
+  return fact ? `${fact.key}${fact.line ? ` (line ${fact.line})` : ''}` : row.verdict;
+}
 async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'), timeoutMs = 10000, parser}) {
   const {indexed, files} = inventory(root);
   if (!files.length) throw Error('No indexed quick corpus snippets; add the curated corpus to Git');
@@ -38,6 +47,11 @@ async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'
   result.reportPath = path.join(home, 'quick.json');
   fs.writeFileSync(result.reportPath, JSON.stringify(result, null, 2) + '\n');
   console.log(`quick: ${mismatching} files mismatching (${files.length} must-match snippets)`);
+  if (mismatching) {
+    for (const row of rows.filter(row => row.verdict !== 'ok'))
+      console.log(`  ${row.path}: ${failureReason(row).replace(/[\r\n]+/g, ' ').slice(0, 600)}`);
+    console.log(`Report: ${result.reportPath}`);
+  }
   return result;
 }
 async function regenerate({root = REPO, config, home = path.join(root, 'local/psi-gate'), timeoutMs = 120000,
@@ -77,4 +91,4 @@ async function regenerate({root = REPO, config, home = path.join(root, 'local/ps
   } finally { fs.rmSync(stage, {recursive: true}); }
 }
 
-module.exports = {run, regenerate, inventory, nativeParser, CORPUS};
+module.exports = {run, regenerate, inventory, nativeParser, failureReason, CORPUS};
