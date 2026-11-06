@@ -109,7 +109,7 @@ describe.skipIf(!available)('live PSI-valid differential fuzzing', () => {
         depth: 2, minCandidates: 16, minRounds: 8, minSeconds: 5, maxSeconds: 90 };
       const first = await run({ ...base, jobs: 1, out: path.join(dir, 'one'), bugs: path.join(dir, 'bugs') });
       const second = await run({ ...base, jobs: 2, out: path.join(dir, 'two'), bugs: path.join(dir, 'bugs') });
-      const comparable = result => result.buckets.map(b => [b.id, b.count, b.text]);
+      const comparable = result => result.files.map(b => [b.id, fs.readFileSync(b.file, 'utf8')]);
       expect(comparable(second)).toEqual(comparable(first));
       expect(second.metrics).toEqual(first.metrics);
     } finally { fs.rmSync(dir, { recursive: true }); }

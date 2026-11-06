@@ -10,6 +10,7 @@ const { normalizePsi } = require('../cross-validation/normalizer');
 const { sha256, confined } = require('../safety');
 const { BudgetExceeded, remaining } = require('./fuzz-budget');
 const { observe } = require('./fuzz-coverage');
+const { layoutDifferences } = require('../cross-validation/native-layout');
 
 function shape(node) {
   if (!node) return null;
@@ -34,20 +35,21 @@ function grammarSignature(root) {
 const signatureId = (signature) => sha256(JSON.stringify(signature)).slice(0, 20);
 
 class Inspector {
-  constructor({ grammar, runtime, out, timeoutMs = 30000, parseTimeoutMs = 10000 }) {
+  constructor({ grammar, runtime, out, config, timeoutMs = 30000, parseTimeoutMs = 10000 }) {
     grammar = path.resolve(grammar); runtime = path.resolve(runtime);
     this.out = path.resolve(out);
     this.timeoutMs = timeoutMs;
     this.parseTimeoutMs = parseTimeoutMs;
     this.parser = loadParsers([{ label: 'main', root: grammar }], runtime, parseTimeoutMs)[0].parser;
-    this.server = new OracleServer();
+    this.config = config;
+    this.server = new OracleServer(config);
     this.restartAfterBudget = false;
   }
   async inspect(inputs, { deadline = Infinity } = {}) {
     remaining(deadline);
     if (this.restartAfterBudget) {
       this.server.close();
-      this.server = new OracleServer();
+      this.server = new OracleServer(this.config);
       this.restartAfterBudget = false;
       remaining(deadline);
     }
@@ -99,6 +101,9 @@ class Inspector {
             : lostQuest.length ? [['grammar', 'token-span', 'quest']]
             : normalizerError ? [['normalizer-exception', normalizerError]]
             : comparison.result.differences.map(namedSignature);
+          const factDifferences = tree.rootNode.hasError ? [] : layoutDifferences(text, tree.rootNode, layout, cst);
+          if (!grammarDefect && !normalizerError)
+            for (const difference of factDifferences) classes.push(['source-fact', difference.key]);
           const unique = new Map(classes.map(signature => [signatureId(signature), signature]));
           remaining(deadline);
           return {
@@ -107,7 +112,7 @@ class Inspector {
             spanEvidence: lostQuest.length ? { psi: lostQuest, native: emptyQuest } : null,
             expectedPsi: layout.composites.map(node => [node.type, node.depth]), psiDump: dump, expectedNormalized: shape(comparison.psiNorm),
             actualNormalized: shape(comparison.tsNorm), nativeTree: tree.rootNode.toString(),
-            differences: comparison.result.differences, normalizerError,
+            differences: comparison.result.differences, layoutDifferences: factDifferences, normalizerError,
           };
         } finally { tree.delete?.(); }
       });

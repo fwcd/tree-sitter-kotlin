@@ -69,8 +69,8 @@ describe.skipIf(!available)('actual mixed generator coverage', () => {
         out: path.join(dir, 'out'), bugs: path.join(dir, 'bugs') });
       expect(Object.keys(result.coverage.generatedFeatures).sort()).toEqual([...FEATURES].sort());
       expect(result.coverage.views.generated.nativeTypes).toHaveProperty('backing_field');
-      expect(result.buckets.every(b => b.signature && b.id && b.text)).toBe(true);
-      expect(fs.existsSync(path.join(dir, 'out/coverage.json'))).toBe(true);
+      expect(result.files.every(item => item.id && fs.existsSync(item.file) && fs.existsSync(item.sidecar))).toBe(true);
+      expect(JSON.parse(fs.readFileSync(result.indexPath)).coverage).toEqual(result.coverage);
     } finally { fs.rmSync(dir, { recursive: true }); }
   }, 120000);
 });

@@ -56,7 +56,9 @@ async function main(argv) {
     }
     if (options.command === 'regenerate-expectations') return require('./quick').regenerate({ ...options, root: ROOT });
     if (options.command === 'add') return require('./add').run(options);
-    return require('./fuzz').run(require('./fuzz').argumentsOf(options.forward));
+    return require('./fuzz').run(require('./fuzz').argumentsOf(options.forward, {
+      config: options.config, home: options.home, jobs: options.jobs, timeoutMs: options.timeoutMs,
+      parseTimeoutMs: options.parseTimeoutMs}));
   });
 }
 async function prepareGrammar({ home, config = loadConfig(), base, upstream } = {}) {

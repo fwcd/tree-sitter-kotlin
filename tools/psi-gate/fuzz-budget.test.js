@@ -10,13 +10,13 @@ const { InspectorPool } = require('./fuzz-compare');
 const { BudgetExceeded } = require('./fuzz-budget');
 const state = require('./fuzz-state');
 
-it('uses merge-base by default, local evidence, and honors explicit continuous input caps', () => {
+it('uses current grammar, local suspects, and honors explicit continuous input caps', () => {
   expect(argumentsOf([]).base).toBeUndefined();
-  expect(argumentsOf([]).bugs).toBe(path.join(ROOT, 'local/psi-fuzz-bugs'));
+  expect(argumentsOf([]).out).toBeUndefined();
   expect(argumentsOf(['--continuous']).maxInputs).toBe(Infinity);
   expect(argumentsOf(['--continuous', '--max-inputs', '1']).maxInputs).toBe(1);
-  expect(argumentsOf(['--promote']).bugs).toBe(path.join(ROOT, 'tools/psi-gate/grammar-bugs'));
-  expect(() => argumentsOf(['--promote', '--bugs', 'other'])).toThrow(/omit --bugs/);
+  expect(() => argumentsOf(['--promote'])).toThrow(/removed/);
+  expect(() => argumentsOf(['--base', 'old'])).toThrow(/removed/);
 });
 
 it('carries the outer deadline through reductions and never starts a final inspection after expiry', async () => {
