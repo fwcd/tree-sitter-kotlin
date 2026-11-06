@@ -13,7 +13,8 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { execFile, execFileSync, spawn } = require('child_process');
-const { jarPaths, isFetched } = require('./fetch');
+const { jarPaths, isFetched, verifyHelper } = require('./fetch');
+const { loadConfig } = require('../psi-gate/config');
 const { confined, javaExecutable, positive } = require('../safety');
 const JVM = ['-Xss64m', '-Xmx1g'];
 
@@ -25,8 +26,8 @@ const SOURCE = path.join(__dirname, 'PsiOracle.java');
  *   failure?: string }} OracleEntry
  */
 
-function javaArgs(listFile, { root, out, trim }) {
-  const args = [...JVM, '-cp', jarPaths().join(path.delimiter), SOURCE,
+function javaArgs(listFile, { root, out, trim, config = loadConfig() }) {
+  const args = [...JVM, '-cp', [...jarPaths(config), verifyHelper(config)].join(path.delimiter), 'PsiOracle',
     '--list', listFile, '--root', root, '--out', out];
   if (trim) args.push('--trim');
   return args;
@@ -42,7 +43,7 @@ function prepare(files, options, verify = true) {
   if (/[\r\n\t\0]/.test(options.root + options.out)) throw new Error('Root/output paths cannot contain control characters');
   if (!files.length || new Set(files).size !== files.length) throw new Error('Oracle inputs must be nonempty and unique');
   files.forEach(file => confined(options.root, file));
-  if (verify && !isFetched()) throw new Error('PSI oracle jars are missing or their SHA-256 does not match; run npm run psi-oracle:fetch');
+  if (verify && !isFetched(options.config)) throw new Error('PSI oracle pins are missing or corrupt; run npm run psi-oracle:fetch');
   fs.mkdirSync(options.out, { recursive: true });
   const listFile = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'psi-oracle-')), 'files.txt');
   fs.writeFileSync(listFile, files.join('\n') + '\n');
@@ -85,9 +86,9 @@ function runOracleAsync(files, options) {
  * start-up is paid once and the parser stays warm.
  */
 class OracleServer {
-  constructor() {
-    if (!isFetched()) throw new Error('PSI oracle jars are missing or their SHA-256 does not match; run npm run psi-oracle:fetch');
-    this.child = spawn(javaExecutable(), [...JVM, '-cp', jarPaths().join(path.delimiter), SOURCE, '--serve'],
+  constructor({ config = loadConfig() } = {}) {
+    if (!isFetched(config)) throw new Error('PSI oracle pins are missing or corrupt; run npm run psi-oracle:fetch');
+    this.child = spawn(javaExecutable(), [...JVM, '-cp', [...jarPaths(config), verifyHelper(config)].join(path.delimiter), 'PsiOracle', '--serve'],
       { stdio: ['pipe', 'pipe', 'inherit'] });
     this.pending = [];
     this.queue = Promise.resolve();

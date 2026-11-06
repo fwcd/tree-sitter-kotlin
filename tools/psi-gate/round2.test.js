@@ -172,21 +172,6 @@ describe('safety and actionable CLI failures', () => {
   });
 });
 
-it('preserves the successful report when a complete run fails', () => {
-  const dir = temporary();
-  try {
-    const old = path.join(dir, 'corpus.md'),
-      report = path.join(dir, 'current.md');
-    fs.writeFileSync(old, 'old successful report');
-    fs.writeFileSync(report, 'new failed report');
-    require('./main').publishReport(dir, 'corpus', { exitCode: 1 }, report);
-    expect(fs.readFileSync(old, 'utf8')).toBe('old successful report');
-    expect(fs.readFileSync(path.join(dir, 'corpus.failed.md'), 'utf8')).toBe('new failed report');
-  } finally {
-    fs.rmSync(dir, { recursive: true });
-  }
-});
-
 it('reclaims the lock of a SIGKILLed owner', async () => {
   const { spawn } = require('child_process');
   const dir = temporary();
@@ -213,16 +198,8 @@ it('reclaims the lock of a SIGKILLed owner', async () => {
     fs.rmSync(dir, { recursive: true });
   }
 });
-it('rejects an inert launcher snapshot and explains a missing base receipt', () => {
-  const { argumentsOf, baseCorpus } = require('./main');
-  expect(() => argumentsOf(['quick', '--expected', 'snapshot.json'])).toThrow(/cannot override/);
-  const dir = temporary(),
-    revision = '0'.repeat(40);
-  try {
-    fs.mkdirSync(path.join(dir, 'base-corpus', revision, 'inputs'), { recursive: true });
-    fs.writeFileSync(path.join(dir, 'base-corpus', revision, 'inputs', 'cases.json'), '{}');
-    expect(() => baseCorpus(dir, revision)).toThrow(/corrupt/);
-  } finally {
-    fs.rmSync(dir, { recursive: true });
-  }
+it('rejects snapshots and historical grammar selection in the v2 launcher', () => {
+  const { argumentsOf } = require('./main');
+  for (const flag of ['--expected', '--base', '--upstream'])
+    expect(() => argumentsOf(['quick', flag, 'snapshot.json'])).toThrow(/removed/);
 });

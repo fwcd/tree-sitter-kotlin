@@ -5,73 +5,44 @@ import os from 'os';
 import path from 'path';
 import { execFileSync } from 'child_process';
 const require = createRequire(import.meta.url);
-const { argumentsOf } = require('./main');
-const { inspectRepository, snapshotRepository, annotateReport } = require('./repository');
-const { sha256 } = require('../safety');
-const git = (root, ...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+const { inspectRepository, indexFiles, selectFiles, fetchRepositories } = require('./repository');
+const git = (root, ...args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim();
 function fixture() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-repository-')), root = path.join(dir, 'repo');
-  fs.mkdirSync(root); git(root, 'init', '-q');
-  git(root, 'config', 'user.name', 'Test'); git(root, 'config', 'user.email', 'test@example.invalid');
-  fs.mkdirSync(path.join(root, 'src'));
-  fs.writeFileSync(path.join(root, 'src/main.kt'), 'fun f() {}\n');
-  fs.writeFileSync(path.join(root, 'build.kts'), 'println("build")\n');
-  fs.writeFileSync(path.join(root, 'marked.kt'), 'val x = <caret>1\n');
-  fs.writeFileSync(path.join(root, 'cases.json'), '{"this is ordinary repository data":true}\n');
-  git(root, 'add', '.'); git(root, 'commit', '-qm', 'pinned input');
-  return { dir, root, home: path.join(dir, 'home'), commit: git(root, 'rev-parse', 'HEAD') };
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-repo-v2-')), root = path.join(dir, 'source');
+  fs.mkdirSync(root); git(root, 'init', '-q'); git(root, 'config', 'user.name', 'Test');
+  git(root, 'config', 'user.email', 'test@example.invalid');
+  fs.writeFileSync(path.join(root, 'a.kt'), 'val a=1\n');
+  fs.writeFileSync(path.join(root, 'excluded.kt'), 'val e=1\n');
+  git(root, 'add', '.'); git(root, 'commit', '-qm', 'pin');
+  return { dir, root, rev: git(root, 'rev-parse', 'HEAD') };
 }
-it('parses the first-class repo folder job and rejects missing/replaced folders', () => {
-  expect(argumentsOf(['repo', '/tmp/example'])).toMatchObject({ command: 'repo', repoRoot: '/tmp/example', corpora: ['repo'] });
-  expect(() => argumentsOf(['repo'])).toThrow(/folder/);
-  expect(() => argumentsOf(['repo', '/tmp/example', '--corpora', 'snippets'])).toThrow(/cannot replace/);
-  expect(() => argumentsOf(['repo', '/tmp/example', '--home', '/tmp/example/cache'])).toThrow(/must be separate/);
-});
-it('rejects missing/non-Git repositories and dirty tracked or untracked Kotlin inputs', () => {
+it('ignores untracked files and lists only indexed includes/excludes', () => {
   const f = fixture();
   try {
-    expect(() => inspectRepository(path.join(f.dir, 'missing'))).toThrow(/missing/);
-    expect(() => inspectRepository(f.dir)).toThrow(/Git checkout/);
-    fs.writeFileSync(path.join(f.root, 'src/main.kt'), 'val changed=1');
-    expect(() => inspectRepository(f.root)).toThrow(/uncommitted changes/);
-    fs.writeFileSync(path.join(f.root, 'src/main.kt'), 'fun f() {}\n');
-    fs.writeFileSync(path.join(f.root, 'new.kt'), 'val x=1');
-    expect(() => inspectRepository(f.root)).toThrow(/untracked Kotlin/);
+    fs.writeFileSync(path.join(f.root, 'untracked.kt'), 'val =');
+    expect(inspectRepository(f.root, f.rev).commit).toBe(f.rev);
+    expect(indexFiles(f.root)).toEqual(['a.kt', 'excluded.kt']);
+    expect(selectFiles(f.root, { excludes: ['excluded.kt'] })).toMatchObject({ files: ['a.kt'], excluded: ['excluded.kt'] });
   } finally { fs.rmSync(f.dir, { recursive: true }); }
 });
-it('snapshots exact tracked bytes without editing the checkout or importing cases.json', () => {
+it('fails any modified or staged tracked file with its filename, and refuses the wrong pin', () => {
   const f = fixture();
   try {
-    const before = git(f.root, 'status', '--porcelain');
-    const snapshot = snapshotRepository(f.root, f.home);
-    expect(snapshot.repository).toMatchObject({ commit: f.commit, files: 2, markupExcluded: ['marked.kt'] });
-    expect(fs.readFileSync(path.join(snapshot.root, 'src/main.kt'), 'utf8')).toBe('fun f() {}\n');
-    expect(fs.existsSync(path.join(snapshot.root, 'cases.json'))).toBe(false);
-    expect(fs.readFileSync(path.join(snapshot.root, '.source-revision'), 'utf8').trim()).toBe(f.commit);
-    expect(git(f.root, 'status', '--porcelain')).toBe(before);
-    expect(snapshotRepository(f.root, f.home).root).toBe(snapshot.root);
-    const report = path.join(f.dir, 'run');fs.mkdirSync(report);
-    fs.writeFileSync(path.join(report, 'report.md'), '# PSI comparison\n\nPASS\n');
-    fs.writeFileSync(path.join(report, 'meta.json'), JSON.stringify({ files: 2, identity: { context: { inputs: snapshot.repository.inputHash } } }));
-    annotateReport(report, snapshot.repository);
-    expect(fs.readFileSync(path.join(report, 'report.md'), 'utf8')).toContain(f.commit);
-    expect(JSON.parse(fs.readFileSync(path.join(report, 'meta.json'))).repository.inputHash).toBe(snapshot.repository.inputHash);
-    fs.writeFileSync(path.join(snapshot.root, 'src/main.kt'), 'corrupt');
-    expect(() => snapshotRepository(f.root, f.home)).toThrow(/cache is corrupt/);
+    expect(() => inspectRepository(f.root, '0'.repeat(40))).toThrow(/differs/);
+    fs.writeFileSync(path.join(f.root, 'a.kt'), 'val a=2\n');
+    expect(() => inspectRepository(f.root)).toThrow(/a.kt/);
+    git(f.root, 'add', 'a.kt');
+    expect(() => inspectRepository(f.root)).toThrow(/a.kt/);
   } finally { fs.rmSync(f.dir, { recursive: true }); }
 });
-it('records a new commit/content identity when input changes are committed', () => {
+it('acquires multiple pinned repositories and verifies cached dirty state', async () => {
   const f = fixture();
   try {
-    const old = snapshotRepository(f.root, f.home);
-    fs.writeFileSync(path.join(f.root, 'src/main.kt'), 'fun f() { println(1) }\n');
-    git(f.root, 'add', '.');git(f.root, 'commit', '-qm', 'change input');
-    const next = snapshotRepository(f.root, f.home);
-    expect(next.repository.commit).not.toBe(old.repository.commit);
-    expect(next.repository.inputHash).not.toBe(old.repository.inputHash);
-    expect(next.root).not.toBe(old.root);
-    const files = fs.readFileSync(next.extra[1], 'utf8').trim().split('\n');
-    const digest = sha256(JSON.stringify(files.map(file => ({ path: file, sha256: sha256(fs.readFileSync(path.join(next.root, file))) }))));
-    expect(digest).toBe(next.repository.inputHash);
+    const repo = { url: f.root, rev: f.rev, includes: ['**/*.kt'], excludes: [] };
+    const home = path.join(f.dir, 'cache');
+    const [a, b] = await fetchRepositories([{ ...repo, name: 'a' }, { ...repo, name: 'b' }], home);
+    expect(a.commit).toBe(f.rev); expect(b.commit).toBe(f.rev); expect(a.root).not.toBe(b.root);
+    fs.writeFileSync(path.join(a.root, 'a.kt'), 'val broken=');
+    await expect(fetchRepositories([{ ...repo, name: 'a' }], home)).rejects.toThrow(/a.kt/);
   } finally { fs.rmSync(f.dir, { recursive: true }); }
-});
+}, 30000);

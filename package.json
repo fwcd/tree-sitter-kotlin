@@ -65,8 +65,11 @@
     }
   },
   "devDependencies": {
-    "tree-sitter-cli": "^0.24.4",
+    "minimatch": "10.1.1",
     "prebuildify": "^6.0.0",
+    "smol-toml": "1.9.1",
+    "tree-sitter-cli": "^0.24.4",
+    "undici": "6.21.3",
     "vitest": "^4.1.0"
   },
   "tree-sitter": [

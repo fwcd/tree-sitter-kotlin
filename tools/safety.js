@@ -78,7 +78,7 @@ function javaDetails() {
   const version = /version "(?:1\.)?(\d+)/.exec((result.stderr || '') + (result.stdout || ''));
   if (result.error || result.status !== 0 || !version || Number(version[1]) < 17) {
     throw new Error(
-      'A JDK 17+ is required. Install a JDK and put java on PATH, or set PSI_JAVA to its executable.',
+      'A JRE 17+ is required. Put java on PATH, or set PSI_JAVA to its executable.',
     );
   }
   return {

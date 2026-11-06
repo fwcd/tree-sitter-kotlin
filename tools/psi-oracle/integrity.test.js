@@ -14,6 +14,11 @@ it('refuses cached/downloaded hash mismatches before executing Java', async () =
     path.join(import.meta.dirname, '../safety.js'),
     path.join(dir, 'tools/safety.js'),
   );
+  fs.mkdirSync(path.join(dir, 'tools/psi-gate'));
+  fs.copyFileSync(path.join(import.meta.dirname, '../psi-gate/config.js'), path.join(dir, 'tools/psi-gate/config.js'));
+  fs.copyFileSync(path.resolve(import.meta.dirname, '../../psigate.toml'), path.join(dir, 'psigate.toml'));
+  fs.cpSync(path.join(import.meta.dirname, 'helpers'), path.join(oracleDir, 'helpers'), { recursive: true });
+  fs.symlinkSync(path.resolve(import.meta.dirname, '../../node_modules'), path.join(dir, 'node_modules'), 'dir');
   const previousCache = process.env.PSI_ORACLE_CACHE;
   process.env.PSI_ORACLE_CACHE = path.join(dir, 'cache');
   const { jarPaths, isFetched, fetchAll } = require(path.join(oracleDir, 'fetch'));
@@ -23,7 +28,7 @@ it('refuses cached/downloaded hash mismatches before executing Java', async () =
   fs.writeFileSync(path.join(dir, 'a.kt'), 'val x=1');
   try {
     expect(isFetched()).toBe(false);
-    expect(() => runOracle(['a.kt'], { root: dir, out: path.join(dir, 'out') })).toThrow(/SHA-256/);
+    expect(() => runOracle(['a.kt'], { root: dir, out: path.join(dir, 'out') })).toThrow(/pins are missing or corrupt/);
     await expect(
       fetchAll({ log: () => {}, downloadJar: () => Buffer.from('invalid downloaded jar') }),
     ).rejects.toThrow(/SHA-256/);
