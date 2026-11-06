@@ -16,11 +16,7 @@ function inventory(root) {
   return {indexed: new Set(paths), files: paths.filter(file => /\.(kt|kts)$/.test(file)).sort()};
 }
 function nativeParser(root) {
-  const runtime = require('./runtime');
-  if (typeof runtime.createParser === 'function') return runtime.createParser(root);
-  // Bootstrap compatibility with the same repository binding while the v2 launcher lands.
-  const Parser = require(require.resolve('tree-sitter', {paths: [root]}));
-  const parser = new Parser(); parser.setLanguage(require(path.join(root, 'bindings/node'))); return parser;
+  return require('./runtime').createParser(root);
 }
 async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'), timeoutMs = 10000, parser}) {
   const {indexed, files} = inventory(root);
