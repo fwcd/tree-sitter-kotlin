@@ -19,7 +19,10 @@ function sourceIdentity(root = ROOT) {
   }
   walk('src');
   const dependencies = ['tree-sitter', 'node-addon-api', 'node-gyp-build'].map(name => {
-    try { return [name, require(require.resolve(name + '/package.json', {paths: [root]})).version]; }
+    try {
+      const file = require.resolve(name + '/package.json', {paths: [root]});
+      return [name, JSON.parse(fs.readFileSync(file, 'utf8')).version, read(file)];
+    }
     catch { throw Error(`Node binding dependency ${name} is missing; run npm install in ${root}`); }
   });
   return {hash: digest(JSON.stringify([files.sort().map(file => [file, read(path.join(root, file))]),
@@ -42,6 +45,7 @@ function fresh(root = ROOT) {
 function assertFresh(root = ROOT) {
   if (!fresh(root)) throw Error(`Native binding is missing, stale or changed: ${root}. ` +
     'Run npm install; after editing grammar.js, run npm run generate first.');
+  return receipt(root);
 }
 function generated(root = ROOT) {
   const file = path.join(root, 'build/generated-grammar.json');

@@ -1,6 +1,8 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
+const loaded = new Map();
 const { spawnSync } = require('child_process');
 const { javaExecutable } = require('../safety');
 const ROOT = path.resolve(__dirname, '../..');
@@ -11,11 +13,15 @@ function prerequisites({ java = true } = {}) {
   if (java) javaExecutable();
 }
 function createParser(root = ROOT, timeoutMs = 10000) {
-  require(path.join(root, 'bindings/node/build')).assertFresh(root);
+  const stamp = require(path.join(root, 'bindings/node/build')).assertFresh(root);
+  const key = fs.realpathSync(root), identity = stamp.source.hash + ':' + stamp.binary.hash;
+  if (loaded.has(key) && loaded.get(key) !== identity)
+    throw Error('Native binding changed after loading; start a new npm run psi-gate command');
   try {
     const Parser = require(require.resolve('tree-sitter', { paths: [root] }));
     const parser = new Parser();
     parser.setLanguage(require(path.join(root, 'bindings/node')));
+    loaded.set(key, identity);
     parser.setTimeoutMicros(timeoutMs * 1000);
     return parser;
   } catch (error) {

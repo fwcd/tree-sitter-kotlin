@@ -25,9 +25,11 @@ it('requires a receipt matching actual source and loaded addon bytes', () => {
   fs.writeFileSync(addon, binary); expect(build.fresh(root)).toBe(true);
 });
 it('ordinary install rebuilds changed scanner sources instead of reusing a loadable addon', () => {
+  require('./runtime').createParser(root);
   const file = path.join(root, 'src/scanner.c'); fs.appendFileSync(file, '\n// freshness control\n');
   expect(() => build.assertFresh(root)).toThrow(/npm install/);
   build.install(root); expect(build.fresh(root)).toBe(true);
+  expect(() => require('./runtime').createParser(root)).toThrow(/start a new npm run psi-gate/);
 }, 180000);
 it('requires generation before certifying a grammar.js edit as built', () => {
   fs.appendFileSync(path.join(root, 'grammar.js'), '\n// grammar change control\n');

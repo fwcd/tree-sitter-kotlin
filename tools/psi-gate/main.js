@@ -47,8 +47,11 @@ async function main(argv) {
   const options = argumentsOf(argv); options.config = loadConfig(options.configFile);
   assertHome(options.home);
   prerequisites({ java: options.command !== 'quick' });
-  if (['quick', 'full', 'repo'].includes(options.command)) createParser();
-  return withHome(options.home, async () => {
+  const usesBinding = ['quick', 'full', 'repo'].includes(options.command);
+  const binding = require('../../bindings/node/build');
+  const before = usesBinding ? binding.assertFresh().source.hash : null;
+  if (usesBinding) createParser();
+  const result = await withHome(options.home, async () => {
     if (options.command === 'quick') return quick(options);
     if (options.command === 'full') return full(options);
     if (options.command === 'repo') {
@@ -62,6 +65,9 @@ async function main(argv) {
       config: options.config, home: options.home, jobs: options.jobs, timeoutMs: options.timeoutMs,
       parseTimeoutMs: options.parseTimeoutMs}));
   });
+  if (usesBinding && binding.assertFresh().source.hash !== before)
+    throw Error('Native binding inputs changed during this check; rerun npm run psi-gate');
+  return result;
 }
 async function prepareGrammar({ home, config = loadConfig(), base, upstream } = {}) {
   if (base || upstream) throw new Error('Historical grammar selection was removed; build the current repo with npm install');
