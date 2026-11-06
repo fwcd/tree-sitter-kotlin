@@ -24,7 +24,8 @@ function indexFiles(root) {
   return [...new Set(git(root, ['ls-files', '-z']).split('\0').filter(Boolean))].sort();
 }
 function selectFiles(root, { includes = ['**/*.kt', '**/*.kts'], excludes = [] } = {}) {
-  const candidates = indexFiles(root).filter(file => /\.kts?$/.test(file) && includes.some(pattern => minimatch(file, pattern, { dot: true })));
+  const candidates = indexFiles(root).filter(file => /\.kts?$/.test(file) &&
+    includes.some(pattern => minimatch(file, pattern, { dot: true })));
   const excluded = candidates.filter(file => excludes.some(pattern => minimatch(file, pattern, { dot: true })));
   const omitted = new Set(excluded);
   return { files: candidates.filter(file => !omitted.has(file)), excluded, candidates };

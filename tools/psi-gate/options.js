@@ -15,6 +15,9 @@ Requires Node, Git, the repo's normal npm install, and JRE 17 for live PSI.
 The current bindings/node parser is the sole grammar; verdicts are absolute.
 `;
 function argumentsOf(argv) {
+  const removed = argv.find(flag =>
+    ['--base', '--upstream', '--upstream-branch', '--expected', '--strict', '--corpora', '--promote'].includes(flag));
+  if (removed) throw new Error(`${removed} was removed: PSI gate v2 checks the current grammar with absolute verdicts`);
   const args = [...argv], command = args.shift() || 'quick';
   if (!['quick', 'full', 'repo', 'regenerate-expectations', 'add', 'fuzz'].includes(command))
     throw new Error(`Unknown PSI gate command: ${command}`);
@@ -27,8 +30,6 @@ function argumentsOf(argv) {
   }
   while (args.length) {
     const flag = args.shift();
-    if (['--base', '--upstream', '--expected', '--strict', '--corpora', '--promote'].includes(flag))
-      throw new Error(`${flag} was removed: PSI gate v2 checks the current grammar with absolute verdicts`);
     if (command === 'fuzz' && !['--config', '--home', '--jobs', '--timeout-ms', '--parse-timeout-ms'].includes(flag)) {
       options.forward.push(flag, ...args); break;
     }

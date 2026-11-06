@@ -9,6 +9,7 @@ it('rejects removed relative options and invalid v2 inputs before work', () => {
   expect(() => argumentsOf(['quick', '--jobs', '0'])).toThrow(/integer/);
   for (const option of ['--corpora', '--base', '--expected', '--promote'])
     expect(() => argumentsOf(['quick', option, 'x'])).toThrow(/removed/);
+  expect(() => argumentsOf(['fuzz', '--seed', 'x', '--promote'])).toThrow(/removed/);
   expect(() => argumentsOf(['update-expected'])).toThrow(/Unknown PSI gate command/);
   expect(() => argumentsOf(['repo'])).toThrow(/Git folder/);
   expect(() => parseArgs(['--corpus', 'x', '--root', '.', '--grammar', 'bad'])).toThrow(/LABEL=DIR/);
