@@ -2,7 +2,6 @@
 
 The gate checks the **current working grammar** through this repository's own
 `bindings/node`, built by the normal `npm install`. Every verdict is absolute.
-There is no base revision, merge-base, ratchet or past-result allowance.
 
 ## Prerequisites and setup
 
@@ -15,7 +14,12 @@ uses stored PSI expectations and needs neither Java nor network.
     npm run psi-gate -- full
 
 No separate gate runtime or per-grammar addon is installed. Rebuild the ordinary
-Node binding after changing generated parser/scanner sources. Curl and tar are
+Node binding with `npm install` after changing generated parser/scanner sources.
+The ordinary install script records the source/runtime and addon SHA-256 in
+`build/node-binding-source.json`; source edits force a rebuild. Missing or stale
+receipts fail the gate with the setup command. After editing `grammar.js`, run
+`npm run generate` then `npm install`; generation records the grammar source used.
+A loadable old addon alone is insufficient to pass the gate. Curl and tar are
 not required. The included `tools/psi-oracle/helpers/psi-oracle-1.jar` is compiled
 from the repository's `PsiOracle.java` with Java 17; normal checks invoke its class,
 never the Java source launcher. Its version/SHA-256 and Kotlin jar coordinates/
@@ -62,7 +66,11 @@ or rewritten. `--home DIR` selects an owned cache/result directory (default
 `local/psi-gate`); `--jobs`, `--timeout-ms` and `--parse-timeout-ms` bound execution.
 
 `regenerate-expectations` regenerates the existing corpus's pinned PSI truth.
-`add FILE` re-verifies one chosen finding before explicit corpus admission.
+`minimize FILE` shrinks one PSI-valid mismatch using the current binding/live PSI,
+writes a reverified source/sidecar/index to a temporary directory, and prints its
+paths. `--class ID` selects a mismatch family and `--max-seconds N` bounds
+reduction (default30); partial reduction exits2. `add FILE` re-verifies one chosen
+finding before explicit corpus admission.
 `fuzz` is a deterministic, budgeted search producing suspect files/sidecars in an
 untracked directory; it does not decide grammar/normalizer fixes or promote cases.
 These corpus/search operations are maintained by their dedicated modules.
@@ -97,7 +105,7 @@ case into quick. Quick remains entirely must-match.
 Native/oracle integration controls require the normal built binding and fetched
 pinned jars. Ordinary grammar tests use `npm test`. Git-clean external inputs,
 index-only selection, pin/config corruption, incomplete oracle results and native
-errors are failures. There is no relative headline or `update-expected` command.
+errors are failures. Every selected input must match current PSI truth.
 Stored expectations are PSI truth, never snapshots of the current tree-sitter output.
 
 ## Fixture import and oracle verification
@@ -114,11 +122,9 @@ The detailed manifests are authoritative when refreshing this pin.
     npm exec -- node-gyp rebuild
     npm run vendor-jetbrains
     npm test
-    npm run cross-validate
 
 Rebuild after every generated-parser change before regenerating corpus trees.
-Review promoted :error cases and parser/scanner fingerprints. Cross-validation
-is the existing static fixture report; its match percentage is not the new gate.
+Review promoted :error cases and parser/scanner fingerprints. Fixture imports remain available for ordinary grammar tests and oracle checks.
 
 Verify the live oracle against all positive and negative upstream goldens:
 

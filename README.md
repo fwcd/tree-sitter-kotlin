@@ -85,7 +85,7 @@ npm run vendor-fixtures
 npm run vendor-jetbrains
 npm test
 npm run cross-validate:test
-npm run cross-validate
+npm run psi-gate -- quick
 
 # Reuse a local clone containing the exact JetBrains pin.
 npm run vendor-fixtures -- --source-repo /path/to/kotlin

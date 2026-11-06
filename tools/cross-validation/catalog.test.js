@@ -6,7 +6,7 @@ import path from 'path';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const api = require('./diff-run');
+const api = {...require('./diff-classify'), ...require('./diff-execute')};
 const { compareTrees } = require('./comparator');
 const { compareWithPsi } = require('./pipeline');
 const { hiddenSpans } = require('./native-metadata');
@@ -59,7 +59,7 @@ describe.skipIf(!available)('source-aware normalization catalog', () => {
     references = Object.fromEntries(runOracle(names.map(n => n + '.kt'), {
       root: directory, out: path.join(directory, 'psi'),
     }).map((entry, i) => [names[i], entry]));
-    const runtime = fs.existsSync(path.join(ROOT, 'tools/psi-gate/node_modules')) ? path.join(ROOT, 'tools/psi-gate') : ROOT;
+    const runtime = ROOT;
     [{ parser }] = api.loadParsers([{ label: 'head', root: ROOT }], runtime);
   }, 120000);
   afterAll(() => { if (directory) fs.rmSync(directory, { recursive: true }); });

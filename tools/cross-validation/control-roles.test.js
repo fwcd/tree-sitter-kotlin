@@ -7,7 +7,7 @@ import { execFileSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const api = require('./diff-run');
+const api = {...require('./diff-classify'), ...require('./diff-execute')};
 const { compareWithPsi } = require('./pipeline');
 const { compareTrees } = require('./comparator');
 const { runOracle } = require('../psi-oracle/oracle');
@@ -115,30 +115,6 @@ describe.skipIf(!available)('native condition, branch and range roles remain exp
       expect(compareTrees(comparison(name, 'then-else').tsNorm, comparison(name).psiNorm).status, name).toBe('MISMATCH');
     }
   });
-  it('fails ordinary and strict CLI gates for both empty/reference role-swap repros', () => {
-    const list = path.join(directory, 'empty-slots.txt');
-    fs.writeFileSync(list, 'emptyThenReference.kt\nemptyElseReference.kt\n');
-    const swapped = roots.find(root => root.label === 'then-else').root;
-    for (const strict of [false, true]) {
-      const out = path.join(directory, strict ? 'strict-run' : 'ordinary-run');
-      const args = [path.join(ROOT, 'tools/cross-validation/diff-run.js'), '--corpus', 'if-empty-slots',
-        '--root', path.join(directory, 'sources'), '--list', list, '--grammar', 'base=' + ROOT,
-        '--grammar', 'head=' + swapped, '--runtime', ROOT, '--out', out, '--jobs', '1'];
-      if (strict) args.push('--strict');
-      let status;
-      try { execFileSync(process.execPath, args, {cwd: ROOT, timeout: 120000, stdio: 'pipe'}); status = 0; }
-      catch (error) { status = error.status; }
-      expect(status, strict ? 'strict' : 'ordinary').toBe(1);
-      const records = fs.readFileSync(path.join(out, 'shards/00000.jsonl'), 'utf8').trim().split('\n').map(JSON.parse);
-      expect(records.length).toBe(2);
-      for (const record of records) {
-        expect(record.psiErrors, record.path).toBe(0);
-        expect(record.results.base.verdict, record.path).toBe('ok');
-        expect(record.results.head.verdict, record.path).toBe('C');
-        expect(record.results.head.treeHash, record.path).not.toBe(record.results.base.treeHash);
-      }
-    }
-  }, 120000);
   it('detects a condition routed into the then role', () => {
     expect(comparison('sameCalls', 'condition-then').verdict).toBe('C');
     expect(compareTrees(comparison('sameCalls').tsNorm, comparison('conditionCall').psiNorm).status).toBe('MISMATCH');

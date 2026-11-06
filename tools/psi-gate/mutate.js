@@ -1,18 +1,5 @@
-// Generic mutations of Kotlin sources for the PSI differential. Each operator applies to every
-// input file, not to hand-picked cases, so a gap shows wherever the operator's construct is.
-//
-// A mutant changes one place of its original (`--per-file N` places per operator and file, picked
-// by a seeded generator), so a gap is not hidden behind an error the same file has elsewhere: a
-// file changed everywhere at once errs for both parsers and says nothing. The inputs are the
-// PSI-clean files only (a sibling `.txt` golden without `PsiErrorElement`), each copied under
-// `original/`, and `origins.json` maps every mutant to its original, so `diff-run.js --origins`
-// tells a divergence the mutation made from one the original already had.
-//
-// Usage: node tools/psi-gate/mutate.js INPUT_DIR OUTPUT_DIR [--per-file N] [--seed S]
+// Deterministic single-site mutations and lexical units shared by v2 search/reduction.
 'use strict';
-const fs = require('fs');
-const path = require('path');
-const { resetOutput, positive } = require('../safety');
 
 const { HARD_KEYWORDS: HARD, SOFT_KEYWORDS, MODIFIERS } = require('../cross-validation/mutations');
 const KEYWORDS = new Set([...HARD, ...SOFT_KEYWORDS, ...MODIFIERS]);
@@ -590,64 +577,4 @@ function mutantsOf(text, { perFile = 2, seed = 'psi-gate', rel = '' } = {}) {
   return out;
 }
 
-/** True when the input's PSI golden (`NAME.txt` beside `NAME.kt`) holds an error element. */
-function goldenHasError(file) {
-  const golden = file.replace(/\.kts?$/, '.txt');
-  if (!fs.existsSync(golden)) throw new Error(`Missing PSI golden: ${golden}`);
-  return require('../psi-fixture-sources').goldenHasPsiError(fs.readFileSync(golden, 'utf8'));
-}
-
-function main(args) {
-  const option = (name, fallback) => {
-    const i = args.indexOf(name);
-    return i >= 0 ? args[i + 1] : fallback;
-  };
-  const [input, output] = args.filter(
-    (arg, i) => !arg.startsWith('--') && !args[i - 1]?.startsWith('--'),
-  );
-  const perFile = positive(option('--per-file', 2), '--per-file', 100);
-  const seed = option('--seed', 'psi-gate');
-  resetOutput(output, input);
-  const files = [];
-  const walk = (dir) => {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      const p = path.join(dir, e.name);
-      if (e.isDirectory()) walk(p);
-      else if (/\.kts?$/.test(e.name)) files.push(p);
-    }
-  };
-  walk(input);
-  const origins = {};
-  let written = 0,
-    skipped = 0;
-  const write = (rel, text) => {
-    const dest = path.join(output, rel);
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, text);
-    written++;
-  };
-  for (const file of files.sort()) {
-    if (goldenHasError(file)) {
-      skipped++;
-      continue;
-    }
-    const text = fs.readFileSync(file, 'utf8');
-    const rel = path.relative(input, file);
-    const original = path.join('original', rel);
-    write(original, text);
-    const ext = path.extname(rel);
-    for (const { dir, index, text: mutated } of mutantsOf(text, { perFile, seed, rel })) {
-      const mutant = path.join(dir, `${rel.slice(0, -ext.length)}~${index}${ext}`);
-      write(mutant, mutated);
-      origins[mutant] = original;
-    }
-  }
-  fs.writeFileSync(path.join(output, 'origins.json'), JSON.stringify(origins) + '\n');
-  console.error(
-    `mutate: ${files.length - skipped} PSI-clean inputs (${skipped} with a PSI error left out), ${written} files`,
-  );
-}
-
-module.exports = { tokenize, mutantsOf, pick, generator };
-
-if (require.main === module) main(process.argv.slice(2));
+module.exports = {tokenize, mutantsOf, pick, generator};

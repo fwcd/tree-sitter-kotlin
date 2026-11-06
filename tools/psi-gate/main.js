@@ -47,6 +47,7 @@ async function main(argv) {
   const options = argumentsOf(argv); options.config = loadConfig(options.configFile);
   assertHome(options.home);
   prerequisites({ java: options.command !== 'quick' });
+  if (['quick', 'full', 'repo'].includes(options.command)) createParser();
   return withHome(options.home, async () => {
     if (options.command === 'quick') return quick(options);
     if (options.command === 'full') return full(options);
@@ -55,6 +56,7 @@ async function main(argv) {
       return checkRepository(repo, options);
     }
     if (options.command === 'regenerate-expectations') return require('./quick').regenerate({ ...options, root: ROOT });
+    if (options.command === 'minimize') return require('./minimize').run(options);
     if (options.command === 'add') return require('./add').run(options);
     return require('./fuzz').run(require('./fuzz').argumentsOf(options.forward, {
       config: options.config, home: options.home, jobs: options.jobs, timeoutMs: options.timeoutMs,

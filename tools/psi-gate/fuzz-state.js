@@ -5,6 +5,7 @@ const path = require('path');
 const { sha256, confined, canonical, inside } = require('../safety');
 const { reduce } = require('../cross-validation/minimize');
 const { tokenize } = require('./mutate');
+const sharedState = require('./state');
 const { BudgetExceeded, remaining } = require('./fuzz-budget');
 
 function comparisonIdentity() {
@@ -23,7 +24,7 @@ function comparisonIdentity() {
     }
   }
   return sha256(JSON.stringify([
-    require('./state').toolIdentity(),
+    sharedState.toolIdentity(),
     files.sort((a, b) => a[0].localeCompare(b[0])),
     sha256(fs.readFileSync(path.join(__dirname, '../../src/grammar.json'))),
     sha256(fs.readFileSync(path.join(__dirname, '../../src/node-types.json'))),
@@ -32,7 +33,7 @@ function comparisonIdentity() {
 function identity({ grammar, runtime }) {
   return sha256(JSON.stringify([
     sha256(fs.readFileSync(path.join(grammar, 'build/Release/tree_sitter_kotlin_binding.node'))),
-    comparisonIdentity(), require('./state').runtimeIdentity(runtime),
+    comparisonIdentity(), sharedState.runtimeIdentity(runtime),
     ['JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS', 'LANG', 'LC_ALL', 'NODE_OPTIONS'].map(name => [name, process.env[name] || '']),
     process.version,
   ]));

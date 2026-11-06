@@ -2,7 +2,7 @@
 const path = require('path');
 const { positive } = require('../safety');
 const ROOT = path.resolve(__dirname, '../..');
-const HELP = `Usage: npm run psi-gate -- quick|full|repo DIR|regenerate-expectations|add FILE|fuzz [options]
+const HELP = `Usage: npm run psi-gate -- quick|full|repo DIR|regenerate-expectations|add FILE|minimize FILE|fuzz [options]
   quick                 Current indexed must-match corpus; no Java/network
   full                  Quick plus clean, pinned configured repositories
   repo DIR              Clean external Git checkout; indexed inputs only
@@ -19,11 +19,11 @@ function argumentsOf(argv) {
     ['--base', '--upstream', '--upstream-branch', '--expected', '--strict', '--corpora', '--promote'].includes(flag));
   if (removed) throw new Error(`${removed} was removed: PSI gate v2 checks the current grammar with absolute verdicts`);
   const args = [...argv], command = args.shift() || 'quick';
-  if (!['quick', 'full', 'repo', 'regenerate-expectations', 'add', 'fuzz'].includes(command))
+  if (!['quick', 'full', 'repo', 'regenerate-expectations', 'add', 'minimize', 'fuzz'].includes(command))
     throw new Error(`Unknown PSI gate command: ${command}`);
   const options = { command, home: path.join(ROOT, 'local/psi-gate'), configFile: path.join(ROOT, 'psigate.toml'),
     jobs: 2, timeoutMs: 120000, parseTimeoutMs: 10000, forward: [] };
-  if (command === 'repo' || command === 'add') {
+  if (command === 'repo' || command === 'add' || command === 'minimize') {
     const value = args.shift();
     if (!value || value.startsWith('--')) throw new Error(`${command} requires a ${command === 'repo' ? 'Git folder' : 'snippet file'}`);
     options[command === 'repo' ? 'repoRoot' : 'file'] = path.resolve(value);
@@ -37,6 +37,8 @@ function argumentsOf(argv) {
     if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value`);
     if (flag === '--config') options.configFile = path.resolve(value);
     else if (flag === '--home') options.home = path.resolve(value);
+    else if (flag === '--max-seconds' && command === 'minimize') options.maxSeconds = positive(value, flag, 3600);
+    else if (flag === '--class' && command === 'minimize') options.classId = value;
     else if (flag === '--jobs') options.jobs = positive(value, flag, 4);
     else if (flag === '--timeout-ms') options.timeoutMs = positive(value, flag);
     else if (flag === '--parse-timeout-ms') options.parseTimeoutMs = positive(value, flag, 60000);

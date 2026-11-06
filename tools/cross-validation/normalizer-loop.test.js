@@ -6,7 +6,7 @@ import path from 'node:path';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const api = require('./diff-run');
+const api = {...require('./diff-classify'), ...require('./diff-execute')};
 const {compareWithPsi} = require('./pipeline');
 const {compareTrees} = require('./comparator');
 const {Node} = require('./models');
@@ -177,7 +177,7 @@ describe.skipIf(!available)('normalizer fix-loop equivalences', () => {
     refs = Object.fromEntries(runOracle(names.map(name => name + '.kt'), {
       root: directory, out: path.join(directory, 'psi'),
     }).map((entry, i) => [names[i], entry]));
-    const runtime = fs.existsSync(path.join(ROOT, 'tools/psi-gate/node_modules')) ? path.join(ROOT, 'tools/psi-gate') : ROOT;
+    const runtime = ROOT;
     [{parser}] = api.loadParsers([{label: 'head', root: ROOT}], runtime);
   }, 120000);
   afterAll(() => { if (directory) fs.rmSync(directory, {recursive: true}); });

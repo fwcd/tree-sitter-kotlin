@@ -42,7 +42,7 @@ async function download(url) {
         throw new Error('Too many oracle download redirects');
       } catch (error) {
         if (attempt === 2) throw new Error(
-          `Oracle download failed: ${error.cause?.message || error.message}. ` +
+          `HTTPS request failed: ${error.cause?.message || error.message}. ` +
           'Check HTTPS_PROXY/npm proxy settings or use a verified PSI_ORACLE_CACHE.');
         await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
       }
@@ -59,7 +59,9 @@ async function fetchAll({ config = loadConfig(), log = console.error, downloadJa
     if (fs.existsSync(cached) && digest(fs.readFileSync(cached)) === expected) { fs.copyFileSync(cached, file); return; }
     const url = `https://repo.maven.apache.org/maven2/${jar.group.replace(/\./g, '/')}/${jar.artifact}/${jar.version}/${name}`;
     log(`Fetching ${jar.coordinate}`);
-    const bytes = await downloadJar(url);
+    let bytes;
+    try { bytes = await downloadJar(url); }
+    catch (error) { throw new Error(`Kotlin jar download failed for ${jar.coordinate} (${url}): ${error.message}`); }
     if (digest(bytes) !== expected) throw new Error(`SHA-256 mismatch for ${jar.coordinate}`);
     const temporary = `${file}.${process.pid}.tmp`; fs.writeFileSync(temporary, bytes); fs.renameSync(temporary, file);
     fs.mkdirSync(CACHE_DIR, { recursive: true });

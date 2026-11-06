@@ -7,10 +7,8 @@ const {
   psiTypeAt,
   firstDivergence,
   classify,
-  summarize,
   trimPath,
-  markMutants,
-} = require('./diff-run');
+} = {...require('./diff-classify'), ...require('./diff-execute')};
 const { Node } = require('./models');
 const { grammarRoot, MISSING } = require('../grammar-root');
 
@@ -131,77 +129,13 @@ describe('firstDivergence', () => {
   });
 });
 
-describe('summarize', () => {
-  it('counts verdicts and buckets per grammar, smallest example first', () => {
-    const records = [
-      {
-        path: 'big.kt',
-        bytes: 90,
-        results: { pr: { verdict: 'A', key: 'A k', line: 3 }, main: { verdict: 'ok' } },
-      },
-      {
-        path: 'small.kt',
-        bytes: 10,
-        results: {
-          pr: { verdict: 'A', key: 'A k', line: 1 },
-          main: { verdict: 'A', key: 'A k', line: 1 },
-        },
-      },
-      {
-        path: 'both.kt',
-        bytes: 5,
-        results: { pr: { verdict: 'both-error' }, main: { verdict: 'B', key: 'B m' } },
-      },
-    ];
-    const summary = summarize(records, ['pr', 'main']);
-    expect(summary.totals).toEqual({ pr: { A: 2, 'both-error': 1 }, main: { ok: 1, A: 1, B: 1 } });
-    expect(summary.buckets.map((bucket) => [bucket.key, bucket.counts])).toEqual([
-      ['A k', { pr: 2, main: 1 }],
-      ['B m', { pr: 0, main: 1 }],
-    ]);
-    expect(summary.buckets[0].examples.pr[0].path).toBe('small.kt');
-  });
-});
-
-describe('mutant origins', () => {
-  const records = [
-    { path: 'original/a.kt', bytes: 1, results: { head: { verdict: 'ok' } } },
-    {
-      path: 'op/a~0.kt',
-      bytes: 1,
-      results: { head: { verdict: 'C', key: 'C @ KtFile: psi FUN / ts BINARY_EXPRESSION' } },
-    },
-    { path: 'original/b.kt', bytes: 1, results: { head: { verdict: 'C', key: 'C @ x' } } },
-    { path: 'op/b~0.kt', bytes: 1, results: { head: { verdict: 'C', key: 'C @ x' } } },
-    {
-      path: 'op/c~0.kt',
-      bytes: 1,
-      results: { head: { verdict: 'B', key: 'B psi BLOCK: m | ts statements' } },
-    },
-  ];
-  const origins = {
-    'op/a~0.kt': 'original/a.kt',
-    'op/b~0.kt': 'original/b.kt',
-    'op/c~0.kt': 'original/a.kt',
-  };
-
-  it('marks a C the mutation made, not one the original had', () => {
-    const marked = markMutants(records, ['head'], origins);
-    expect(marked[1].results.head).toMatchObject({
-      verdict: 'C-mutant',
-      key: 'C* @ KtFile: psi FUN / ts BINARY_EXPRESSION',
-    });
-    expect(marked[3].results.head.verdict).toBe('C');
-  });
-});
-
 // classify needs the grammar's native binding, which a checkout without `node-gyp rebuild` lacks.
 const binding = grammarRoot()
   ? require('./binding-errors').load(grammarRoot())
   : { error: MISSING };
 
 describe.skipIf(binding.error)('classify', () => {
-  const { loadParsers, parseText } = require('./diff-run');
+  const { loadParsers, parseText } = {...require('./diff-classify'), ...require('./diff-execute')};
   // vitest runs a skipped describe's body to collect it, so load only when the binding is there.
   const [{ parser }] = binding.error ? [{}] : loadParsers([{ label: 'head', root: grammarRoot() }]);
 

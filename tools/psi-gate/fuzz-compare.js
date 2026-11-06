@@ -3,7 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const { OracleServer } = require('../psi-oracle/oracle');
-const { loadParsers, parseText, firstTsError, psiLayout, lexicalFacts } = require('../cross-validation/diff-run');
+const {loadParsers, parseText} = require('../cross-validation/diff-execute');
+const {firstTsError, psiLayout, lexicalFacts} = require('../cross-validation/diff-classify');
 const { compareWithPsi } = require('../cross-validation/pipeline');
 const { parsePsi } = require('../cross-validation/parser-psi');
 const { normalizePsi } = require('../cross-validation/normalizer');

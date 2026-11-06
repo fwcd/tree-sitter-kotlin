@@ -11,6 +11,7 @@ function prerequisites({ java = true } = {}) {
   if (java) javaExecutable();
 }
 function createParser(root = ROOT, timeoutMs = 10000) {
+  require(path.join(root, 'bindings/node/build')).assertFresh(root);
   try {
     const Parser = require(require.resolve('tree-sitter', { paths: [root] }));
     const parser = new Parser();

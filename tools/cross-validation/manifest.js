@@ -1,15 +1,4 @@
-/**
- * Pinned manifest of the vendored JetBrains fixture set.
- *
- * `npm run cross-validate` used to exit 0 against an empty fixtures directory:
- * no fixtures meant no failures meant success. Gating on it bought nothing. The
- * manifest closes that hole by stating up front exactly which fixtures must be
- * present, so a missing, truncated or half-vendored tree is a hard failure
- * rather than a quiet pass.
- *
- * @module manifest
- */
-
+/** Integrity inventory for the vendored JetBrains fixture importer. */
 'use strict';
 
 const crypto = require('crypto');

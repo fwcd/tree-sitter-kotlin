@@ -32,6 +32,8 @@ it('refuses cached/downloaded hash mismatches before executing Java', async () =
     await expect(
       fetchAll({ log: () => {}, downloadJar: () => Buffer.from('invalid downloaded jar') }),
     ).rejects.toThrow(/SHA-256/);
+    await expect(fetchAll({log: () => {}, downloadJar: () => { throw Error('injected connection failure'); }}))
+      .rejects.toThrow(/Kotlin jar download failed for org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.21 \(https:\/\/repo.maven.apache.org/);
     expect(fs.readFileSync(jarPaths()[0], 'utf8')).toBe('invalid cached jar');
   } finally {
     if (previousCache === undefined) delete process.env.PSI_ORACLE_CACHE;

@@ -6,7 +6,7 @@ import path from 'path';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const api = require('./diff-run');
+const api = {...require('./diff-classify'), ...require('./diff-execute')};
 const oracle = require('../psi-oracle/oracle');
 const ledger = require('../psi-gate/grammar-bugs/catalog-ledger.json');
 const available = require('../psi-oracle/fetch').isFetched() && fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node'));
@@ -16,7 +16,7 @@ describe.skipIf(!available)('confirmed grammar defects remain visible through no
   beforeAll(() => {
     output = fs.mkdtempSync(path.join(os.tmpdir(), 'grammar-catalog-'));
     refs = oracle.runOracle(ledger.cases.map(c => c.file), { root: path.join(ROOT, 'tools/psi-gate/grammar-bugs'), out: output });
-    const runtime = fs.existsSync(path.join(ROOT, 'tools/psi-gate/node_modules')) ? path.join(ROOT, 'tools/psi-gate') : ROOT;
+    const runtime = ROOT;
     [{ parser }] = api.loadParsers([{ label: 'head', root: ROOT }], runtime);
   }, 120000);
   afterAll(() => { if (output) fs.rmSync(output, { recursive: true }); });
