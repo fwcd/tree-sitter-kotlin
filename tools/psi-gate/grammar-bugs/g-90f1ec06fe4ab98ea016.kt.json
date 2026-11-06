@@ -1,1 +1,1 @@
-"class KaptStubConverter(val kaptContext: KaptContextForStubGeneration, val generateNonExistentClass: Boolean) {\n    internal companion object {\n    }\n    fun convert(): List<KaptStub> {\n        return treeMaker.ClassDef(\n            {\n                val useSimpleName = '\u0000' in fqName && fqName.substringBeforeLast('.', \"\") == packageFqName\n            }\n        )\n    }\n}"
+"class KaptStubConverter(kaptContext:KaptContextForStubGeneration){fun convert(){({val useSimpleName='\u0000'in substringBeforeLast})}}"

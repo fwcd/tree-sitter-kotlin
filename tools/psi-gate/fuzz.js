@@ -10,6 +10,7 @@ const { InspectorPool } = require('./fuzz-compare');
 const state = require('./fuzz-state');
 const { BudgetExceeded, remaining } = require('./fuzz-budget');
 const { Coverage } = require('./fuzz-coverage');
+const { prepareGrammar } = require('./main');
 const TRACKED_BUGS = path.join(__dirname, 'grammar-bugs');
 const ROOT = path.resolve(__dirname, '../..');
 const loadedComparison = state.comparisonIdentity();
@@ -132,7 +133,7 @@ async function runPrepared(options, inputs) {
   resetOutput(options.out);
   const prepared = options.grammar
     ? { grammar: options.grammar, runtime: options.runtime, revision: 'external-built-grammar' }
-    : await require('./main').prepareGrammar({ home: path.join(ROOT, 'local/psi-fuzz-cache'),
+    : await prepareGrammar({ home: path.join(ROOT, 'local/psi-fuzz-cache'),
       base: options.base, upstream: options.upstream, upstreamBranch: options.upstreamBranch });
   const started = Date.now(), deadline = started + options.maxSeconds * 1000;
   const context = state.identity(prepared), ledgerValidation = [], buckets = new Map(), coverage = new Coverage();

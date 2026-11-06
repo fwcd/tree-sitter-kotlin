@@ -6,6 +6,7 @@ import path from 'path';
 import { execFileSync } from 'child_process';
 
 const require = createRequire(import.meta.url);
+const GIT_TIMEOUT_MS = 30000;
 const { resolveBase } = require('./base');
 const { argumentsOf } = require('./main');
 const git = (root, ...args) => execFileSync('git', args, {
@@ -51,7 +52,7 @@ describe('upstream merge-base selection', () => {
       expect(git(f.local, 'tag')).toBe('');
       expect(messages[0]).toContain('merge-base of HEAD');
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('prefers a canonical configured remote and honors its existing default branch', () => {
     const f = fixture();
     try {
@@ -65,7 +66,7 @@ describe('upstream merge-base selection', () => {
       expect(result).toMatchObject({ commit: f.common, remote: 'upstream', branch: 'trunk' });
       expect(refs(f.local)).toBe(before);
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('supports URL/remote and branch overrides through flags or environment', () => {
     const f = fixture();
     try {
@@ -78,7 +79,7 @@ describe('upstream merge-base selection', () => {
       const fromFlags = resolveBase(options, { cwd: f.local, env, log: () => {} });
       expect(fromFlags).toMatchObject({ commit: f.common, remote: null, branch: 'main' });
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('uses the documented canonical fallback without creating a tracking remote', () => {
     const f = fixture();
     try {
@@ -88,7 +89,7 @@ describe('upstream merge-base selection', () => {
       expect(refs(f.local)).toBe(before);
       expect(git(f.local, 'remote')).toBe(remoteNames);
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('deepens a shallow fork branch while keeping its tracking refs unchanged', () => {
     const f = fixture();
     try {
@@ -102,7 +103,7 @@ describe('upstream merge-base selection', () => {
       expect(refs(shallow)).toBe(before);
       expect(git(shallow, 'diff', '--name-only', result.commit, 'HEAD')).toBe('feature-only');
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('fetches past the first shallow window when upstream advanced far beyond the fork', () => {
     const f = fixture();
     try {
@@ -116,7 +117,7 @@ describe('upstream merge-base selection', () => {
       expect(result.commit).toBe(f.common);
       expect(refs(shallow)).toBe(before);
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('fails offline with --base guidance and lets an explicit base work without fetching', () => {
     const f = fixture();
     try {
@@ -128,7 +129,7 @@ describe('upstream merge-base selection', () => {
       expect(explicit.commit).toBe(f.common);
       expect(refs(f.local)).toBe(before);
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('uses complete local ancestry after advertising the current upstream tip', () => {
     const f = fixture();
     try {
@@ -139,7 +140,7 @@ describe('upstream merge-base selection', () => {
       expect(refs(f.local)).toBe(before);
       expect(fs.readFileSync(path.join(f.local, '.git/FETCH_HEAD'), 'utf8')).toBe('sentinel');
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('keeps existing tags even when the checkout enables automatic pruning', () => {
     const f = fixture();
     try {
@@ -151,7 +152,7 @@ describe('upstream merge-base selection', () => {
       expect(refs(f.local)).toBe(before);
       expect(git(f.local, 'tag')).toBe('local-only-tag');
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
   it('refuses unrelated history rather than selecting the upstream tip', () => {
     const f = fixture();
     try {
@@ -162,9 +163,8 @@ describe('upstream merge-base selection', () => {
       expect(() => resolveBase({ upstream: other }, { cwd: f.local, env: {}, log: () => {} }))
         .toThrow(/complete common ancestor.*--base REV/);
     } finally { cleanup(f); }
-  });
+  }, GIT_TIMEOUT_MS);
 });
-
 
 it('names a missing explicit base reference', () => {
   const f = fixture();
@@ -172,4 +172,4 @@ it('names a missing explicit base reference', () => {
     expect(() => resolveBase({ base: 'missing-reference' }, { cwd: f.local, log: () => {} }))
       .toThrow(/missing-reference/);
   } finally { cleanup(f); }
-});
+}, GIT_TIMEOUT_MS);

@@ -98,6 +98,5 @@ async function main(argv) {
   return withHome(options.home, () => runJob(options));
 }
 
-
 module.exports = { prepareGrammar, main, argumentsOf, prerequisites, unmarked, baseCorpus, publishReport };
 runIfMain(module, main);

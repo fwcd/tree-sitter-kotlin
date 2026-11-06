@@ -1,5 +1,7 @@
 'use strict';
 
+const { signature } = require('../psi-gate/state');
+
 function partition(file, corpus) {
   if (corpus === 'snippets') return 'generated';
   if (corpus === 'mutations') return file.startsWith('original/') ? 'testData-originals' : 'testData-mutants';
@@ -16,20 +18,24 @@ function partition(file, corpus) {
     /^(common|jvm|js|native|wasm|android|androidunit|androidinstrumented|ios|linux|macos|mingw).*tests?$/.test(p));
   if (parts.some(p => ['testdata', 'test-data', 'test_data'].includes(p))) return 'testData';
   if ((testModule || testSet) &&
-      parts.some(p => ['resources', 'testresources', 'fixtures', 'testfixturesresources'].includes(p))) return 'testData';
+      parts.some(p => ['resources', 'testresources', 'fixtures', 'testfixturesresources'].includes(p)))
+    return 'testData';
   if (parts.includes('archetype-resources') || name.endsWith('.gradle.kts') ||
-      parts.some(p => /^(examples?|samples?|benchmarks?|jmh|buildsrc|build-logic|scripts?|gradle)$/.test(p))) return 'support';
+      parts.some(p => /^(examples?|samples?|benchmarks?|jmh|buildsrc|build-logic|scripts?|gradle)$/.test(p)))
+    return 'support';
   if (testModule) return 'tests';
-  const mainSet = /^(main|commonmain|jvmmain|jsmain|nativemain|wasmmain|androidmain|iosmain|linuxmain|macosmain|mingwmain)$/;
+  const mainSet = new RegExp(
+    '^(main|commonmain|jvmmain|jsmain|nativemain|wasmmain|androidmain|iosmain|linuxmain|macosmain|mingwmain)$',
+  );
   for (let i = 0; i < parts.length - 1; i++) {
     if (parts[i] === 'src' && mainSet.test(parts[i + 1])) return 'production';
-    if (/^(common|jvm|js|native|wasm|android|ios|linux|macos|mingw)$/.test(parts[i]) && parts[i + 1] === 'src') return 'production';
+    if (/^(common|jvm|js|native|wasm|android|ios|linux|macos|mingw)$/.test(parts[i]) && parts[i + 1] === 'src')
+      return 'production';
   }
   if (testSet) return 'tests';
   return name.endsWith('.kts') ? 'support' : 'production';
 }
 const matches = (record, result) => result?.verdict === 'ok' && result.hasError !== true && !(record.psiErrors > 0);
-const signature = result => JSON.stringify([result?.verdict, result?.key, result?.treeHash]);
 const executionError = result => !result || ['oracle-failure', 'harness-error'].includes(result.verdict);
 function conformance(records, labels, context = {}) {
   const groups = new Map();
@@ -38,7 +44,9 @@ function conformance(records, labels, context = {}) {
       labels: Object.fromEntries(labels.map(label => [label, {
         mismatching: 0, verdicts: {}, psiRejected: 0, nativeRejected: 0, executionErrors: 0,
       }])),
-      deltas: Object.fromEntries(labels.filter(label => label !== 'base').map(label => [label, { fixed: 0, worse: 0, changed: 0 }])) });
+      deltas: Object.fromEntries(labels.filter(label => label !== 'base').map(label => [label, {
+        fixed: 0, worse: 0, changed: 0,
+      }])) });
     return groups.get(name);
   };
   for (const file of context.excluded || []) group(partition(file, context.corpus)).excluded++;
@@ -47,10 +55,11 @@ function conformance(records, labels, context = {}) {
     for (const label of labels) {
       const result = record.results[label], score = row.labels[label];
       if (!matches(record, result)) score.mismatching++;
-      score.verdicts[result?.verdict || 'missing-result'] = (score.verdicts[result?.verdict || 'missing-result'] || 0) + 1;
+      const verdict = result?.verdict || 'missing-result';
+      score.verdicts[verdict] = (score.verdicts[verdict] || 0) + 1;
       if (record.psiErrors > 0) score.psiRejected++;
       if (result?.hasError || ['A', 'A-prefix', 'both-error'].includes(result?.verdict)) score.nativeRejected++;
-      if (['oracle-failure', 'harness-error', 'missing-result'].includes(result?.verdict || 'missing-result')) score.executionErrors++;
+      if (['oracle-failure', 'harness-error', 'missing-result'].includes(verdict)) score.executionErrors++;
       if (label === 'base' || !labels.includes('base')) continue;
       const prior = record.results.base;
       if (executionError(prior) || executionError(result)) continue;
@@ -81,7 +90,8 @@ function renderConformance(score) {
   for (const row of score.partitions) for (const label of score.labels) {
     const delta = row.deltas[label];
     out.push(`| ${row.partition} | ${row.files} | ${row.excluded} | ${label} | ` +
-      `${row.labels[label].mismatching} | ${delta?.fixed ?? '—'} | ${delta?.worse ?? '—'} | ${delta?.changed ?? '—'} |`);
+      `${row.labels[label].mismatching} | ${delta?.fixed ?? '—'} | ` +
+      `${delta?.worse ?? '—'} | ${delta?.changed ?? '—'} |`);
   }
   out.push('', '| partition / grammar | ok | A | B | C | script-only | both-error | execution-error |',
     '|---|---:|---:|---:|---:|---:|---:|---:|');
@@ -89,7 +99,8 @@ function renderConformance(score) {
     const value = row.labels[label], v = value.verdicts;
     out.push(`| ${row.partition} / ${label} | ${v.ok || 0} | ` +
       `${(v.A || 0) + (v['A-prefix'] || 0)} | ${(v.B || 0) + (v['B-prefix'] || 0)} | ` +
-      `${(v.C || 0) + (v['C-mutant'] || 0)} | ${v['B-script'] || 0} | ${v['both-error'] || 0} | ${value.executionErrors} |`);
+      `${(v.C || 0) + (v['C-mutant'] || 0)} | ${v['B-script'] || 0} | ` +
+      `${v['both-error'] || 0} | ${value.executionErrors} |`);
   }
   out.push('', 'Only a clean original-file comparison counts as a match. ' +
     'Script-only acceptance and syntax-bearing test data remain mismatches; ' +

@@ -130,6 +130,7 @@ function generate({ fixturesDir = FIXTURES_DIR, root = grammarRoot(), output, pa
       report.grammarCommit = execFileSync('git', ['rev-parse', 'HEAD'], {
         cwd: root,
         encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
       }).trim();
     } catch {}
     const artifacts = path.join(root, 'build');

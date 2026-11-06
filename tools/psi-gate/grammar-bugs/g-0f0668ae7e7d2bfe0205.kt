@@ -4,6 +4,6 @@ class KaptStubConverter(val kaptContext: KaptContextForStubGeneration, ) {compan
         }
     }
     private fun getDefaultValue(Type): Any? = when (type) {
-        Type.CHAR_TYPE -> 'a//b'
+        Type-> 'a//b'
     }
 }

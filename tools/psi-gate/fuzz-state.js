@@ -2,17 +2,29 @@
 
 const fs = require('fs');
 const path = require('path');
-const { sha256, confined, canonical } = require('../safety');
+const { sha256, confined, canonical, inside } = require('../safety');
 const { reduce } = require('../cross-validation/minimize');
 const { tokenize } = require('./mutate');
 const { BudgetExceeded, remaining } = require('./fuzz-budget');
 
 function comparisonIdentity() {
+  const entry = require.resolve('./fuzz');
+  if (!require.cache[entry]) require(entry);
+  const root = path.resolve(__dirname, '../..'), seen = new Set(), files = [];
+  const pending = [require.cache[entry]];
+  while (pending.length) {
+    const dependency = pending.pop();
+    if (!dependency || seen.has(dependency.id)) continue;
+    seen.add(dependency.id);
+    pending.push(...dependency.children);
+    if (inside(path.join(root, 'tools'), dependency.filename) &&
+        !dependency.filename.includes('node_modules')) {
+      files.push([path.relative(root, dependency.filename), sha256(fs.readFileSync(dependency.filename))]);
+    }
+  }
   return sha256(JSON.stringify([
     require('./state').toolIdentity(),
-    ['fuzz.js', 'fuzz-compare.js', 'fuzz-state.js', 'fuzz-budget.js', 'fuzz-generate.js', 'fuzz-declarations.js', 'fuzz-grammar.js', 'fuzz-coverage.js', 'fuzz-psi-types.json', 'mutate.js'].map(name =>
-      sha256(fs.readFileSync(path.join(__dirname, name)))),
-    sha256(fs.readFileSync(path.join(__dirname, '../cross-validation/minimize.js'))),
+    files.sort((a, b) => a[0].localeCompare(b[0])),
     sha256(fs.readFileSync(path.join(__dirname, '../../src/grammar.json'))),
     sha256(fs.readFileSync(path.join(__dirname, '../../src/node-types.json'))),
   ]));

@@ -283,12 +283,21 @@ regenerated from the pinned Kotlin 2.4.21 oracle. Catalog `.psi.txt` sidecars re
 readable. Original whole-source inputs/dumps belong in research run artifacts.
 Detailed affected-file measurements are archived at the immutable commit named
 in the catalog ledger; the shipped ledger retains counts and causal descriptions.
+The archive remains in the `VladimirMakaev/tree-sitter-kotlin` fork's
+`psi-gate-improved` history after an upstream squash-merge, which does not retain
+the original commits. Fetch the recorded revision from that fork and read the
+recorded path with `git show REVISION:PATH`; verify its recorded SHA-256. The
+[current archive](https://github.com/VladimirMakaev/tree-sitter-kotlin/blob/cff4a71d8282d40da840888853e6a30e93d1b1c2/tools/psi-gate/grammar-bugs/catalog-ledger.json)
+is available independently of the upstream squash commit. Retain the fork history
+for as long as those detailed measurements are needed.
 
 The synthetic cases are part of this MIT-licensed grammar project. Derived
 counterexamples use the Apache-2.0 Kotlin, Okio, Exposed, Ktor and kotlinx.coroutines
 sources identified by repository, commit and relative path in the ledgers; the
 Kotlin production-source pin is distinct from the JetBrains fixture-import pin.
 Refer to those upstream licenses and original pinned sources for provenance.
+The historical mixed-run entries now retain their recovered mutation seed, index,
+operator and original source pin; reductions keep those original provenance fields.
 
 Existing ledger expectations are reverified on later runs against that ledger;
 confirmed cases remain evidence after a grammar fix. Rerun the same seed after a
