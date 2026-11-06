@@ -99,7 +99,7 @@ function annotatedStart(node, start) {
     if (!first) break;
     start = first.startIndex;
   }
-  // Hidden statement/argument annotation tuples have the same FUN modifier prefix.
+  // N39: hidden statement/argument annotation tuples have the same FUN modifier prefix.
   const parent = node.parent;
   if (!parent || !['source_file', 'statements', 'control_structure_body', 'value_argument'].includes(parent.type)) return start;
   if (parent.type === 'value_argument' && parent.children.some(child => ['=', '*'].includes(child.type))) return start;

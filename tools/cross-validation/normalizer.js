@@ -14,6 +14,10 @@ const {
   WRAPPER_COLLAPSE,
 } = require('./mapping');
 
+// Standing premise for N18, N21, N22 and N38–N41: _statement_annotations stays
+// hidden and the affected tuples have no explicit native binding to preserve.
+// If the grammar expresses binding in these formerly flat annotation tuples,
+// revisit these regroupings; explicit operator/label/parenthesis scopes stay strict.
 const STATEMENT_EXPRESSIONS = new Set([
   'postfix_expression', 'indexing_expression', 'navigation_expression', 'prefix_expression',
   'as_expression', 'spread_expression', 'multiplicative_expression', 'additive_expression',
@@ -47,7 +51,48 @@ function _normalizeTsMulti(node, parentName = null) {
 
   const tsName = node.name;
 
-  // The anonymous receiver's hidden simple-user-type rule emits its pieces directly.
+  // N42: preserve native IF field roles. A branch requires its visible body node;
+  // a hidden/dropped control_structure_body must not be reconstructed from a field.
+  if (tsName === 'if_expression') {
+    const children = [];
+    const hasThen = node.children.some(child => child.field === 'consequence');
+    let emptyThen = false;
+    for (const child of node.children) {
+      if (child.field === 'alternative' && !hasThen && !emptyThen) {
+        children.push(new Node('THEN')); emptyThen = true;
+      }
+      const contents = _normalizeTsMulti(child, tsName);
+      if (child.field === 'condition') children.push(new Node('CONDITION', contents));
+      else if (child.name === 'control_structure_body' && ['consequence', 'alternative'].includes(child.field))
+        children.push(new Node(child.field === 'consequence' ? 'THEN' : 'ELSE', contents));
+      else children.push(...contents);
+    }
+    if (!hasThen && !emptyThen) children.push(new Node('THEN'));
+    if (node.sourceInfo?.tokens.some(token => token.type === 'else')
+        && !node.children.some(child => child.field === 'alternative')) children.push(new Node('ELSE'));
+    return [new Node('IF', children)];
+  }
+
+  // N42: retain the loop range/condition slot, even when its reference is transparent.
+  if (['for_statement', 'while_statement', 'do_while_statement'].includes(tsName)) {
+    const header = node.sourceInfo ? node.sourceInfo.controlHeader : legacyLoopHeader(node);
+    const indices = header?.indices || [];
+    const children = [];
+    for (let i = 0; i < node.children.length; i++) {
+      if (indices.includes(i)) {
+        if (i === indices[0]) children.push(new Node(header.role,
+          indices.flatMap(index => _normalizeTsMulti(node.children[index], tsName))));
+      } else children.push(..._normalizeTsMulti(node.children[i], tsName));
+    }
+    const unownedBody = node.children.some((child, i) => !indices.includes(i)
+      && !['annotation', 'variable_declaration', 'multi_variable_declaration', 'line_comment', 'multiline_comment'].includes(child.name));
+    // N19: a genuinely absent optional FOR/WHILE body keeps PSI's empty BODY slot.
+    if (tsName !== 'do_while_statement' && !unownedBody
+        && !node.children.some(child => child.name === 'control_structure_body')) children.push(new Node('BODY'));
+    return [new Node(TS_TO_PSI[tsName], children)];
+  }
+
+  // N31: The anonymous receiver's hidden simple-user-type rule emits its pieces directly.
   if (tsName === 'anonymous_function' && node.sourceInfo?.tokens.some(token => token.type === '.')) {
     const end = node.children.findIndex(child => ['type_parameters', 'function_value_parameters'].includes(child.name));
     const start = node.children.findIndex(child => child.name === 'type_identifier');
@@ -60,7 +105,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // A return type's hidden modifier tuple owns the following function type.
+  // N36: A return type's hidden modifier tuple owns the following function type.
   if (['function_declaration', 'anonymous_function'].includes(tsName)) {
     const grouped = []; let changed = false;
     for (let i = 0; i < node.children.length; i++) {
@@ -79,7 +124,7 @@ function _normalizeTsMulti(node, parentName = null) {
     if (changed) return _normalizeTsMulti(new Node(tsName, grouped), parentName);
   }
 
-  // A lambda-only suffix appends arguments to the preceding call.
+  // N33: A lambda-only suffix appends arguments to the preceding call.
   if (tsName === 'call_expression') {
     const parts = node.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
     const [callee, suffix] = parts;
@@ -93,7 +138,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // A parenthesized or lambda selector is the call target, even when its receiver vanishes.
+  // N37: A parenthesized or lambda selector is the call target, even when its receiver vanishes.
   if (tsName === 'call_expression') {
     const parts = node.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
     const [callee, callSuffix] = parts;
@@ -119,7 +164,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // Initializer modifiers belong to the declaration, outside its hidden brace body.
+  // N26: Initializer modifiers belong to the declaration, outside its hidden brace body.
   if (tsName === 'anonymous_initializer') {
     const headers = node.children.filter(child => child.name === 'modifiers');
     const body = node.children.filter(child => child.name !== 'modifiers');
@@ -129,7 +174,7 @@ function _normalizeTsMulti(node, parentName = null) {
     ])];
   }
 
-  // _annotated_delegation_specifier is hidden; its prefix owns only this delegated entry.
+  // N27: _annotated_delegation_specifier is hidden; its prefix owns only this delegated entry.
   if (['class_declaration', 'object_declaration', 'object_literal', 'companion_object'].includes(tsName)) {
     const children = []; let changed = false;
     for (let i = 0; i < node.children.length; i++) {
@@ -146,7 +191,7 @@ function _normalizeTsMulti(node, parentName = null) {
     if (changed) return _normalizeTsMulti(new Node(tsName, children), parentName);
   }
 
-  // A bracket annotation list aliases multiple unescaped entries inside one native annotation.
+  // N23: A bracket annotation list aliases multiple unescaped entries inside one native annotation.
   if (tsName === 'annotation') {
     const entries = node.children.filter(child => ['user_type', 'constructor_invocation'].includes(child.name));
     const prefix = node.children.filter(child => !entries.includes(child));
@@ -155,7 +200,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // An inline final annotation makes a PSI LHS prefix; a line boundary retains the statement wrapper.
+  // N21: An inline final annotation makes a PSI LHS prefix; a line boundary retains the statement wrapper.
   if (tsName === 'annotated_expression') {
     const parts = node.children.filter(child => !['line_comment', 'multiline_comment'].includes(child.name));
     const assignment = parts[parts.length - 1];
@@ -166,7 +211,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // The restricted delegate grammar aliases a callee and its generic suffix separately.
+  // N20: The restricted delegate grammar aliases a callee and its generic suffix separately.
   if (tsName === 'explicit_delegation') {
     const indices = node.children.map((child, i) => ['line_comment', 'multiline_comment'].includes(child.name) ? -1 : i).filter(i => i >= 0);
     const [leftIndex, rightIndex] = indices.slice(-2);
@@ -183,10 +228,11 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // _statement_annotations is hidden; only expression tails share that prefix.
+  // N18: _statement_annotations is hidden; only expression tails share that prefix.
   if ((['source_file', 'statements', 'control_structure_body'].includes(tsName)
       || (tsName === 'value_argument' && !node.sourceInfo?.tokens.some(token => ['=', '*'].includes(token.type))))
       && node.sourceInfo?.statementSpans && node.children.some(child => child.name === 'annotation')) {
+    // N22: separate value-argument annotation siblings keep argument-owned scope.
     const grouped = groupStatementAnnotations(node);
     if (grouped.children.some((child, i) => child !== node.children[i])) {
       const replacement = new Node(tsName, grouped.children);
@@ -195,16 +241,17 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // A declared when subject is the same property syntax as a local declaration.
+  // N13: A declared when subject is the same property syntax as a local declaration.
   if (tsName === 'when_subject' && node.children.some(child =>
     ['variable_declaration', 'multi_variable_declaration'].includes(child.name))) {
     return _normalizeTsMulti(new Node('property_declaration', node.children), parentName);
   }
 
-  // A string-content token is opaque; PSI splits the same text into literal and escape runs.
+  // N7: A string-content token is opaque; PSI splits the same text into literal and escape runs.
   if (tsName === 'string_literal' && node.sourceInfo?.string) {
     const children = [];
     const info = node.sourceInfo;
+    // N11: keep the parsed multi-dollar prefix count and exact source interval.
     if (info.string.prefix) children.push(new Node('STRING_INTERPOLATION_PREFIX', [], {
       value: info.string.prefix, start: info.start, end: info.start + info.string.prefix,
     }));
@@ -224,12 +271,12 @@ function _normalizeTsMulti(node, parentName = null) {
     flush();
     return [new Node('STRING_TEMPLATE', mergeRuns(children))];
   }
-  // $this is a this-expression, while ordinary interpolated names remain references.
+  // N10: $this is a this-expression, while ordinary interpolated names remain references.
   if (tsName === 'interpolated_identifier' && node.sourceInfo?.text === 'this') {
     return [new Node('SHORT_STRING_TEMPLATE_ENTRY', [new Node('THIS_EXPRESSION')])];
   }
 
-  // Mandatory brace bodies are hidden _block rules, but their scope is explicit in PSI.
+  // N4: Mandatory brace bodies are hidden _block rules, but their scope is explicit in PSI.
   if (tsName === 'try_expression') {
     let end = node.children.findIndex(n => ['catch_block', 'finally_block'].includes(n.name));
     if (end < 0) end = node.children.length;
@@ -250,18 +297,20 @@ function _normalizeTsMulti(node, parentName = null) {
   if (tsName === 'finally_block') {
     return [new Node('FINALLY', [new Node('BLOCK', node.children.flatMap(n => _normalizeTsMulti(n, tsName)))])];
   }
-  // A secondary constructor's body is optional. Its implicit delegation has no source token.
+  // N9: A secondary constructor's body is optional. Its implicit delegation has no source token.
   if (tsName === 'secondary_constructor') {
     const header = node.children.filter(n => ['modifiers', 'function_value_parameters', 'constructor_delegation_call'].includes(n.name));
     const body = node.children.filter(n => !header.includes(n));
     const children = header.flatMap(n => _normalizeTsMulti(n, tsName));
     if (!header.some(n => n.name === 'constructor_delegation_call')) children.push(new Node('CONSTRUCTOR_DELEGATION_CALL'));
+    // N25: constructor header comments alone do not create an optional brace body.
     if (body.some(child => !['line_comment', 'multiline_comment'].includes(child.name)) || node.sourceInfo?.braced)
       children.push(new Node('BLOCK', body.flatMap(n => _normalizeTsMulti(n, tsName))));
     return [new Node('SECONDARY_CONSTRUCTOR', children)];
   }
   // Assignment targets emit postfix pieces instead of the expression wrapper used on the RHS.
   // The hidden lvalue rule still emits its postfix operators in their parsed order.
+  // N15: retain actual lvalue postfix operators in their parsed order.
   if (tsName === 'directly_assignable_expression' && node.sourceInfo?.postfixSequence
       .some(part => !part.named && ['!!', '++', '--'].includes(part.type))) {
     let value, complete = true;
@@ -281,6 +330,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
     if (complete && value) return _normalizeTsMulti(value, parentName);
   }
+  // N5: retain actual lvalue receiver/index/navigation suffix structure.
   if (tsName === 'directly_assignable_expression' && node.children.slice(1).some(n => ['indexing_suffix', 'navigation_suffix'].includes(n.name))) {
     let value = node.children[0];
     for (const suffix of node.children.slice(1)) {
@@ -289,13 +339,13 @@ function _normalizeTsMulti(node, parentName = null) {
     }
     if (value) return _normalizeTsMulti(value, parentName);
   }
-  // The parsed suffix operator, rather than its node label, identifies a callable reference.
+  // N16: The parsed suffix operator, rather than its node label, identifies a callable reference.
   if (tsName === 'navigation_expression') {
     const suffix = node.children[node.children.length - 1];
     const operator = suffix?.sourceInfo?.tokens.find(n => ['.', '?.', '::'].includes(n.type));
     const argumentsNodes = suffix?.children.filter(child => child.name === 'type_arguments') || [];
     const selector = suffix?.children.filter(child => child.name !== 'type_arguments') || [];
-    // A parsed generic qualifier before the dot is PSI's type-argument-only receiver call.
+    // N35: a parsed generic qualifier before the dot is PSI's type-argument-only receiver call.
     if (['.', '?.'].includes(operator?.type) && argumentsNodes.length === 1
         && argumentsNodes[0].sourceInfo?.end <= operator.start && selector.every(child =>
           ['simple_identifier', 'line_comment', 'multiline_comment'].includes(child.name))) {
@@ -306,7 +356,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
     if (operator?.type === '::') {
       const isClass = suffix.sourceInfo.tokens.some(n => n.type === 'class');
-      // PSI calls the parsed expression receiver Foo<T> a type-argument-only call.
+      // N17: PSI calls the parsed expression receiver Foo<T> a type-argument-only call.
       if (argumentsNodes.length === 1 && selector.every(child =>
         ['simple_identifier', 'line_comment', 'multiline_comment'].includes(child.name))) {
         const receiver = new Node('call_expression', node.children.slice(0, -1).concat(argumentsNodes));
@@ -329,7 +379,7 @@ function _normalizeTsMulti(node, parentName = null) {
   // must remain distinguishable from an annotated expression.
   if ((tsName === 'prefix_expression' || tsName === 'annotated_lambda')
       && node.children.some(child => child.name === 'annotation')) {
-    // Consecutive annotation prefixes form one PSI annotation list. An intervening
+    // N41: consecutive annotation prefixes form one PSI annotation list. An intervening
     // label, operator or parenthesized expression keeps its own scope.
     const tail = node.children.at(-1);
     if (tsName === 'prefix_expression' && tail?.name === 'prefix_expression'
@@ -339,7 +389,7 @@ function _normalizeTsMulti(node, parentName = null) {
       return _normalizeTsMulti(new Node(tsName, node.children.slice(0, -1).concat(tail.children)), parentName);
     }
     const children = node.children.flatMap(child => _normalizeTsMulti(child, tsName));
-    // An annotation directly on an anonymous function belongs to FUN's
+    // N39: an annotation directly on an anonymous function belongs to FUN's
     // modifiers in PSI, rather than an ANNOTATED_EXPRESSION around the FUN.
     if (tsName === 'prefix_expression' && node.children.some(child => child.name === 'anonymous_function')) {
       const fn = children.find(child => child.name === 'FUN');
@@ -404,7 +454,7 @@ function _normalizeTsMulti(node, parentName = null) {
     return kids;
   }
 
-  // Kotlin PSI models signed/unsigned numeric tokens as one atomic constant.
+  // N3: Kotlin PSI models signed/unsigned numeric tokens as one atomic constant.
   if (tsName === 'unsigned_literal') {
     const children = node.children.flatMap(n => _normalizeTsMulti(n, tsName));
     if (children.length === 1 && children[0].name === 'INTEGER_CONSTANT') return children;
@@ -433,7 +483,7 @@ function _normalizeTsMulti(node, parentName = null) {
 
   if (tsName === 'function_type_parameters') {
     const parameters = []; let modifiers = [];
-    // The hidden dynamic type still occupies one function parameter slot.
+    // N30: the hidden dynamic type still occupies one function parameter slot.
     const inputs = node.sourceInfo?.typeParameterSequence
       ? node.sourceInfo.typeParameterSequence.flatMap(part => part.named
         ? [node.children[part.index]] : part.type === 'dynamic' ? [new Node('parameter')] : [])
@@ -475,12 +525,6 @@ function _normalizeTsMulti(node, parentName = null) {
 
   // --- Special cases ---
 
-  // An absent optional loop body is PSI's empty BODY slot, not a following sibling.
-  if (['for_statement', 'while_statement'].includes(tsName)
-      && !node.children.some(child => child.name === 'control_structure_body')) {
-    children.push(new Node('BODY'));
-  }
-
   // check_expression → IS_EXPRESSION for type tests, BINARY_EXPRESSION for in/!in
   if (tsName === 'check_expression') {
     const types = new Set(['type_test', 'user_type', 'nullable_type', 'function_type',
@@ -500,7 +544,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // control_structure_body → BLOCK only for actual blocks, transparent otherwise
+  // N6: control_structure_body → BLOCK only for actual blocks, transparent otherwise
   if (tsName === 'control_structure_body') {
     const hasStatements = node.children.some(c => c.name === 'statements');
     const hasNonCommentChildren = node.children.some(c =>
@@ -545,7 +589,8 @@ function _normalizeTsMulti(node, parentName = null) {
   if (psiName === 'CALL_EXPRESSION') {
     const callee = node.children.find(child => !['line_comment', 'multiline_comment'].includes(child.name));
     const flattened = _flattenCallExpression(children);
-    // Parenthesized arguments invoke a qualified call's result at every chain depth.
+    // N28: parenthesized arguments invoke an already evaluated qualified call.
+    // N32: retain that result invocation at every chain depth.
     if (callee?.name === 'call_expression' && flattened[0]?.name === 'DOT_QUALIFIED_EXPRESSION'
         && node.children.some(child => child.name === 'call_suffix' && child.children.some(part => part.name === 'value_arguments'))
         && callee.children.some(child => child.name === 'call_suffix' && child.children.some(part =>
@@ -568,7 +613,7 @@ function _normalizeTsMulti(node, parentName = null) {
     }
   }
 
-  // function_body — expression body detection
+  // N34: function_body — expression body detection
   if (tsName === 'function_body') {
     // The parsed equals token makes every normalized expression piece body content.
     if (node.sourceInfo?.tokens.some(token => token.type === '=')) return children;
@@ -603,7 +648,7 @@ function _normalizeTsMulti(node, parentName = null) {
     children = _wrapLambdaBodyInBlock(children);
   }
 
-  // CLASS_INITIALIZER → wrap children in BLOCK
+  // N12: CLASS_INITIALIZER → wrap children in BLOCK
   if (psiName === 'CLASS_INITIALIZER') {
     children = [new Node('BLOCK', children)];
   }
@@ -643,7 +688,7 @@ function _normalizeTsMulti(node, parentName = null) {
     children = _mergeFileAnnotationLists(children);
   }
 
-  // Native nullable_type owns repeated quest children; PSI nests one wrapper per quest.
+  // N14: Native nullable_type owns repeated quest children; PSI nests one wrapper per quest.
   if (tsName === 'nullable_type') {
     const count = node.children.filter(child => child.name === 'quest').length;
     if (count > 1) {
@@ -654,6 +699,16 @@ function _normalizeTsMulti(node, parentName = null) {
   }
 
   return [new Node(psiName, children)];
+}
+
+// S-expression-only callers lack anonymous delimiter tokens. The declared grammar's
+// single expression slot has this order; live native metadata takes precedence.
+function legacyLoopHeader(node) {
+  const eligible = node.children.map((child, index) => ({child, index})).filter(({child}) =>
+    !['annotation', 'variable_declaration', 'multi_variable_declaration',
+      'control_structure_body', 'line_comment', 'multiline_comment'].includes(child.name));
+  const entry = node.name === 'do_while_statement' ? eligible.at(-1) : eligible[0];
+  return {role: node.name === 'for_statement' ? 'LOOP_RANGE' : 'CONDITION', indices: entry ? [entry.index] : []};
 }
 
 /**
@@ -690,7 +745,7 @@ function groupStatementAnnotations(node) {
     const prefix = node.children.slice(i, end);
     let lastAnnotation = end - 1;
     while (lastAnnotation > i && node.children[lastAnnotation].name !== 'annotation') lastAnnotation--;
-    // A newline after the final statement annotation gives it the whole statement.
+    // N40: a newline after the final statement annotation gives it the whole statement.
     // Newlines inside parsed annotation arguments/comments do not break the prefix.
     const inline = spans.slice(lastAnnotation + 1, end + 1).every(span => span?.newlineBefore === false);
     const operandPrefix = (node.name === 'value_argument' || inline) && ARGUMENT_PREFIX_OPERANDS.has(expression.name)
@@ -703,7 +758,8 @@ function groupStatementAnnotations(node) {
   return {children: result, spans: resultSpans};
 }
 
-// A separate annotation in a hidden statement/body/argument tuple prefixes its first operand.
+// N38: a separate argument annotation prefixes its first operand.
+// N40: the same hidden statement/body tuple respects the final annotation's newline.
 // Parentheses stop the left-operand walk and preserve explicitly grouped expressions.
 function prefixArgumentOperand(expression, prefix) {
   if (!ARGUMENT_PREFIX_OPERANDS.has(expression.name)) return new Node('prefix_expression', prefix.concat(expression));
@@ -744,7 +800,7 @@ function _normalizePsiMulti(node) {
 
   // Both PSI access labels use the native navigation wrapper; the operator stays lexical.
   const name = node.name === 'SAFE_ACCESS_EXPRESSION' ? 'DOT_QUALIFIED_EXPRESSION' : node.name;
-  // A PSI bracket group's target applies to each entry, as in native annotation aliases.
+  // N29: A PSI bracket group's target applies to each entry, as in native annotation aliases.
   if (name === 'ANNOTATION') {
     const target = node.children.find(child => child.name === 'ANNOTATION_TARGET');
     const entries = node.children.filter(child => child.name === 'ANNOTATION_ENTRY');
@@ -813,7 +869,7 @@ function _normalizePsiMulti(node) {
     return [];
   }
 
-  // Pure DOT_QUALIFIED_EXPRESSION chains → collapse to nothing
+  // N8: Pure DOT_QUALIFIED_EXPRESSION chains → collapse to nothing
   if (name === 'DOT_QUALIFIED_EXPRESSION') {
     const referenceOnly = n => n.name === 'DOT_QUALIFIED_EXPRESSION' && n.children.every(referenceOnly);
     if (children.every(referenceOnly)) {

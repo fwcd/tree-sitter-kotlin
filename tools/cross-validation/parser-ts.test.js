@@ -28,6 +28,12 @@ const BABY_STEPS_TS = `(source_file [0, 0] - [7, 0]
 // ---------------------------------------------------------------------------
 
 describe('parseTreeSitter', () => {
+  it('retains native role fields without assigning them to neighboring siblings', () => {
+    const tree = parseTreeSitter('(if_expression condition: (simple_identifier) (line_comment) '
+      + 'consequence: (control_structure_body (integer_literal)) alternative: (control_structure_body))');
+    expect(tree.children.map(child => child.field)).toEqual(['condition', undefined, 'consequence', 'alternative']);
+    expect(tree.children[2].children[0].field).toBeUndefined();
+  });
   it('parses root node as source_file', () => {
     const tree = parseTreeSitter(BABY_STEPS_TS);
     expect(tree.name).toBe('source_file');

@@ -273,11 +273,9 @@ const SKIP_PSI_NODES = new Set([
   'CONSTRUCTOR_CALLEE',
   'CONSTRUCTOR_DELEGATION_REFERENCE',
 
-  // Body wrappers — tree-sitter uses control_structure_body
-  'THEN',
-  'ELSE',
-  'LOOP_RANGE',
-  'CONDITION',
+  // CONDITION, THEN, ELSE, LOOP_RANGE and BODY retain their roles. The native
+  // normalizer maps field labels/header slots and visible control_structure_body
+  // nodes onto them; flattening these wrappers hides binding and dropped-body bugs.
 
   // Jump expression wrappers — tree-sitter skips jump_expression (promotes children)
   'RETURN',

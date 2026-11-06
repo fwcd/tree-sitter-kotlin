@@ -24,6 +24,7 @@ function textNode(info, raw = false) {
 }
 
 /** Keep invalid escape fragments separate from the surrounding valid opaque run. */
+// N24: keep invalid escape fragments separate, preserving their text and source spans.
 function textNodes(info, raw = false) {
   if (raw) return [textNode(info, true)];
   const result = []; let start = 0;

@@ -59,11 +59,17 @@ function parseNode(tokens, state) {
 
   // Read children until ')'
   const children = [];
+  let field;
   while (state.pos < tokens.length && tokens[state.pos] !== ')') {
     if (tokens[state.pos] === '(') {
-      children.push(parseNode(tokens, state));
+      const child = parseNode(tokens, state);
+      if (field) Object.defineProperty(child, 'field', { value: field });
+      children.push(child);
+      field = undefined;
     } else {
-      // Skip unexpected non-paren tokens (shouldn't normally happen)
+      // Native field labels carry roles independently of the child's node type.
+      const token = tokens[state.pos];
+      if (token.endsWith(':')) field = token.slice(0, -1);
       state.pos++;
     }
   }

@@ -7,6 +7,7 @@ const NATIVE_METADATA = new Set([
   'directly_assignable_expression',
   'source_file', 'statements', 'value_argument', 'annotated_expression', 'function_type_parameters', 'anonymous_function',
   'function_body', 'type_arguments',
+  'if_expression', 'for_statement', 'while_statement', 'do_while_statement',
 ]);
 const PSI_METADATA = new Set([
   'LITERAL_STRING_TEMPLATE_ENTRY', 'ESCAPE_STRING_TEMPLATE_ENTRY', 'STRING_INTERPOLATION_PREFIX',
@@ -47,6 +48,7 @@ function stringDelimiter(text) {
 
 function hiddenSpans(node) {
   const spans = [];
+  // N1: only the parsed wildcard-import gap owns the hidden DOT token.
   if (node.type === 'import_header') {
     const identifier = node.namedChildren.find(n => n.type === 'identifier');
     const star = node.namedChildren.find(n => n.type === 'wildcard_import');
@@ -57,6 +59,7 @@ function hiddenSpans(node) {
       });
     }
   }
+  // N2: only a parsed constructor header owns its hidden constructor keyword.
   if (node.type === 'primary_constructor') {
     const modifiers = node.namedChildren.find(n => n.type === 'modifiers');
     const parameters = node.children.find(n => n.type === '(');
@@ -101,11 +104,24 @@ function attachNative(tree, root) {
         text: ['string_literal', 'string_content', 'interpolated_identifier'].includes(node.type) ? node.text : undefined,
         string: literal ? stringDelimiter(literal.text) : null,
         braced: tokens.some(n => n.type === '{') && tokens.some(n => n.type === '}'),
+        controlHeader: controlHeader(node),
       });
     }
     if (cursor.gotoFirstChild()) continue;
     while (!cursor.gotoNextSibling()) if (!cursor.gotoParent()) return assign(tree, byType);
   }
+}
+
+// N42: loop headers have no named fields; only their parsed delimiters own the slot.
+function controlHeader(node) {
+  if (!['for_statement', 'while_statement', 'do_while_statement'].includes(node.type)) return undefined;
+  const start = node.children.find(child => child.type === (node.type === 'for_statement' ? 'in' : '('));
+  const end = node.children.find(child => child.type === ')' && child.startIndex > (start?.endIndex ?? Infinity));
+  if (!start || !end) return undefined;
+  return { role: node.type === 'for_statement' ? 'LOOP_RANGE' : 'CONDITION',
+    indices: node.namedChildren.flatMap((child, index) =>
+      child.startIndex >= start.endIndex && child.endIndex <= end.startIndex ? [index] : []),
+  };
 }
 
 function postfixSequence(node) {
