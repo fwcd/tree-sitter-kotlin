@@ -1,41 +1,27 @@
-# PSI gate v2 — proposal for owner approval
+# PSI gate v2 — owner-approved design
 
-**Design only; no implementation authorized yet.** Supersedes v1's base/relative workflow.
-The current checkout, including uncommitted grammar edits, is the sole parser under test.
-Retain reviewed N1–N42, including native IF field/empty-slot ownership at `75dfaa2`, and its
-positive/negative controls. Full match remains exact normalized tree/payload plus comment,
-declaration and significant-token facts; errors, timeouts and incomplete gate runs fail.
-Catalogue changes require semantic witnesses, positive/genuine-negative controls and both-family review;
-making a file pass alone never justifies normalization. Keep catalogue identity in results/expectations.
+Authoritative decisions: **2026-11-06 17:16 UTC**. Replaces the proposal at `9cdbc62`.
+This task updates documentation only; implementation is separate. Verdicts answer whether the
+current contents are good against pinned PSI, with no comparison to previous commits.
 
-## 1. Backend and prerequisites
+## 1. Native backend and prerequisites
 
-**Recommend native initially, subject to owner choice (Q1).** Node 22 plus the native binding's
-usual build tools: Python, make on Unix, C++17. These only serve node-gyp/binding.gyp and are
-the **same toolchain this repository's `npm install` already requires**, not extra PSI requirements.
-Regenerate/build the current parser with the repo's generator; reject stale generated sources or addons.
-Accept a prebuilt only when its source digest matches. Every backend must retain fields, named/anonymous
-nodes, UTF-16 ranges, ERROR/MISSING and bounded cancellation; rerun all mutation controls before switching.
+Use **the repository's own Node binding**: load `bindings/node`, built from `binding.gyp` by the
+normal `npm install`/node-gyp workflow, with the repository's installed Tree-sitter dependency.
+Do not install a separate gate runtime or create private per-grammar addon builds. Ensure generated
+parser sources and the loaded addon represent the current working tree; if a rebuild is necessary,
+use the repository's normal generate/build workflow once. That current build is necessary for
+testing grammar edits; historical/base grammar builds are not.
 
-Full/live-oracle operations need **JRE 17**, normal Java SE modules plus `jdk.unsupported`/`jdk.zipfs`.
-Ship a versioned/SHA-verified precompiled `PsiOracle` helper; a JDK is needed to build that helper
-in release CI, never to run checks. Kotlin parser jars stay; `jdk.compiler` is unnecessary.
-Quick needs **no Java**. Remove required git/curl/tar:
-Node HTTPS with bounded/proxy-aware requests and SHA verification; a small audited JS tar/ZIP
-reader with confined paths/symlink policy. Git is optional provenance/fetch convenience.
+Required: **Node, Git, the build toolchain the repository's npm install already needs, and JRE 17**
+for live PSI operations. Python/make/C++ serve the existing Node binding, not PSI. Ship the
+precompiled/versioned/SHA-verified `PsiOracle` helper; JDK compilation belongs to helper release CI.
+Quick needs no Java. Node HTTP/SHA verification handles jars/helper downloads; curl/tar are gone.
+Native field/range/ERROR/MISSING/cancellation and N1–N42 controls remain required.
 
-WASM is a documented alternative: 104/104 sample fidelity, faster extraction, released runtime
-Node+JRE; **changed grammars need Emscripten or Docker/Podman to rebuild WASM**. The 49k research
-pass compared counts, with one PSI-invalid difference; it is not complete-tree fidelity proof.
-CLI/CST achieved only 85/104 fidelity and very large output; defer it. Evidence: prerequisite
-research dated 2026-11-06, native/WASM runtime 0.25.1.
+## 2. One configuration: `psigate.toml`
 
-## 2. Checked-in configuration
-
-Recommend **TOML**, for comments/readability, with one pinned parser dependency; JSON is accepted
-through the same schema using `JSON.parse` (Q2). Select one file via `--config`; ambiguous discovery fails.
-Unknown keys, missing pins and duplicate names fail.
-Illustrative shape; implementation must supply real coordinates/digests, never placeholders:
+TOML only, with comments for context. The supported shape is:
 
 ```toml
 [kotlin-psi]
@@ -45,86 +31,84 @@ helper = { version = "<release>", sha256 = "<64 hex>" }
 [[repo]]
 name = "okio"
 url = "https://github.com/square/okio.git"
-rev = "1926f022425ccd85ee558c558f0a5b7b24826a57"
-includes = ["**/*.kt", "**/*.kts"] # defaults; POSIX globs relative to repo root
-excludes = []
-known-failures = [] # exact path, raw SHA, reason/class, issue URL, ledger/evidence
-content-manifest = "<reviewed source inventory/digest>"
+rev = "1926f022425ccd85ee558c558f0a5b7b24826a57" # full commit SHA
+includes = ["**/*.kt", "**/*.kts"] # defaults, relative to repository root
+excludes = ["folder1/**", "folder1/file1.kt"] # context in TOML comments
 ```
 
-Resolve config paths relative to the config file; globs relative to each imported repository.
-Includes/excludes declare reviewed scope; **failure-based exclusions belong in known-failures**,
-not glob filters. Never auto-filter PSI-invalid files. Verify full-SHA HTTPS archive metadata
-and extracted source manifests; provider commit assertions alone are insufficient. Content digests
-survive repackaged archives. Report selection/exclusion counts and pins per repository/partition.
+Pins/digests must be real; invalid schema/pins fail. **No known-failures, content-manifest, JSON
+configuration alternative, exclusion caps, or gate lockfile.** Existing repository npm conventions
+remain unchanged. All include/exclude globs use repository-relative POSIX paths.
 
-## 3. Quick — committed, curated assertions
+## 3. Inputs: external Git checkouts versus our working tree
 
-Corpus defaults to our cases + ledger cases + **deliberately selected findings** (Q3); no automatic
-generated corpus. Commit each source, original `.kt`/`.kts` mode, raw SHA, pinned normalized PSI
-tree/source facts, oracle/helper/catalogue identity and mode `must-match` or `known-bug` + ledger ID.
+Configured repositories are fetched/cached as Git checkouts at their **exact pinned revision**.
+Both config repositories and `repo DIR` must be **clean**: any modified or staged tracked file
+fails, with affected paths listed. An unconfigured `repo DIR` records its current HEAD; config
+repositories must match their configured full SHA. **Untracked files are ignored, never an error.**
+Inventory comes **only from `git ls-files`**, then includes/excludes. No directory-walk fallback,
+content/markup/PSI-validity filter, or import of another repository's grammar assertions.
 
-**Store PSI expectations, not tree-sitter outputs.** Quick compares the current grammar directly
-with these reference assertions; it needs neither JVM nor network. TS snapshots would freeze
-old mistakes and create noisy acceptance baselines; use native output only as diagnostic evidence.
-`must-match` differences fail. A known-bug row is `KNOWN` only when its complete mismatch is covered
-by a narrow reviewed issue assertion covering all differences, never just a filename/signature;
-extra/different failures fail, and a match is reported `RESOLVED` without automatic promotion.
-Known-bug diagnostic rows never count as full conformance or become repository waivers.
+For **our repository**, impose **no clean requirement**. Use its Git index (tracked + newly staged
+files) for discovery, but read **current working-tree bytes**, including unstaged edits. A new
+snippet participates once `git add`ed; unstaged untracked files do not. Missing included files or
+incomplete input runs fail. Preserve `.kt`/`.kts` modes and identical decoding on both parsers.
 
-`psi-gate regenerate-expectations` explicitly regenerates **existing selected sources' PSI truth**
-with pinned jars/JRE, deterministic ordering and reviewed diffs. It neither generates/adopts sources
-nor copies current TS output into expectations. Stale source/oracle/catalogue identities fail quick.
+**Excludes pass always.** They are unconditional exemptions, documented by optional TOML comments;
+there is no count/hash/issue/removal-condition policy. Full may optionally note that an excluded
+file now matches, but the note/check never fails the gate or requires exclude cleanup.
+This exempts file conformance; external checkout cleanliness and revision checks still apply.
 
-## 4. Full — parallel acquisition, absolute results
+## 4. Quick and full: absolute checks
 
-`full` starts quick and bounded concurrent repo fetches together; verified warm caches avoid fetches.
-Then check configured source snapshots against live PSI while preserving their paths/extensions.
-Optional PSI cache keys include file SHA/path/mode, jars/helper and decode policy; normalized cache
-also includes catalogue identity. Grammar-only changes can reuse reference PSI, never stale verdicts.
-Overall pass requires quick assertions and every included full source to pass; acquisition/oracle errors fail.
-`repo DIR` survives for current local folders using the same selection/checking; Git/clean status is optional.
+Quick uses **one curated, committed corpus; every snippet is MUST-MATCH**. Store source and pinned
+normalized PSI tree/source-fact expectations with reference identities. Store no Tree-sitter output
+acceptance snapshots. Stale expectations or any included mismatch fail. **Failing cases remain in
+the grammar-bug ledger outside quick**, never known-bug quick assertions or tolerated mismatches.
 
-Verdicts are **absolute for current contents**: no merge-base, base build, delta, ratchet or past-commit
-acceptance snapshots. Retain strict v1 principles: immutable reviewed repo pins; exact known-failure
-records; target ≤5/hard cap10 globally across required repositories, including PSI-invalid originals;
-no runtime reclassification. Resolved full waivers must be removed. Report mismatch counts, never
-blended percentages. First admission: fix Okio's two grammar defects preferably, or approve two
-exact-hash waivers; add whole natural partitions when green. Exact candidate-merge CI protects main.
+Explicit, reviewed `regenerate-expectations` refreshes stored PSI for existing selected snippets
+using the pinned jars/helper/JRE. It does not generate/adopt snippets or record current native output
+as truth. Normal quick runs use stored expectations and need no JVM/network. Quick stays green
+through must-match admission and checks on every candidate revision.
 
-## 5. Fuzz — suspects only; follow-up decides
+`full` starts quick and bounded parallel fetch/cache work for config repositories together, then
+checks included index-listed source against live pinned PSI. Overall pass requires quick and every
+included full file to match; setup/fetch/dirty-check/parse failures fail. Optional PSI caches use
+source/path/mode and oracle/decode identity; normalized caches also include catalogue identity.
+Integrity/cache receipts are internal, not a checked-in lockfile/content manifest or past verdict.
 
-Reuse the current generator, mutator, minimizer, inspector and local-ledger machinery as a **seeded,
-deterministic, budgeted search**, never quick/full pass/fail or a corpus producer. Its only deliverable
-is an owned temp/untracked folder. One completed, minimized, PSI-valid, live-reverified `suspect-ID.kt`
-per distinct suspect fingerprint (preserve `.kts` for scripts), plus `suspect-ID.json` containing:
+Retain exact normalized tree/payload, native role ownership and comment/declaration/token facts.
+Included files require both parsers error-free; report absolute mismatching counts per repository/
+partition and selected/excluded counts, never base deltas or blended percentages. Required CI
+checks the exact candidate merge revision; stale/skipped checks cannot qualify.
 
-`{schema, sourceSha256, seed, origin, oraclePin, grammarDigest, catalogueDigest, psiErrors:0,
-nativeErrors, psiNormalized, nativeNormalized, diff, signature, knownMatch, reduction, reverified}`.
+## 5. Fuzz search, follow-up and explicit admission
 
-`index.json` contains ordered absolute file/sidecar paths, seed/budgets, completeness and pending/known
-counts; stdout prints the suspect file paths only. Output cannot target the committed corpus.
-No ranked verdict report or grammar/normalizer
-classification. Incomplete reductions are marked pending, not emitted as verified minimized findings.
-Replay corpus/ledger for dedupe: suppress verified identical examples/problem evidence; shared
-signatures alone are only advisory `knownMatch` candidates, never grounds to hide a different defect.
+Fuzz is **seeded, deterministic, budgeted search only**, never quick/full pass/fail or an automatic
+corpus producer. Reuse the generator, mutator, minimizer, inspector and local finding/ledger tools.
+Write an owned temp/untracked folder of completed minimized, PSI-valid, live-reverified suspect
+`.kt` files (preserve script mode for script inputs), with one representative per distinct suspect.
 
-A separate human/agent follow-up analyzes **each file**, parallelizable: grammar bug / fixed must-match
-case / normalizer fix / discard. Only explicit `psi-gate add FILE --kind must-match` or
-`--kind known-bug --ledger-id ID` admits one chosen finding. Add rechecks source/pins/live PSI and the
-current grammar, validates the chosen assertion, dedupes, then atomically writes source + stored PSI
-expectation + manifest/ledger link for review. It cannot trust stale sidecars or classify automatically.
+Sidecar: `{schema, sourceSha256, seed, provenance, oraclePin, grammarDigest, catalogueDigest,
+psiNormalized, nativeNormalized, diff, signature, knownMatch, reduction, reverified}`.
+`index.json` gives ordered absolute file/sidecar paths, budgets and complete/pending/known counts;
+stdout prints the file paths. Unfinished/unverified reductions remain pending. Suppress verified
+identical known corpus/ledger examples; shared signatures alone only annotate possible known matches.
+**The fuzzer makes no decisions**, classifies no root cause, and writes no committed corpus files.
 
-## 6. Migration and owner questions
+A separate human/agent follow-up analyzes each suspect, parallelizable: grammar bug / normalizer
+fix / discard / fixed must-match candidate. Record failing cases in the grammar-bug ledger.
+Only explicit `psi-gate add FILE` re-verifies a chosen snippet with current grammar/live pinned PSI,
+**requires full match**, dedupes, writes source + stored PSI expectation/corpus metadata, and stages
+them with Git (no commit). It rejects failing/stale findings; there is no known-bug quick admission.
 
-Delete `base.js`/history-topology tests, merge-base/upstream options and fetches, base grammar/corpus
-archives, ratchet/distance and per-file historical acceptance, `update-expected`, relative headlines,
-and fuzz `--promote`/automatic corpus writes. Port regression controls to absolute v2 commands.
-Keep normalizer/facts, oracle protocol, integrity caches, reports, minimizer, generator/search, ledger,
-and `repo`; **regenerate-expectations/add are explicit reference/admission operations**, not past baselines.
+## 6. Migration boundary
 
-Owner approval is required before code, including:
-1. **Backend:** native first (recommended, same repository build tools), or WASM with a supported rebuild workflow?
-2. **Config:** TOML + JSON compatibility (recommended), or JSON-only to avoid the TOML parser dependency?
-3. **Corpus:** one curated corpus (recommended), or a separate “generated” label for manually selected specimens?
-   Either choice forbids automatic fuzz/coverage-gain additions.
+Delete base.js/history tests, merge-base/upstream-history options, base builds/corpus archives,
+separate gate runtime/private addon build machinery, ratchet/distance/per-file historical acceptance,
+`update-expected`, relative headlines, fuzz `--promote`, known-bug quick modes, known-failure/cap/
+content-manifest/lockfile policy, and curl/tar requirements. Port regression controls to v2 commands.
+Keep normalizer/facts/N1–N42 review safeguards, oracle protocol, integrity caches, reports, minimizer,
+search/generator, bug ledger and `repo`; expectation regeneration/admission remain explicit operations.
+No automatic generated corpus. These owner decisions supersede earlier optional base/relative and
+waiver proposals; retain their history as design context, not active v2 behavior.
