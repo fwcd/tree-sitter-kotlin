@@ -1,126 +1,130 @@
-# Strict PSI conformance gate
+# PSI gate v2 — proposal for owner approval
 
-**Decision proposed for review; no implementation.** Make a fixed corpus's full PSI match the required
-grammar check. Reviewed foundation: N1–N42 at `0e319e2`, 72 catalog/93 native witnesses, and genuine
-full-coverage stability windows of 5,014 and 5,003 PSI-valid inputs. These are evidence, not exemptions.
+**Design only; no implementation authorized yet.** Supersedes v1's base/relative workflow.
+The current checkout, including uncommitted grammar edits, is the sole parser under test.
+Retain reviewed N1–N42, including native IF field/empty-slot ownership at `75dfaa2`, and its
+positive/negative controls. Full match remains exact normalized tree/payload plus comment,
+declaration and significant-token facts; errors, timeouts and incomplete gate runs fail.
+Catalogue changes require semantic witnesses, positive/genuine-negative controls and both-family review;
+making a file pass alone never justifies normalization. Keep catalogue identity in results/expectations.
 
-## Contract and normalization
+## 1. Backend and prerequisites
 
-For each selected original `.kt`/`.kts` file, compare HEAD's grammar with pinned Kotlin PSI **2.4.21**.
-Pin the existing runtime **tree-sitter 0.25.1**, build environment and corpus manifest; reproduce the
-initial counts under those exact CI pins before enabling the job. Decode both sides identically;
-record raw-byte hashes and any explicit BOM/newline decoding policy. Never reinterpret `.kt` as `.kts`.
+**Recommend native initially, subject to owner choice (Q1).** Node 22 plus the native binding's
+usual build tools: Python, make on Unix, C++17. These only serve node-gyp/binding.gyp and are
+the **same toolchain this repository's `npm install` already requires**, not extra PSI requirements.
+Regenerate/build the current parser with the repo's generator; reject stale generated sources or addons.
+Accept a prebuilt only when its source digest matches. Every backend must retain fields, named/anonymous
+nodes, UTF-16 ranges, ERROR/MISSING and bounded cancellation; rerun all mutation controls before switching.
 
-`N.tree = {type, children: N.tree[], payload?: {value, start, end}}`, ordered, with literal values/ranges
-and `CONDITION/THEN/ELSE/LOOP_RANGE/BODY` roles retained. Ordinary reference wrappers are transparent.
-Full match means exact tree/payload equality **and** agreement of comments, declaration starts and
-significant-token ownership/spans under the reviewed aliases in `native-facts.js`/`native-layout.js`.
-Both sides normalize independently from their own emitted structure/source facts; no guessed names,
-precedence repair, dropped substantive children or diagnostic-signature waiver.
+Full/live-oracle operations need **JRE 17**, normal Java SE modules plus `jdk.unsupported`/`jdk.zipfs`.
+Ship a versioned/SHA-verified precompiled `PsiOracle` helper; a JDK is needed to build that helper
+in release CI, never to run checks. Kotlin parser jars stay; `jdk.compiler` is unnecessary.
+Quick needs **no Java**. Remove required git/curl/tar:
+Node HTTPS with bounded/proxy-aware requests and SHA verification; a small audited JS tar/ZIP
+reader with confined paths/symlink policy. Git is optional provenance/fetch convenience.
 
-Errors must agree. Every selected file in any required tier requires **neither parser to report errors**;
-one-sided and both-error files are failures. PSI-invalid originals **inside a selected core partition consume the same capped exclusion budget**;
-never drop/reclassify them at runtime. Deliberately negative testData stays outside core in a separately
-enumerated job. Neither parser's error boolean alone establishes conformance.
-Missing files, corrupt pins, oracle failures, timeouts and incomplete runs fail the job.
+WASM is a documented alternative: 104/104 sample fidelity, faster extraction, released runtime
+Node+JRE; **changed grammars need Emscripten or Docker/Podman to rebuild WASM**. The 49k research
+pass compared counts, with one PSI-invalid difference; it is not complete-tree fidelity proof.
+CLI/CST achieved only 85/104 fidelity and very large output; defer it. Evidence: prerequisite
+research dated 2026-11-06, native/WASM runtime 0.25.1.
 
-The closed **N1–N42 catalogue** is incorporated from [normalizer.js](../cross-validation/normalizer.js),
-its metadata/literal helpers and catalog/loop tests. Per-rule reason → example:
+## 2. Checked-in configuration
 
-- **N1** owned import DOT → `a.*`; **N2** owned constructor keyword → `constructor()`;
-  **N3** atomic suffix → `1u`; **N4** handler blocks → `try{}catch(e:T){}`;
-  **N5** lvalue suffix aliases → `a[i].b=c`; **N6** actual braces → `{}`;
-  **N7** equivalent literal runs → `"a\nb"`.
-- **N8** qualification retains calls → `foo().bar.baz`; **N9** implicit delegation → `constructor()`;
-  **N10** short this → `"$this"`; **N11** prefix count/range → `$$"x"`; **N12** initializer block → `init{}`;
-  **N13** subject declaration → `when(val x=f())`; **N14** layer per quest → `T??`.
-- **N15** parsed postfix order → `a!!.b=c`; **N16** access alias/operator facts → `a?.b`;
-  **N17** generic receiver alias → `Foo<T>::class`; **N18** flat statement prefix → `@A f()`;
-  **N19** iterator/absent body → `for(x in y);`; **N20** delegated generic call → `I by f<T>()`;
-  **N21** assignment annotation scope → `@A x.y=1`.
-- **N22** argument annotation scope → `g(x,@A f())`; **N23** grouped entries → `@[A B]`;
-  **N24** invalid escape fragments → `"\q"`; **N25** header comment is no body → `constructor()/*c*/`;
-  **N26** initializer header → `@A init{}`; **N27** delegated annotation → `I by @A f()`;
-  **N28** result invocation → `a.b()()`.
-- **N29** target per entry → `@field:[A B]`; **N30** dynamic parameter slot → `(dynamic)->T`;
-  **N31** receiver alias → `fun T.(){}`; **N32** arbitrary invocation depth → `a.b()()()`;
-  **N33** lambda arguments → `a.b{}{1}`; **N34** expression-body pieces → `fun f()=l@f()`;
-  **N35** parsed generic qualifier → `Foo<T>.Bar<U>::f`.
-- **N36** type-owned context → `context(A)()->T`; **N37** selector target → `a.(f)(1)`;
-  **N38** argument first operand → `g(x,@A a+b)`; **N39** annotated declaration start → `@A fun(){}`;
-  **N40** final newline controls scope → `@A(1)\n(a)+b`; **N41** consecutive list → `(@A @B x)`;
-  **N42** actual fields/header roles → `if(c)f()else g()`.
+Recommend **TOML**, for comments/readability, with one pinned parser dependency; JSON is accepted
+through the same schema using `JSON.parse` (Q2). Select one file via `--config`; ambiguous discovery fails.
+Unknown keys, missing pins and duplicate names fail.
+Illustrative shape; implementation must supply real coordinates/digests, never placeholders:
 
-Standing premise for N18/N21/N22/N38–N41: `_statement_annotations` remains hidden. Revisit regrouping
-if formerly flat tuples acquire explicit binding. Catalogue changes require a minimized witness proving PSI semantic equivalence, positive/genuine negative
-controls and both-family review; passing a corpus file alone never justifies a rule. Report catalogue
-version/count. Keep rebuilt hidden-body/role-swap controls and minimized witnesses.
+```toml
+[kotlin-psi]
+version = "2.4.21"
+jars = [{ coordinate = "group:artifact:version", sha256 = "<64 hex>" }]
+helper = { version = "<release>", sha256 = "<64 hex>" }
+[[repo]]
+name = "okio"
+url = "https://github.com/square/okio.git"
+rev = "1926f022425ccd85ee558c558f0a5b7b24826a57"
+includes = ["**/*.kt", "**/*.kts"] # defaults; POSIX globs relative to repo root
+excludes = []
+known-failures = [] # exact path, raw SHA, reason/class, issue URL, ledger/evidence
+content-manifest = "<reviewed source inventory/digest>"
+```
 
-## First corpus and ladder
+Resolve config paths relative to the config file; globs relative to each imported repository.
+Includes/excludes declare reviewed scope; **failure-based exclusions belong in known-failures**,
+not glob filters. Never auto-filter PSI-invalid files. Verify full-SHA HTTPS archive metadata
+and extracted source manifests; provider commit assertions alone are insufficient. Content digests
+survive repackaged archives. Report selection/exclusion counts and pins per repository/partition.
 
-**Recommend fixing the two grammar bugs, then enabling Okio production with zero exclusions.** Pin
-`square/okio@1926f022425ccd85ee558c558f0a5b7b24826a57`: all **205** inventoried production files,
-including shipped `okio-testing-support` main sources. Fix **the grammar/scanner**, never corpus bytes.
-The manifest publishes disjoint directory/source-set predicates: main/platform sources are production
-regardless of `Test` names; test source sets are tests; build/example/script sources are support. The
-95 tests/27 support exclude production main sources; **205+95+27=327**, with no residual, overlaps,
-filename/content/markup/pass-result filter. Publish sorted paths/raw hashes and partition rule version.
+## 3. Quick — committed, curated assertions
 
-| Choice | Grammar/scanner defects | Coverage trade-off |
-|---|---|---|
-| Fix both (recommended) | `loop-data-index-assignment` in `okio/internal/Buffer.kt`; `loop-escaped-dollar-interpolation` in `AbstractFileSystemTest.kt` | All 205 checked, zero waivers |
-| Bootstrap with two reviewed exclusions | Candidates below, owner-approved issues/removal plan | Green sooner on 203; omits 135,237 bytes, about 13% of source, including core Buffer |
+Corpus defaults to our cases + ledger cases + **deliberately selected findings** (Q3); no automatic
+generated corpus. Commit each source, original `.kt`/`.kts` mode, raw SHA, pinned normalized PSI
+tree/source facts, oracle/helper/catalogue identity and mode `must-match` or `known-bug` + ledger ID.
 
-Proposed bootstrap candidates (not active until owner review and real issue URLs), with immutable raw hashes:
+**Store PSI expectations, not tree-sitter outputs.** Quick compares the current grammar directly
+with these reference assertions; it needs neither JVM nor network. TS snapshots would freeze
+old mistakes and create noisy acceptance baselines; use native output only as diagnostic evidence.
+`must-match` differences fail. A known-bug row is `KNOWN` only when its complete mismatch is covered
+by a narrow reviewed issue assertion covering all differences, never just a filename/signature;
+extra/different failures fail, and a match is reported `RESOLVED` without automatic promotion.
+Known-bug diagnostic rows never count as full conformance or become repository waivers.
 
-| Path | SHA-256 | Reason / ledger ID |
-|---|---|---|
-| `okio/src/commonMain/kotlin/okio/internal/Buffer.kt` | `8c729e9d9372f9cec92d48dbe44be6d2c95344460d5b738501fde79e402d688a` | soft-data indexed assignment / `loop-data-index-assignment` |
-| `okio-testing-support/src/commonMain/kotlin/okio/AbstractFileSystemTest.kt` | `e9c836021d77265ec2ada98e745695ae6d74eab90506684b5c1959d542472ed6` | escaped-dollar interpolation / `loop-escaped-dollar-interpolation` |
+`psi-gate regenerate-expectations` explicitly regenerates **existing selected sources' PSI truth**
+with pinned jars/JRE, deterministic ordering and reviewed diffs. It neither generates/adopts sources
+nor copies current TS output into expectations. Stale source/oracle/catalogue identities fail quick.
 
-These PSI-valid waivers are a new choice beyond prior PSI-invalid proposals. Fixes retain positive
-witnesses/ledger history and remove related exclusions in the same PR; corpus bytes/pins stay fixed.
+## 4. Full — parallel acquisition, absolute results
 
-Grow by reviewed, **whole natural partitions**, never a selection of passing files:
+`full` starts quick and bounded concurrent repo fetches together; verified warm caches avoid fetches.
+Then check configured source snapshots against live PSI while preserving their paths/extensions.
+Optional PSI cache keys include file SHA/path/mode, jars/helper and decode policy; normalized cache
+also includes catalogue identity. Grammar-only changes can reuse reference PSI, never stale verdicts.
+Overall pass requires quick assertions and every included full source to pass; acquisition/oracle errors fail.
+`repo DIR` survives for current local folders using the same selection/checking; Git/clean status is optional.
 
-| Next required tier | Current mismatching FILES | Admission |
-|---|---:|---|
-| Okio tests (95) + support (27), same pin | 0 + 0 | Add immediately after first tier is green |
-| Kotlin stdlib (901), `9180ce6a7a7d3627f88b424717583f28ddca052d` | 31 | Fix shared grammar classes; 31 cannot fit the exception budget |
-| Other libraries, then compiler production (5,343), then remaining Kotlin production | Compiler 84; all Kotlin production 213 | Remeasure libraries; fix before admission; compiler/stdlib are subsets |
+Verdicts are **absolute for current contents**: no merge-base, base build, delta, ratchet or past-commit
+acceptance snapshots. Retain strict v1 principles: immutable reviewed repo pins; exact known-failure
+records; target ≤5/hard cap10 globally across required repositories, including PSI-invalid originals;
+no runtime reclassification. Resolved full waivers must be removed. Report mismatch counts, never
+blended percentages. First admission: fix Okio's two grammar defects preferably, or approve two
+exact-hash waivers; add whole natural partitions when green. Exact candidate-merge CI protects main.
 
-These are mismatching **file** counts, including errors: Okio production has 2 PSI-valid grammar
-mismatches/0 PSI-invalid; Kotlin production 213 = 211 PSI-valid mismatches + 2 PSI-invalid originals;
-stdlib/compiler 31/84 have no PSI-invalid originals. Kotlin tests 65 have none; support 34 = 33 + 1.
-Fix grammar mismatch classes before admission; any reviewed waivers, including PSI-invalid originals,
-share the global cap. Kotlin tests/support follow production when ready. TestData's 4,019 failures
-stay in a non-required diagnostic/fuzz job; it cannot absorb relocated core files or become uncapped exclusions.
+## 5. Fuzz — suspects only; follow-up decides
 
-## Exclusions, result and migration
+Reuse the current generator, mutator, minimizer, inspector and local-ledger machinery as a **seeded,
+deterministic, budgeted search**, never quick/full pass/fail or a corpus producer. Its only deliverable
+is an owned temp/untracked folder. One completed, minimized, PSI-valid, live-reverified `suspect-ID.kt`
+per distinct suspect fingerprint (preserve `.kts` for scripts), plus `suspect-ID.json` containing:
 
-Proposed `strict-exclusions.json`: versioned entries `{corpus, path, sha256, reasonClass, reason, issue,
-ledgerId?, oracleEvidence?}`. `issue` is a reviewed tracker URL for either a grammar defect or input/reference
-validity problem; placeholders never activate waivers. Hash raw bytes; reject unknown/duplicate paths.
-`grammar-defect` becomes stale on full match. `psi-invalid-original` also requires pinned oracle-error
-evidence and becomes stale when PSI is error-free, even if native still fails. Both classes share the cap.
-**Target ≤5, hard cap 10 across all required corpora.** Additions/pin changes require review. Compute
-and report excluded files' actual results too; a whole-file waiver can hide further bugs in that file.
+`{schema, sourceSha256, seed, origin, oraclePin, grammarDigest, catalogueDigest, psiErrors:0,
+nativeErrors, psiNormalized, nativeNormalized, diff, signature, knownMatch, reduction, reverified}`.
 
-Recommended headline: `okio/production: 0 files mismatching (target 0, 0 excluded; 205 selected, 205 included)`.
-Bootstrap instead reports **205 selected, 203 included, 2 excluded, 0 included mismatches**, plus the
-excluded files' actual results. All selected files are evaluated; report catalogue N42/42 rules.
-Pass iff every non-excluded selected file fully matches and the manifest/exclusions/run are valid.
-Never report a blended percentage. Pins and integrity hashes identify inputs; they are not match evidence.
+`index.json` contains ordered absolute file/sidecar paths, seed/budgets, completeness and pending/known
+counts; stdout prints the suspect file paths only. Output cannot target the committed corpus.
+No ranked verdict report or grammar/normalizer
+classification. Incomplete reductions are marked pending, not emitted as verified minimized findings.
+Replay corpus/ledger for dedupe: suppress verified identical examples/problem evidence; shared
+signatures alone are only advisory `knownMatch` candidates, never grounds to hide a different defect.
 
-Implement a HEAD-only strict path: remove base resolution/builds, ratchet/distance rules, allowed
-per-file mismatch baselines and `treeHash`/signature acceptance from its predicate. Keep the existing
-relative commands/headlines as clearly labelled, optional diagnostics for broader ungated corpora;
-their PASS does not mean PSI conformance. Replace their required CI role when strict becomes green.
-Delete no shared builders, integrity/cache checks, minimizers, coverage tools, bug ledger or controls;
-physically remove obsolete relative-only modules only after their callers are retired.
+A separate human/agent follow-up analyzes **each file**, parallelizable: grammar bug / fixed must-match
+case / normalizer fix / discard. Only explicit `psi-gate add FILE --kind must-match` or
+`--kind known-bug --ledger-id ID` admits one chosen finding. Add rechecks source/pins/live PSI and the
+current grammar, validates the chosen assertion, dedupes, then atomically writes source + stored PSI
+expectation + manifest/ledger link for review. It cannot trust stale sidecars or classify automatically.
 
-Keep the existing required check until strict activation lands green. Thereafter require strict CI
-on **the exact candidate merge SHA**, via merge queue/equivalent protection, for every change affecting
-parser/scanner, normalizer, runner, pins, manifests, exclusions or CI. HEAD may be the combined merge
-candidate; it is never compared with a base. Skipped/stale checks cannot satisfy protection. **Both Codex and Claude reviewer families
-review this spec before implementation; record approvals or concrete objections.**
+## 6. Migration and owner questions
+
+Delete `base.js`/history-topology tests, merge-base/upstream options and fetches, base grammar/corpus
+archives, ratchet/distance and per-file historical acceptance, `update-expected`, relative headlines,
+and fuzz `--promote`/automatic corpus writes. Port regression controls to absolute v2 commands.
+Keep normalizer/facts, oracle protocol, integrity caches, reports, minimizer, generator/search, ledger,
+and `repo`; **regenerate-expectations/add are explicit reference/admission operations**, not past baselines.
+
+Owner approval is required before code, including:
+1. **Backend:** native first (recommended, same repository build tools), or WASM with a supported rebuild workflow?
+2. **Config:** TOML + JSON compatibility (recommended), or JSON-only to avoid the TOML parser dependency?
+3. **Corpus:** one curated corpus (recommended), or a separate “generated” label for manually selected specimens?
+   Either choice forbids automatic fuzz/coverage-gain additions.
