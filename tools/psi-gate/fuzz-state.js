@@ -10,9 +10,11 @@ const { BudgetExceeded, remaining } = require('./fuzz-budget');
 function comparisonIdentity() {
   return sha256(JSON.stringify([
     require('./state').toolIdentity(),
-    ['fuzz.js', 'fuzz-compare.js', 'fuzz-state.js', 'fuzz-budget.js', 'fuzz-generate.js', 'mutate.js'].map(name =>
+    ['fuzz.js', 'fuzz-compare.js', 'fuzz-state.js', 'fuzz-budget.js', 'fuzz-generate.js', 'fuzz-declarations.js', 'fuzz-grammar.js', 'fuzz-coverage.js', 'fuzz-psi-types.json', 'mutate.js'].map(name =>
       sha256(fs.readFileSync(path.join(__dirname, name)))),
     sha256(fs.readFileSync(path.join(__dirname, '../cross-validation/minimize.js'))),
+    sha256(fs.readFileSync(path.join(__dirname, '../../src/grammar.json'))),
+    sha256(fs.readFileSync(path.join(__dirname, '../../src/node-types.json'))),
   ]));
 }
 function identity({ grammar, runtime }) {

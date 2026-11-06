@@ -296,3 +296,33 @@ normalizer/mapping change; comparison identities prevent stale reuse.
 
 Use `--help` for budgets and alternate owned output/ledger directories. Run output
 and input roots must be separate. No grammar rule is changed by the fuzz harness.
+
+
+### Grammar-driven generation and coverage
+
+Generation reads `src/grammar.json` and `src/node-types.json`. Grammar combinators
+supply operator, argument and expression productions; Kotlin context rules supply
+declaration boundaries, valid annotation/type positions and lexical spellings.
+The initial cycle covers every declaration/production family, using eight
+expression positions where applicable. Later selection favors missing/rare named types and parent-child pairs.
+Generation and mutation have separate counters, so every-third source mutation
+cannot skip declaration families.
+
+Each run writes `coverage.json` alongside clusters: intended and observed type/context
+sets, per-file frequencies, generated/mutated/corpus partitions, native parent
+contexts and a native-clean alternative. Rejected PSI inputs contribute no coverage.
+The full catalogue and explicitly non-emitted entries remain visible; applicability
+never changes because a run failed to hit a type. The pinned file PSI exposes
+`kotlin.FILE` instead of its parser wrapper. Lexer recovery/reserved spellings and
+one KDoc highlighting token are documented in `fuzz-psi-types.json` with reasons.
+These are catalogue distinctions, not exclusions of valid corpus files.
+
+The generator includes ordinary headers, grouped/file annotations, explicit backing
+fields, named destructuring, guarded when entries, callable references, floating
+literals, scripts and KDoc, plus syntax accepted by the pinned parser such as
+contract-v2 and companion blocks. The live PSI-valid filter is authoritative;
+syntax acceptance still does not imply successful type checking. Existing normalizer
+cluster formats and local defect ledgers are unchanged. Intrinsic roots/directives
+and some leaf types have only one legal direct parent; observed context sets show
+that limitation rather than inventing additional contexts. Full type coverage alone
+does not prove all combinations or grammar-wide normalizer correctness.

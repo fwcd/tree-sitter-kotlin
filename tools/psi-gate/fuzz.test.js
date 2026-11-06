@@ -13,9 +13,9 @@ const { argumentsOf, sourceInputs, run } = require('./fuzz');
 const temporary = () => fs.mkdtempSync(path.join(os.tmpdir(), 'psi-fuzz-test-'));
 
 it('generates reproducible nested construct combinations and single-site mutants', () => {
-  const a = Array.from({ length: 48 }, (_, i) => generated('seed', i, 3));
-  expect(a).toEqual(Array.from({ length: 48 }, (_, i) => generated('seed', i, 3)));
-  expect(a).not.toEqual(Array.from({ length: 48 }, (_, i) => generated('other', i, 3)));
+  const a = Array.from({ length: FEATURES.length * 2 }, (_, i) => generated('seed', i, 3));
+  expect(a).toEqual(Array.from({ length: FEATURES.length * 2 }, (_, i) => generated('seed', i, 3)));
+  expect(a).not.toEqual(Array.from({ length: FEATURES.length * 2 }, (_, i) => generated('other', i, 3)));
   expect(new Set(a.map(input => input.origin.feature)).size).toBe(FEATURES.length);
   expect(mutated(a[0], 'seed', 0)).toEqual(mutated(a[0], 'seed', 0));
   expect(a.some(input => input.text.includes('finally'))).toBe(true);

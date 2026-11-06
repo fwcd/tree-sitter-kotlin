@@ -9,6 +9,7 @@ const { generated, mutated } = require('./fuzz-generate');
 const { InspectorPool } = require('./fuzz-compare');
 const state = require('./fuzz-state');
 const { BudgetExceeded, remaining } = require('./fuzz-budget');
+const { Coverage } = require('./fuzz-coverage');
 const TRACKED_BUGS = path.join(__dirname, 'grammar-bugs');
 const ROOT = path.resolve(__dirname, '../..');
 const loadedComparison = state.comparisonIdentity();
@@ -97,6 +98,13 @@ function render(result) {
     `${result.metrics.rejected} discarded; ${result.metrics.matches} normalized matches.`,
     `Stop: ${result.stopReason}; stable valid-input window ${result.stableCount}/${result.stableWindow}.`,
     'Named mismatches need normalizer/AST triage. Grammar entries are PSI-clean native rejections.', ''];
+  if (result.coverage) {
+    const c = result.coverage, v = c.views.all.summary;
+    out.push(`Coverage: ${v.nativeTypes}/${v.nativeTotal} named native types; ` +
+      `${v.psiComposites}/${v.psiCompositeTotal} PSI composites; ${v.psiTokens}/${v.psiTokenTotal} PSI lexer types; ` +
+      `${v.nativePairs} native and ${v.psiPairs} PSI parent-child contexts.`,
+      'Intended/observed sets, frequencies, native-clean view and non-emitted entries: coverage.json.', '');
+  }
   for (const bucket of result.buckets) {
     out.push(`## ${bucket.kind}: ${bucket.id} (${bucket.count} files)`, '',
       '`' + JSON.stringify(bucket.signature).replace(/`/g, 'ˋ') + '`', '',
@@ -127,10 +135,10 @@ async function runPrepared(options, inputs) {
     : await require('./main').prepareGrammar({ home: path.join(ROOT, 'local/psi-fuzz-cache'),
       base: options.base, upstream: options.upstream, upstreamBranch: options.upstreamBranch });
   const started = Date.now(), deadline = started + options.maxSeconds * 1000;
-  const context = state.identity(prepared), ledgerValidation = [], buckets = new Map();
+  const context = state.identity(prepared), ledgerValidation = [], buckets = new Map(), coverage = new Coverage();
   const metrics = { attempted: 0, accepted: 0, rejected: 0, matches: 0, grammarInputs: 0 };
   const minOptions = { candidates: options.minCandidates, rounds: options.minRounds, seconds: options.minSeconds, deadline };
-  let inspector, existingLedger = [], stableCount = 0, generatedIndex = 0, stopReason = 'input-budget';
+  let inspector, existingLedger = [], stableCount = 0, generatedIndex = 0, mixedIndex = 0, stopReason = 'input-budget';
   const verifyContext = () => {
     if (state.identity(prepared) !== context || state.comparisonIdentity() !== loadedComparison)
       throw new Error('Grammar/comparison changed during fuzzing; rerun with the same seed');
@@ -148,10 +156,12 @@ async function runPrepared(options, inputs) {
   };
   const next = () => {
     if (metrics.attempted < inputs.length) return inputs[metrics.attempted];
-    const index = generatedIndex++;
-    return inputs.length && index % 3 === 0
-      ? mutated(inputs[Math.floor(index / 3) % inputs.length], options.seed, index)
-      : generated(options.seed, index, options.depth);
+    const turn = mixedIndex++;
+    if (inputs.length && turn % 3 === 0)
+      return mutated(inputs[Math.floor(turn / 3) % inputs.length], options.seed, turn);
+    const input = generated(options.seed, generatedIndex++, options.depth, coverage);
+    coverage.target(input.origin);
+    return input;
   };
   let timedOut = false;
   try {
@@ -185,6 +195,7 @@ async function runPrepared(options, inputs) {
         const result = results[i], input = batch[i];
         if (!result.accepted) { metrics.rejected++; continue; }
         metrics.accepted++;
+        coverage.add(result, input.origin);
         if (!result.classes.length) metrics.matches++;
         let novel = false;
         if (result.grammarError) metrics.grammarInputs++;
@@ -220,6 +231,7 @@ async function runPrepared(options, inputs) {
           count: b.count, originalBytes: b.originalBytes, text: b.text, reproduced: b.reproduced || false,
           timeBoundReached: b.timeBoundReached })),
       }, null, 2) + '\n');
+      coverage.write(options.out);
       process.stderr.write(`${metrics.attempted} attempts; ${metrics.accepted} valid; ${buckets.size} clusters\n`);
       if (stableCount >= options.stableWindow) { stopReason = 'stable-window'; break; }
     }
@@ -236,9 +248,10 @@ async function runPrepared(options, inputs) {
   const partial = timedOut || pending > 0 || ledgerValidation.length !== existingLedger.length;
   const result = { schemaVersion: 1, partial, exitCode: partial ? 2 : 0, seed: options.seed, context,
     grammar: prepared.revision, stableWindow: options.stableWindow, stableCount, stopReason, metrics,
-    ledgerValidation, seconds: (Date.now() - started) / 1000,
+    ledgerValidation, coverage: coverage.snapshot(), seconds: (Date.now() - started) / 1000,
     buckets: [...buckets.values()].sort((a, b) => b.count - a.count || a.id.localeCompare(b.id)) };
   fs.writeFileSync(path.join(options.out, 'buckets.json'), JSON.stringify(result, null, 2) + '\n');
+  coverage.write(options.out);
   fs.writeFileSync(path.join(options.out, 'report.md'), render(result));
   console.log(JSON.stringify({ out: options.out, pendingRepresentatives: pending, ...metrics,
     clusters: result.buckets.length, stopReason, seconds: result.seconds }));

@@ -54,6 +54,17 @@ try {
     fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node'));
 } catch {}
 describe.skipIf(!available)('actual native rejection and continuous controls', () => {
+  it('can inspect new inputs after a representative-level oracle deadline expires', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-budget-'));
+    const inspector = new InspectorPool({ grammar: ROOT, runtime: ROOT, out: dir });
+    try {
+      await inspector.inspect([{ text: 'val x=1\n', extension: '.kt' }]);
+      const input = { text: 'fun f(x:Any?) = listOf(x,x,x,x)\n'.repeat(2000), extension: '.kt' };
+      await expect(inspector.inspect([input], { deadline: Date.now() + 50 })).rejects.toBeInstanceOf(BudgetExceeded);
+      const [result] = await inspector.inspect([{ text: 'val x=1\n', extension: '.kt' }]);
+      expect(result.accepted).toBe(true);
+    } finally { inspector.close(); fs.rmSync(dir, { recursive: true }); }
+  }, 30000);
   it('stores control characters as reviewable JSON without changing the parsed input', async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-budget-'));
     const inspector = new InspectorPool({ grammar: ROOT, runtime: ROOT, out: dir });

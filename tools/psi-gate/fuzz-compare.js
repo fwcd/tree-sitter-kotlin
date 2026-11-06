@@ -9,6 +9,7 @@ const { parsePsi } = require('../cross-validation/parser-psi');
 const { normalizePsi } = require('../cross-validation/normalizer');
 const { sha256, confined } = require('../safety');
 const { BudgetExceeded, remaining } = require('./fuzz-budget');
+const { observe } = require('./fuzz-coverage');
 
 function shape(node) {
   if (!node) return null;
@@ -40,9 +41,16 @@ class Inspector {
     this.parseTimeoutMs = parseTimeoutMs;
     this.parser = loadParsers([{ label: 'main', root: grammar }], runtime, parseTimeoutMs)[0].parser;
     this.server = new OracleServer();
+    this.restartAfterBudget = false;
   }
   async inspect(inputs, { deadline = Infinity } = {}) {
     remaining(deadline);
+    if (this.restartAfterBudget) {
+      this.server.close();
+      this.server = new OracleServer();
+      this.restartAfterBudget = false;
+      remaining(deadline);
+    }
     const root = fs.mkdtempSync(path.join(this.out, '.batch-'));
     try {
       const names = inputs.map((input, i) => {
@@ -94,7 +102,7 @@ class Inspector {
           const unique = new Map(classes.map(signature => [signatureId(signature), signature]));
           remaining(deadline);
           return {
-            accepted: true, text, classes: [...unique].map(([id, signature]) => ({ id, signature })),
+            accepted: true, text, nativeRejected: tree.rootNode.hasError, coverage: observe(tree.rootNode, dump), classes: [...unique].map(([id, signature]) => ({ id, signature })),
             grammarError: Boolean(grammarDefect), grammarDefect,
             spanEvidence: lostQuest.length ? { psi: lostQuest, native: emptyQuest } : null,
             expectedPsi: layout.composites.map(node => [node.type, node.depth]), psiDump: dump, expectedNormalized: shape(comparison.psiNorm),
@@ -104,7 +112,10 @@ class Inspector {
         } finally { tree.delete?.(); }
       });
     } catch (error) {
-      if (Date.now() >= deadline) throw new BudgetExceeded();
+      if (Date.now() >= deadline) {
+        this.restartAfterBudget = Boolean(this.server.failure);
+        throw new BudgetExceeded();
+      }
       throw error;
     } finally {
       fs.rmSync(root, { recursive: true });
