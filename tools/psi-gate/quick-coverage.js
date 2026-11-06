@@ -9,6 +9,12 @@ const expected = require('./expectations');
 const {observe, Coverage} = require('./fuzz-coverage');
 const {confined, sha256} = require('../safety');
 const ROOT = path.resolve(__dirname, '../..');
+const grammarBlocked = {
+  COMPANION_BLOCK: 'coverage-companion-block',
+  CONTRACT_EFFECT: 'coverage-contract-v2',
+  CONTRACT_EFFECT_LIST: 'coverage-contract-v2',
+  contract: 'coverage-contract-v2',
+};
 
 async function measure({root = ROOT, config = require('./config').loadConfig(),
   out = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-quick-coverage-')), timeoutMs = 120000} = {}) {
@@ -41,9 +47,15 @@ async function measure({root = ROOT, config = require('./config').loadConfig(),
     } finally { tree.delete?.(); }
   }
   const result = {...coverage.snapshot(), oracle: expected.oracleIdentity(config), sources: rows};
+  result.notYetCoverable = ['psiComposites', 'psiTokens'].flatMap(universe =>
+    result.views.all.missing[universe].filter(type => Object.hasOwn(grammarBlocked, type)).map(type => ({
+      universe, type, ledgerId: grammarBlocked[type],
+      reason: `not yet coverable — blocked by grammar defects ${grammarBlocked[type]}`,
+    })));
   fs.writeFileSync(path.join(out, 'coverage.json'), JSON.stringify(result, null, 2) + '\n');
   const s = result.views.all.summary;
   console.log(`quick coverage (${files.length} must-match snippets): native ${s.nativeTypes}/${s.nativeTotal}, PSI composites ${s.psiComposites}/${s.psiCompositeTotal}, lexer ${s.psiTokens}/${s.psiTokenTotal}`);
+  for (const gap of result.notYetCoverable) console.log(`  ${gap.type}: ${gap.reason}`);
   console.log(`Report: ${path.join(out, 'coverage.json')}`);
   return result;
 }

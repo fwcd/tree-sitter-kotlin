@@ -20,12 +20,21 @@ round-2 curation measures:
 | Native parent/child contexts | 181 | 351 |
 | PSI parent/child contexts | 312 | 612 |
 
-The three missing PSI composites are `COMPANION_BLOCK`, `CONTRACT_EFFECT` and
-`CONTRACT_EFFECT_LIST`; the missing lexer type is `contract`. Their PSI-valid witnesses
-currently fail native parsing (ledger `coverage-companion-block` and `coverage-contract-v2`).
-They remain grammar bugs outside this must-match corpus. The denominators retain them;
-this is complete native-type coverage, with those explicit PSI gaps. Type presence does
-not prove every possible syntax combination or context.
+These four types are explicitly reported as blocked:
+
+| Type | Universe | Coverage status |
+| --- | --- | --- |
+| `COMPANION_BLOCK` | PSI composite | not yet coverable — blocked by grammar defects `coverage-companion-block` |
+| `CONTRACT_EFFECT` | PSI composite | not yet coverable — blocked by grammar defects `coverage-contract-v2` |
+| `CONTRACT_EFFECT_LIST` | PSI composite | not yet coverable — blocked by grammar defects `coverage-contract-v2` |
+| `contract` | PSI lexer | not yet coverable — blocked by grammar defects `coverage-contract-v2` |
+
+Both defects have minimized PSI-clean cases in the [grammar-bug ledger](../grammar-bugs/catalog-ledger.json):
+[companion block](../grammar-bugs/coverage-companion-block.kt) and
+[contract-v2](../grammar-bugs/coverage-contract-v2.kt). They currently fail native parsing
+and remain outside this must-match corpus. The denominators retain them; this is complete
+native-type coverage, with those explicit PSI gaps. Type presence does not prove every
+possible syntax combination or context.
 
 The `syntax-*` examples cover:
 
@@ -47,7 +56,9 @@ node tools/psi-gate/quick-coverage.js --out local/psi-gate/quick-coverage
 
 The command reads indexed sources/current bytes, verifies stored references against live PSI,
 requires every input to match, and writes `coverage.json` with frequencies, missing sets,
-parent contexts and per-source witnesses using `fuzz-coverage.js`. Quick itself needs no Java.
+parent contexts and per-source witnesses using `fuzz-coverage.js`. The report's
+`notYetCoverable` entries and console output list the blocked types with their ledger IDs;
+they are reported only while missing. Quick itself needs no Java.
 
 ## Stored expectations
 
