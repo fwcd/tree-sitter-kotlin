@@ -78,8 +78,7 @@ it('adds one selected matching case, stages source/reference and leaves quick gr
   try {
     result = await add.run({file: source, root, config});
     const text = output.mock.calls.flat().join('\n');
-    expect(text).toContain('Added: ' + result.file);
-    expect(text).toContain('PSI expectation: ' + result.expectation);
+    expect(text.split('\n')).toEqual([result.file,result.expectation]);
     const guidance = progress.mock.calls.flat().join('\n');
     expect(guidance).toContain('Both files are staged.');
     expect(guidance).toContain('regenerate-expectations');

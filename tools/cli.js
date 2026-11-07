@@ -17,7 +17,8 @@ function runIfMain(entry, main, {setupExitCode = EXIT.SETUP, command} = {}) {
   const fail = (error) => {
     console.error(
       isResourceError(error) ? resourceMessage(error.command || command || process.argv[2] || 'PSI check', error) :
-      process.env.PSI_DEBUG === '1' ? error.stack || error.message : error.message || String(error),
+      process.env.PSI_DEBUG === '1' ? error.stack || error.message :
+      `${error.command || command || process.argv[2] || 'PSI command'}: ${exitCodeFor(error, setupExitCode) === EXIT.MISMATCH ? 'MISMATCH' : 'ERROR'}: ${error.message || String(error)}`,
     );
     process.exitCode = exitCodeFor(error, setupExitCode);
   };
