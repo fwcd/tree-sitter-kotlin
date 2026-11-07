@@ -163,7 +163,7 @@ it('saves a discoverable empty partial index when an independent request budget 
     const result=await run({...argumentsOf([]),root:ROOT,out:path.join(dir,'out'),maxInputs:1,maxSeconds:30});
     expect(result).toMatchObject({exitCode:2,partial:true,stopReason:'resource-budget',files:[]});
     expect(fs.existsSync(result.indexPath)).toBe(true);
-    expect(output.mock.calls.flat().join('\n')).toContain(result.indexPath);
+    expect(progress.mock.calls.flat().join('\n')).toContain(result.indexPath);
     expect(progress.mock.calls.flat().join('\n')).toContain('--timeout-ms');
   } finally{spy.mockRestore();output.mockRestore();progress.mockRestore();fs.rmSync(dir,{recursive:true});}
 });

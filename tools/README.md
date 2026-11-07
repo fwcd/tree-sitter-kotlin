@@ -96,13 +96,16 @@ These corpus/search operations are maintained by their dedicated modules.
     npm run psi-gate -- fuzz --seed trial --max-inputs 400 --max-seconds 120
 
 Search defaults to a new OS temporary folder; `--out DIR` selects an owned,
-untracked output. Stdout lists suspect Kotlin paths. `index.json` records ordered
+untracked output. Stdout contains only bare suspect Kotlin file paths, suitable
+for `node tools/psi-gate/main.js fuzz ... | xargs -r ls`. `index.json` records ordered
 paths/sidecars, seed, budgets, completeness and pending/suppressed known cases.
 Every run prints a final tried/PSI-valid/suspect count, budget stop reason, output
-directory and index path, including empty and partial searches. Preparation and
-ten-second progress updates and final summaries go to stderr; paths go to stdout.
-Detailed coverage lives in `coverage.json`, referenced by the index's
-`coverageRef`; the index retains only coverage summary counts.
+directory and index path on stderr, including empty and partial searches.
+Preparation and ten-second progress updates also go to stderr.
+`coverage.json`, referenced by the index's `coverageRef`, stores compact counts,
+missing types and per-view summaries by default. Frequency/context tables are
+kept in the programmatic search result rather than duplicated on disk; the index
+retains only coverage summary counts.
 The full pinned oracle identity is stored once in `index.json`; each sidecar's
 `oracleRef: "index.json#/oracle"` refers to it. Keep the index with the sidecars.
 Each sidecar contains source SHA, provenance, comparison identity,
@@ -134,8 +137,9 @@ to stage both source and expectation. Staging alone does not refresh PSI truth.
 An existing duplicate prints its existing paths; it adds and stages nothing and
 does not give staging advice. Quick remains entirely must-match.
 
-`minimize` reports unchanged completed results as already minimal within its
-reduction limits, prints the index path, and explains the next review/fix/add step.
+`minimize` writes only bare source/sidecar paths to stdout. It reports unchanged
+completed results as already minimal within its reduction limits, prints the
+index path, and explains the next review/fix/add step on stderr.
 Exhausted time budgets consistently exit 2. If no verified reduction was saved,
 the partial index has no entries and no source/sidecar is emitted; increase
 `--max-seconds` and retry. Keep each index with its referenced sidecars.
@@ -217,10 +221,11 @@ and parent-child pairs.
 Generation and mutation have separate counters, so every-third source mutation
 cannot skip declaration families.
 
-Each run writes `coverage.json` alongside clusters: intended and observed type/context
-sets, per-file frequencies, generated/mutated/corpus partitions, native parent
-contexts and a native-clean alternative. Rejected PSI inputs contribute no coverage.
-The full catalogue and explicitly non-emitted entries remain visible; applicability
+Each search writes compact `coverage.json` counts and missing types, including
+generated/mutated/corpus and native-clean summaries. Its programmatic result also
+retains detailed intended/observed sets, frequencies and parent contexts.
+Rejected PSI inputs contribute no coverage. The full catalogue and explicitly
+non-emitted entries remain available in the detailed result; applicability
 never changes because a run failed to hit a type. The pinned file PSI exposes
 `kotlin.FILE` instead of its parser wrapper. Lexer recovery/reserved spellings and
 one KDoc highlighting token are documented in `fuzz-psi-types.json` with reasons.

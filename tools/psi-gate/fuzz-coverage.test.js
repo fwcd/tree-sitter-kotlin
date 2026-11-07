@@ -72,7 +72,10 @@ describe.skipIf(!available)('actual mixed generator coverage', () => {
       expect(result.files.every(item => item.id && fs.existsSync(item.file) && fs.existsSync(item.sidecar))).toBe(true);
       const index = JSON.parse(fs.readFileSync(result.indexPath));
       expect(index).not.toHaveProperty('coverage');
-      expect(JSON.parse(fs.readFileSync(path.join(result.out, index.coverageRef)))).toEqual(result.coverage);
+      const compact = JSON.parse(fs.readFileSync(path.join(result.out, index.coverageRef)));
+      expect(compact.views.generated.summary).toEqual(result.coverage.views.generated.summary);
+      expect(compact.missing).toEqual(result.coverage.views.all.missing);
+      expect(compact.views.generated).not.toHaveProperty('nativeTypes');
     } finally { fs.rmSync(dir, { recursive: true }); }
   }, 120000);
 });

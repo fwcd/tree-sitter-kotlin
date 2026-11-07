@@ -27,7 +27,7 @@ async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 
     const [original] = await inspector.inspect([input], {deadline});
     remaining(deadline);
     if (!original.accepted) throw Error('Input is PSI-invalid; minimization requires error-free PSI');
-    if (!original.classes.length) { console.log('Input matches PSI; nothing to minimize'); return {exitCode: 0}; }
+    if (!original.classes.length) { console.error('Input matches PSI; nothing to minimize'); return {exitCode: 0}; }
     const selected = classId ? original.classes.find(c => c.id === classId) : original.classes[0];
     if (!selected) throw Error(`Mismatch class is no longer present: ${classId}`);
     const min = await state.minimize(input, selected.id, inspector, {seconds: maxSeconds, deadline});
@@ -40,7 +40,7 @@ async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 
       ? `minimize: already minimal within the reduction limits (${after} bytes)`
       : `minimize: ${before} -> ${after} bytes${min.exhausted ? ' (partial)' : ''}`);
     console.log(entry.file); console.log(entry.sidecar);
-    console.log(`Index: ${indexPath}`);
+    console.error(`Index: ${indexPath}`);
     console.error(min.exhausted ? 'Reduction incomplete: retry with a larger --max-seconds budget.'
       : 'Next: review the mismatch and sidecar, fix it, then use add FILE once it matches PSI.');
     console.error('Keep the index with the source and sidecar for their referenced metadata.');
@@ -50,7 +50,7 @@ async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 
     saveIndex({entries: [], partial: true, stopReason: error instanceof BudgetExceeded ? 'time-budget' : 'resource-budget',
       input: {path: path.resolve(file), sourceSha256: sha256(Buffer.from(input.text))}});
     console.error(resourceMessage('minimize', {...error, message: 'no verified representative saved before exhaustion'}));
-    console.log(`Index: ${indexPath}`);
+    console.error(`Index: ${indexPath}`);
     return {exitCode: 2, partial: true, saved: false, indexPath};
   } finally { inspector.close(); }
 }

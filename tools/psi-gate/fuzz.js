@@ -173,7 +173,11 @@ async function search(options, inputs, progress) {
   partial ||= pending.length > 0;
   progress.phase = 'saving artifacts';
   const coverageResult = coverage.snapshot();
-  fs.writeFileSync(path.join(options.out, 'coverage.json'), JSON.stringify(coverageResult, null, 2) + '\n');
+  const compactCoverage = {schemaVersion: coverageResult.schemaVersion, compiler: coverageResult.compiler,
+    files: coverageResult.files, nativeRejected: coverageResult.nativeRejected,
+    generatedFeatures: coverageResult.generatedFeatures, missing: coverageResult.views.all.missing,
+    views: Object.fromEntries(Object.entries(coverageResult.views).map(([name, view]) => [name, {summary: view.summary}]))};
+  fs.writeFileSync(path.join(options.out, 'coverage.json'), JSON.stringify(compactCoverage, null, 2) + '\n');
   const index = {schemaVersion: 1, seed: options.seed, context, oracle, syntaxNote: findings.syntaxNote,
     stopReason, partial, exitCode: partial ? 2 : 0, ...(resource ? {resource} : {}),
     metrics, budgets: {maxInputs: Number.isFinite(options.maxInputs) ? options.maxInputs : null, maxSeconds: options.maxSeconds,
@@ -185,8 +189,8 @@ async function search(options, inputs, progress) {
   const seconds = (Date.now() - started) / 1000, indexPath = path.resolve(options.out, 'index.json');
   const limit = Number.isFinite(options.maxInputs) ? options.maxInputs : 'unlimited';
   console.error(`fuzz: ${partial ? 'partial' : 'complete'}; ${metrics.attempted} inputs tried (limit ${limit}), ${metrics.accepted} PSI-valid, ${index.files.length} suspects; stop ${stopReason}; ${seconds.toFixed(1)}/${options.maxSeconds}s time budget`);
-  console.log(`Output: ${path.resolve(options.out)}`);
-  console.log(`Index: ${indexPath}`);
+  console.error(`Output: ${path.resolve(options.out)}`);
+  console.error(`Index: ${indexPath}`);
   if (resource) console.error(resourceMessage('fuzz', resource));
   else if (partial) console.error('Search incomplete: inspect pending classes in the index and retry with larger time or reduction budgets.');
   return {...index, out: options.out, indexPath, seconds, coverage: coverageResult};

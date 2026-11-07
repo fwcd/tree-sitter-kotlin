@@ -10,6 +10,7 @@ const {runOracleAsync} = require('../psi-oracle/oracle');
 const expected = require('./expectations');
 const {inventory, CORPUS} = require('./quick');
 const {createParser} = require('./runtime');
+const {resourceError} = require('../resource');
 const ROOT = path.resolve(__dirname, '../..');
 function printAdmission(file, expectation, duplicate) {
   console.log(`${duplicate ? 'Already in corpus' : 'Added'}: ${file}`);
@@ -22,7 +23,16 @@ function printAdmission(file, expectation, duplicate) {
   console.error(`  git add -- ${quote(file)} ${quote(expectation)}`);
 }
 
-async function run({file, root = ROOT, config = loadConfig(), timeoutMs = 120000, parseTimeoutMs = 10000}) {
+function compareForAdmission(options) {
+  try {return expected.compare(options);}
+  catch (error) {
+    if (error.message === 'Native quick parse timed out')
+      throw resourceError(`Native admission parse timed out (limit ${options.timeoutMs} ms)`, 'PSI_NATIVE_TIMEOUT');
+    throw error;
+  }
+}
+
+async function run({file, root = ROOT, config = loadConfig(), oracleTimeoutMs = 120000, parseTimeoutMs = 10000}) {
   if (!file || !['.kt', '.kts'].includes(path.extname(file))) throw Error('add requires a Kotlin snippet file');
   const bytes = fs.readFileSync(file);
   if (!bytes.length || bytes.length > 1000) throw Error('add expects a nonempty minimized snippet of at most 1000 bytes');
@@ -39,13 +49,13 @@ async function run({file, root = ROOT, config = loadConfig(), timeoutMs = 120000
   try {
     fs.writeFileSync(input, bytes);
     const out = path.join(stage, 'psi');
-    const refs = await runOracleAsync([path.basename(relative)], {root: stage, out, config, timeoutMs});
+    const refs = await runOracleAsync([path.basename(relative)], {root: stage, out, config, timeoutMs: oracleTimeoutMs});
     if (refs.length !== 1 || refs[0].path !== path.basename(relative)) throw Error('Incomplete add PSI re-verification');
     const dump = fs.readFileSync(confined(out, refs[0].dump), 'utf8');
     const reference = expected.make({relative, bytes, dump, psi: refs[0], config,
       origin: {kind: 'selected-finding', sourceSha256, ...(finding ? {seed: finding.seed, signatures: finding.signatures} : {})}});
     const parser = createParser(root, parseTimeoutMs);
-    const result = expected.compare({text: expected.textOf(bytes), parser, expected: reference, timeoutMs: parseTimeoutMs});
+    const result = compareForAdmission({text: expected.textOf(bytes), parser, expected: reference, timeoutMs: parseTimeoutMs});
     if (result.verdict !== 'ok') throw Error('Snippet still differs from PSI; fix it or retain it in the grammar-bug ledger');
     if (sha256(fs.readFileSync(file)) !== sourceSha256) throw Error('Suspect source changed during re-verification');
     const existing = inventory(root);
@@ -53,7 +63,7 @@ async function run({file, root = ROOT, config = loadConfig(), timeoutMs = 120000
       const content = fs.readFileSync(confined(root, candidate));
       if (path.extname(candidate) !== extension || sha256(content) !== sourceSha256) continue;
       const stored = expected.read({root, relative: candidate, config, indexed: existing.indexed, bytes: content});
-      if (expected.compare({text: expected.textOf(content), parser, expected: stored, timeoutMs: parseTimeoutMs}).verdict !== 'ok')
+      if (compareForAdmission({text: expected.textOf(content), parser, expected: stored, timeoutMs: parseTimeoutMs}).verdict !== 'ok')
         throw Error('Existing corpus duplicate is not a valid must-match assertion');
       const expectation = expected.filename(candidate);
       printAdmission(candidate, expectation, true);
