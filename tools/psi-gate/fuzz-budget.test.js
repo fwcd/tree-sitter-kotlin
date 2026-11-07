@@ -142,3 +142,14 @@ describe.skipIf(!available)('actual native rejection and continuous controls', (
     } finally { fs.rmSync(dir, { recursive: true }); }
   }, 30000);
 });
+
+it('distinguishes a deadline-clipped oracle timer from the independent oracle timeout', async () => {
+  const {OracleServer}=require('../psi-oracle/oracle');
+  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'psi-clipped-budget-'));
+  const failed=vi.spyOn(OracleServer.prototype,'run').mockRejectedValue(new Error('PSI oracle timed out'));
+  const inspector=new InspectorPool({grammar:ROOT,runtime:ROOT,out:directory,timeoutMs:1000});
+  try {
+    await expect(inspector.inspect([{text:'val x=1',extension:'.kt'}],{deadline:Date.now()+50})).rejects.toBeInstanceOf(BudgetExceeded);
+    await expect(inspector.inspect([{text:'val x=1',extension:'.kt'}],{deadline:Date.now()+10000})).rejects.toThrow('PSI oracle timed out');
+  } finally {failed.mockRestore();inspector.close();fs.rmSync(directory,{recursive:true});}
+});

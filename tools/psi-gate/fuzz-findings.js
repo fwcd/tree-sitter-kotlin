@@ -4,6 +4,7 @@ const path = require('path');
 const {sha256, confined} = require('../safety');
 const state = require('./fuzz-state');
 const {inventory} = require('./quick');
+const syntaxNote = 'PSI-valid syntax does not imply compilable Kotlin. Minimization may leave unresolved names, type errors or unusual valid constructs; compilation and type checking were not run.';
 
 function observation(result) {
   return sha256(JSON.stringify([sha256(Buffer.from(result.text)), result.classes.map(c => c.signature), result.expectedPsi,
@@ -27,7 +28,16 @@ function knownInputs(root, directory) {
   if (root) for (const relative of inventory(root).files)
     entries.push({id: 'corpus:' + relative, mustMatch: true, input: {text: fs.readFileSync(confined(root, relative), 'utf8'),
       extension: path.extname(relative)}});
-  return entries;
+  const grouped = new Map();
+  for (const entry of entries) {
+    const key = sha256(Buffer.from(entry.input.text)) + ':' + entry.input.extension;
+    let group = grouped.get(key);
+    if (!group) {group = {...entry, ids: []}; grouped.set(key, group);}
+    group.ids.push(entry.id);
+    // A retained must-match case takes precedence over a historical bug alias.
+    group.mustMatch ||= entry.mustMatch;
+  }
+  return [...grouped.values()];
 }
 function record({out, seed, context, bucket, min, knownMatch}) {
   const result = min.result, source = Buffer.from(min.text), id = observation(result).slice(0, 24);
@@ -37,7 +47,7 @@ function record({out, seed, context, bucket, min, knownMatch}) {
     provenance: bucket.input.origin, originalBytes: bucket.originalBytes, extension,
     context, oracleRef: 'index.json#/oracle', reduction: {complete: !min.exhausted, bytes: source.length}, reverified: true,
     psiErrors: 0, compilationChecked: false,
-    note: 'PSI-valid syntax does not imply compilable Kotlin. Minimization may leave unresolved names, type errors or unusual valid constructs; compilation and type checking were not run.',
+    noteRef: 'index.json#/syntaxNote',
     nativeErrors: result.nativeRejected, psiNormalized: result.expectedNormalized,
     nativeNormalized: result.actualNormalized, nativeTree: result.nativeTree,
     diff: result.differences, layoutDiff: result.layoutDifferences || [], signatures: result.classes,
@@ -47,4 +57,4 @@ function record({out, seed, context, bucket, min, knownMatch}) {
   fs.writeFileSync(path.join(out, sidecar), JSON.stringify(evidence, null, 2) + '\n');
   return {id, file: path.resolve(target), sidecar: path.resolve(out, sidecar), sourceSha256: evidence.sourceSha256};
 }
-module.exports = {observation, knownInputs, record};
+module.exports = {observation, knownInputs, record, syntaxNote};

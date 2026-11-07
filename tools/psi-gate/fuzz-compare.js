@@ -55,6 +55,7 @@ class Inspector {
       remaining(deadline);
     }
     const root = fs.mkdtempSync(path.join(this.out, '.batch-'));
+    let oracleBudgetLimited = false;
     try {
       const names = inputs.map((input, i) => {
         remaining(deadline);
@@ -64,8 +65,10 @@ class Inspector {
         return name;
       });
       const output = path.join(root, 'psi');
+      const available = remaining(deadline);
+      oracleBudgetLimited = available <= this.timeoutMs;
       const entries = await this.server.run(names, {
-        root, out: output, timeoutMs: Math.min(this.timeoutMs, remaining(deadline)),
+        root, out: output, timeoutMs: Math.min(this.timeoutMs, available),
       });
       remaining(deadline);
       if (entries.length !== inputs.length) throw new Error('Incomplete fuzz oracle index');
@@ -118,7 +121,8 @@ class Inspector {
         } finally { tree.delete?.(); }
       });
     } catch (error) {
-      if (Date.now() >= deadline) {
+      // A clipped request timer can fire just before the wall-clock deadline.
+      if (Date.now() >= deadline || (oracleBudgetLimited && error.message === 'PSI oracle timed out')) {
         this.restartAfterBudget = Boolean(this.server.failure);
         throw new BudgetExceeded();
       }

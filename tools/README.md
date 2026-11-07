@@ -98,6 +98,11 @@ These corpus/search operations are maintained by their dedicated modules.
 Search defaults to a new OS temporary folder; `--out DIR` selects an owned,
 untracked output. Stdout lists suspect Kotlin paths. `index.json` records ordered
 paths/sidecars, seed, budgets, completeness and pending/suppressed known cases.
+Every run prints a final tried/PSI-valid/suspect count, budget stop reason, output
+directory and index path, including empty and partial searches. Preparation and
+ten-second progress updates and final summaries go to stderr; paths go to stdout.
+Detailed coverage lives in `coverage.json`, referenced by the index's
+`coverageRef`; the index retains only coverage summary counts.
 The full pinned oracle identity is stored once in `index.json`; each sidecar's
 `oracleRef: "index.json#/oracle"` refers to it. Keep the index with the sidecars.
 Each sidecar contains source SHA, provenance, comparison identity,
@@ -109,7 +114,8 @@ corpus case is never treated as a known-bug waiver.
 PSI syntax validity does not imply compilable or well-typed Kotlin. Minimized
 sources can have unresolved names, type errors or unusual valid constructs such
 as `fun()=if(flag)else 2`. Compilation and type checking are not run; sidecars
-record `compilationChecked: false` and explain this distinction for the follow-up.
+record `compilationChecked: false` and `noteRef: "index.json#/syntaxNote"`.
+The explanation is stored once in the index, shared by search and minimize output.
 
 A separate per-file follow-up decides whether a suspect is a grammar bug,
 requires normalization work, should be discarded, or is fixed and worth keeping.
@@ -121,10 +127,18 @@ add operation. To admit a selected, fixed example:
 `add` re-verifies current grammar/live pinned PSI, requires a full named-tree and
 source-fact match, checks sidecar/source integrity, dedupes and stages the chosen
 source plus stored PSI expectation. It never commits or imports a still-failing
-case into quick. It prints both paths and confirms the new pair is staged. After
-reviewing or editing the pair, use the printed `git add` command to stage both
-source and expectation together. An existing duplicate prints both existing paths
-and the same reminder. Quick remains entirely must-match.
+case into quick. It prints both paths and confirms the new pair is staged. Review
+it before committing. After editing the source, run `regenerate-expectations`,
+review the resulting PSI-reference diff, then use the printed `git add` command
+to stage both source and expectation. Staging alone does not refresh PSI truth.
+An existing duplicate prints its existing paths; it adds and stages nothing and
+does not give staging advice. Quick remains entirely must-match.
+
+`minimize` reports unchanged completed results as already minimal within its
+reduction limits, prints the index path, and explains the next review/fix/add step.
+Exhausted time budgets consistently exit 2. If no verified reduction was saved,
+the partial index has no entries and no source/sidecar is emitted; increase
+`--max-seconds` and retry. Keep each index with its referenced sidecars.
 
 ## Validation
 

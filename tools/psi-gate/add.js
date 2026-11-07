@@ -14,10 +14,12 @@ const ROOT = path.resolve(__dirname, '../..');
 function printAdmission(file, expectation, duplicate) {
   console.log(`${duplicate ? 'Already in corpus' : 'Added'}: ${file}`);
   console.log(`PSI expectation: ${expectation}`);
-  if (!duplicate) console.log('Both files are staged.');
-  console.log('After reviewing or editing them, stage both with:');
+  if (duplicate) return;
+  console.error('Both files are staged. Review them before committing.');
+  console.error('After editing the source, refresh its PSI expectation, review the diff, then stage both:');
+  console.error('  npm run psi-gate -- regenerate-expectations');
   const quote = value => "'" + value.replace(/'/g, "'\"'\"'") + "'";
-  console.log(`  git add -- ${quote(file)} ${quote(expectation)}`);
+  console.error(`  git add -- ${quote(file)} ${quote(expectation)}`);
 }
 
 async function run({file, root = ROOT, config = loadConfig(), timeoutMs = 120000, parseTimeoutMs = 10000}) {

@@ -1,8 +1,8 @@
 # Curated must-match corpus
 
 Every indexed `.kt`/`.kts` source here must match its stored `.psi.json` reference.
-The 103 sources combine source-aware catalog/N13–N42 equivalence and role controls with
-36 manually selected language examples. Every source passed live pinned PSI and the native
+The 107 sources combine source-aware catalog/N13–N42 equivalence and role controls with
+40 manually selected language examples. Every source passed live pinned PSI and the native
 grammar before admission. Expectation `origin` records the original test/case or manual
 feature and reviewed revision. The identical empty-IF/braced-IF source is stored once,
 with both test origins retained. Failing cases remain in `../grammar-bugs/`.
@@ -12,13 +12,13 @@ with both test origins retained. Failing cases remain in `../grammar-bugs/`.
 Coverage uses raw native named types and raw PSI elements, before normalization. The
 round-2 curation measures:
 
-| Universe | Original 68 sources | Curated 103 sources |
+| Universe | Original 68 sources | Curated 107 sources |
 | --- | ---: | ---: |
 | Native named types | 80 / 145 | **145 / 145** |
 | Applicable PSI composites | 76 / 124 | **121 / 124** |
 | Applicable PSI lexer types | 59 / 150 | **149 / 150** |
-| Native parent/child contexts | 181 | 351 |
-| PSI parent/child contexts | 312 | 612 |
+| Native parent/child contexts | 181 | 361 |
+| PSI parent/child contexts | 312 | 626 |
 
 These four types are explicitly reported as blocked:
 
@@ -38,7 +38,9 @@ possible syntax combination or context.
 
 The `syntax-*` examples cover:
 
-- `.kts` shebangs and script initializers; package/import aliases and file/use-site annotations.
+- Five `.kts` files cover shebangs, script declarations/imports, annotations and
+  delegation, top-level loops/comment boundaries, and Gradle-style
+  plugins/dependencies/task blocks; package/import aliases and file/use-site annotations.
 - Objects, companions, enums and enum initializers, inheritance/super, type aliases,
   accessors, delegates, backing fields, named/positional destructuring and modifier families.
 - Generic variance/reification/constraints, nullable and parenthesized intersection types,

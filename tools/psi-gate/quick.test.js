@@ -12,7 +12,7 @@ const ROOT = path.resolve(import.meta.dirname, '../..');
 const relative = 'tools/psi-gate/corpus/catalog-constructor.kt';
 const fixture = JSON.parse(fs.readFileSync(path.join(ROOT, expectations.filename(relative)), 'utf8'));
 const config = {psi: fixture.oracle};
-let directory, parser, broken, brokenFloat;
+let directory, parser, broken, brokenFloat, brokenScript;
 const git = (root, ...args) => execFileSync('git', ['-C', root, ...args], {stdio: ['ignore', 'pipe', 'pipe']});
 function repository(selected = relative) {
   const root = fs.mkdtempSync(path.join(directory, 'repo-')); git(root, 'init', '--quiet');
@@ -25,7 +25,7 @@ beforeAll(() => {
   const setup = require('./test-prerequisites').variantBuild(ROOT);
   if (setup.missing.length) throw Error('Quick regression build prerequisites: ' + setup.missing.join(', '));
   const variants = [];
-  for (const type of ['class_declaration', 'real_literal']) {
+  for (const type of ['class_declaration', 'real_literal', 'shebang_line']) {
     const root = path.join(directory, 'hidden-' + type); fs.mkdirSync(root);
     for (const name of ['src', 'bindings']) fs.cpSync(path.join(ROOT, name), path.join(root, name), {recursive: true});
     for (const name of ['package.json', 'binding.gyp']) fs.copyFileSync(path.join(ROOT, name), path.join(root, name));
@@ -40,7 +40,7 @@ beforeAll(() => {
     const Parser = require('tree-sitter'), variant = new Parser();
     variant.setLanguage(require(path.join(root, 'bindings/node'))); variants.push(variant);
   }
-  [broken, brokenFloat] = variants;
+  [broken, brokenFloat, brokenScript] = variants;
 }, 180000);
 afterAll(() => { if (directory) fs.rmSync(directory, {recursive: true}); });
 
@@ -88,6 +88,13 @@ it('rejects a real rebuilt float-literal regression and prints its file, differe
     expect(text).toContain(selected); expect(text).toContain(quick.failureReason(result.rows[0]));
     expect(text).toContain(result.reportPath);
   } finally { diagnostic.mockRestore(); output.mockRestore(); }
+});
+it('rejects a rebuilt grammar that drops the script shebang from a .kts input', async () => {
+  const root = repository(quick.CORPUS + '/syntax-script.kts');
+  expect((await quick.run({root, config, parser, home: path.join(root, 'report')})).exitCode).toBe(0);
+  const result = await quick.run({root, config, parser: brokenScript, home: path.join(root, 'report')});
+  expect(result.exitCode).toBe(1); expect(result.rows[0].verdict).toBe('C');
+  expect(result.rows[0].layoutDifferences.some(d => d.key.includes('comment'))).toBe(true);
 });
 it('runs with invalid Java paths and does not load the oracle or downloader', () => {
   const root = repository(), program = `

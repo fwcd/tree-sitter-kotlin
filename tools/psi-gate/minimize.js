@@ -9,7 +9,7 @@ const state = require('./fuzz-state');
 const findings = require('./fuzz-findings');
 const {oracleIdentity} = require('./expectations');
 const {sha256} = require('../safety');
-const {remaining} = require('./fuzz-budget');
+const {BudgetExceeded, remaining} = require('./fuzz-budget');
 const {isResourceError, resourceMessage} = require('../resource');
 const ROOT = path.resolve(__dirname, '../..');
 async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 30, classId}) {
@@ -18,6 +18,9 @@ async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 
   const input = {text: fs.readFileSync(file, 'utf8'), extension, origin: {file: path.resolve(file)}};
   createParser(); await fetchAll({config});
   const out = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-minimized-'));
+  const oracle = oracleIdentity(config), indexPath = path.join(out, 'index.json');
+  const saveIndex = value => fs.writeFileSync(indexPath, JSON.stringify({schemaVersion: 1, oracle,
+    syntaxNote: findings.syntaxNote, ...value}, null, 2) + '\n');
   const inspector = new InspectorPool({grammar: ROOT, runtime: ROOT, config: {config}, out, timeoutMs: oracleTimeoutMs, parseTimeoutMs});
   try {
     const deadline = Date.now() + maxSeconds * 1000;
@@ -28,19 +31,27 @@ async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 
     const selected = classId ? original.classes.find(c => c.id === classId) : original.classes[0];
     if (!selected) throw Error(`Mismatch class is no longer present: ${classId}`);
     const min = await state.minimize(input, selected.id, inspector, {seconds: maxSeconds, deadline});
-    if (min.exhausted) console.error('minimize: reduction budget exhausted; verified best-so-far saved. Retry with a larger --max-seconds.');
-    const oracle = oracleIdentity(config);
     const context = sha256(JSON.stringify([state.identity({grammar: ROOT, runtime: ROOT}), oracle]));
     const entry = findings.record({out, seed: 'per-file', context,
       bucket: {input, originalBytes: Buffer.byteLength(input.text)}, min, knownMatch: false});
-    fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify({schemaVersion: 1, oracle, entries: [entry]}, null, 2) + '\n');
-    console.log(`minimize: ${Buffer.byteLength(input.text)} -> ${Buffer.byteLength(min.text)} bytes${min.exhausted ? ' (partial)' : ''}`);
+    saveIndex({entries: [entry], partial: min.exhausted});
+    const before = Buffer.byteLength(input.text), after = Buffer.byteLength(min.text);
+    console.error(!min.exhausted && before === after
+      ? `minimize: already minimal within the reduction limits (${after} bytes)`
+      : `minimize: ${before} -> ${after} bytes${min.exhausted ? ' (partial)' : ''}`);
     console.log(entry.file); console.log(entry.sidecar);
-    return {exitCode: min.exhausted ? 2 : 0, ...entry};
+    console.log(`Index: ${indexPath}`);
+    console.error(min.exhausted ? 'Reduction incomplete: retry with a larger --max-seconds budget.'
+      : 'Next: review the mismatch and sidecar, fix it, then use add FILE once it matches PSI.');
+    console.error('Keep the index with the source and sidecar for their referenced metadata.');
+    return {exitCode: min.exhausted ? 2 : 0, ...entry, indexPath, partial: min.exhausted};
   } catch (error) {
     if (!isResourceError(error)) throw error;
+    saveIndex({entries: [], partial: true, stopReason: error instanceof BudgetExceeded ? 'time-budget' : 'resource-budget',
+      input: {path: path.resolve(file), sourceSha256: sha256(Buffer.from(input.text))}});
     console.error(resourceMessage('minimize', {...error, message: 'no verified representative saved before exhaustion'}));
-    return {exitCode: 2, partial: true, saved: false};
+    console.log(`Index: ${indexPath}`);
+    return {exitCode: 2, partial: true, indexPath};
   } finally { inspector.close(); }
 }
 module.exports = {run};

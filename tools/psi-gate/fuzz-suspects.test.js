@@ -45,7 +45,9 @@ it('emits reverified suspect paths/sidecars/index for a real broken grammar with
     const [file, pointer] = sidecar.oracleRef.split('#');
     expect(JSON.parse(fs.readFileSync(path.resolve(path.dirname(finding.sidecar), file)))[pointer.slice(1)])
       .toEqual(index.oracle);
-    expect(sidecar.note).toContain('compilation and type checking were not run');
+    expect(sidecar).not.toHaveProperty('note');
+    expect(sidecar.noteRef).toBe('index.json#/syntaxNote');
+    expect(index.syntaxNote).toContain('compilation and type checking were not run');
     expect(sidecar).not.toHaveProperty('kind'); expect(sidecar).not.toHaveProperty('verdict');
   }
   expect(execFileSync('git', ['-C', ROOT, 'diff', 'HEAD', '--', 'tools/psi-gate/corpus', 'tools/psi-gate/grammar-bugs']))
@@ -72,14 +74,17 @@ it('adds one selected matching case, stages source/reference and leaves quick gr
   fs.writeFileSync(source, 'fun selectedForCorpus()=12345\n');
   let result;
   const output = vi.spyOn(console, 'log').mockImplementation(() => {});
+  const progress = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     result = await add.run({file: source, root, config});
     const text = output.mock.calls.flat().join('\n');
     expect(text).toContain('Added: ' + result.file);
     expect(text).toContain('PSI expectation: ' + result.expectation);
-    expect(text).toContain('Both files are staged.');
-    expect(text).toContain(`git add -- '${result.file}' '${result.expectation}'`);
-  } finally { output.mockRestore(); }
+    const guidance = progress.mock.calls.flat().join('\n');
+    expect(guidance).toContain('Both files are staged.');
+    expect(guidance).toContain('regenerate-expectations');
+    expect(guidance).toContain(`git add -- '${result.file}' '${result.expectation}'`);
+  } finally { output.mockRestore(); progress.mockRestore(); }
   expect(result).toMatchObject({exitCode: 0, duplicate: false, staged: true});
   const indexed = execFileSync('git', ['-C', root, 'ls-files', '--', result.file, result.expectation], {encoding: 'utf8'});
   expect(indexed.trim().split('\n')).toHaveLength(2);

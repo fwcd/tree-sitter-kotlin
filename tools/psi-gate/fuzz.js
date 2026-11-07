@@ -72,11 +72,19 @@ async function run(options = {}) {
   for (const root of protectedRoots)
     if (inside(canonical(root), canonical(options.out)) || inside(canonical(options.out), canonical(root)))
       throw Error('Search output and corpus/source directories must be separate');
-  await fetchAll({config: options.config});
-  const release = state.acquireLock(options.out + '.lock');
-  try {return await search(options, inputs);} finally {release();}
+  const progress = {started: Date.now(), phase: 'preparing oracle', metrics: {attempted: 0, accepted: 0}};
+  const report = () => console.error(`fuzz: ${progress.phase}; ${progress.metrics.attempted} inputs tried, ${progress.metrics.accepted} PSI-valid; ${((Date.now() - progress.started) / 1000).toFixed(1)}s elapsed`);
+  const limit = Number.isFinite(options.maxInputs) ? options.maxInputs : 'unlimited';
+  console.error(`fuzz: preparing search (seed ${options.seed}, input limit ${limit}, time limit ${options.maxSeconds}s)`);
+  const timer = setInterval(report, 10000); timer.unref();
+  let release;
+  try {
+    await fetchAll({config: options.config});
+    release = state.acquireLock(options.out + '.lock');
+    return await search(options, inputs, progress);
+  } finally {clearInterval(timer); release?.();}
 }
-async function search(options, inputs) {
+async function search(options, inputs, progress) {
   resetOutput(options.out);
   const prepared = {grammar: options.grammar || options.root, runtime: options.runtime || options.root,
     out: options.out, config: options.config, timeoutMs: options.timeoutMs, parseTimeoutMs: options.parseTimeoutMs};
@@ -85,6 +93,7 @@ async function search(options, inputs) {
   const context = contextOf(), coverage = new Coverage(), buckets = new Map(), exact = new Map(), signatures = new Map();
   const ledgerValidation = [], metrics = {attempted: 0, accepted: 0, rejected: 0, matches: 0, mismatches: 0};
   const seenKnown = [];
+  Object.assign(progress, {started, metrics, phase: 'checking known inputs'});
   let inspector, stopReason = 'input-budget', stableCount = 0, generatedIndex = 0, mixedIndex = 0, partial = false;
   const verify = () => {if (contextOf() !== context) throw Error('Grammar/comparison changed during search; rerun');};
   const remember = async bucket => {
@@ -100,14 +109,15 @@ async function search(options, inputs) {
     for (let i = 0; i < known.length; i += options.batchSize) {
       const batch = known.slice(i, i + options.batchSize), values = await inspector.inspect(batch.map(x => x.input), {deadline});
       for (let j = 0; j < values.length; j++) {
-        remaining(deadline); const result = values[j], id = batch[j].id;
-        ledgerValidation.push({id, accepted: result.accepted, mismatch: Boolean(result.classes?.length)});
+        remaining(deadline); const result = values[j], ids = batch[j].ids;
+        ledgerValidation.push({ids, accepted: result.accepted, mismatch: Boolean(result.classes?.length)});
         // A newly failing must-match corpus row is a regression, never a known-bug waiver.
         if (!result.accepted || !result.classes.length || batch[j].mustMatch) continue;
-        const key = findings.observation(result); if (!exact.has(key)) exact.set(key, []); exact.get(key).push(id);
-        for (const c of result.classes) {if (!signatures.has(c.id)) signatures.set(c.id, new Set()); signatures.get(c.id).add(id);}
+        const key = findings.observation(result); if (!exact.has(key)) exact.set(key, []); exact.get(key).push(...ids);
+        for (const c of result.classes) {if (!signatures.has(c.id)) signatures.set(c.id, new Set()); for (const id of ids) signatures.get(c.id).add(id);}
       }
     }
+    progress.phase = 'searching and minimizing';
     while (metrics.attempted < options.maxInputs) {
       remaining(deadline); verify(); const batch = [];
       for (let i = 0; i < options.batchSize && metrics.attempted < options.maxInputs; i++) {
@@ -156,14 +166,24 @@ async function search(options, inputs) {
       knownMatch: {exact: [], possible}}); files.set(item.id, item);
   }
   partial ||= pending.length > 0;
-  const index = {schemaVersion: 1, seed: options.seed, context, oracle, stopReason, partial, exitCode: partial ? 2 : 0,
+  progress.phase = 'saving artifacts';
+  const coverageResult = coverage.snapshot();
+  fs.writeFileSync(path.join(options.out, 'coverage.json'), JSON.stringify(coverageResult, null, 2) + '\n');
+  const index = {schemaVersion: 1, seed: options.seed, context, oracle, syntaxNote: findings.syntaxNote,
+    stopReason, partial, exitCode: partial ? 2 : 0,
     metrics, budgets: {maxInputs: Number.isFinite(options.maxInputs) ? options.maxInputs : null, maxSeconds: options.maxSeconds,
-      minSeconds: options.minSeconds}, files: [...files.values()].sort((a,b) => a.id.localeCompare(b.id)), pending, suppressed,
-    known: ledgerValidation, coverage: coverage.snapshot()};
+      minSeconds: options.minSeconds, minRounds: options.minRounds, minCandidates: options.minCandidates},
+    files: [...files.values()].sort((a,b) => a.id.localeCompare(b.id)), pending, suppressed,
+    known: ledgerValidation, coverageRef: 'coverage.json', coverageSummary: coverageResult.views.all.summary};
   fs.writeFileSync(path.join(options.out, 'index.json'), JSON.stringify(index, null, 2) + '\n');
   for (const item of index.files) console.log(item.file);
-  return {...index, out: options.out, indexPath: path.resolve(options.out, 'index.json'),
-    seconds: (Date.now() - started) / 1000};
+  const seconds = (Date.now() - started) / 1000, indexPath = path.resolve(options.out, 'index.json');
+  const limit = Number.isFinite(options.maxInputs) ? options.maxInputs : 'unlimited';
+  console.error(`fuzz: ${partial ? 'partial' : 'complete'}; ${metrics.attempted} inputs tried (limit ${limit}), ${metrics.accepted} PSI-valid, ${index.files.length} suspects; stop ${stopReason}; ${seconds.toFixed(1)}/${options.maxSeconds}s time budget`);
+  console.log(`Output: ${path.resolve(options.out)}`);
+  console.log(`Index: ${indexPath}`);
+  if (partial) console.error('Search incomplete: inspect pending classes in the index and retry with larger time or reduction budgets.');
+  return {...index, out: options.out, indexPath, seconds, coverage: coverageResult};
 }
 async function main(argv) {
   if (argv.includes('--help') || argv.includes('-h')) {console.log(HELP); return;}
