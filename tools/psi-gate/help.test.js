@@ -20,3 +20,15 @@ it('lists options for each command without requiring live setup', () => {
   expect(commandHelp('quick')).not.toContain('--timeout-ms');
   expect(() => argumentsOf(['fuzz', '--jobs', '4'])).toThrow(/integer/);
 });
+
+it('rejects every inherited command name with an unknown-command diagnostic', () => {
+  for (const command of ['constructor','toString','__proto__','hasOwnProperty','valueOf']) {
+    expect(() => commandHelp(command)).toThrow('Unknown PSI gate command: '+command);
+    expect(() => argumentsOf([command])).toThrow('Unknown PSI gate command: '+command);
+  }
+  expect(commandHelp('quick')).toContain('default psigate.toml');
+  expect(commandHelp('quick')).toContain('default local/psi-gate');
+  expect(commandHelp('fuzz')).toContain('default psi-search');
+  expect(commandHelp('quick')).not.toContain('PSI_JAVA');
+  expect(HELP).toContain('PSI_JAVA');
+});

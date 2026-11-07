@@ -240,8 +240,8 @@ does not prove all combinations or grammar-wide normalizer correctness.
 
 Progress, diagnostics and incomplete-resource remedies use stderr. Stdout contains
 conformance verdicts and saved artifact paths. Full reports verdicts in configured
-order and total duration on stderr. Exit 0 means complete, exit 1 is a mismatch or
-setup/execution failure, and exit 2 means a resource budget stopped an incomplete
+order and total duration on stderr. Exit 0 means complete, exit 1 is a grammar mismatch, exit 3 is a setup/acquisition/oracle failure,
+and exit 2 means a resource budget stopped an incomplete
 check/search/reduction. No unverified specimen is emitted on an initial timeout.
 
 `--timeout-ms` limits live PSI requests; `--parse-timeout-ms` separately limits
@@ -259,3 +259,14 @@ exhaustion retry with a larger displayed budget.
 
 Pinned dependencies are updated with npm install --save-dev --save-exact and
 verified with npm audit plus the native/oracle suite before publication.
+
+Undici is held at the audit-clean, maintained 6.29.1 line to support the advertised
+Node 22 range without the higher Node minimum of 8.x; its ProxyAgent API remains
+compatible. Review its audit and supported engine range before changing that pin.
+
+Git timeouts retain exit 2/resource context and name PSI_GATE_GIT_TIMEOUT_MS.
+An incomplete cached repository with no HEAD and no indexed work is recovered by
+fetch/checkout on retry. Dirty or unverifiable caches are preserved and refused,
+with an exact fresh-home command; no reset or forced checkout is used.
+Full prints ERROR/exit 3 for setup failures, FAIL/exit 1 for grammar mismatches, and
+INCOMPLETE/exit 2 for resource expiry. CI can distinguish these outcomes directly.

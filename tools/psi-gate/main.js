@@ -41,16 +41,16 @@ async function full(options) {
   ]);
   const failed = error => {
     console.error(isResourceError(error) ? resourceMessage('full', error) : error.message);
-    exits.push(isResourceError(error) ? 2 : 1);
+    exits.push(isResourceError(error) ? 2 : 3);
   };
   const [q, r] = preparations;
-  if (q.status === 'fulfilled') {require('./quick').printResult(q.value); exits.push(q.value.exitCode);}
+  if (q.status === 'fulfilled') {require('./quick').printResult(q.value); exits.push(q.value.rows?.some(row => row.verdict === 'expectation-error') ? 3 : q.value.exitCode);}
   else failed(q.reason);
   if (r.status === 'fulfilled') for (const repo of r.value) {
     try {exits.push((await checkRepository(repo, options)).exitCode);} catch (error) {failed(error);}
   } else failed(r.reason);
-  const exitCode = exits.includes(2) ? 2 : exits.includes(1) ? 1 : 0;
-  console.log(`full: ${exitCode === 0 ? 'PASS' : exitCode === 2 ? 'INCOMPLETE' : 'FAIL'}`);
+  const exitCode = exits.includes(3) ? 3 : exits.includes(2) ? 2 : exits.includes(1) ? 1 : 0;
+  console.log(`full: ${exitCode === 0 ? 'PASS' : exitCode === 2 ? 'INCOMPLETE' : exitCode === 3 ? 'ERROR' : 'FAIL'}`);
   console.error(`full: completed in ${((Date.now() - started) / 1000).toFixed(2)}s`);
   return {exitCode};
 }
@@ -67,8 +67,15 @@ async function main(argv) {
     if (options.command === 'quick') return quick(options);
     if (options.command === 'full') return full(options);
     if (options.command === 'repo') {
-      const repo = inspectRepository(options.repoRoot); await fetchAll({ config: options.config });
-      return checkRepository(repo, options);
+      try {
+        const repo = inspectRepository(options.repoRoot); await fetchAll({ config: options.config });
+        return await checkRepository(repo, options);
+      } catch (error) {
+        const exitCode = isResourceError(error) ? 2 : 3;
+        console.error(isResourceError(error) ? resourceMessage('repo', error) : error.message);
+        console.log(`repo: ${exitCode === 2 ? 'INCOMPLETE' : 'ERROR'}`);
+        return {exitCode};
+      }
     }
     if (options.command === 'regenerate-expectations') return require('./quick').regenerate({ ...options, root: ROOT });
     if (options.command === 'coverage') {
@@ -91,4 +98,4 @@ async function prepareGrammar({ home, config = loadConfig(), base, upstream } = 
   return { grammar: ROOT, runtime: ROOT, revision: 'current-working-tree' };
 }
 module.exports = { main, argumentsOf, prerequisites, prepareGrammar, full, checkRepository };
-runIfMain(module, main);
+runIfMain(module, main, {setupExitCode: 3});

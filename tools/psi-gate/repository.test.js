@@ -5,7 +5,7 @@ import os from 'os';
 import path from 'path';
 import { execFileSync } from 'child_process';
 const require = createRequire(import.meta.url);
-const { inspectRepository, indexFiles, selectFiles, fetchRepositories } = require('./repository');
+const { inspectRepository, indexFiles, selectFiles, fetchRepositories, runGit } = require('./repository');
 const git = (root, ...args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trim();
 function fixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-repo-v2-')), root = path.join(dir, 'source');
@@ -52,3 +52,35 @@ it('acquires multiple pinned repositories and verifies cached dirty state', asyn
     await expect(fetchRepositories([{ ...repo, name: 'a' }], home)).rejects.toThrow(/a.kt/);
   } finally { fs.rmSync(f.dir, { recursive: true }); }
 }, 30000);
+
+it('recovers an incomplete cache on retry while preserving untracked files', async () => {
+  const f = fixture();
+  try {
+    const repo={url:f.root,rev:f.rev,name:'partial',includes:['**/*.kt'],excludes:[]};
+    const home=path.join(f.dir,'home'),cache=path.join(home,'repos','partial-'+require('../safety').sha256(repo.url+'\0'+repo.rev).slice(0,16));
+    fs.mkdirSync(cache,{recursive:true});git(cache,'init','-q');fs.writeFileSync(path.join(cache,'keep.txt'),'untracked work');
+    const logs=[];const [result]=await fetchRepositories([repo],home,{log:text=>logs.push(text)});
+    expect(result.commit).toBe(f.rev);expect(result.files).toEqual(['a.kt','excluded.kt']);
+    expect(fs.readFileSync(path.join(cache,'keep.txt'),'utf8')).toBe('untracked work');
+    expect(logs.join(' ')).toContain('resuming incomplete');
+  } finally {fs.rmSync(f.dir,{recursive:true});}
+});
+it('refuses indexed work in incomplete caches and gives a concrete fresh-home command', async () => {
+  const f=fixture();
+  try {
+    const repo={url:f.root,rev:f.rev,name:'dirty-partial'},home=path.join(f.dir,'home');
+    const cache=path.join(home,'repos',repo.name+'-'+require('../safety').sha256(repo.url+'\0'+repo.rev).slice(0,16));
+    fs.mkdirSync(cache,{recursive:true});git(cache,'init','-q');fs.writeFileSync(path.join(cache,'own.kt'),'val userWork=1');git(cache,'add','own.kt');
+    await expect(fetchRepositories([repo],home)).rejects.toThrow(/indexed work.*recovery refused[\s\S]*full --home/);
+    expect(fs.readFileSync(path.join(cache,'own.kt'),'utf8')).toBe('val userWork=1');
+  } finally {fs.rmSync(f.dir,{recursive:true});}
+});
+it('keeps a Git fetch timeout typed with its actual limit', async () => {
+  const f=fixture();
+  try {
+    const dir=path.join(f.dir,'fetch');fs.mkdirSync(dir);git(dir,'init','-q');
+    const upload=path.join(f.dir,'slow-upload');fs.writeFileSync(upload,'#!/bin/sh\nsleep 2\n');fs.chmodSync(upload,0o755);
+    await expect(runGit(['fetch','--upload-pack='+upload,f.root,f.rev],dir,150))
+      .rejects.toMatchObject({code:'PSI_GIT_TIMEOUT',exitCode:2,message:'Git fetch timed out after 150 ms'});
+  } finally {fs.rmSync(f.dir,{recursive:true});}
+});

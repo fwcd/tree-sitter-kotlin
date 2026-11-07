@@ -25,7 +25,7 @@ it('rejects committed grammar-only changes on first install and in both gate com
     for (const args of [['run', 'install'], ['run', 'psi-gate', '--', 'quick'], ['run', 'psi-gate', '--', 'full']]) {
       const result = spawnSync('npm', args, {cwd: root, encoding: 'utf8', timeout: 30000,
         env: {...process.env, PSI_JAVA: java}});
-      expect(result.status, result.stdout + result.stderr).toBe(1);
+      expect(result.status, result.stdout + result.stderr).toBe(args[1] === 'install' ? 1 : 3);
       expect(result.stdout + result.stderr).toMatch(/Generated parser does not match.*npm run generate/);
     }
     fs.writeFileSync(file, before + '\n// correctly generated source change\n');

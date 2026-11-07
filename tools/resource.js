@@ -1,8 +1,10 @@
 'use strict';
-const CODES = new Set(['PSI_FUZZ_BUDGET', 'PSI_ORACLE_TIMEOUT', 'PSI_NATIVE_TIMEOUT', 'ETIMEDOUT']);
+const CODES = new Set(['PSI_FUZZ_BUDGET', 'PSI_ORACLE_TIMEOUT', 'PSI_NATIVE_TIMEOUT', 'PSI_GIT_TIMEOUT', 'ETIMEDOUT']);
 function resourceError(message, code) {return Object.assign(new Error(message), {code, exitCode: 2});}
 function isResourceError(error) {return CODES.has(error?.code);}
 function resourceMessage(command, error) {
+  if (error.code === 'PSI_GIT_TIMEOUT') return `${command}: resource budget exhausted (${error.message}). ` +
+    'Retry the same home with a larger PSI_GATE_GIT_TIMEOUT_MS (for example 180000).';
   const flag = error.code === 'PSI_NATIVE_TIMEOUT' ? '--parse-timeout-ms' :
     error.code === 'PSI_ORACLE_TIMEOUT' ? '--timeout-ms' : '--max-seconds';
   return `${command}: resource budget exhausted (${error.message}). No complete verdict; retry with a larger ${flag}.`;

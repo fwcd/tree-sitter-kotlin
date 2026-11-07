@@ -54,18 +54,20 @@ function commandHelp(command) {
   if (!command || command.startsWith('-')) return 'Usage: npm run psi-gate -- COMMAND [options]\n' +
     Object.values(COMMANDS).map(([usage, summary]) => `  ${usage.padEnd(27)} ${summary}`).join('\n') +
     '\nUse COMMAND --help for its options.' + environment + '\n';
-  const spec = COMMANDS[command]; if (!spec) throw Error(`Unknown PSI gate command: ${command}`);
+  const spec = Object.hasOwn(COMMANDS, command) ? COMMANDS[command] : null; if (!spec) throw Error(`Unknown PSI gate command: ${command}`);
   return `Usage: npm run psi-gate -- ${spec[0]} [options]\n${spec[1]}\n\nOptions:\n` + spec[2].map(id => {
     const [flag, text, , fallback, maximum] = OPTIONS[id];
-    const value = typeof fallback === 'number' ? ` (default ${fallback}${maximum ? '; range 1..' + maximum : ''})` : '';
+    const shown = typeof fallback === 'string' && path.isAbsolute(fallback) ? path.relative(ROOT, fallback) : fallback;
+    const value = shown === undefined ? '' : ` (default ${shown}${maximum ? '; range 1..' + maximum : ''})`;
     return `  ${flag.padEnd(23)} ${text}${value}`;
-  }).join('\n') + '\n\nExit codes: 0 complete; 1 mismatch/setup failure; 2 resource budget exhausted (incomplete).\n' + environment + '\n';
+  }).join('\n') + '\n\nExit codes: 0 pass/complete; 1 mismatch; 2 resource budget (incomplete); 3 setup/execution error.\n' +
+    'Environment settings: see npm run psi-gate -- --help.\n';
 }
 const HELP = commandHelp();
 function argumentsOf(argv) {
   const removed = argv.find(flag => ['--base','--upstream','--upstream-branch','--expected','--strict','--corpora','--promote'].includes(flag));
   if (removed) throw Error(`${removed} was removed: PSI gate checks the current grammar with absolute verdicts`);
-  const args = [...argv], command = args.shift() || 'quick', spec = COMMANDS[command];
+  const args = [...argv], command = args.shift() || 'quick', spec = Object.hasOwn(COMMANDS, command) ? COMMANDS[command] : null;
   if (!spec) throw Error(`Unknown PSI gate command: ${command}`);
   const options = {command, configFile: OPTIONS.config[3], home: OPTIONS.home[3], oracleTimeoutMs: 120000,
     parseTimeoutMs: 10000, jobs: 2, forward: []};

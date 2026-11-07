@@ -60,7 +60,7 @@ describe('safety and actionable CLI failures', () => {
       const result = invoke('tools/psi-gate/main.js', ['quick', '--home', dir], {
         PSI_JAVA: '/missing-java',
       });
-      expect(result.status).toBe(1);
+      expect(result.status).toBe(3);
       expect(output(result)).toMatch(/not an owned PSI cache/);
       expect(output(result)).not.toMatch(/Installing/);
       expect(fs.readFileSync(path.join(dir, 'keep.txt'), 'utf8')).toBe('sentinel');
