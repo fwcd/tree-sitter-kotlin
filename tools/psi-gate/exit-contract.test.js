@@ -12,17 +12,15 @@ it('keeps codes and stdout shape uniform at every actual command/alias dispatch 
  fs.writeFileSync(artifact,'val verified=1\n');
  fs.writeFileSync(preload,`
  const Module=require('module'), original=Module._load;
- const {mismatchError}=require(${JSON.stringify(path.join(ROOT,'tools/cli'))});
- const {resourceError}=require(${JSON.stringify(path.join(ROOT,'tools/resource'))});
  const root=${JSON.stringify(ROOT)}, artifact=${JSON.stringify(artifact)}, mode=Number(process.env.PROBE_OUTCOME);
- function outcome(){if(mode===1)throw mismatchError('controlled comparison mismatch');if(mode===2)throw resourceError('controlled resource expiry','PSI_NATIVE_TIMEOUT');if(mode===3)throw Error('controlled setup failure');}
+ function outcome(){if(mode===1)throw Object.assign(Error('controlled comparison mismatch'),{code:'PSI_MISMATCH',exitCode:1});if(mode===2)throw Object.assign(Error('controlled resource expiry'),{code:'PSI_NATIVE_TIMEOUT',exitCode:2});if(mode===3)throw Error('controlled setup failure');}
  Module._load=function(name,parent,isMain){
   const value=original.apply(this,arguments);let file;try{file=Module._resolveFilename(name,parent);}catch{return value;}
   if(file===root+'/tools/psi-gate/runtime.js')return {...value,prerequisites(){},createParser(){return {};}};
   if(file===root+'/bindings/node/build.js')return {...value,assertFresh(){return {source:{hash:'stable'}};}};
   if(file===root+'/tools/psi-oracle/fetch.js')return {...value,fetchAll:async()=>[]};
   if(file===root+'/tools/psi-gate/repository.js')return {...value,inspectRepository:()=>({root,commit:'test'}),selectFiles:()=>({files:['fixture.kt'],excluded:[]}),fetchRepositories:async()=>[]};
-  if(file===root+'/tools/psi-gate/check.js')return {...value,checkFiles:async()=>{if(mode===2||mode===3)outcome();return {exitCode:mode,files:1,mismatches:mode===1?[{path:'fixture.kt',verdict:'C',key:'controlled comparison mismatch'}]:[]};}};
+  if(file===root+'/tools/psi-gate/check.js')return {...value,checkFiles:async options=>{require('fs').mkdirSync(options.out,{recursive:true});if(mode===2||mode===3)outcome();return {exitCode:mode,files:1,mismatches:mode===1?[{path:'fixture.kt',verdict:'C',key:'controlled comparison mismatch'}]:[]};}};
   if(file===root+'/tools/psi-gate/quick.js'){
    value.run=async options=>{if(mode===3)outcome();const result={exitCode:mode,rows:mode===1?[{path:'fixture.kt',verdict:'C'}]:[],counts:{selected:1,mismatching:mode===1?1:0,incomplete:mode===2?1:0,errors:0},reportPath:artifact};if(options.emit!==false)value.printResult(result);return result;};
    value.regenerate=async()=>{outcome();console.log('regenerate-expectations: PASS');return {exitCode:0};};return value;
@@ -33,6 +31,7 @@ it('keeps codes and stdout shape uniform at every actual command/alias dispatch 
  };
  `);
  try{
+  const matrix=[];
   const routes=['quick','full','repo','regenerate-expectations','coverage','minimize','add','fuzz','direct-fuzz','npm-psi-fuzz'];
   for(const route of routes)for(const code of Object.values(EXIT)){
    const home=path.join(dir,route+'-'+code);let command='node',args=['--require',preload,'tools/psi-gate/main.js',route];
@@ -42,6 +41,7 @@ it('keeps codes and stdout shape uniform at every actual command/alias dispatch 
    args.push('--home',home);
    const result=spawnSync(command,args,{cwd:ROOT,encoding:'utf8',timeout:10000,
     env:{...process.env,PROBE_OUTCOME:String(code),NODE_OPTIONS:route==='npm-psi-fuzz'?'--require='+preload:''}});
+   matrix.push({route,expectedCode:code,actualCode:result.status,stdout:result.stdout,stderr:result.stderr,mode:'controlled backend; actual CLI dispatch'});
    expect(result.status,route+'/'+code+'\n'+result.stdout+'\n'+result.stderr).toBe(code);
    const lines=result.stdout.trim().split('\n').filter(Boolean);
    if(['add','minimize','coverage','fuzz','direct-fuzz','npm-psi-fuzz'].includes(route))
@@ -51,5 +51,6 @@ it('keeps codes and stdout shape uniform at every actual command/alias dispatch 
    }
    if(route==='repo'&&code===0){expect(result.stdout).toContain('repo: PASS');expect(result.stderr).toContain('repo: completed in');}
   }
+  if(process.env.PSI_CONTRACT_MATRIX)fs.writeFileSync(process.env.PSI_CONTRACT_MATRIX,JSON.stringify(matrix,null,2)+'\n');
  }finally{fs.rmSync(dir,{recursive:true});}
 },30000);

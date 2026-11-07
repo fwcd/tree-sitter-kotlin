@@ -19,7 +19,6 @@ async function checkRepository(repo, options) {
   console.error(`${repo.name || 'repo'}: comparing with live PSI...`);
   const result = await checkFiles({ ...options, root: repo.root, files: selected.files, out });
   inspectRepository(repo.root, repo.rev);
-  console.log(`${repo.name || 'repo'}: ${result.mismatches.length} files mismatching (target 0, ${selected.excluded.length} excluded)`);
   for (const row of result.mismatches) console.error(`${row.path}: ${row.verdict}: ${row.key || 'PSI mismatch'}`);
   if (selected.excluded.length) {
     try {
@@ -30,6 +29,7 @@ async function checkRepository(repo, options) {
   inspectRepository(repo.root, repo.rev);
   fs.writeFileSync(path.join(out, 'summary.json'), JSON.stringify({ name: repo.name, revision: repo.commit,
     files: result.files, mismatching: result.mismatches.length, excluded: selected.excluded }, null, 2) + '\n');
+  console.log(`${repo.name || 'repo'}: ${result.mismatches.length} files mismatching (target 0, ${selected.excluded.length} excluded)`);
   return result;
 }
 async function full(options) {
