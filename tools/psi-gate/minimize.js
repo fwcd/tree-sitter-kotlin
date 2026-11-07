@@ -9,6 +9,7 @@ const state = require('./fuzz-state');
 const findings = require('./fuzz-findings');
 const {oracleIdentity} = require('./expectations');
 const {sha256} = require('../safety');
+const {remaining} = require('./fuzz-budget');
 const {isResourceError, resourceMessage} = require('../resource');
 const ROOT = path.resolve(__dirname, '../..');
 async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 30, classId}) {
@@ -21,11 +22,13 @@ async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 
   try {
     const deadline = Date.now() + maxSeconds * 1000;
     const [original] = await inspector.inspect([input], {deadline});
+    remaining(deadline);
     if (!original.accepted) throw Error('Input is PSI-invalid; minimization requires error-free PSI');
     if (!original.classes.length) { console.log('Input matches PSI; nothing to minimize'); return {exitCode: 0}; }
     const selected = classId ? original.classes.find(c => c.id === classId) : original.classes[0];
     if (!selected) throw Error(`Mismatch class is no longer present: ${classId}`);
     const min = await state.minimize(input, selected.id, inspector, {seconds: maxSeconds, deadline});
+    if (min.exhausted) console.error('minimize: reduction budget exhausted; verified best-so-far saved. Retry with a larger --max-seconds.');
     const oracle = oracleIdentity(config);
     const context = sha256(JSON.stringify([state.identity({grammar: ROOT, runtime: ROOT}), oracle]));
     const entry = findings.record({out, seed: 'per-file', context,
