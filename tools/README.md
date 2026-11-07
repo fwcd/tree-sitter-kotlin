@@ -240,8 +240,9 @@ does not prove all combinations or grammar-wide normalizer correctness.
 
 Progress, diagnostics and incomplete-resource remedies use stderr. Stdout contains
 conformance verdicts and saved artifact paths. Full reports verdicts in configured
-order and total duration on stderr. Exit 0 means complete, exit 1 is a grammar mismatch, exit 3 is a setup/acquisition/oracle failure,
-and exit 2 means a resource budget stopped an incomplete
+order and total duration on stderr. Exit 0 means complete; exit 1 is a grammar
+mismatch; exit 3 is a setup/acquisition/oracle failure; exit 2 means a resource
+budget stopped an incomplete
 check/search/reduction. No unverified specimen is emitted on an initial timeout.
 
 `--timeout-ms` limits live PSI requests; `--parse-timeout-ms` separately limits
