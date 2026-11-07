@@ -290,3 +290,9 @@ Quick/Full/Repo print conformance verdicts on stdout; artifact commands emit
 bare existing paths. Labels, details, progress, duration and remedies use stderr.
 Repo prints PASS/FAIL/INCOMPLETE/ERROR and duration just like Full. Add rejects
 a nonmatching native tree with mismatch 1, without changing the corpus or index.
+
+Stdout shape is deliberate by command class. Quick, Full, Repo and
+regenerate-expectations emit PASS/FAIL/INCOMPLETE/ERROR verdicts (conformance
+commands also include file counts/report paths). Add, minimize, coverage and fuzz
+emit bare saved artifact paths. Details, progress, timing and remedies use stderr.
+A duration is printed only after valid options start a Full/Repo run.

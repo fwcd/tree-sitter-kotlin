@@ -46,9 +46,11 @@ it('keeps codes and stdout shape uniform at every actual command/alias dispatch 
    const lines=result.stdout.trim().split('\n').filter(Boolean);
    if(['add','minimize','coverage','fuzz','direct-fuzz','npm-psi-fuzz'].includes(route))
     expect(lines.every(line=>line===artifact),route+'/'+code+'\n'+result.stdout).toBe(true);
-   if(['quick','full','repo'].includes(route)&&code===3){
+   if(['quick','full','repo','regenerate-expectations'].includes(route)&&code===3){
     expect(result.stdout).toContain('ERROR');expect(result.stdout).not.toContain('files mismatching');
    }
+   if(['quick','full','repo','regenerate-expectations'].includes(route))
+    expect(result.stdout,route+'/'+code).toContain(route+': '+['PASS','FAIL','INCOMPLETE','ERROR'][code]);
    if(route==='repo'&&code===0){expect(result.stdout).toContain('repo: PASS');expect(result.stderr).toContain('repo: completed in');}
   }
   if(process.env.PSI_CONTRACT_MATRIX)fs.writeFileSync(process.env.PSI_CONTRACT_MATRIX,JSON.stringify(matrix,null,2)+'\n');

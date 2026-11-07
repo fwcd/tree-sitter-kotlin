@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const expected = require('./expectations');
-const {EXIT} = require('../cli');
+const {EXIT, verdictFor} = require('../cli');
 const { confined, sha256 } = require('../safety');
 const REPO = path.resolve(__dirname, '../..');
 const CORPUS = 'tools/psi-gate/corpus';
@@ -60,7 +60,10 @@ function printResult(result) {
   } else if (result.exitCode === EXIT.RESOURCE) {
     console.log(`quick: INCOMPLETE (${result.counts.incomplete} native timeouts)`);
     console.error('quick: increase --parse-timeout-ms and rerun; no complete verdict');
-  } else console.log(`quick: ${mismatching} files mismatching (${selected} must-match snippets)`);
+  } else {
+    console.log(`quick: ${mismatching} files mismatching (${selected} must-match snippets)`);
+    console.log(`quick: ${verdictFor(result.exitCode)}`);
+  }
   if (result.exitCode !== EXIT.PASS) {
     for (const row of rows.filter(row => row.verdict !== 'ok'))
       console.error(`  ${row.path}: ${failureReason(row).replace(/[\r\n]+/g, ' ').slice(0, 600)}`);

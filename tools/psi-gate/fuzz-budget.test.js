@@ -53,6 +53,7 @@ try {
   available = require('../psi-oracle/fetch').isFetched() &&
     fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node'));
 } catch {}
+if (!available) process.stderr.write('PSI budget tests skipped; missing: npm run psi-oracle:fetch (verified PSI jars) and built native binding\n');
 describe.skipIf(!available)('actual native rejection and continuous controls', () => {
   it('can inspect new inputs after a representative-level oracle deadline expires', async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-budget-'));
@@ -143,7 +144,7 @@ describe.skipIf(!available)('actual native rejection and continuous controls', (
   }, 30000);
 });
 
-it('distinguishes a deadline-clipped oracle timer from the independent oracle timeout', async () => {
+it.skipIf(!available)('distinguishes a deadline-clipped oracle timer from the independent oracle timeout', async () => {
   const {OracleServer}=require('../psi-oracle/oracle');
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'psi-clipped-budget-'));
   const failed=vi.spyOn(OracleServer.prototype,'run').mockRejectedValue(new Error('PSI oracle timed out'));
@@ -154,7 +155,7 @@ it('distinguishes a deadline-clipped oracle timer from the independent oracle ti
   } finally {failed.mockRestore();inspector.close();fs.rmSync(directory,{recursive:true});}
 });
 
-it('saves a discoverable empty partial index when an independent request budget expires', async () => {
+it.skipIf(!available)('saves a discoverable empty partial index when an independent request budget expires', async () => {
   const {resourceError}=require('../resource');
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'psi-fuzz-resource-'));
   const spy=vi.spyOn(InspectorPool.prototype,'inspect').mockRejectedValue(resourceError('request timed out','PSI_ORACLE_TIMEOUT'));

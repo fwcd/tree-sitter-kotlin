@@ -53,9 +53,9 @@ async function full(options) {
 
   return {exitCode};
 }
-async function execute(argv) {
+async function execute(argv, onStart) {
   if (argv.includes('--help') || argv.includes('-h')) { console.log(commandHelp(argv[0])); return { exitCode: 0 }; }
-  const options = argumentsOf(argv); options.config = loadConfig(options.configFile);
+  const options = argumentsOf(argv); onStart(); options.config = loadConfig(options.configFile);
   assertHome(options.home);
   prerequisites({ java: options.command !== 'quick' });
   const usesBinding = ['quick', 'full', 'repo'].includes(options.command);
@@ -91,19 +91,19 @@ async function execute(argv) {
   return result;
 }
 async function main(argv) {
-  const command = argv[0] || 'quick', started = Date.now();
+  const command = argv[0] || 'quick'; let started;
   const verdict = ['full','repo'].includes(command) && !argv.includes('--help') && !argv.includes('-h');
   try {
-    const result = await execute(argv);
+    const result = await execute(argv, () => {started = Date.now();});
     if (verdict) console.log(`${command}: ${verdictFor(result.exitCode)}`);
     return result;
   } catch (error) {
     error.command = command;
-    if (['quick','full','repo'].includes(command) && !argv.includes('--help') && !argv.includes('-h'))
+    if (['quick','full','repo','regenerate-expectations'].includes(command) && !argv.includes('--help') && !argv.includes('-h'))
       console.log(`${command}: ${verdictFor(exitCodeFor(error))}`);
     throw error;
   } finally {
-    if (verdict) console.error(`${command}: completed in ${((Date.now() - started) / 1000).toFixed(2)}s`);
+    if (verdict && started !== undefined) console.error(`${command}: completed in ${((Date.now() - started) / 1000).toFixed(2)}s`);
   }
 }
 async function prepareGrammar({ home, config = loadConfig(), base, upstream } = {}) {

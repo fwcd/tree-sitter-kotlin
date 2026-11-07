@@ -62,6 +62,9 @@ function commandHelp(command) {
     const value = shown === undefined ? '' : ` (default ${shown}${maximum ? '; range 1..' + maximum : ''})`;
     return `  ${flag.padEnd(23)} ${text}${value}`;
   }).join('\n') + '\n\n' + EXIT_HELP + '\n' +
+    (['quick','full','repo','regenerate-expectations'].includes(command)
+      ? 'Stdout: verdict words and reports (Quick/Full/Repo also include conformance counts).\n'
+      : 'Stdout: bare saved artifact paths; labels, progress and remedies use stderr.\n') +
     'Environment settings: see npm run psi-gate -- --help.\n';
 }
 const HELP = commandHelp();
