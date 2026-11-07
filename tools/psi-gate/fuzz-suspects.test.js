@@ -7,9 +7,12 @@ import {execFileSync} from 'node:child_process';
 const require = createRequire(import.meta.url), ROOT = path.resolve(import.meta.dirname, '../..');
 const fuzz = require('./fuzz'), add = require('./add'), quick = require('./quick');
 const config = require('./config').loadConfig();
+const available=require('../psi-oracle/fetch').isFetched();
+if(!available)process.stderr.write('Suspect integration tests skipped; missing: npm run psi-oracle:fetch (verified PSI jars)\n');
 let directory, variant;
 beforeAll(() => {
   directory = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-suspect-test-'));
+  if(!available)return;
   const setup = require('./test-prerequisites').variantBuild(ROOT);
   if (setup.missing.length) throw Error(setup.missing.join(', '));
   variant = path.join(directory, 'hidden-class'); fs.mkdirSync(variant);
@@ -26,7 +29,7 @@ beforeAll(() => {
 }, 180000);
 afterAll(() => {if (directory) fs.rmSync(directory, {recursive: true});});
 
-it('emits reverified suspect paths/sidecars/index for a real broken grammar without corpus writes', async () => {
+it.skipIf(!available)('emits reverified suspect paths/sidecars/index for a real broken grammar without corpus writes', async () => {
   const source = path.join(directory, 'seed'); fs.mkdirSync(source);
   fs.writeFileSync(path.join(source, 'a.kt'), 'class Broken\n');
   const tracked = execFileSync('git', ['-C', ROOT, 'diff', 'HEAD', '--', 'tools/psi-gate/corpus', 'tools/psi-gate/grammar-bugs']);
@@ -53,7 +56,7 @@ it('emits reverified suspect paths/sidecars/index for a real broken grammar with
   expect(execFileSync('git', ['-C', ROOT, 'diff', 'HEAD', '--', 'tools/psi-gate/corpus', 'tools/psi-gate/grammar-bugs']))
     .toEqual(tracked);
 }, 60000);
-it('dedupes an exact known problem and refuses search output targeting committed corpus', async () => {
+it.skipIf(!available)('dedupes an exact known problem and refuses search output targeting committed corpus', async () => {
   const source = path.join(directory, 'known-seed'); fs.mkdirSync(source);
   const file = 'catalog-empty-quest-span.kt';
   fs.copyFileSync(path.join(ROOT, 'tools/psi-gate/grammar-bugs', file), path.join(source, file));
@@ -69,7 +72,7 @@ function repository() {
   fs.symlinkSync(path.join(ROOT, 'node_modules'), path.join(root, 'node_modules'), 'dir');
   fs.cpSync(path.join(ROOT, 'build'), path.join(root, 'build'), {recursive: true}); return root;
 }
-it('adds one selected matching case, stages source/reference and leaves quick green; rejects failures', async () => {
+it.skipIf(!available)('adds one selected matching case, stages source/reference and leaves quick green; rejects failures', async () => {
   const root = repository(), source = path.join(directory, 'selected.kt');
   fs.writeFileSync(source, 'fun selectedForCorpus()=12345\n');
   let result;

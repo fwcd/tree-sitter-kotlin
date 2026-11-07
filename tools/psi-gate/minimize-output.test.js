@@ -6,7 +6,9 @@ import path from 'node:path';
 const require=createRequire(import.meta.url),ROOT=path.resolve(import.meta.dirname,'../..');
 const {run}=require('./minimize'),{InspectorPool}=require('./fuzz-compare');
 const config=require('./config').loadConfig();
-for(const boundary of ['before inspection','after real inspection']) it(`reports incomplete reduction consistently ${boundary}`,async()=>{
+const available=require('../psi-oracle/fetch').isFetched();
+if(!available)process.stderr.write('Minimizer output tests skipped; missing: npm run psi-oracle:fetch (verified PSI jars)\n');
+for(const boundary of ['before inspection','after real inspection']) it.skipIf(!available)(`reports incomplete reduction consistently ${boundary}`,async()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'psi-min-budget-')),file=path.join(dir,'case.kt');
  fs.writeFileSync(file,'val ref = String? ::plus\n');
  const original=InspectorPool.prototype.inspect;

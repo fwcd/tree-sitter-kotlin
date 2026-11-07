@@ -53,7 +53,12 @@ try {
   available = require('../psi-oracle/fetch').isFetched() &&
     fs.existsSync(path.join(ROOT, 'build/Release/tree_sitter_kotlin_binding.node'));
 } catch {}
-if (!available) process.stderr.write('PSI budget tests skipped; missing: npm run psi-oracle:fetch (verified PSI jars) and built native binding\n');
+if (!available) {
+  const missing=[];
+  if(!require('../psi-oracle/fetch').isFetched())missing.push('npm run psi-oracle:fetch (verified PSI jars)');
+  if(!fs.existsSync(path.join(ROOT,'build/Release/tree_sitter_kotlin_binding.node')))missing.push('npm install (native binding)');
+  process.stderr.write('PSI budget tests skipped; missing: '+missing.join('; ')+'\n');
+}
 describe.skipIf(!available)('actual native rejection and continuous controls', () => {
   it('can inspect new inputs after a representative-level oracle deadline expires', async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-budget-'));
