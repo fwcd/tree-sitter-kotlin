@@ -37,9 +37,8 @@ __pycache__/
 
 # Vendored JetBrains fixtures (fetched on demand via npm run vendor-fixtures)
 tools/cross-validation/fixtures/
-
-# Generated cross-validation report (regenerated via npm run cross-validate)
-tools/cross-validation/report.md
+# Temporary fixture import staging (a cancelled import may leave this directory)
+tools/cross-validation/.fixtures-stage-*/
 
 # PSI oracle jars (fetched on demand via npm run psi-oracle:fetch)
 tools/psi-oracle/lib/
