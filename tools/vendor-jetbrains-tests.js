@@ -161,5 +161,5 @@ function main(args) {
     ),
   );
 }
-runIfMain(module, main);
+runIfMain(module, main, {setupExitCode: 1});
 module.exports = { generate, CORPUS_NAMESPACE, corpusDirectory };

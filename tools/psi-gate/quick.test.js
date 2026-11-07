@@ -51,14 +51,14 @@ it('checks indexed must-match fixtures and ignores an untracked new source', asy
   expect(result.exitCode).toBe(0); expect(result.counts.selected).toBe(1);
   git(root, 'add', quick.CORPUS + '/untracked.kt');
   const staged = await quick.run({root, config, parser, home: path.join(root, 'report')});
-  expect(staged.exitCode).toBe(1); expect(staged.counts.selected).toBe(2);
+  expect(staged.exitCode).toBe(3); expect(staged.counts.selected).toBe(2);
   expect(staged.rows.find(row => row.path.endsWith('/untracked.kt')).error).toContain('not in the Git index');
 });
 it('uses current unstaged working-tree content, without a clean-check prerequisite', async () => {
   const root = repository();
   fs.appendFileSync(path.join(root, relative), 'val changed=1\n');
   const result = await quick.run({root, config, parser, home: path.join(root, 'report')});
-  expect(result.exitCode).toBe(1); expect(result.rows[0].error).toContain('Stale PSI source identity');
+  expect(result.exitCode).toBe(3); expect(result.rows[0].error).toContain('Stale PSI source identity');
 });
 it('rejects stale oracle and comparison identities', async () => {
   const root = repository();

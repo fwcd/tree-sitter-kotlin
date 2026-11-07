@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const expected = require('./expectations');
+const {EXIT} = require('../cli');
 const { confined, sha256 } = require('../safety');
 const REPO = path.resolve(__dirname, '../..');
 const CORPUS = 'tools/psi-gate/corpus';
@@ -42,9 +43,10 @@ async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'
       'resource-exhausted' : 'expectation-error', error: error.message}); }
   }
   const incomplete = rows.filter(row => row.verdict === 'resource-exhausted').length;
-  const mismatching = rows.filter(row => !['ok','resource-exhausted'].includes(row.verdict)).length;
-  const result = {exitCode: incomplete ? 2 : mismatching ? 1 : 0, rows,
-    counts: {selected: files.length, matched: files.length - mismatching - incomplete, mismatching, incomplete}};
+  const errors = rows.filter(row => row.verdict === 'expectation-error').length;
+  const mismatching = rows.filter(row => !['ok','resource-exhausted','expectation-error'].includes(row.verdict)).length;
+  const result = {exitCode: errors ? EXIT.SETUP : incomplete ? EXIT.RESOURCE : mismatching ? EXIT.MISMATCH : EXIT.PASS, rows,
+    counts: {selected: files.length, matched: files.length - mismatching - incomplete - errors, mismatching, incomplete, errors}};
   fs.mkdirSync(home, {recursive: true});
   result.reportPath = path.join(home, 'quick.json');
   fs.writeFileSync(result.reportPath, JSON.stringify(result, null, 2) + '\n');
@@ -53,11 +55,13 @@ async function run({root = REPO, config, home = path.join(root, 'local/psi-gate'
 }
 function printResult(result) {
   const {rows, counts: {mismatching, selected}, reportPath} = result;
-  if (result.exitCode === 2) {
+  if (result.exitCode === EXIT.SETUP) {
+    console.log('quick: ERROR');
+  } else if (result.exitCode === EXIT.RESOURCE) {
     console.log(`quick: INCOMPLETE (${result.counts.incomplete} native timeouts)`);
     console.error('quick: increase --parse-timeout-ms and rerun; no complete verdict');
   } else console.log(`quick: ${mismatching} files mismatching (${selected} must-match snippets)`);
-  if (mismatching || result.exitCode === 2) {
+  if (result.exitCode !== EXIT.PASS) {
     for (const row of rows.filter(row => row.verdict !== 'ok'))
       console.error(`  ${row.path}: ${failureReason(row).replace(/[\r\n]+/g, ' ').slice(0, 600)}`);
     console.log(reportPath);

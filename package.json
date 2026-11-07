@@ -19,7 +19,7 @@
     "psi-oracle:fetch": "node tools/psi-oracle/fetch.js",
     "psi-oracle:verify": "node tools/vendor-fixtures.js --oracle-corpus local/psi-gate/corpora/testdata && node tools/psi-oracle/verify.js",
     "psi-gate": "node tools/psi-gate/main.js",
-    "psi-fuzz": "node tools/psi-gate/fuzz.js",
+    "psi-fuzz": "node tools/psi-gate/main.js fuzz",
     "test:tools": "npx vitest run"
   },
   "repository": {

@@ -276,3 +276,17 @@ fetch/checkout on retry. Dirty or unverifiable caches are preserved and refused,
 with an exact fresh-home command; no reset or forced checkout is used.
 Full prints ERROR/exit 3 for setup failures, FAIL/exit 1 for grammar mismatches, and
 INCOMPLETE/exit 2 for resource expiry. CI can distinguish these outcomes directly.
+
+## Uniform entry-point outcomes
+
+All psi-gate commands, the psi-fuzz npm alias and direct fuzz.js entry use the
+same contract: 0 completed/pass; 1 a genuine conformance or admission comparison
+mismatch; 2 incomplete resource budget; 3 setup/acquisition/oracle/usage error.
+Stored PSI source/oracle/normalizer identity errors are setup errors 3 everywhere,
+not grammar mismatch counts. Search and minimization findings are successful
+processing, not conformance verdicts; their findings do not imply exit 1.
+
+Quick/Full/Repo print conformance verdicts on stdout; artifact commands emit
+bare existing paths. Labels, details, progress, duration and remedies use stderr.
+Repo prints PASS/FAIL/INCOMPLETE/ERROR and duration just like Full. Add rejects
+a nonmatching native tree with mismatch 1, without changing the corpus or index.

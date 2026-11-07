@@ -7,6 +7,7 @@ const path = require('path');
 const quick = require('./quick');
 const expected = require('./expectations');
 const {observe, Coverage} = require('./fuzz-coverage');
+const {mismatchError} = require('../cli');
 const {resourceError} = require('../resource');
 const {parseText} = require('../cross-validation/diff-execute');
 const {confined, sha256} = require('../safety');
@@ -45,7 +46,7 @@ async function measure({root = ROOT, config = require('./config').loadConfig(),
     catch (error) { if (error.message === 'Native quick parse timed out')
       throw resourceError('Native coverage parse timed out', 'PSI_NATIVE_TIMEOUT');
       throw error; }
-    if (comparison.verdict !== 'ok') throw Error('Quick coverage requires must-match input: ' + relative + ': ' + quick.failureReason(comparison));
+    if (comparison.verdict !== 'ok') throw mismatchError('Quick coverage requires must-match input: ' + relative + ': ' + quick.failureReason(comparison));
     parser.setTimeoutMicros(parseTimeoutMs * 1000);
     const tree = parseText(parser, text);
     try {

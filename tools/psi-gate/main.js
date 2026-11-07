@@ -2,7 +2,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { runIfMain } = require('../cli');
+const {runIfMain, exitCodeFor, verdictFor} = require('../cli');
 const { loadConfig } = require('./config');
 const { commandHelp, argumentsOf } = require('./options');
 const { prerequisites, createParser } = require('./runtime');
@@ -33,7 +33,7 @@ async function checkRepository(repo, options) {
   return result;
 }
 async function full(options) {
-  const started = Date.now(), exits = [];
+  const exits = [];
   const preparations = await Promise.allSettled([
     Promise.resolve().then(() => quick({...options, emit: false})),
     Promise.all([fetchRepositories(options.config.repos, options.home, {log: console.error}),
@@ -44,17 +44,16 @@ async function full(options) {
     exits.push(isResourceError(error) ? 2 : 3);
   };
   const [q, r] = preparations;
-  if (q.status === 'fulfilled') {require('./quick').printResult(q.value); exits.push(q.value.rows?.some(row => row.verdict === 'expectation-error') ? 3 : q.value.exitCode);}
+  if (q.status === 'fulfilled') {require('./quick').printResult(q.value); exits.push(q.value.exitCode);}
   else failed(q.reason);
   if (r.status === 'fulfilled') for (const repo of r.value) {
     try {exits.push((await checkRepository(repo, options)).exitCode);} catch (error) {failed(error);}
   } else failed(r.reason);
   const exitCode = exits.includes(3) ? 3 : exits.includes(2) ? 2 : exits.includes(1) ? 1 : 0;
-  console.log(`full: ${exitCode === 0 ? 'PASS' : exitCode === 2 ? 'INCOMPLETE' : exitCode === 3 ? 'ERROR' : 'FAIL'}`);
-  console.error(`full: completed in ${((Date.now() - started) / 1000).toFixed(2)}s`);
+
   return {exitCode};
 }
-async function main(argv) {
+async function execute(argv) {
   if (argv.includes('--help') || argv.includes('-h')) { console.log(commandHelp(argv[0])); return { exitCode: 0 }; }
   const options = argumentsOf(argv); options.config = loadConfig(options.configFile);
   assertHome(options.home);
@@ -73,7 +72,6 @@ async function main(argv) {
       } catch (error) {
         const exitCode = isResourceError(error) ? 2 : 3;
         console.error(isResourceError(error) ? resourceMessage('repo', error) : error.message);
-        console.log(`repo: ${exitCode === 2 ? 'INCOMPLETE' : 'ERROR'}`);
         return {exitCode};
       }
     }
@@ -92,10 +90,26 @@ async function main(argv) {
     throw Error('Native binding inputs changed during this check; rerun npm run psi-gate');
   return result;
 }
+async function main(argv) {
+  const command = argv[0] || 'quick', started = Date.now();
+  const verdict = ['full','repo'].includes(command) && !argv.includes('--help') && !argv.includes('-h');
+  try {
+    const result = await execute(argv);
+    if (verdict) console.log(`${command}: ${verdictFor(result.exitCode)}`);
+    return result;
+  } catch (error) {
+    error.command = command;
+    if (['quick','full','repo'].includes(command) && !argv.includes('--help') && !argv.includes('-h'))
+      console.log(`${command}: ${verdictFor(exitCodeFor(error))}`);
+    throw error;
+  } finally {
+    if (verdict) console.error(`${command}: completed in ${((Date.now() - started) / 1000).toFixed(2)}s`);
+  }
+}
 async function prepareGrammar({ home, config = loadConfig(), base, upstream } = {}) {
   if (base || upstream) throw new Error('Historical grammar selection was removed; build the current repo with npm install');
   prerequisites(); createParser(); await fetchAll({ config });
   return { grammar: ROOT, runtime: ROOT, revision: 'current-working-tree' };
 }
 module.exports = { main, argumentsOf, prerequisites, prepareGrammar, full, checkRepository };
-runIfMain(module, main, {setupExitCode: 3});
+runIfMain(module, main);

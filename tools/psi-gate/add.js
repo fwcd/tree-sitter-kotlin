@@ -10,11 +10,12 @@ const {runOracleAsync} = require('../psi-oracle/oracle');
 const expected = require('./expectations');
 const {inventory, CORPUS} = require('./quick');
 const {createParser} = require('./runtime');
+const {mismatchError} = require('../cli');
 const {resourceError} = require('../resource');
 const ROOT = path.resolve(__dirname, '../..');
 function printAdmission(file, expectation, duplicate) {
-  console.log(`${duplicate ? 'Already in corpus' : 'Added'}: ${file}`);
-  console.log(`PSI expectation: ${expectation}`);
+  console.log(file); console.log(expectation);
+  console.error(`${duplicate ? 'Already in corpus' : 'Added'} source and stored PSI expectation.`);
   if (duplicate) return;
   console.error('Both files are staged. Review them before committing.');
   console.error('After editing the source, refresh its PSI expectation, review the diff, then stage both:');
@@ -56,7 +57,7 @@ async function run({file, root = ROOT, config = loadConfig(), oracleTimeoutMs = 
       origin: {kind: 'selected-finding', sourceSha256, ...(finding ? {seed: finding.seed, signatures: finding.signatures} : {})}});
     const parser = createParser(root, parseTimeoutMs);
     const result = compareForAdmission({text: expected.textOf(bytes), parser, expected: reference, timeoutMs: parseTimeoutMs});
-    if (result.verdict !== 'ok') throw Error('Snippet still differs from PSI; fix it or retain it in the grammar-bug ledger');
+    if (result.verdict !== 'ok') throw mismatchError('Snippet still differs from PSI; fix it or retain it in the grammar-bug ledger');
     if (sha256(fs.readFileSync(file)) !== sourceSha256) throw Error('Suspect source changed during re-verification');
     const existing = inventory(root);
     for (const candidate of existing.files) {

@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const {EXIT_HELP} = require('../cli');
 const {positive} = require('../safety');
 const ROOT = path.resolve(__dirname, '../..');
 const OPTIONS = {
@@ -60,7 +61,7 @@ function commandHelp(command) {
     const shown = typeof fallback === 'string' && path.isAbsolute(fallback) ? path.relative(ROOT, fallback) : fallback;
     const value = shown === undefined ? '' : ` (default ${shown}${maximum ? '; range 1..' + maximum : ''})`;
     return `  ${flag.padEnd(23)} ${text}${value}`;
-  }).join('\n') + '\n\nExit codes: 0 pass/complete; 1 mismatch; 2 resource budget (incomplete); 3 setup/execution error.\n' +
+  }).join('\n') + '\n\n' + EXIT_HELP + '\n' +
     'Environment settings: see npm run psi-gate -- --help.\n';
 }
 const HELP = commandHelp();

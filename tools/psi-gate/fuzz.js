@@ -17,7 +17,6 @@ const {oracleIdentity} = require('./expectations');
 const {isResourceError, resourceMessage} = require('../resource');
 const ROOT = path.resolve(__dirname, '../..');
 const TRACKED = path.join(__dirname, 'grammar-bugs');
-const HELP = require('./options').commandHelp('fuzz');
 function argumentsOf(argv, inherited = {}) {
   const options = {seed: 'psi-search', maxInputs: 400, maxSeconds: 900, stableWindow: 5000,
     jobs: 1, depth: 4, batchSize: 16, minRounds: 20, minCandidates: 32, minSeconds: 20, ...inherited};
@@ -195,9 +194,5 @@ async function search(options, inputs, progress) {
   else if (partial) console.error('Search incomplete: inspect pending classes in the index and retry with larger time or reduction budgets.');
   return {...index, out: options.out, indexPath, seconds, coverage: coverageResult};
 }
-async function main(argv) {
-  if (argv.includes('--help') || argv.includes('-h')) {console.log(HELP); return;}
-  return run(argumentsOf(argv));
-}
 module.exports = {argumentsOf, sourceInputs, run};
-runIfMain(module, main);
+runIfMain(module, argv => require('./main').main(['fuzz', ...argv]), {command: 'fuzz'});

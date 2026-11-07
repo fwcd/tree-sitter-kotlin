@@ -348,5 +348,5 @@ function main(args) {
   );
 }
 
-runIfMain(module, main);
+runIfMain(module, main, {setupExitCode: 1});
 module.exports = { vendor, vendorOracleCorpus, exportOracleCorpus, copyFiles, listFilesRecursive };
