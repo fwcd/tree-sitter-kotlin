@@ -14,6 +14,7 @@ const {Coverage} = require('./fuzz-coverage');
 const {loadConfig} = require('./config');
 const {fetchAll} = require('../psi-oracle/fetch');
 const {oracleIdentity} = require('./expectations');
+const {isResourceError, resourceMessage} = require('../resource');
 const ROOT = path.resolve(__dirname, '../..');
 const TRACKED = path.join(__dirname, 'grammar-bugs');
 const HELP = require('./options').commandHelp('fuzz');
@@ -94,7 +95,7 @@ async function search(options, inputs, progress) {
   const ledgerValidation = [], metrics = {attempted: 0, accepted: 0, rejected: 0, matches: 0, mismatches: 0};
   const seenKnown = [];
   Object.assign(progress, {started, metrics, phase: 'checking known inputs'});
-  let inspector, stopReason = 'input-budget', stableCount = 0, generatedIndex = 0, mixedIndex = 0, partial = false;
+  let inspector, resource, stopReason = 'input-budget', stableCount = 0, generatedIndex = 0, mixedIndex = 0, partial = false;
   const verify = () => {if (contextOf() !== context) throw Error('Grammar/comparison changed during search; rerun');};
   const remember = async bucket => {
     if (bucket.min && !bucket.min.exhausted) return;
@@ -151,7 +152,11 @@ async function search(options, inputs, progress) {
       if (options.continuous && stableCount >= options.stableWindow) {stopReason = 'stable-window'; break;}
     }
     for (const bucket of buckets.values()) await remember(bucket);
-  } catch (error) {if (!(error instanceof BudgetExceeded)) throw error; partial = true; stopReason = 'time-budget';}
+  } catch (error) {
+    if (!isResourceError(error)) throw error;
+    resource = {code: error.code, message: error.message};
+    partial = true; stopReason = error instanceof BudgetExceeded ? 'time-budget' : 'resource-budget';
+  }
   finally {inspector?.close();}
   verify();
   if (!metrics.accepted && !partial) throw Error('No PSI-valid inputs; choose valid source seeds');
@@ -170,7 +175,7 @@ async function search(options, inputs, progress) {
   const coverageResult = coverage.snapshot();
   fs.writeFileSync(path.join(options.out, 'coverage.json'), JSON.stringify(coverageResult, null, 2) + '\n');
   const index = {schemaVersion: 1, seed: options.seed, context, oracle, syntaxNote: findings.syntaxNote,
-    stopReason, partial, exitCode: partial ? 2 : 0,
+    stopReason, partial, exitCode: partial ? 2 : 0, ...(resource ? {resource} : {}),
     metrics, budgets: {maxInputs: Number.isFinite(options.maxInputs) ? options.maxInputs : null, maxSeconds: options.maxSeconds,
       minSeconds: options.minSeconds, minRounds: options.minRounds, minCandidates: options.minCandidates},
     files: [...files.values()].sort((a,b) => a.id.localeCompare(b.id)), pending, suppressed,
@@ -182,7 +187,8 @@ async function search(options, inputs, progress) {
   console.error(`fuzz: ${partial ? 'partial' : 'complete'}; ${metrics.attempted} inputs tried (limit ${limit}), ${metrics.accepted} PSI-valid, ${index.files.length} suspects; stop ${stopReason}; ${seconds.toFixed(1)}/${options.maxSeconds}s time budget`);
   console.log(`Output: ${path.resolve(options.out)}`);
   console.log(`Index: ${indexPath}`);
-  if (partial) console.error('Search incomplete: inspect pending classes in the index and retry with larger time or reduction budgets.');
+  if (resource) console.error(resourceMessage('fuzz', resource));
+  else if (partial) console.error('Search incomplete: inspect pending classes in the index and retry with larger time or reduction budgets.');
   return {...index, out: options.out, indexPath, seconds, coverage: coverageResult};
 }
 async function main(argv) {

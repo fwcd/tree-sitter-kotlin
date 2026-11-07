@@ -51,7 +51,7 @@ async function run({file, config, oracleTimeoutMs, parseTimeoutMs, maxSeconds = 
       input: {path: path.resolve(file), sourceSha256: sha256(Buffer.from(input.text))}});
     console.error(resourceMessage('minimize', {...error, message: 'no verified representative saved before exhaustion'}));
     console.log(`Index: ${indexPath}`);
-    return {exitCode: 2, partial: true, indexPath};
+    return {exitCode: 2, partial: true, saved: false, indexPath};
   } finally { inspector.close(); }
 }
 module.exports = {run};

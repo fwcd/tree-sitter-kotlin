@@ -153,3 +153,17 @@ it('distinguishes a deadline-clipped oracle timer from the independent oracle ti
     await expect(inspector.inspect([{text:'val x=1',extension:'.kt'}],{deadline:Date.now()+10000})).rejects.toThrow('PSI oracle timed out');
   } finally {failed.mockRestore();inspector.close();fs.rmSync(directory,{recursive:true});}
 });
+
+it('saves a discoverable empty partial index when an independent request budget expires', async () => {
+  const {resourceError}=require('../resource');
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'psi-fuzz-resource-'));
+  const spy=vi.spyOn(InspectorPool.prototype,'inspect').mockRejectedValue(resourceError('request timed out','PSI_ORACLE_TIMEOUT'));
+  const output=vi.spyOn(console,'log').mockImplementation(()=>{}),progress=vi.spyOn(console,'error').mockImplementation(()=>{});
+  try{
+    const result=await run({...argumentsOf([]),root:ROOT,out:path.join(dir,'out'),maxInputs:1,maxSeconds:30});
+    expect(result).toMatchObject({exitCode:2,partial:true,stopReason:'resource-budget',files:[]});
+    expect(fs.existsSync(result.indexPath)).toBe(true);
+    expect(output.mock.calls.flat().join('\n')).toContain(result.indexPath);
+    expect(progress.mock.calls.flat().join('\n')).toContain('--timeout-ms');
+  } finally{spy.mockRestore();output.mockRestore();progress.mockRestore();fs.rmSync(dir,{recursive:true});}
+});
