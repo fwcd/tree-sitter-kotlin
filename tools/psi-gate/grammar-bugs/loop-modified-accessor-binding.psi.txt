@@ -1,0 +1,29 @@
+KtFile: loop-modified-accessor-binding.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(var)('var')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('a')
+    PsiWhiteSpace('\n')
+    PROPERTY_ACCESSOR
+      MODIFIER_LIST
+        PsiElement(inline)('inline')
+      PsiWhiteSpace(' ')
+      PsiElement(set)('set')
+      VALUE_PARAMETER_LIST
+        PsiElement(LPAR)('(')
+        VALUE_PARAMETER
+          PsiElement(IDENTIFIER)('value')
+        PsiElement(RPAR)(')')
+      BLOCK
+        PsiElement(LBRACE)('{')
+        PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')
+  PROPERTY
+    PsiElement(var)('var')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('b')
+  PsiWhiteSpace('\n')

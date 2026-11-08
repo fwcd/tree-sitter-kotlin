@@ -1,0 +1,1 @@
+fun<T>(){(Array<*>?::contentEquals)}

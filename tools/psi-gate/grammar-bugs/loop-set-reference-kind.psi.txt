@@ -1,0 +1,18 @@
+KtFile: loop-set-reference-kind.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('set')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

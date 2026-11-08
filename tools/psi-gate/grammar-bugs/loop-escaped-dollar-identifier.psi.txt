@@ -1,0 +1,20 @@
+KtFile: loop-escaped-dollar-identifier.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    STRING_TEMPLATE
+      PsiElement(OPEN_QUOTE)('"')
+      ESCAPE_STRING_TEMPLATE_ENTRY
+        PsiElement(ESCAPE_SEQUENCE)('\$')
+      ESCAPE_STRING_TEMPLATE_ENTRY
+        PsiElement(ESCAPE_SEQUENCE)('\$')
+      LITERAL_STRING_TEMPLATE_ENTRY
+        PsiElement(REGULAR_STRING_PART)('d')
+      PsiElement(CLOSING_QUOTE)('"')
+  PsiWhiteSpace('\n')

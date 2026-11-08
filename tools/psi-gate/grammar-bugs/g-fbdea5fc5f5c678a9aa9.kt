@@ -1,0 +1,1 @@
+class KotlinCliJavaFileManagerTest{fun tearDown(){("\$\${}")}}

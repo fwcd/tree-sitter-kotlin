@@ -95,19 +95,17 @@ describe('normalizeTs', () => {
     expect(cls).toBeDefined();
   });
 
+  // The TYPE_PARAMETER_LIST of BabySteps' class, as normalizeTs builds it.
+  const babyStepsTypeParameters = () => normalizeTs(parseTreeSitter(BABY_STEPS_TS))
+    .children.find(c => c.name === 'CLASS')
+    .children.find(c => c.name === 'TYPE_PARAMETER_LIST');
+
   it('maps type_parameters to TYPE_PARAMETER_LIST', () => {
-    const tree = parseTreeSitter(BABY_STEPS_TS);
-    const norm = normalizeTs(tree);
-    const cls = norm.children.find(c => c.name === 'CLASS');
-    const typeParamList = cls.children.find(c => c.name === 'TYPE_PARAMETER_LIST');
-    expect(typeParamList).toBeDefined();
+    expect(babyStepsTypeParameters()).toBeDefined();
   });
 
   it('maps type_parameter to TYPE_PARAMETER', () => {
-    const tree = parseTreeSitter(BABY_STEPS_TS);
-    const norm = normalizeTs(tree);
-    const cls = norm.children.find(c => c.name === 'CLASS');
-    const typeParamList = cls.children.find(c => c.name === 'TYPE_PARAMETER_LIST');
+    const typeParamList = babyStepsTypeParameters();
     expect(typeParamList.children.length).toBe(1);
     expect(typeParamList.children[0].name).toBe('TYPE_PARAMETER');
   });
@@ -370,29 +368,21 @@ describe('compareTrees — mismatches', () => {
     expect(result.differences[0].expected).toBe('CLASS');
   });
 
+  // A file with a class and a function compared with a file holding only the class.
+  const compareExtraFun = () => compareTrees(
+    new Node('KtFile', [new Node('CLASS'), new Node('FUN')]),
+    new Node('KtFile', [new Node('CLASS')]),
+  );
+
   it('child count mismatch detected', () => {
-    const tree1 = new Node('KtFile', [
-      new Node('CLASS'),
-      new Node('FUN'),
-    ]);
-    const tree2 = new Node('KtFile', [
-      new Node('CLASS'),
-    ]);
-    const result = compareTrees(tree1, tree2);
+    const result = compareExtraFun();
     expect(result.status).toBe(Status.MISMATCH);
     const countMismatch = result.differences.find(d => d.kind === DiffKind.CHILD_COUNT_MISMATCH);
     expect(countMismatch).toBeDefined();
   });
 
   it('extra child detected', () => {
-    const tree1 = new Node('KtFile', [
-      new Node('CLASS'),
-      new Node('FUN'),
-    ]);
-    const tree2 = new Node('KtFile', [
-      new Node('CLASS'),
-    ]);
-    const result = compareTrees(tree1, tree2);
+    const result = compareExtraFun();
     const extra = result.differences.find(d => d.kind === DiffKind.EXTRA_CHILD);
     expect(extra).toBeDefined();
     expect(extra.actual).toBe('FUN');
@@ -412,18 +402,14 @@ describe('compareTrees — mismatches', () => {
     expect(missing.expected).toBe('PROPERTY');
   });
 
+  // A class holding a function compared with a class holding a property.
+  const compareNestedFunAndProperty = () => compareTrees(
+    new Node('KtFile', [new Node('CLASS', [new Node('FUN')])]),
+    new Node('KtFile', [new Node('CLASS', [new Node('PROPERTY')])]),
+  );
+
   it('nested name mismatch detected', () => {
-    const tree1 = new Node('KtFile', [
-      new Node('CLASS', [
-        new Node('FUN'),
-      ]),
-    ]);
-    const tree2 = new Node('KtFile', [
-      new Node('CLASS', [
-        new Node('PROPERTY'),
-      ]),
-    ]);
-    const result = compareTrees(tree1, tree2);
+    const result = compareNestedFunAndProperty();
     expect(result.status).toBe(Status.MISMATCH);
     const nameMismatch = result.differences.find(d => d.kind === DiffKind.NAME_MISMATCH);
     expect(nameMismatch).toBeDefined();
@@ -432,17 +418,7 @@ describe('compareTrees — mismatches', () => {
   });
 
   it('difference path tracks nesting', () => {
-    const tree1 = new Node('KtFile', [
-      new Node('CLASS', [
-        new Node('FUN'),
-      ]),
-    ]);
-    const tree2 = new Node('KtFile', [
-      new Node('CLASS', [
-        new Node('PROPERTY'),
-      ]),
-    ]);
-    const result = compareTrees(tree1, tree2);
+    const result = compareNestedFunAndProperty();
     const nameMismatch = result.differences.find(d => d.kind === DiffKind.NAME_MISMATCH);
     expect(nameMismatch.path).toContain('KtFile');
     expect(nameMismatch.path).toContain('CLASS');

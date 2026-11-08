@@ -1,0 +1,32 @@
+KtFile: coverage-if-cast-postfix.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    POSTFIX_EXPRESSION
+      IF
+        PsiElement(if)('if')
+        PsiElement(LPAR)('(')
+        CONDITION
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('c')
+        PsiElement(RPAR)(')')
+        THEN
+          BINARY_WITH_TYPE
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('b')
+            PsiWhiteSpace(' ')
+            OPERATION_REFERENCE
+              PsiElement(as)('as')
+            PsiWhiteSpace(' ')
+            TYPE_REFERENCE
+              USER_TYPE
+                REFERENCE_EXPRESSION
+                  PsiElement(IDENTIFIER)('T')
+      OPERATION_REFERENCE
+        PsiElement(PLUSPLUS)('++')

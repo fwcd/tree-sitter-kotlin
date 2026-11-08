@@ -1,0 +1,1 @@
+fun(){for(@ForParameter()(@NestedParam y)in bar){}}

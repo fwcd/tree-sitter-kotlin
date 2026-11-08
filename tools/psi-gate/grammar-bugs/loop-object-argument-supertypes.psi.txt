@@ -1,0 +1,46 @@
+KtFile: loop-object-argument-supertypes.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      CALL_EXPRESSION
+        REFERENCE_EXPRESSION
+          PsiElement(IDENTIFIER)('g')
+        VALUE_ARGUMENT_LIST
+          PsiElement(LPAR)('(')
+          VALUE_ARGUMENT
+            OBJECT_LITERAL
+              OBJECT_DECLARATION
+                PsiElement(object)('object')
+                PsiElement(COLON)(':')
+                SUPER_TYPE_LIST
+                  SUPER_TYPE_CALL_ENTRY
+                    CONSTRUCTOR_CALLEE
+                      TYPE_REFERENCE
+                        USER_TYPE
+                          REFERENCE_EXPRESSION
+                            PsiElement(IDENTIFIER)('A')
+                    VALUE_ARGUMENT_LIST
+                      PsiElement(LPAR)('(')
+                      PsiElement(RPAR)(')')
+                  PsiElement(COMMA)(',')
+                  SUPER_TYPE_ENTRY
+                    TYPE_REFERENCE
+                      USER_TYPE
+                        REFERENCE_EXPRESSION
+                          PsiElement(IDENTIFIER)('B')
+                CLASS_BODY
+                  PsiElement(LBRACE)('{')
+                  PsiElement(RBRACE)('}')
+          PsiElement(RPAR)(')')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

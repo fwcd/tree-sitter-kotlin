@@ -1,0 +1,13 @@
+KtFile: loop-modifier-newline-property.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    MODIFIER_LIST
+      PsiElement(private)('private')
+    PsiWhiteSpace('\n')
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+  PsiWhiteSpace('\n')

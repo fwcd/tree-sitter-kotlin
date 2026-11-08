@@ -81,3 +81,11 @@ npx node-gyp rebuild
 # Check compiled parser size
 cc -O2 -I src -std=c11 -c src/parser.c -o /tmp/parser.o && wc -c /tmp/parser.o
 ```
+
+## Optional live Kotlin PSI checks
+
+After regenerating a grammar change, run `npm run psi-gate -- quick` to compare
+it with current upstream main. This opt-in tooling needs Node 22+, a JDK 17+
+and native build tools; it installs a separate pinned runtime. Ordinary grammar
+builds/tests do not need Java. See [tools/README.md](tools/README.md) for full
+runs, corpus assertion auditing, prerequisites and result interpretation.

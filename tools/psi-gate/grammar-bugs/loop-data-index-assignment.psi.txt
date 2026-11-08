@@ -1,0 +1,38 @@
+KtFile: loop-data-index-assignment.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      BINARY_EXPRESSION
+        ARRAY_ACCESS_EXPRESSION
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('data')
+          INDICES
+            PsiElement(LBRACKET)('[')
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('i')
+            PsiElement(RBRACKET)(']')
+        OPERATION_REFERENCE
+          PsiElement(EQ)('=')
+        ARRAY_ACCESS_EXPRESSION
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('a')
+          INDICES
+            PsiElement(LBRACKET)('[')
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('x')
+            PsiElement(RBRACKET)(']')
+      PsiWhiteSpace('\n')
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('i')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

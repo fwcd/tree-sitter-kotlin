@@ -1,0 +1,1 @@
+class BasicVectorColumnType{fun readObject(){('')}}

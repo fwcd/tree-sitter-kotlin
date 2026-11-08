@@ -1,0 +1,2 @@
+fun()=@A
+object O{}

@@ -1,0 +1,1 @@
+class Regex(pattern:String){fun containsMatchIn(){("""\$""")}}

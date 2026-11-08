@@ -1,0 +1,1 @@
+"class KaptStubConverter(kaptContext:Boolean){val typeReferenceToFirType={{(substringAfterLast('\u0000'))}}}"

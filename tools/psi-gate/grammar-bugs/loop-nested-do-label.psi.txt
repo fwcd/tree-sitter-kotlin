@@ -1,0 +1,35 @@
+KtFile: loop-nested-do-label.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      LABELED_EXPRESSION
+        LABEL_QUALIFIER
+          LABEL
+            PsiElement(IDENTIFIER)('l1')
+            PsiElement(AT)('@')
+        LABELED_EXPRESSION
+          LABEL_QUALIFIER
+            LABEL
+              PsiElement(IDENTIFIER)('l2')
+              PsiElement(AT)('@')
+          DO_WHILE
+            PsiElement(do)('do')
+            PsiWhiteSpace(' ')
+            PsiElement(while)('while')
+            PsiElement(LPAR)('(')
+            CONDITION
+              REFERENCE_EXPRESSION
+                PsiElement(IDENTIFIER)('c')
+            PsiElement(RPAR)(')')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

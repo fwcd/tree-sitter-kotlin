@@ -1,0 +1,31 @@
+KtFile: coverage-anonymous-type-check-body.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    BINARY_EXPRESSION
+      FUN
+        PsiElement(fun)('fun')
+        VALUE_PARAMETER_LIST
+          PsiElement(LPAR)('(')
+          PsiElement(RPAR)(')')
+        PsiElement(EQ)('=')
+        IS_EXPRESSION
+          INTEGER_CONSTANT
+            PsiElement(INTEGER_LITERAL)('1')
+          OPERATION_REFERENCE
+            PsiElement(is)('is')
+          PsiWhiteSpace(' ')
+          TYPE_REFERENCE
+            USER_TYPE
+              REFERENCE_EXPRESSION
+                PsiElement(IDENTIFIER)('T')
+      OPERATION_REFERENCE
+        PsiElement(MUL)('*')
+      INTEGER_CONSTANT
+        PsiElement(INTEGER_LITERAL)('2')

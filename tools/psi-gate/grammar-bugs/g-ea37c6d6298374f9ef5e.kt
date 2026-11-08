@@ -1,0 +1,1 @@
+class C{fun foo<V:V>()}

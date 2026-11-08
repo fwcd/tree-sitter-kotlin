@@ -1,0 +1,1 @@
+class DelimitedRangesSequence{fun hasNext():Boolean{{('ab')}}}

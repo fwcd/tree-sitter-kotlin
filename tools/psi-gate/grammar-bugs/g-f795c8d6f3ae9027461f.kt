@@ -1,0 +1,1 @@
+class Regex名(){fun containsMatchIn名(){("""\$""")}}

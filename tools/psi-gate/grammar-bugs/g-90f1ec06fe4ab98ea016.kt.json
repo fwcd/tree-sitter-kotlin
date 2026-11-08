@@ -1,0 +1,1 @@
+"class KaptStubConverter(kaptContext:KaptContextForStubGeneration){fun convert(){({val useSimpleName='\u0000'in substringBeforeLast})}}"

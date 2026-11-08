@@ -27,6 +27,7 @@ const DiffKind = {
   MISSING_CHILD: 'missing_child',
   EXTRA_CHILD: 'extra_child',
   CHILD_COUNT_MISMATCH: 'child_count_mismatch',
+  LITERAL_MISMATCH: 'literal_mismatch',
 };
 
 // ---------------------------------------------------------------------------
@@ -119,6 +120,9 @@ function _compareNodes(tsNode, psiNode, path, differences) {
 
   const tsChildren = tsNode.children;
   const psiChildren = psiNode.children;
+  if (JSON.stringify(tsNode.literal) !== JSON.stringify(psiNode.literal)) {
+    differences.push(new Difference(path, JSON.stringify(psiNode.literal), JSON.stringify(tsNode.literal), DiffKind.LITERAL_MISMATCH));
+  }
 
   // Check child count
   if (tsChildren.length !== psiChildren.length) {

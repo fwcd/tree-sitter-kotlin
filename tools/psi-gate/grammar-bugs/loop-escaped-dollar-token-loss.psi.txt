@@ -1,0 +1,16 @@
+KtFile: loop-escaped-dollar-token-loss.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    STRING_TEMPLATE
+      PsiElement(OPEN_QUOTE)('"')
+      ESCAPE_STRING_TEMPLATE_ENTRY
+        PsiElement(ESCAPE_SEQUENCE)('\$')
+      PsiElement(CLOSING_QUOTE)('"')
+  PsiWhiteSpace('\n')

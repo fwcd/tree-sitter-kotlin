@@ -1,0 +1,1 @@
+val foo=object(x:Int):Bar{}

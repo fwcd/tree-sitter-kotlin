@@ -1,0 +1,34 @@
+KtFile: coverage-if-type-check-elvis.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('x')
+    PsiElement(EQ)('=')
+    BINARY_EXPRESSION
+      IF
+        PsiElement(if)('if')
+        PsiElement(LPAR)('(')
+        CONDITION
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('c')
+        PsiElement(RPAR)(')')
+        THEN
+          IS_EXPRESSION
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('a')
+            PsiWhiteSpace(' ')
+            OPERATION_REFERENCE
+              PsiElement(is)('is')
+            PsiWhiteSpace(' ')
+            TYPE_REFERENCE
+              USER_TYPE
+                REFERENCE_EXPRESSION
+                  PsiElement(IDENTIFIER)('T')
+      OPERATION_REFERENCE
+        PsiElement(ELVIS)('?:')
+      REFERENCE_EXPRESSION
+        PsiElement(IDENTIFIER)('d')

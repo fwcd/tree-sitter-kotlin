@@ -163,7 +163,7 @@ const TS_TO_PSI = {
   // An annotated statement. PSI has no composite for it: the ANNOTATION_ENTRY
   // is attached to the expression itself, so the wrapper is dropped and its
   // children promoted, which is the shape PSI records.
-  annotated_expression: null,
+  annotated_expression: 'ANNOTATED_EXPRESSION',
   multi_variable_declaration: 'DESTRUCTURING_DECLARATION',
   variable_declaration: null,
   binding_pattern_kind: null,
@@ -176,8 +176,11 @@ const TS_TO_PSI = {
   interpolation_expression_start: null,
   interpolation_expression_end: null,
   interpolation_identifier_start: null,
+  // The legacy grammar's named alias for '?' is a PSI token, not a composite.
+  quest: null,
   character_literal: 'CHARACTER_CONSTANT',
-  character_escape_seq: 'ESCAPE_STRING_TEMPLATE_ENTRY',
+  // PSI's CHARACTER_CONSTANT is one leaf, its escapes included: no template entry.
+  character_escape_seq: null,
   integer_literal: 'INTEGER_CONSTANT',
   real_literal: 'FLOAT_CONSTANT',
   long_literal: null,
@@ -196,6 +199,9 @@ const TS_TO_PSI = {
 
   // Other
   anonymous_initializer: 'CLASS_INITIALIZER',
+  companion_block: 'COMPANION_BLOCK',
+  backing_field: 'BACKING_FIELD',
+  contract_effect_list: 'CONTRACT_EFFECT_LIST',
   shebang_line: null,
 };
 
@@ -267,11 +273,9 @@ const SKIP_PSI_NODES = new Set([
   'CONSTRUCTOR_CALLEE',
   'CONSTRUCTOR_DELEGATION_REFERENCE',
 
-  // Body wrappers — tree-sitter uses control_structure_body
-  'THEN',
-  'ELSE',
-  'LOOP_RANGE',
-  'CONDITION',
+  // CONDITION, THEN, ELSE, LOOP_RANGE and BODY retain their roles. The native
+  // normalizer maps field labels/header slots and visible control_structure_body
+  // nodes onto them; flattening these wrappers hides binding and dropped-body bugs.
 
   // Jump expression wrappers — tree-sitter skips jump_expression (promotes children)
   'RETURN',
@@ -307,6 +311,9 @@ const SKIP_PSI_NODES = new Set([
 
   // KDOC_SECTION — documentation nodes
   'KDOC_SECTION',
+
+  // Each effect of a contract — tree-sitter puts the expressions in the list directly
+  'CONTRACT_EFFECT',
 
   // Receiver entries are transparent; preserve the containing parameter list.
   'CONTEXT_RECEIVER',
@@ -486,6 +493,10 @@ const ALL_TS_NAMED_NODES = new Set([
 
 /** @type {Set<string>} */
 const ALL_PSI_COMPOSITE_NODES = new Set([
+  'BACKING_FIELD',
+  'COMPANION_BLOCK',
+  'CONTRACT_EFFECT',
+  'CONTRACT_EFFECT_LIST',
   'ANNOTATED_EXPRESSION',
   'ANNOTATION',
   'ANNOTATION_ENTRY',

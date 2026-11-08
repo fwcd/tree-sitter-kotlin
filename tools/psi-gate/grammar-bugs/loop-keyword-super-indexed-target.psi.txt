@@ -1,0 +1,34 @@
+KtFile: loop-keyword-super-indexed-target.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      BINARY_EXPRESSION
+        ARRAY_ACCESS_EXPRESSION
+          DOT_QUALIFIED_EXPRESSION
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('a')
+            PsiElement(DOT)('.')
+            SUPER_EXPRESSION
+              REFERENCE_EXPRESSION
+                PsiElement(super)('super')
+          INDICES
+            PsiElement(LBRACKET)('[')
+            REFERENCE_EXPRESSION
+              PsiElement(IDENTIFIER)('i')
+            PsiElement(RBRACKET)(']')
+        OPERATION_REFERENCE
+          PsiElement(EQ)('=')
+        REFERENCE_EXPRESSION
+          PsiElement(IDENTIFIER)('x')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

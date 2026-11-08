@@ -1,0 +1,1 @@
+fun(){when{foo<T>->a}}

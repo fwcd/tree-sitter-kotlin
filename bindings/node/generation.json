@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "generatorVersion": "0.24.7",
+  "grammarHash": "462034591e9c53025e218e72c7fa42d19d9a0980d95c2a2e184135f8de4189a4",
+  "files": {
+    "src/parser.c": "d489e0ee02b320ffc1a67c55245b0e150317dfd80321678370c2a2145a0111f3",
+    "src/grammar.json": "b3b03a895464780a0a946b0a4baa7397599c4711ba8073357a78b69916f67ee1",
+    "src/node-types.json": "c52aeae846963fe9bc82cc81e2715344e9976fff99469a127c91988ad3787c72"
+  }
+}

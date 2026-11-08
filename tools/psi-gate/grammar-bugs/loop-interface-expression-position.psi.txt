@@ -1,0 +1,23 @@
+KtFile: loop-interface-expression-position.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  PROPERTY
+    PsiElement(val)('val')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('p')
+    PsiElement(EQ)('=')
+    BINARY_EXPRESSION
+      INTEGER_CONSTANT
+        PsiElement(INTEGER_LITERAL)('1')
+      OPERATION_REFERENCE
+        PsiElement(LT)('<')
+      CLASS
+        PsiElement(interface)('interface')
+        PsiWhiteSpace(' ')
+        PsiElement(IDENTIFIER)('I')
+        CLASS_BODY
+          PsiElement(LBRACE)('{')
+          PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

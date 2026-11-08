@@ -13,9 +13,10 @@ class Node {
    * @param {string} name - The node type name.
    * @param {Node[]} [children] - Child nodes.
    */
-  constructor(name, children = []) {
+  constructor(name, children = [], literal) {
     this.name = name;
     this.children = children;
+    if (literal !== undefined) this.literal = literal;
   }
 
   /**
@@ -26,6 +27,7 @@ class Node {
   equals(other) {
     if (!(other instanceof Node)) return false;
     if (this.name !== other.name) return false;
+    if (JSON.stringify(this.literal) !== JSON.stringify(other.literal)) return false;
     if (this.children.length !== other.children.length) return false;
     return this.children.every((c, i) => c.equals(other.children[i]));
   }

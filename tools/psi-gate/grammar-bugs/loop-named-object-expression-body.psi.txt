@@ -1,0 +1,28 @@
+KtFile: loop-named-object-expression-body.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    PsiElement(EQ)('=')
+    OBJECT_DECLARATION
+      MODIFIER_LIST
+        ANNOTATION_ENTRY
+          PsiElement(AT)('@')
+          CONSTRUCTOR_CALLEE
+            TYPE_REFERENCE
+              USER_TYPE
+                REFERENCE_EXPRESSION
+                  PsiElement(IDENTIFIER)('A')
+      PsiWhiteSpace('\n')
+      PsiElement(object)('object')
+      PsiWhiteSpace(' ')
+      PsiElement(IDENTIFIER)('O')
+      CLASS_BODY
+        PsiElement(LBRACE)('{')
+        PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

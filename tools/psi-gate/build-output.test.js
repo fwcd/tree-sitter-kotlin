@@ -1,0 +1,25 @@
+import {it, expect, vi} from 'vitest';
+import {createRequire} from 'module';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+const require = createRequire(import.meta.url);
+const {runTool} = require('../../bindings/node/build');
+it('keeps successful tool output quiet but shows complete failure diagnostics', async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'psi-output-')), file = path.join(root, 'tool.js');
+  const output = [], spy = vi.spyOn(process.stderr, 'write').mockImplementation(chunk => {output.push(String(chunk)); return true;});
+  const consoleSpy = vi.spyOn(console, 'error').mockImplementation(message => output.push(String(message)));
+  try {
+    fs.writeFileSync(file, 'console.log("gyp info noisy success");\n');
+    await runTool(file, [], root, 'Building fixture');
+    expect(output.join('')).toContain('Building fixture...');
+    expect(output.join('')).not.toContain('noisy success');
+    fs.writeFileSync(file, 'console.log("make: compiling object");console.error("gyp WARN keep this warning");\n');
+    await runTool(file, [], root, 'Building fixture');
+    expect(output.join('')).toContain('gyp WARN keep this warning');
+    expect(output.join('')).not.toContain('make: compiling object');
+    fs.writeFileSync(file, 'console.error("fatal: actionable compiler failure");process.exit(7);\n');
+    await expect(runTool(file, [], root, 'Building fixture')).rejects.toThrow(/failed/);
+    expect(output.join('').split('fatal: actionable compiler failure').length - 1).toBe(1);
+  } finally {consoleSpy.mockRestore(); spy.mockRestore(); fs.rmSync(root, {recursive: true});}
+});

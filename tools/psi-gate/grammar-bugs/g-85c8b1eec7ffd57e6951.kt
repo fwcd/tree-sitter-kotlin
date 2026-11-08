@@ -1,0 +1,1 @@
+class Foo{fun test1()contract[callsInPlace()]}

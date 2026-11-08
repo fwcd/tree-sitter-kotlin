@@ -1,0 +1,38 @@
+KtFile: loop-newline-for-compound-return.kt
+  PACKAGE_DIRECTIVE
+    <empty list>
+  IMPORT_LIST
+    <empty list>
+  FUN
+    PsiElement(fun)('fun')
+    PsiWhiteSpace(' ')
+    PsiElement(IDENTIFIER)('f')
+    VALUE_PARAMETER_LIST
+      PsiElement(LPAR)('(')
+      PsiElement(RPAR)(')')
+    BLOCK
+      PsiElement(LBRACE)('{')
+      FOR
+        PsiElement(for)('for')
+        PsiElement(LPAR)('(')
+        VALUE_PARAMETER
+          PsiElement(IDENTIFIER)('x')
+        PsiWhiteSpace(' ')
+        PsiElement(in)('in')
+        PsiWhiteSpace(' ')
+        LOOP_RANGE
+          REFERENCE_EXPRESSION
+            PsiElement(IDENTIFIER)('y')
+        PsiElement(RPAR)(')')
+        PsiWhiteSpace('\n')
+        BODY
+          RETURN
+            PsiElement(return)('return')
+            PsiWhiteSpace(' ')
+            PARENTHESIZED
+              PsiElement(LPAR)('(')
+              REFERENCE_EXPRESSION
+                PsiElement(IDENTIFIER)('x')
+              PsiElement(RPAR)(')')
+      PsiElement(RBRACE)('}')
+  PsiWhiteSpace('\n')

@@ -3,6 +3,7 @@ const { Node } = require('./models');
 const { normalizeTs, normalizePsi } = require('./normalizer');
 const { compareTrees, Status } = require('./comparator');
 const n = (name, ...children) => new Node(name, children);
+const field = (name, node) => { Object.defineProperty(node, 'field', {value: name}); return node; };
 const tsType = () => n('user_type', n('type_identifier'));
 const psiType = () => n('TYPE_REFERENCE', n('USER_TYPE', n('REFERENCE_EXPRESSION')));
 const tsAnnotation = () => n('annotation', tsType());
@@ -41,7 +42,8 @@ describe('PSI comparison artifacts', () => {
   it('keeps unbraced loop bodies unbraced and leaves if bodies outside BODY', () => {
     same(n('while_statement', n('boolean_literal'), n('control_structure_body', n('call_expression'))),
       n('WHILE', n('CONDITION', n('BOOLEAN_CONSTANT')), n('BODY', n('CALL_EXPRESSION'))));
-    same(n('if_expression', n('boolean_literal'), n('control_structure_body', n('statements', n('call_expression')))),
+    same(n('if_expression', field('condition', n('boolean_literal')),
+      field('consequence', n('control_structure_body', n('statements', n('call_expression'))))),
       n('IF', n('CONDITION', n('BOOLEAN_CONSTANT')), n('THEN', n('BLOCK', n('CALL_EXPRESSION')))));
   });
   it('names positional destructuring once for both declaration node spellings', () => {
